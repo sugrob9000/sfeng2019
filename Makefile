@@ -10,3 +10,7 @@ linux:
 
 windows:
 
+runl: linux
+	./$(EXEC-NAME).out
+runw: windows
+	$(EXEC-NAME).exe

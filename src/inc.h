@@ -6,7 +6,7 @@
 	#include <GL/glew.h>
 	#include <SDL2/SDL_opengl.h>
 	#include <GL/glu.h>
-#elif _WIN32
+#elif WINDOWS
 
 #else
 	#error "Unsupported system"
@@ -16,4 +16,3 @@
 #include <vector>
 
 #endif // INC_H
-

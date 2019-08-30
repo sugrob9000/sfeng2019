@@ -13,7 +13,9 @@
 	#include <GL/glu.h>
 #elif WINDOWS
 	#define SDL_MAIN_HANDLED
+	#define GLEW_STATIC
 	#include "SDL2/SDL.h"
+	#include "GL/glew.h"
 	#include "SDL2/SDL_opengl.h"
 	#include "GL/glext.h"
 #else

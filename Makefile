@@ -1,21 +1,35 @@
-EXEC-NAME = engine
+EXEC = engine
 
 CC = g++
-CFLAGS = -O2
+CFLAGS = -O1 -Wno-attributes -o bin/$(EXEC)
 
-LIBS-LINUX = -lSDL2 -lGL -lGLEW
-LIBS-WINDOWS = -lmingw32 -lSDL2 -lOpenGL32
-
-FILES = src/main.cpp \
+FILES = \
+	src/main.cpp
 
 
-linux:
-	$(CC) $(FILES) $(CFLAGS) $(LIBS-LINUX) -o bin/$(EXEC-NAME).out -DLINUX
+ifeq ($(OS), Windows_NT)
+# Windows
 
-win:
-	$(CC) $(FILES) $(CFLAGS) $(LIBS-WINDOWS) -o bin/$(EXEC-NAME).exe -DWINDOWS -Iinclude -Llib
+LIBS = -lmingw32 -lSDL2 -lOpenGL32
+EXEC := $(EXEC).exe
+FILES += include/GL/glew.c
+CFLAGS += -DWINDOWS -Iinclude -Llib
 
-runl: linux
-	bin/$(EXEC-NAME).out
-runw: win
-	bin/$(EXEC-NAME).exe
+else
+# Linux
+
+LIBS = -lSDL2 -lGL -lGLEW
+EXEC := $(EXEC).out
+CFLAGS += -DLINUX
+
+endif
+
+all: $(EXEC)
+	@echo Up to date
+
+$(EXEC): $(FILES)
+	@echo Rebuilding
+	$(CC) $(FILES) $(CFLAGS) $(LIBS)
+
+run: all
+	bin/$(EXEC)

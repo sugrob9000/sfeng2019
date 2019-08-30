@@ -5,9 +5,8 @@
 *.lo
 *.o
 
-# Compiled Dynamic libraries
-*.so
-*.dll
+# Do not exclude .dll because SDL2.dll is shipped
+#*.dll
 
 # Compiled Static libraries
 *.lai

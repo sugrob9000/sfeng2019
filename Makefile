@@ -3,18 +3,19 @@ EXEC-NAME = engine
 CC = g++
 CFLAGS = -O2
 
-LIBS = -lSDL2 -lGL -lGLEW
+LIBS-LINUX = -lSDL2 -lGL -lGLEW
+LIBS-WINDOWS = -lmingw32 -lSDL2 -lOpenGL32
 
 FILES = src/main.cpp \
 
 
 linux:
-	$(CC) $(FILES) $(CFLAGS) $(LIBS) -o $(EXEC-NAME).out -DLINUX
+	$(CC) $(FILES) $(CFLAGS) $(LIBS-LINUX) -o bin/$(EXEC-NAME).out -DLINUX
 
-windows:
-	$(CC) $(FILES) $(CFLAGS) -o $(EXEC-NAME).exe -DWINDOWS
+win:
+	$(CC) $(FILES) $(CFLAGS) $(LIBS-WINDOWS) -o bin/$(EXEC-NAME).exe -DWINDOWS -Iinclude -Llib
 
 runl: linux
-	./$(EXEC-NAME).out
-runw: windows
-	$(EXEC-NAME).out
+	bin/$(EXEC-NAME).out
+runw: win
+	bin/$(EXEC-NAME).exe

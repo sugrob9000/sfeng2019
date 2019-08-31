@@ -1,13 +1,14 @@
-EXEC = engine
+EXEC = bin/engine
 
 CC = g++
-CFLAGS = -O1 -Wno-attributes -o bin/$(EXEC)
+CFLAGS = -O1 -Wno-attributes -Wall -Wextra -pedantic
 
 FILES = \
 	src/main.cpp
 
 
 ifeq ($(OS), Windows_NT)
+
 # Windows
 
 LIBS = -lmingw32 -lSDL2 -lOpenGL32
@@ -16,6 +17,7 @@ FILES += include/GL/glew.c
 CFLAGS += -DWINDOWS -Iinclude -Llib
 
 else
+
 # Linux
 
 LIBS = -lSDL2 -lGL -lGLEW
@@ -29,7 +31,8 @@ all: $(EXEC)
 
 $(EXEC): $(FILES)
 	@echo Rebuilding
-	$(CC) $(FILES) $(CFLAGS) $(LIBS)
+	$(CC) $^ $(CFLAGS) $(LIBS) -o $@
 
 run: all
-	bin/$(EXEC)
+	$(EXEC)
+

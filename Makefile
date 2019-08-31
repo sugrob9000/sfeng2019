@@ -1,7 +1,7 @@
 EXEC = bin/engine
 
 CC = g++
-CFLAGS = -O1 -Wno-attributes -Wall -Wextra -pedantic
+CFLAGS = -O1 -Wno-attributes
 
 FILES = \
 	src/main.cpp

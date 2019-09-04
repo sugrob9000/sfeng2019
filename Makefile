@@ -12,10 +12,16 @@ ifeq ($(OS), Windows_NT)
 
 # Windows
 
-LIBS = -lmingw32 -lSDL2 -lOpenGL32
+LIBS = -lmingw32 -llibSDL2 -lOpenGL32
 EXEC := $(EXEC).exe
 FILES += include/GL/glew.c
-CFLAGS += -DWINDOWS -Iinclude -Llib
+
+CFLAGS += -DWINDOWS -Iinclude
+ifeq ($(LBITS), 64)
+CFLAGS += -Llib/64
+else
+CFLAGS += -Llib/86
+endif
 
 else
 

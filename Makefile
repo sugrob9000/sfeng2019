@@ -1,4 +1,4 @@
-EXEC = bin/engine
+EXEC = bin/$(LBITS)/engine
 
 CC = g++
 CFLAGS = -O1 -Wno-attributes
@@ -10,18 +10,16 @@ FILES = \
 
 ifeq ($(OS), Windows_NT)
 
+LBITS = $(shell getconf LONG_BIT)
+
 # Windows
 
-LIBS = -lmingw32 -llibSDL2 -lOpenGL32
+LIBS = -lmingw32 -lSDL2 -lOpenGL32
 EXEC := $(EXEC).exe
 FILES += include/GL/glew.c
 
 CFLAGS += -DWINDOWS -Iinclude
-ifeq ($(LBITS), 64)
-CFLAGS += -Llib/64
-else
-CFLAGS += -Llib/86
-endif
+CFLAGS += -Llib/$(LBITS)
 
 else
 

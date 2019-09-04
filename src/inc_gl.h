@@ -1,10 +1,5 @@
-#ifndef INC_H
-#define INC_H
-
-// in case someone writes g++ ... -DEBUG
-#ifdef EBUG
-	#define DEBUG
-#endif
+#ifndef INC_GL_H
+#define INC_GL_H
 
 #ifdef LINUX
 	#include <SDL2/SDL.h>
@@ -19,10 +14,7 @@
 	#include "SDL2/SDL_opengl.h"
 	#include "GL/glext.h"
 #else
-	#error Unsupported system or building the wrong way
+	#error "Unsupported system or building the wrong way"
 #endif
 
-#include <iostream>
-#include <vector>
-
-#endif // INC_H
+#endif // INC_GL_H

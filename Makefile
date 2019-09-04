@@ -4,7 +4,8 @@ CC = g++
 CFLAGS = -O1 -Wno-attributes
 
 FILES = \
-	src/main.cpp
+	src/main.cpp \
+	src/render.cpp \
 
 
 ifeq ($(OS), Windows_NT)

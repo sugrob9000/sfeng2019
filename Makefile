@@ -3,10 +3,7 @@ EXEC = bin/$(LBITS)/engine
 CC = g++
 CFLAGS = -O1 -Wno-attributes
 
-FILES = \
-	src/main.cpp \
-	src/render.cpp \
-
+FILES = $(shell echo src/**.cpp)
 
 ifeq ($(OS), Windows_NT)
 

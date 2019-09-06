@@ -4,10 +4,9 @@ CC = g++
 CFLAGS = -O1 -Wno-attributes
 
 FILES = $(shell echo src/**.cpp)
+LBITS = $(shell getconf LONG_BIT)
 
 ifeq ($(OS), Windows_NT)
-
-LBITS = $(shell getconf LONG_BIT)
 
 # Windows
 

@@ -40,3 +40,40 @@ vec3 operator* (float c, vec3 v)
 	return vec3(c * v.x(), c * v.y(), c * v.z());
 }
 
+vec3 operator/ (vec3 v, float c)
+{
+	return vec3(v.x() / c, v.y() / c, v.z() / c);
+}
+
+vec3& vec3::operator+= (vec3 v)
+{
+	_d[0] += v._d[0];
+	_d[1] += v._d[1];
+	_d[2] += v._d[2];
+	return *this;
+}
+
+vec3& vec3::operator-= (vec3 v)
+{
+	_d[0] -= v._d[0];
+	_d[1] -= v._d[1];
+	_d[2] -= v._d[2];
+	return *this;
+}
+
+vec3& vec3::operator*= (float c)
+{
+	_d[0] *= c;
+	_d[1] *= c;
+	_d[2] *= c;
+	return *this;
+}
+
+vec3& vec3::operator/= (float c)
+{
+	_d[0] /= c;
+	_d[1] /= c;
+	_d[2] /= c;
+	return *this;
+}
+

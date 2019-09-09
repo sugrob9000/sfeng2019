@@ -1,6 +1,8 @@
 #ifndef RENDER_H
 #define RENDER_H
 
+#include "inc_gl.h"
+
 namespace render
 {
 

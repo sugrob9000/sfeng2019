@@ -10,17 +10,23 @@ class vec3
 	vec3 (float x, float y, float z);
 	vec3 ();
 
-	float& x() { return _d[0]; }
-	float& y() { return _d[1]; }
-	float& z() { return _d[2]; }
+	inline float& x() { return _d[0]; }
+	inline float& y() { return _d[1]; }
+	inline float& z() { return _d[2]; }
 
-	float& operator[] (int i) { return _d[i]; }
+	inline float& operator[] (int i) { return _d[i]; }
+
+	inline vec3& operator+= (vec3 v);
+	inline vec3& operator-= (vec3 v);
+	inline vec3& operator*= (float c);
+	inline vec3& operator/= (float c);
 };
 
-vec3 operator+ (vec3 one, vec3 other);
-vec3 operator- (vec3 one, vec3 other);
-vec3 operator* (vec3 v, float c);
-vec3 operator* (float c, vec3 v);
+inline vec3 operator+ (vec3 one, vec3 other);
+inline vec3 operator- (vec3 one, vec3 other);
+inline vec3 operator* (vec3 v, float c);
+inline vec3 operator* (float c, vec3 v);
+inline vec3 operator/ (vec3 v, float c);
 
 #endif // VEC3_H
 

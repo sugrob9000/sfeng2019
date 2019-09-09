@@ -1,7 +1,7 @@
 EXEC = bin/$(LBITS)/engine
 
 CC = g++
-CFLAGS = -O1 -Wno-attributes
+CFLAGS = -O1 -Wno-attributes -Isrc
 
 FILES-CPP = $(shell find src/ -name "*.cpp")
 FILES-H = $(shell find src/ -name "*.h")

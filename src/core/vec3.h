@@ -3,16 +3,15 @@
 
 class vec3
 {
-	float _d[3];
-
 	public:
 
-	vec3 (float x, float y, float z);
-	vec3 ();
+	union {
+		float _d[3];
+		struct { float x, y, z; };
+	};
 
-	inline float& x() { return _d[0]; }
-	inline float& y() { return _d[1]; }
-	inline float& z() { return _d[2]; }
+	vec3 (float xx, float yy, float zz);
+	vec3 ();
 
 	inline float& operator[] (int i) { return _d[i]; }
 

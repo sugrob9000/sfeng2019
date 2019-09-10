@@ -3,6 +3,7 @@
 
 #include "inc_general.h"
 #include "vec3.h"
+#include "render.h"
 
 namespace core
 {

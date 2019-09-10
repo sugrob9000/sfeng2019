@@ -3,5 +3,7 @@
 
 #include <vector>
 #include <iostream>
+#include <map>
+#include <fstream>
 
 #endif // INC_GENERAL_H

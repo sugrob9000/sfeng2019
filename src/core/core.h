@@ -8,13 +8,13 @@
 namespace core
 {
 
-class entity
+class t_entity
 {
 	public:
 
 	vec3 pos;
 
-	entity ();
+	t_entity ();
 };
 
 }

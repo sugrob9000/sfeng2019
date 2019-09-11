@@ -4,11 +4,11 @@
 namespace input
 {
 
-keybind_map key_bindings;
+t_keybind_map key_binds;
 
 void init (std::string input_conf_path)
 {
-	int input_status = keybinds_from_cfg(input_conf_path, key_bindings);
+	int input_status = keybinds_from_cfg(input_conf_path, key_binds);
 	if (input_status != 0) {
 		std::cerr << "Failed to initialze input: "
 				<< input_status << '\n';
@@ -20,17 +20,17 @@ void handle_input ()
 
 }
 
-command parse_command (std::string str)
+t_command parse_command (std::string str)
 {
-	return { str, {} };
+	return { str };
 }
 
-void run_command (command& cmd)
+void run_command (t_command& cmd)
 {
 
 }
 
-int keybinds_from_cfg (std::string path, keybind_map& m)
+int keybinds_from_cfg (std::string path, t_keybind_map& m)
 {
 	std::ifstream f(path);
 

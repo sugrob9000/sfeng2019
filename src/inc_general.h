@@ -5,5 +5,6 @@
 #include <iostream>
 #include <map>
 #include <fstream>
+#include "core/vec3.h"
 
 #endif // INC_GENERAL_H

@@ -17,7 +17,19 @@ void init (std::string input_conf_path)
 
 void handle_input ()
 {
+	SDL_Event e;
+	while (SDL_PollEvent(&e)) {
+		switch (e.type) {
 
+		case SDL_QUIT:
+			exit(0);
+			break;
+
+		case SDL_KEYDOWN:
+			SDL_Scancode scan = e.key.keysym.scancode;
+			run_command(key_binds[scan]);
+		}
+	}
 }
 
 t_command parse_command (std::string str)
@@ -27,7 +39,7 @@ t_command parse_command (std::string str)
 
 void run_command (t_command& cmd)
 {
-
+	std::cout << cmd.cmd << std::endl;
 }
 
 int keybinds_from_cfg (std::string path, t_keybind_map& m)

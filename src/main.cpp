@@ -20,7 +20,7 @@ int main (int argc, char** argv)
 	input::init("res/cfg/input");
 
 	SDL_Event ev;
-	while (true) {
+	while (!core::due_to_quit) {
 		input::handle_input();
 		render_all();
 	}

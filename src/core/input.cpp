@@ -22,7 +22,7 @@ void handle_input ()
 		switch (e.type) {
 
 		case SDL_QUIT:
-			exit(0);
+			core::due_to_quit = true;
 			break;
 
 		case SDL_KEYDOWN:

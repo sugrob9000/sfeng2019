@@ -17,6 +17,8 @@ class t_entity
 	t_entity ();
 };
 
+extern bool due_to_quit;
+
 }
 
 #endif // CORE_H

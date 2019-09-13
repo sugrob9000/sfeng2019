@@ -37,5 +37,6 @@ $(EXEC): $(FILES-CPP) $(FILES-H)
 	$(CC) $(FILES-CPP) $(CFLAGS) $(LIBS) -o $@
 
 run: all
+	@echo Running
 	$(EXEC)
 

@@ -1,45 +1,24 @@
-#include "input.h"
-#include "core.h"
+#include "keybind.h"
 
 namespace input
 {
 
+t_command t_keybind_map::empty_cmd;
 t_keybind_map key_binds;
 
-void init (std::string input_conf_path)
+void t_keybind_map::clear ()
 {
-	int input_status = keybinds_from_cfg(input_conf_path, key_binds);
-	if (input_status != 0) {
-		std::cerr << "Failed to initialze input: "
-				<< input_status << '\n';
-	}
+	m.clear();
 }
 
-void handle_input ()
+t_command& t_keybind_map::operator[] (SDL_Scancode scan)
 {
-	SDL_Event e;
-	while (SDL_PollEvent(&e)) {
-		switch (e.type) {
+	auto i = m.find(scan);
 
-		case SDL_QUIT:
-			core::due_to_quit = true;
-			break;
+	if (i == m.end())
+		return empty_cmd;
 
-		case SDL_KEYDOWN:
-			SDL_Scancode scan = e.key.keysym.scancode;
-			run_command(key_binds[scan]);
-		}
-	}
-}
-
-t_command parse_command (std::string str)
-{
-	return { str };
-}
-
-void run_command (t_command& cmd)
-{
-	std::cout << cmd.cmd << std::endl;
+	return i->second;
 }
 
 int keybinds_from_cfg (std::string path, t_keybind_map& m)

@@ -1,25 +1,26 @@
-#ifndef INPUT_H
-#define INPUT_H
+#ifndef KEYBIND_H
+#define KEYBIND_H
 
 #include "inc_general.h"
-#include "inc_gl.h"
+#include "input.h"
 
 namespace input
 {
 
-struct t_command
+class t_keybind_map
 {
-	std::string cmd;
+	private:
+
+	static t_command empty_cmd;
+	std::unordered_map<SDL_Scancode, t_command> m;
+
+	public:
+
+	void clear ();
+	t_command& operator[] (SDL_Scancode scan);
 };
 
-typedef std::map<SDL_Scancode, t_command> t_keybind_map;
 extern t_keybind_map key_binds;
-
-void init (std::string input_conf_path);
-void handle_input ();
-
-t_command parse_command (std::string str);
-void run_command (t_command& cmd);
 
 /*
  * Returns 0 on success, -1 on failure to open file,
@@ -36,5 +37,4 @@ int keybinds_from_cfg (std::string path, t_keybind_map& m);
 
 }
 
-#endif // INPUT_H
-
+#endif // KEYBIND_H

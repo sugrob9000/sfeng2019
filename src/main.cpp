@@ -1,10 +1,11 @@
 #include "inc_general.h"
 #include "render.h"
 #include "core/core.h"
-#include "core/input.h"
+#include "input/input.h"
+#include "input/keybind.h"
 
 render::t_render_info ri;
-vec3 v = { 0.0, 0.0, 0.0 };
+vec3 v(0.0, 0.0, 0.0);
 
 void render_all ()
 {
@@ -19,7 +20,11 @@ int main (int argc, char** argv)
 	render::init(640, 480);
 	input::init("res/cfg/input");
 
-	SDL_Event ev;
+	std::cout << input::key_binds[SDL_SCANCODE_UNKNOWN].cmd << '\n';
+	// std::cout << input::key_binds[SDL_SCANCODE_Z].cmd << '\n';
+
+	return 0;
+
 	while (!core::due_to_quit) {
 		input::handle_input();
 		render_all();

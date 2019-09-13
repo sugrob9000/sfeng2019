@@ -7,6 +7,12 @@
 namespace input
 {
 
+/*
+ * A wrapper around std::map that prevents it from
+ * allocating a node when accessing a key that
+ * does not exist, by instead returning a reference
+ * to a static default-initialized empty command.
+ */
 class t_keybind_map
 {
 	private:

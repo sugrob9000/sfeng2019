@@ -17,7 +17,7 @@ void init (std::string input_conf_path);
 void handle_input ();
 
 t_command parse_command (std::string str);
-void run_command (t_command& cmd);
+void run_command (const t_command& cmd);
 
 }
 

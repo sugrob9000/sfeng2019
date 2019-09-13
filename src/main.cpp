@@ -20,11 +20,6 @@ int main (int argc, char** argv)
 	render::init(640, 480);
 	input::init("res/cfg/input");
 
-	std::cout << input::key_binds[SDL_SCANCODE_UNKNOWN].cmd << '\n';
-	// std::cout << input::key_binds[SDL_SCANCODE_Z].cmd << '\n';
-
-	return 0;
-
 	while (!core::due_to_quit) {
 		input::handle_input();
 		render_all();

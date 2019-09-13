@@ -37,7 +37,7 @@ t_command parse_command (std::string str)
 	return { str };
 }
 
-void run_command (t_command& cmd)
+void run_command (const t_command& cmd)
 {
 	std::cout << cmd.cmd << std::endl;
 }

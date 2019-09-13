@@ -11,7 +11,12 @@ void t_keybind_map::clear ()
 	m.clear();
 }
 
-t_command& t_keybind_map::operator[] (SDL_Scancode scan)
+void t_keybind_map::add_bind (SDL_Scancode scan, t_command value)
+{
+	m[scan] = value;
+}
+
+const t_command& t_keybind_map::operator[] (SDL_Scancode scan)
 {
 	auto i = m.find(scan);
 
@@ -61,7 +66,7 @@ int keybinds_from_cfg (std::string path, t_keybind_map& m)
 		if (scancode == SDL_SCANCODE_UNKNOWN)
 			return line_nr;
 
-		m[scancode] = parse_command(bind);
+		m.add_bind(scancode, parse_command(bind));
 	}
 
 	return 0;

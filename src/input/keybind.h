@@ -12,12 +12,13 @@ class t_keybind_map
 	private:
 
 	static t_command empty_cmd;
-	std::unordered_map<SDL_Scancode, t_command> m;
+	std::map<SDL_Scancode, t_command> m;
 
 	public:
 
 	void clear ();
-	t_command& operator[] (SDL_Scancode scan);
+	void add_bind (SDL_Scancode key, t_command value);
+	const t_command& operator[] (SDL_Scancode scan);
 };
 
 extern t_keybind_map key_binds;

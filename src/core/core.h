@@ -19,6 +19,8 @@ class t_entity
 
 extern bool due_to_quit;
 
+void init ();
+
 }
 
 #endif // CORE_H

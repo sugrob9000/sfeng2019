@@ -19,6 +19,7 @@ int main (int argc, char** argv)
 {
 	render::init(640, 480);
 	input::init("res/cfg/input");
+	core::init();
 
 	while (!core::due_to_quit) {
 		input::handle_input();

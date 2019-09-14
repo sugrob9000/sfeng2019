@@ -25,7 +25,7 @@ void handle_input ()
 
 		case SDL_KEYDOWN:
 			SDL_Scancode scan = e.key.keysym.scancode;
-			run_command(key_binds[scan]);
+			key_binds[scan].run();
 			break;
 
 		}
@@ -34,12 +34,26 @@ void handle_input ()
 
 t_command parse_command (std::string str)
 {
-	return { str };
+	t_command ret;
+
+	std::istringstream is(str);
+	std::string arg;
+
+	is >> ret.cmd;
+
+	while (true) {
+		is >> arg;
+		if (!is.good())
+			break;
+		ret.args.push_back(arg);
+	}
+
+	return ret;
 }
 
-void run_command (const t_command& cmd)
+void t_command::run () const
 {
-	if (cmd.cmd == "exit")
+	if (cmd == "exit")
 		core::due_to_quit = true;
 }
 

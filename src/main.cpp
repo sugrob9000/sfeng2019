@@ -4,13 +4,13 @@
 #include "input/input.h"
 #include "input/keybind.h"
 
-render::t_render_info ri;
-vec3 v(0.0, 0.0, 0.0);
+core::t_entity ent;
 
 void render_all ()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	ri.render(v);
+
+	ent.render();
 
 	SDL_GL_SwapWindow(render::window);
 }

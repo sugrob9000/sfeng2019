@@ -13,8 +13,9 @@ class t_entity
 	public:
 
 	vec3 pos;
+	render::t_render_info* render_info;
 
-	t_entity ();
+	void render ();
 };
 
 extern bool due_to_quit;

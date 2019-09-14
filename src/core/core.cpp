@@ -11,4 +11,9 @@ void init ()
 	due_to_quit = false;
 }
 
+void t_entity::render ()
+{
+	render_info->render(pos);
+}
+
 }

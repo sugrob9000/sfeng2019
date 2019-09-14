@@ -39,7 +39,8 @@ t_command parse_command (std::string str)
 
 void run_command (const t_command& cmd)
 {
-	std::cout << cmd.cmd << std::endl;
+	if (cmd.cmd == "exit")
+		core::due_to_quit = true;
 }
 
 }

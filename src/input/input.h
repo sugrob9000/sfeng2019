@@ -9,7 +9,8 @@
 namespace input
 {
 
-typedef std::vector<std::string> t_command_args;
+typedef std::vector<std::string> t_cmd_args;
+typedef void (*t_cmd_routine) (const t_cmd_args&);
 
 /*
  * Instances of this class are *not* supposed to be created
@@ -18,14 +19,10 @@ typedef std::vector<std::string> t_command_args;
  * They are also created when parsing a console command, which is
  * not often either.
  */
-class t_command
+struct t_command
 {
-	public:
-
-	std::string cmd;
-	t_command_args args;
-
-	void run () const;
+	std::string name;
+	t_cmd_args args;
 };
 
 /*
@@ -36,9 +33,28 @@ class t_command
  */
 struct t_action
 {
-	void (*press) (t_command_args);
-	void (*release) (t_command_args);
+	static const uint8_t PRESS = 1;
+	static const uint8_t RELEASE = 0;
+
+	t_cmd_routine routine[2];
 };
+
+class t_command_registry
+{
+	private:
+
+	std::map<std::string, t_action> m;
+
+	public:
+
+	void register_command (
+			std::string name,
+			t_cmd_routine press,
+			t_cmd_routine release);
+	void run (const t_command& cmd, uint8_t ev);
+};
+
+extern t_command_registry cmd_registry;
 
 void init (std::string input_conf_path);
 void handle_input ();

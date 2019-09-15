@@ -1,8 +1,11 @@
 #include "input.h"
 #include "keybind.h"
+#include "cmds_basic.h"
 
 namespace input
 {
+
+t_command_registry cmd_registry;
 
 void init (std::string input_conf_path)
 {
@@ -11,6 +14,8 @@ void init (std::string input_conf_path)
 		std::cerr << "Failed to initialze input: "
 				<< input_status << '\n';
 	}
+
+	cmd_registry.register_command("exit", &cmd::exit, &cmd::nop);
 }
 
 void handle_input ()
@@ -19,14 +24,24 @@ void handle_input ()
 	while (SDL_PollEvent(&e)) {
 		switch (e.type) {
 
-		case SDL_QUIT:
+		case SDL_QUIT: {
 			core::due_to_quit = true;
 			break;
+		}
 
-		case SDL_KEYDOWN:
+		case SDL_KEYDOWN: {
 			SDL_Scancode scan = e.key.keysym.scancode;
-			key_binds[scan].run();
+			const t_command& cmd = key_binds[scan];
+			cmd_registry.run(cmd, t_action::PRESS);
 			break;
+		}
+
+		case SDL_KEYUP: {
+			SDL_Scancode scan = e.key.keysym.scancode;
+			const t_command& cmd = key_binds[scan];
+			cmd_registry.run(cmd, t_action::RELEASE);
+			break;
+		}
 
 		}
 	}
@@ -39,7 +54,7 @@ t_command parse_command (std::string str)
 	std::istringstream is(str);
 	std::string arg;
 
-	is >> ret.cmd;
+	is >> ret.name;
 
 	while (true) {
 		is >> arg;
@@ -51,10 +66,23 @@ t_command parse_command (std::string str)
 	return ret;
 }
 
-void t_command::run () const
+void t_command_registry::register_command (
+		std::string name,
+		t_cmd_routine press,
+		t_cmd_routine release )
 {
-	if (cmd == "exit")
-		core::due_to_quit = true;
+	t_action& action = m[name];
+	action.routine[t_action::PRESS] = press;
+	action.routine[t_action::RELEASE] = release;
+}
+
+void t_command_registry::run (const t_command& cmd, uint8_t ev)
+{
+	t_action& action = m[cmd.name];
+	t_cmd_routine& routine = action.routine[ev];
+
+	if (routine != nullptr)
+		routine(cmd.args);
 }
 
 }

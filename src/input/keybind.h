@@ -8,7 +8,7 @@ namespace input
 {
 
 /*
- * A wrapper around std::map that prevents it from
+ * A wrapper around a standard map that prevents it from
  * allocating a node when accessing a key that
  * does not exist, by instead returning a reference
  * to a static default-initialized empty command.
@@ -18,7 +18,7 @@ class t_keybind_map
 	private:
 
 	static t_command empty_cmd;
-	std::map<SDL_Scancode, t_command> m;
+	std::unordered_map<SDL_Scancode, t_command> m;
 
 	public:
 

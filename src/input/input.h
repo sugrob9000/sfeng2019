@@ -43,7 +43,7 @@ class t_command_registry
 {
 	private:
 
-	std::map<std::string, t_action> m;
+	std::unordered_map<std::string, t_action> m;
 
 	public:
 

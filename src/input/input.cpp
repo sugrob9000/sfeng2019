@@ -59,12 +59,8 @@ t_command parse_command (std::string str)
 
 	is >> ret.name;
 
-	while (true) {
-		is >> arg;
-		if (!is.good())
-			break;
+	while (is >> arg)
 		ret.args.push_back(arg);
-	}
 
 	return ret;
 }

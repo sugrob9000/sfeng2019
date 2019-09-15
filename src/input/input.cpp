@@ -15,13 +15,16 @@ void init (std::string input_conf_path)
 				<< input_status << '\n';
 	}
 
-	cmd_registry.register_command("exit", &cmd::exit, &cmd::nop);
+	cmd_registry.register_command("exit", &cmd::exit);
 }
 
 void handle_input ()
 {
 	SDL_Event e;
 	while (SDL_PollEvent(&e)) {
+
+		uint8_t kb_action;
+
 		switch (e.type) {
 
 		case SDL_QUIT: {
@@ -30,16 +33,16 @@ void handle_input ()
 		}
 
 		case SDL_KEYDOWN: {
-			SDL_Scancode scan = e.key.keysym.scancode;
-			const t_command& cmd = key_binds[scan];
-			cmd_registry.run(cmd, t_action::PRESS);
-			break;
+			kb_action = t_action::PRESS;
+			// fall through
 		}
 
 		case SDL_KEYUP: {
+			kb_action = t_action::RELEASE;
+
 			SDL_Scancode scan = e.key.keysym.scancode;
 			const t_command& cmd = key_binds[scan];
-			cmd_registry.run(cmd, t_action::RELEASE);
+			cmd_registry.run(cmd, kb_action);
 			break;
 		}
 
@@ -68,21 +71,18 @@ t_command parse_command (std::string str)
 
 void t_command_registry::register_command (
 		std::string name,
-		t_cmd_routine press,
-		t_cmd_routine release )
+		t_cmd_routine routine )
 {
-	t_action& action = m[name];
-	action.routine[t_action::PRESS] = press;
-	action.routine[t_action::RELEASE] = release;
+	m[name].routine = routine;
 }
 
 void t_command_registry::run (const t_command& cmd, uint8_t ev)
 {
 	t_action& action = m[cmd.name];
-	t_cmd_routine& routine = action.routine[ev];
+	t_cmd_routine& routine = action.routine;
 
 	if (routine != nullptr)
-		routine(cmd.args);
+		routine(cmd.args, ev);
 }
 
 }

@@ -6,9 +6,12 @@ namespace input
 namespace cmd
 {
 
-CONSOLE_COMMAND (nop) { }
+COMMAND_ROUTINE (nop)
+{
+	return;
+}
 
-CONSOLE_COMMAND (exit)
+COMMAND_ROUTINE (exit)
 {
 	core::due_to_quit = true;
 }

@@ -3,7 +3,7 @@
 
 #include "input.h"
 
-#define CONSOLE_COMMAND(name) void name (const t_cmd_args& args)
+#define COMMAND_ROUTINE(name) void name (const t_cmd_args& args, uint8_t ev)
 
 namespace input
 {
@@ -14,12 +14,12 @@ namespace cmd
  * Do nothing. A command may need it, for instance,
  * if it does nothing on release
  */
-CONSOLE_COMMAND (nop);
+COMMAND_ROUTINE (nop);
 
 /*
  * Exit the engine.
  */
-CONSOLE_COMMAND (exit);
+COMMAND_ROUTINE (exit);
 
 }
 }

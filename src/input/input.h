@@ -10,7 +10,7 @@ namespace input
 {
 
 typedef std::vector<std::string> t_cmd_args;
-typedef void (*t_cmd_routine) (const t_cmd_args&);
+typedef void (*t_cmd_routine) (const t_cmd_args&, uint8_t);
 
 /*
  * Instances of this class are *not* supposed to be created
@@ -33,10 +33,10 @@ struct t_command
  */
 struct t_action
 {
-	static const uint8_t PRESS = 1;
-	static const uint8_t RELEASE = 0;
+	static const uint8_t PRESS = 0;
+	static const uint8_t RELEASE = 1;
 
-	t_cmd_routine routine[2];
+	t_cmd_routine routine;
 };
 
 class t_command_registry
@@ -49,8 +49,7 @@ class t_command_registry
 
 	void register_command (
 			std::string name,
-			t_cmd_routine press,
-			t_cmd_routine release);
+			t_cmd_routine routine);
 	void run (const t_command& cmd, uint8_t ev);
 };
 

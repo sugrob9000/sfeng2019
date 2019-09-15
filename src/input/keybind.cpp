@@ -26,17 +26,17 @@ const t_command& t_keybind_map::operator[] (SDL_Scancode scan)
 	return i->second;
 }
 
-int keybinds_from_cfg (std::string path, t_keybind_map& m)
+int t_keybind_map::load_from_cfg (std::string path)
 {
 	std::ifstream f(path);
 
 	if (!f.good())
 		return -1;
 
-	m.clear();
+	clear();
 
 	std::string line;
-	std::string key_name, bind;
+	std::string keyname, bind;
 
 	int line_nr = 0;
 
@@ -59,14 +59,14 @@ int keybinds_from_cfg (std::string path, t_keybind_map& m)
 		if (colon_pos == std::string::npos)
 			return line_nr;
 
-		key_name = line.substr(0, colon_pos);
+		keyname = line.substr(0, colon_pos);
 		bind = line.substr(colon_pos + 1, std::string::npos);
 
-		SDL_Scancode scancode = SDL_GetScancodeFromName(key_name.c_str());
-		if (scancode == SDL_SCANCODE_UNKNOWN)
+		SDL_Scancode scan = SDL_GetScancodeFromName(keyname.c_str());
+		if (scan == SDL_SCANCODE_UNKNOWN)
 			return line_nr;
 
-		m.add_bind(scancode, parse_command(bind));
+		add_bind(scan, parse_command(bind));
 	}
 
 	return 0;

@@ -9,7 +9,7 @@ t_command_registry cmd_registry;
 
 void init (std::string input_conf_path)
 {
-	int input_status = keybinds_from_cfg(input_conf_path, key_binds);
+	int input_status = key_binds.load_from_cfg(input_conf_path);
 	if (input_status != 0) {
 		std::cerr << "Failed to initialze input: "
 				<< input_status << '\n';
@@ -67,14 +67,18 @@ t_command parse_command (std::string str)
 
 void t_command_registry::register_command (
 		std::string name,
-		t_cmd_routine routine )
+		t_cmd_routine routine)
 {
 	m[name].routine = routine;
 }
 
 void t_command_registry::run (const t_command& cmd, uint8_t ev)
 {
-	t_action& action = m[cmd.name];
+	auto i = m.find(cmd.name);
+	if (i == m.end())
+		return;
+
+	t_action& action = i->second;
 	t_cmd_routine& routine = action.routine;
 
 	if (routine != nullptr)

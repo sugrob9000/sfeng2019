@@ -25,6 +25,8 @@ class t_keybind_map
 	void clear ();
 	void add_bind (SDL_Scancode key, t_command value);
 	const t_command& operator[] (SDL_Scancode scan);
+
+	int load_from_cfg (std::string path);
 };
 
 extern t_keybind_map key_binds;

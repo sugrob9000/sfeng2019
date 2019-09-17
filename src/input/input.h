@@ -9,6 +9,9 @@
 namespace input
 {
 
+const uint8_t KB_PRESS = 0;
+const uint8_t KB_RELEASE = 1;
+
 typedef std::vector<std::string> t_cmd_args;
 typedef void (*t_cmd_routine) (const t_cmd_args&, uint8_t);
 
@@ -33,9 +36,6 @@ struct t_command
  */
 struct t_action
 {
-	static const uint8_t PRESS = 0;
-	static const uint8_t RELEASE = 1;
-
 	t_cmd_routine routine;
 };
 

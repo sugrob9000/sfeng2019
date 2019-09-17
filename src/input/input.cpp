@@ -23,7 +23,7 @@ void handle_input ()
 	SDL_Event e;
 	while (SDL_PollEvent(&e)) {
 
-		uint8_t kb_action = t_action::RELEASE;
+		uint8_t kb_action = KB_RELEASE;
 
 		switch (e.type) {
 
@@ -33,7 +33,7 @@ void handle_input ()
 		}
 
 		case SDL_KEYDOWN: {
-			kb_action = t_action::PRESS;
+			kb_action = KB_PRESS;
 			// fall through
 		}
 

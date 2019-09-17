@@ -11,6 +11,8 @@ class vec3
 	};
 
 	vec3 (float xx, float yy, float zz);
+	vec3 (float xx, float yy);
+	vec3 (float c);
 	vec3 ();
 
 	inline float& operator[] (int i) { return _d[i]; }
@@ -19,6 +21,8 @@ class vec3
 	inline vec3& operator-= (vec3 v);
 	inline vec3& operator*= (float c);
 	inline vec3& operator/= (float c);
+
+	vec3& norm ();
 };
 
 inline vec3 operator+ (vec3 one, vec3 other);
@@ -26,6 +30,8 @@ inline vec3 operator- (vec3 one, vec3 other);
 inline vec3 operator* (vec3 v, float c);
 inline vec3 operator* (float c, vec3 v);
 inline vec3 operator/ (vec3 v, float c);
+
+float abs (const vec3& v);
 
 #endif // VEC3_H
 

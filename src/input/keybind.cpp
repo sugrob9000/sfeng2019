@@ -35,32 +35,23 @@ int t_keybind_map::load_from_cfg (std::string path)
 
 	clear();
 
-	std::string line;
-	std::string keyname, bind;
+	int line_nr = 1;
 
-	int line_nr = 0;
+	for (std::string line; std::getline(f, line); line_nr++) {
 
-	while (true) {
-		line_nr++;
-
-		std::getline(f, line);
-
-		if (!f.good())
-			break;
-
-		int comment_pos = line.find('#');
-		if (comment_pos != std::string::npos)
-			line.erase(comment_pos, std::string::npos);
+		int comment = line.find('#');
+		if (comment != std::string::npos)
+			line.erase(comment, std::string::npos);
 
 		if (line.empty())
 			continue;
 
-		int colon_pos = line.find(':');
-		if (colon_pos == std::string::npos)
+		int colon = line.find(':');
+		if (colon == std::string::npos)
 			return line_nr;
 
-		keyname = line.substr(0, colon_pos);
-		bind = line.substr(colon_pos + 1, std::string::npos);
+		std::string keyname = line.substr(0, colon);
+		std::string bind = line.substr(colon + 1, std::string::npos);
 
 		SDL_Scancode scan = SDL_GetScancodeFromName(keyname.c_str());
 		if (scan == SDL_SCANCODE_UNKNOWN)

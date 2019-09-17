@@ -23,7 +23,7 @@ void handle_input ()
 	SDL_Event e;
 	while (SDL_PollEvent(&e)) {
 
-		uint8_t kb_action;
+		uint8_t kb_action = t_action::RELEASE;
 
 		switch (e.type) {
 
@@ -38,8 +38,6 @@ void handle_input ()
 		}
 
 		case SDL_KEYUP: {
-			kb_action = t_action::RELEASE;
-
 			SDL_Scancode scan = e.key.keysym.scancode;
 			const t_command& cmd = key_binds[scan];
 			cmd_registry.run(cmd, kb_action);

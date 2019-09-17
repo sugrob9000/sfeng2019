@@ -11,8 +11,7 @@ namespace cmd
 {
 
 /*
- * Do nothing. A command may need it, for instance,
- * if it does nothing on release
+ * Do nothing.
  */
 COMMAND_ROUTINE (nop);
 

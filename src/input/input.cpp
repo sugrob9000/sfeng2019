@@ -12,7 +12,7 @@ void init (std::string input_conf_path)
 	int input_status = key_binds.load_from_cfg(input_conf_path);
 	if (input_status != 0) {
 		std::cerr << "Failed to initialze input: "
-				<< input_status << '\n';
+		          << input_status << std::endl;
 	}
 
 	cmd_registry.register_command("exit", &cmd::exit);
@@ -53,11 +53,10 @@ t_command parse_command (std::string str)
 	t_command ret;
 
 	std::istringstream is(str);
-	std::string arg;
 
 	is >> ret.name;
 
-	while (is >> arg)
+	for (std::string arg; is >> arg; )
 		ret.args.push_back(arg);
 
 	return ret;

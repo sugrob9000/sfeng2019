@@ -16,5 +16,16 @@ COMMAND_ROUTINE (exit)
 	core::due_to_quit = true;
 }
 
+COMMAND_ROUTINE (echo)
+{
+	if (ev != PRESS)
+		return;
+
+	for (const std::string& arg: args)
+		std::cerr << arg << " ";
+
+	std::cerr << std::endl;
+}
+
 }
 }

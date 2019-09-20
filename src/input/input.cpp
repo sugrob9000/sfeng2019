@@ -15,7 +15,20 @@ void init (std::string input_conf_path)
 		          << input_status << std::endl;
 	}
 
+	cmd_registry.register_command("nop", &cmd::nop);
 	cmd_registry.register_command("exit", &cmd::exit);
+	cmd_registry.register_command("echo", &cmd::echo);
+}
+
+inline void handle_key (SDL_Scancode scan, uint8_t action)
+{
+	const t_command& cmd = key_binds[scan];
+	cmd_registry.run(cmd, action);
+}
+
+inline void handle_mouse (int button, uint8_t action)
+{
+	handle_key(mouse_scancodes[button], action);
 }
 
 void handle_input ()
@@ -23,27 +36,27 @@ void handle_input ()
 	SDL_Event e;
 	while (SDL_PollEvent(&e)) {
 
-		uint8_t kb_action = KB_RELEASE;
-
 		switch (e.type) {
 
-		case SDL_QUIT: {
+		case SDL_QUIT:
 			core::due_to_quit = true;
 			break;
-		}
 
-		case SDL_KEYDOWN: {
-			kb_action = KB_PRESS;
-			// fall through
-		}
-
-		case SDL_KEYUP: {
-			SDL_Scancode scan = e.key.keysym.scancode;
-			const t_command& cmd = key_binds[scan];
-			cmd_registry.run(cmd, kb_action);
+		case SDL_KEYDOWN:
+			handle_key(e.key.keysym.scancode, PRESS);
 			break;
-		}
 
+		case SDL_KEYUP:
+			handle_key(e.key.keysym.scancode, RELEASE);
+			break;
+
+		case SDL_MOUSEBUTTONDOWN:
+			handle_mouse(e.button.button, PRESS);
+			break;
+
+		case SDL_MOUSEBUTTONUP:
+			handle_mouse(e.button.button, RELEASE);
+			break;
 		}
 	}
 }

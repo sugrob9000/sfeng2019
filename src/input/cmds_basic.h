@@ -20,6 +20,11 @@ COMMAND_ROUTINE (nop);
  */
 COMMAND_ROUTINE (exit);
 
+/*
+ * Output arguments to stderr
+ */
+COMMAND_ROUTINE (echo);
+
 }
 }
 

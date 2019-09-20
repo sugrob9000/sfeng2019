@@ -1,5 +1,5 @@
-#ifndef KEYBIND_H
-#define KEYBIND_H
+#ifndef BIND_H
+#define BIND_H
 
 #include "inc_general.h"
 #include "input.h"
@@ -55,4 +55,4 @@ extern t_keybind_map key_binds;
 
 }
 
-#endif // KEYBIND_H
+#endif // BIND_H

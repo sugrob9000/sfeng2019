@@ -2,7 +2,7 @@
 #include "render/render.h"
 #include "core/core.h"
 #include "input/input.h"
-#include "input/keybind.h"
+#include "input/bind.h"
 
 core::t_entity ent;
 

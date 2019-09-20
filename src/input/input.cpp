@@ -1,5 +1,5 @@
 #include "input.h"
-#include "keybind.h"
+#include "bind.h"
 #include "cmds_basic.h"
 
 namespace input

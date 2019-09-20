@@ -22,9 +22,9 @@ COMMAND_ROUTINE (echo)
 		return;
 
 	for (const std::string& arg: args)
-		std::cerr << arg << " ";
+		std::cout << arg << " ";
 
-	std::cerr << std::endl;
+	std::cout << std::endl;
 }
 
 }

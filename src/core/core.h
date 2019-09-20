@@ -22,6 +22,9 @@ extern bool due_to_quit;
 
 void init ();
 
+void error (const std::string& msg, bool fatal);
+void warn (const std::string& msg);
+
 }
 
 #endif // CORE_H

@@ -12,8 +12,8 @@
 
 #define DEBUG_OUT_EXPR(expr) \
 	do { \
-		std::cerr << #expr << " = " \
-		          << expr << std::endl; \
+		std::cerr << #expr " = " \
+		          << (expr) << std::endl; \
 	} while (false)
 
 

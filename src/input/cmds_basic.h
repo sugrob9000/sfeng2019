@@ -21,7 +21,7 @@ COMMAND_ROUTINE (nop);
 COMMAND_ROUTINE (exit);
 
 /*
- * Output arguments to stderr
+ * Output arguments to stdout
  */
 COMMAND_ROUTINE (echo);
 

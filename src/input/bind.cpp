@@ -36,7 +36,7 @@ SDL_Scancode bind_get_from_name (std::string name)
 	else if (name == "mmb")
 		return mouse_scancodes[SDL_BUTTON_MIDDLE];
 	else if (name == "rmb")
-		return mouse_scancodes[SDL_BUTTON_MIDDLE];
+		return mouse_scancodes[SDL_BUTTON_RIGHT];
 
 	return SDL_GetScancodeFromName(name.c_str());
 }

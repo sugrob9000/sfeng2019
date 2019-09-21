@@ -32,11 +32,15 @@ SDL_Scancode bind_get_from_name (std::string name)
 		c = tolower(c);
 
 	if (name == "lmb")
-		return mouse_scancodes[SDL_BUTTON_LEFT];
+		return scan_mouse[SDL_BUTTON_LEFT];
 	else if (name == "mmb")
-		return mouse_scancodes[SDL_BUTTON_MIDDLE];
+		return scan_mouse[SDL_BUTTON_MIDDLE];
 	else if (name == "rmb")
-		return mouse_scancodes[SDL_BUTTON_RIGHT];
+		return scan_mouse[SDL_BUTTON_RIGHT];
+	else if (name == "mwheelup")
+		return scan_mwheel_up;
+	else if (name == "mwheeldown")
+		return scan_mwheel_down;
 
 	return SDL_GetScancodeFromName(name.c_str());
 }

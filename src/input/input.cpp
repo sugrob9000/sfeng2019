@@ -26,11 +26,6 @@ inline void handle_key (SDL_Scancode scan, uint8_t action)
 	cmd_registry.run(cmd, action);
 }
 
-inline void handle_mouse (int button, uint8_t action)
-{
-	handle_key(mouse_scancodes[button], action);
-}
-
 void handle_input ()
 {
 	SDL_Event e;
@@ -38,25 +33,38 @@ void handle_input ()
 
 		switch (e.type) {
 
-		case SDL_QUIT:
+		case SDL_QUIT: {
 			core::due_to_quit = true;
 			break;
-
-		case SDL_KEYDOWN:
+		}
+		case SDL_KEYDOWN: {
 			handle_key(e.key.keysym.scancode, PRESS);
 			break;
-
-		case SDL_KEYUP:
+		}
+		case SDL_KEYUP: {
 			handle_key(e.key.keysym.scancode, RELEASE);
 			break;
-
-		case SDL_MOUSEBUTTONDOWN:
-			handle_mouse(e.button.button, PRESS);
+		}
+		case SDL_MOUSEBUTTONDOWN: {
+			handle_key(scan_mouse[e.button.button], PRESS);
 			break;
-
-		case SDL_MOUSEBUTTONUP:
-			handle_mouse(e.button.button, RELEASE);
+		}
+		case SDL_MOUSEBUTTONUP: {
+			handle_key(scan_mouse[e.button.button], RELEASE);
 			break;
+		}
+		case SDL_MOUSEWHEEL: {
+			int y = e.wheel.y;
+			SDL_Scancode scan = scan_mwheel_up;
+			if (y < 0) {
+				scan = scan_mwheel_down;
+				y = -y;
+			}
+			for (int i = 0; i < y; i++)
+				handle_key(scan, PRESS);
+			break;
+		}
+
 		}
 	}
 }

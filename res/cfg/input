@@ -1,2 +1,7 @@
 Q:exit
-LMB:echo lmb press
+
+MWheelUp:echo wheel up
+MWheelDown:echo wheel down
+RMB:echo rmb
+LMB:echo lmb
+MMB:echo mmb

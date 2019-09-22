@@ -24,7 +24,7 @@ struct t_game_info
 	bool must_quit;
 	int exit_code;
 };
-extern t_game_info game_info;
+extern t_game_info game;
 
 void init ();
 

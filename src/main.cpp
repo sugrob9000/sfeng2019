@@ -21,11 +21,11 @@ int main (int argc, char** argv)
 	input::init("res/cfg/input");
 	core::init();
 
-	while (!core::game_info.must_quit) {
+	while (!core::game.must_quit) {
 		input::handle_input();
 		render_all();
 	}
 
-	return core::game_info.exit_code;
+	return core::game.exit_code;
 }
 

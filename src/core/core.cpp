@@ -5,20 +5,20 @@
 namespace core
 {
 
-t_game_info game_info;
+t_game_info game;
 
 void init ()
 {
-	game_info.must_quit = false;
-	game_info.exit_code = 0;
+	game.must_quit = false;
+	game.exit_code = 0;
 }
 
 void error (const std::string msg, bool fatal)
 {
 	std::cerr << "Error: " << msg << std::endl;
 	if (fatal) {
-		game_info.must_quit = true;
-		game_info.exit_code = 1;
+		game.must_quit = true;
+		game.exit_code = 1;
 	}
 }
 

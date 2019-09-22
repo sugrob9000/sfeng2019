@@ -4,18 +4,21 @@
 namespace core
 {
 
-bool due_to_quit;
+t_game_info game_info;
 
 void init ()
 {
-	due_to_quit = false;
+	game_info.must_quit = false;
+	game_info.exit_code = 0;
 }
 
 void error (const std::string msg, bool fatal)
 {
 	std::cerr << "Error: " << msg << std::endl;
-	if (fatal)
-		due_to_quit = true;
+	if (fatal) {
+		game_info.must_quit = true;
+		game_info.exit_code = 1;
+	}
 }
 
 void warn (const std::string msg)

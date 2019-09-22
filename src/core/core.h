@@ -18,7 +18,13 @@ class t_entity
 	void render ();
 };
 
-extern bool due_to_quit;
+
+struct t_game_info
+{
+	bool must_quit;
+	int exit_code;
+};
+extern t_game_info game_info;
 
 void init ();
 

@@ -13,7 +13,11 @@ COMMAND_ROUTINE (nop)
 
 COMMAND_ROUTINE (exit)
 {
-	core::due_to_quit = true;
+	core::game_info.exit_code = 0;
+	if (!args.empty())
+		core::game_info.exit_code = std::atoi(args[0].c_str());
+
+	core::game_info.must_quit = true;
 }
 
 COMMAND_ROUTINE (echo)

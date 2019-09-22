@@ -34,7 +34,7 @@ void handle_input ()
 		switch (e.type) {
 
 		case SDL_QUIT: {
-			core::due_to_quit = true;
+			core::game_info.must_quit = true;
 			break;
 		}
 		case SDL_KEYDOWN: {

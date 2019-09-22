@@ -12,11 +12,13 @@ namespace input
  * Starts with an invalid scancode because mouse buttons
  * start from 1
  */
-const SDL_Scancode scan_mouse[4] = {
+const SDL_Scancode scan_mouse[6] = {
 		SDL_SCANCODE_UNKNOWN,
 		SDL_SCANCODE_F20,
 		SDL_SCANCODE_F21,
-		SDL_SCANCODE_F22 };
+		SDL_SCANCODE_F22,
+		SDL_SCANCODE_UNKNOWN,
+		SDL_SCANCODE_UNKNOWN };
 const SDL_Scancode scan_mwheel_up = SDL_SCANCODE_F23;
 const SDL_Scancode scan_mwheel_down = SDL_SCANCODE_F24;
 

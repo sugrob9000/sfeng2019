@@ -8,6 +8,10 @@
 # Do not exclude .dll because SDL2.dll is shipped
 # Don't exclude libs either because SDL2 libs are shipped
 
+# dependency files
+*.P
+*.d
+
 # Executables
 *.exe
 *.out

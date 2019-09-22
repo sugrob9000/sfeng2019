@@ -5,6 +5,7 @@ CFLAGS = -O1 -Wno-attributes -Isrc
 
 FILES-CPP = $(shell find src/ -name "*.cpp")
 FILES-H = $(shell find src/ -name "*.h")
+FILES-O = $(FILES-CPP:src/%.cpp=bin/%.o)
 
 LBITS = $(shell getconf LONG_BIT)
 
@@ -32,11 +33,19 @@ endif
 all: $(EXEC)
 	@echo Up to date
 
-$(EXEC): $(FILES-CPP) $(FILES-H)
-	@echo Rebuilding
-	$(CC) $(FILES-CPP) $(CFLAGS) $(LIBS) -o $@
+$(EXEC): $(FILES-O)
+	@echo Linking
+	@$(CC) $(LIBS) $^ -o $@
+
+bin/%.o: src/%.cpp
+	@mkdir -p $(dir $@)
+	@echo Compiling $@
+	@$(CC) -c $(CFLAGS) $^ -o $@
 
 run: all
 	@echo Running
-	$(EXEC)
+	@$(EXEC)
+
+dd:
+	@echo $(FILES-O)
 

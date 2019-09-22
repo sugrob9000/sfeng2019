@@ -1,5 +1,6 @@
 #include "inc_general.h"
 #include "core.h"
+#include "render/render.h"
 
 namespace core
 {

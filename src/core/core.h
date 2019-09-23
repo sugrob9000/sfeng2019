@@ -4,6 +4,7 @@
 #include "inc_general.h"
 #include "vec3.h"
 #include "render/render.h"
+#include <queue>
 
 namespace core
 {
@@ -16,6 +17,28 @@ class t_entity
 	render::t_render_info* render_info;
 
 	void render ();
+};
+
+struct t_signal
+{
+	long long tick_due;
+	t_entity* source;
+	t_entity* target;
+};
+
+/*
+ * Compare signals by their due time
+ */
+bool operator< (const t_signal& a, const t_signal b);
+
+class t_world
+{
+	public:
+
+	std::vector<t_entity> entities;
+	std::priority_queue<t_signal> signals;
+
+	void render (render::t_camera& cam);
 };
 
 

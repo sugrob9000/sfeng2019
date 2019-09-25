@@ -7,49 +7,16 @@ namespace core
 
 t_game_info game;
 
-void init ()
+t_game_info::t_game_info ()
 {
-	game.must_quit = false;
-	game.exit_code = 0;
+	must_quit = false;
+	exit_code = 0;
+	tick = 0;
 }
 
-
-
-void error (const std::string msg, bool fatal)
+void t_game_info::update ()
 {
-	std::cerr << "Error: " << msg << std::endl;
-	if (fatal) {
-		game.must_quit = true;
-		game.exit_code = 1;
-	}
-}
-
-void warn (const std::string msg)
-{
-	std::cerr << "Warning: " << msg << std::endl;
-}
-
-
-
-void t_entity::render ()
-{
-	render_info->render(pos);
-}
-
-void t_world::render (render::t_camera& cam)
-{
-	glPushMatrix();
-	cam.apply();
-
-	for (t_entity& e: entities)
-		e.render();
-
-	glPopMatrix();
-}
-
-bool operator< (const t_signal& a, const t_signal& b)
-{
-	return a.tick_due < b.tick_due;
+	tick++;
 }
 
 }

@@ -1,4 +1,5 @@
 Q:exit
+Escape:exit
 
 MWheelUp:echo wheel up
 MWheelDown:echo wheel down

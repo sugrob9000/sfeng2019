@@ -18,15 +18,13 @@ class e_base
 	virtual void think ();
 };
 
-#define ENT_DECL(name) \
-	class e_##name: public e_base
+#define ENT_DECL(name) class e_##name: public e_base
 
-#define ENT_REG(name) \
-	class e_##name;
-
-#include "entities.inc"
-#undef ENT_REG
+template <class e_derived> e_base* ent_new ();
+typedef e_base* (*t_ent_new_routine) ();
 
 };
+
+#include "ent_headers.inc"
 
 #endif // ENTITY_H

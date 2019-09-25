@@ -1,13 +1,11 @@
-#include "entity.h"
+#include "prop.h"
 
 namespace core
 {
 
-ENT_DECL (prop)
+e_prop::e_prop ()
 {
-	public:
-
-	int a;
-};
+	render_info = new render::t_render_info;
+}
 
 }

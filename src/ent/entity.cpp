@@ -11,8 +11,6 @@ e_base* ent_new ()
 	return new e_derived();
 }
 
-typedef e_base* (*t_ent_new_routine) ();
-
 void init ()
 {
 }

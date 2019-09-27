@@ -10,7 +10,6 @@ t_game_info game;
 
 void init ()
 {
-	ent_fill_registry();
 }
 
 t_game_info::t_game_info ()

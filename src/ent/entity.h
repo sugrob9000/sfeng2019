@@ -31,7 +31,7 @@ class t_ent_registry
 	std::map<std::string, t_ent_new_routine> m;
 
 	t_ent_registry ();
-	t_ent_new_routine operator[] (std::string key);
+	t_ent_new_routine& operator[] (std::string key);
 };
 extern t_ent_registry ent_registry;
 

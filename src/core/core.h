@@ -2,13 +2,16 @@
 #define CORE_H
 
 #include "inc_general.h"
-#include "vec3.h"
-#include "render/render.h"
+#include "ent/entity.h"
 #include <queue>
 
 namespace core
 {
 
+/*
+ * Pretty much a singleton to bundle the globals
+ * related to the game logic together
+ */
 class t_game_info
 {
 	public:
@@ -16,6 +19,8 @@ class t_game_info
 	bool must_quit;
 	int exit_code;
 	long long tick;
+
+	t_entities ents;
 
 	t_game_info ();
 	void update ();
@@ -27,4 +32,3 @@ void init ();
 }
 
 #endif // CORE_H
-

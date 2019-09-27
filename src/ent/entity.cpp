@@ -16,12 +16,17 @@ e_base* ent_new ()
 	return new e_derived();
 }
 
-void ent_fill_registry ()
+t_ent_registry::t_ent_registry ()
 {
 	#define ENT_REG(name) \
-		ent_reg[#name] = &ent_new<e_##name>;
+		m[#name] = &ent_new<e_##name>;
 	#include "ent_list.inc"
 	#undef ENT_REG
+}
+
+t_ent_new_routine& t_ent_registry::operator[] (std::string key)
+{
+	return m[key];
 }
 
 e_base* ent_spawn (std::string type)

@@ -3,7 +3,6 @@
 #include "core/core.h"
 #include "input/input.h"
 #include "input/bind.h"
-#include "ent/entity.h"
 
 using core::game;
 

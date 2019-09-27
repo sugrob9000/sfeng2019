@@ -24,11 +24,29 @@ class e_base
 template <class e_derived> e_base* ent_new ();
 typedef e_base* (*t_ent_new_routine) ();
 
-typedef std::map<std::string, t_ent_new_routine> t_ent_registry;
+class t_ent_registry
+{
+	public:
+
+	std::map<std::string, t_ent_new_routine> m;
+
+	t_ent_registry ();
+	t_ent_new_routine operator[] (std::string key);
+};
 extern t_ent_registry ent_registry;
 
-void ent_fill_registry ();
-e_base* ent_spawn (std::string type);
+/*
+ * A world's currently existing entities
+ */
+class t_entities
+{
+	private:
+	std::vector<e_base*> ents;
+
+	public:
+	e_base* spawn (std::string type);
+	e_base* find_by_name (std::string key);
+};
 
 };
 

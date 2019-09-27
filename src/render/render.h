@@ -30,6 +30,7 @@ class t_camera
 	 */
 	t_camera (vec3, vec3) = delete;
 	t_camera (vec3) = delete;
+	t_camera () = delete;
 
 	t_camera (vec3 pos, vec3 ang,
 	          float zf, float zn, float fov);

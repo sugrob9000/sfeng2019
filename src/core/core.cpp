@@ -1,6 +1,7 @@
 #include "inc_general.h"
 #include "core.h"
 #include "render/render.h"
+#include "ent/entity.h"
 
 namespace core
 {
@@ -17,6 +18,11 @@ t_game_info::t_game_info ()
 void t_game_info::update ()
 {
 	tick++;
+}
+
+void init ()
+{
+	ent_fill_registry();
 }
 
 }

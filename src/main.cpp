@@ -3,6 +3,7 @@
 #include "core/core.h"
 #include "input/input.h"
 #include "input/bind.h"
+#include "ent/entity.h"
 
 using core::game;
 
@@ -17,6 +18,7 @@ int main (int argc, char** argv)
 {
 	render::init(640, 480);
 	input::init("res/cfg/input");
+	core::init();
 
 	while (!core::game.must_quit) {
 		input::handle_input();

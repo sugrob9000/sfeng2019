@@ -8,7 +8,7 @@
 #include <map>
 #include <unordered_map>
 
-#include "core/vec3.h"
+#include "vec3.h"
 
 #define DEBUG_OUT_EXPR(expr) \
 	do { \

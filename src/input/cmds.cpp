@@ -1,4 +1,4 @@
-#include "cmds_basic.h"
+#include "cmds.h"
 #include "core/core.h"
 
 namespace input

@@ -1,6 +1,6 @@
 #include "input.h"
 #include "bind.h"
-#include "cmds_basic.h"
+#include "cmds.h"
 
 namespace input
 {

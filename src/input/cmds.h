@@ -1,5 +1,5 @@
-#ifndef CMDS_BASIC_H
-#define CMDS_BASIC_H
+#ifndef CMDS_H
+#define CMDS_H
 
 #include "input.h"
 
@@ -28,4 +28,4 @@ COMMAND_ROUTINE (echo);
 }
 }
 
-#endif
+#endif // CMDS_H

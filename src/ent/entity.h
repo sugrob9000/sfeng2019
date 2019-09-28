@@ -7,6 +7,9 @@
 namespace core
 {
 
+/*
+ * The base entity class
+ */
 class e_base
 {
 	public:
@@ -24,6 +27,9 @@ class e_base
 template <class e_derived> e_base* ent_new ();
 typedef e_base* (*t_ent_new_routine) ();
 
+/*
+ * The list of types of entities known to the engine
+ */
 class t_ent_registry
 {
 	public:

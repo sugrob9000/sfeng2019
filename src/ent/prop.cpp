@@ -5,7 +5,6 @@ namespace core
 
 e_prop::e_prop ()
 {
-	return;
 }
 
 }

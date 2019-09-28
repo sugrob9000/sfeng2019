@@ -15,7 +15,7 @@ const uint8_t RELEASE = 1;
 typedef std::vector<std::string> t_cmd_args;
 
 typedef void (*t_cmd_routine) (const t_cmd_args&, uint8_t);
-typedef void (*t_mousemove_routine) (int x, int y, int relx, int rely);
+typedef void (*t_mousemove_routine) (int dx, int dy, int abx, int aby);
 
 /*
  * Instances of this class are *not* supposed to be created
@@ -56,6 +56,7 @@ class t_command_registry
 };
 
 extern t_command_registry cmd_registry;
+extern t_mousemove_routine mousemove_proc;
 
 void init (std::string input_conf_path);
 void handle_input ();

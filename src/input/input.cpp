@@ -6,6 +6,7 @@ namespace input
 {
 
 t_command_registry cmd_registry;
+t_mousemove_routine mousemove_proc;
 
 void init (std::string input_conf_path)
 {
@@ -18,6 +19,8 @@ void init (std::string input_conf_path)
 	cmd_registry.register_command("nop", &cmd::nop);
 	cmd_registry.register_command("exit", &cmd::exit);
 	cmd_registry.register_command("echo", &cmd::echo);
+
+	mousemove_proc = &cmd::basic_mousemove;
 }
 
 inline void handle_key (SDL_Scancode scan, uint8_t action)
@@ -62,6 +65,11 @@ void handle_input ()
 			}
 			for (int i = 0; i < y; i++)
 				handle_key(scan, PRESS);
+			break;
+		}
+		case SDL_MOUSEMOTION: {
+			mousemove_proc(e.motion.xrel, e.motion.yrel,
+			               e.motion.x, e.motion.y);
 			break;
 		}
 

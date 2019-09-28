@@ -3,7 +3,10 @@
 
 #include "input.h"
 
-#define COMMAND_ROUTINE(name) void name (const t_cmd_args& args, uint8_t ev)
+#define COMMAND_ROUTINE(name) \
+	void name (const t_cmd_args& args, uint8_t ev)
+#define MOUSEMOVE_ROUTINE(name) \
+	void name (int dx, int dy, int abx, int aby)
 
 namespace input
 {
@@ -24,6 +27,8 @@ COMMAND_ROUTINE (exit);
  * Output arguments to stdout
  */
 COMMAND_ROUTINE (echo);
+
+MOUSEMOVE_ROUTINE (basic_mousemove);
 
 }
 }

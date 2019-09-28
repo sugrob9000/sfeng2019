@@ -12,7 +12,7 @@ namespace core
  * Pretty much a singleton to bundle the globals
  * related to the game logic together
  */
-class t_game_info
+class t_game
 {
 	public:
 
@@ -22,10 +22,10 @@ class t_game_info
 
 	t_entities ents;
 
-	t_game_info ();
+	t_game ();
 	void update ();
 };
-extern t_game_info game;
+extern t_game game;
 
 void init ();
 

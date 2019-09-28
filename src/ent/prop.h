@@ -14,6 +14,7 @@ ENT_DECL (prop)
 	render::t_render_info* render_info;
 
 	e_prop ();
+	void think ();
 };
 
 }

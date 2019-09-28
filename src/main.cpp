@@ -19,6 +19,8 @@ int main (int argc, char** argv)
 	input::init("res/cfg/input");
 	core::init();
 
+	game.ents.spawn("prop");
+
 	while (!core::game.must_quit) {
 		input::handle_input();
 		game.update();

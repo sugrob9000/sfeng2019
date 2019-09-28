@@ -27,6 +27,7 @@ class e_base
 template <class e_derived> e_base* ent_new ();
 typedef e_base* (*t_ent_new_routine) ();
 
+
 /*
  * The list of types of entities known to the engine
  */
@@ -41,15 +42,16 @@ class t_ent_registry
 };
 extern t_ent_registry ent_registry;
 
+
 /*
  * A world's currently existing entities
  */
 class t_entities
 {
-	private:
-	std::vector<e_base*> ents;
-
 	public:
+
+	std::vector<e_base*> v;
+
 	e_base* spawn (std::string type);
 	e_base* find_by_name (std::string key);
 };

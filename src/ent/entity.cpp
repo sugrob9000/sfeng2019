@@ -29,12 +29,16 @@ t_ent_new_routine& t_ent_registry::operator[] (std::string key)
 	return m[key];
 }
 
-e_base* ent_spawn (std::string type)
+e_base* t_entities::spawn (std::string type)
 {
 	t_ent_new_routine spawner = ent_reg[type];
+
 	if (spawner == nullptr)
 		return nullptr;
-	return spawner();
+
+	e_base* ent = spawner();
+	v.push_back(ent);
+	return ent;
 }
 
 };

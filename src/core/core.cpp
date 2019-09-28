@@ -6,22 +6,25 @@
 namespace core
 {
 
-t_game_info game;
+t_game game;
 
 void init ()
 {
 }
 
-t_game_info::t_game_info ()
+t_game::t_game ()
 {
 	must_quit = false;
 	exit_code = 0;
 	tick = 0;
 }
 
-void t_game_info::update ()
+void t_game::update ()
 {
 	tick++;
+
+	for (e_base* e: ents.v)
+		e->think();
 }
 
 }

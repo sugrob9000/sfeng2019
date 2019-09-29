@@ -10,11 +10,17 @@ class t_model
 {
 	public:
 
+	struct t_texcrd
+	{
+		float u;
+		float v;
+	};
+
 	struct t_vertex
 	{
 		vec3 pos;
 		vec3 norm;
-		float u, v;
+		t_texcrd tex;
 	};
 
 	std::vector<t_vertex> verts;

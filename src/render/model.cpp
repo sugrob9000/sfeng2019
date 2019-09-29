@@ -16,7 +16,7 @@ void t_model::render () const
 	glBegin(GL_TRIANGLES);
 	for (const t_vertex v: verts) {
 		glNormal3f(v.norm.x, v.norm.y, v.norm.z);
-		glTexCoord2f(v.u, v.v);
+		glTexCoord2f(v.tex.u, v.tex.v);
 		glVertex3f(v.pos.x, v.pos.y, v.pos.z);
 	}
 	glEnd();
@@ -28,14 +28,9 @@ bool t_model::load_obj (std::string path)
 	if (!f)
 		return false;
 
-	struct texcoord {
-		float u;
-		float v;
-	};
-
 	std::vector<vec3> points;
 	std::vector<vec3> normals;
-	std::vector<texcoord> texcoords;
+	std::vector<t_texcrd> texcoords;
 
 	auto encode2chars =
 		[] (char a, char b) constexpr -> uint16_t
@@ -92,11 +87,10 @@ bool t_model::load_obj (std::string path)
 					&v[2], &t[2], &n[2]);
 
 			for (int i = 0; i < 3; i++) {
-				verts.push_back({
-					points[v[i]-1],
-					normals[v[i]-1],
-					texcoords[t[i]-1].u,
-					texcoords[t[i]-1].v });
+				verts.push_back(
+					{ points[v[i]-1],
+					  normals[v[i]-1],
+					  texcoords[t[i]-1] });
 			}
 
 			break;

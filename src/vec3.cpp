@@ -108,3 +108,8 @@ float abs (const vec3& v)
 	          + v.z * v.z);
 }
 
+std::ostream& operator<< (std::ostream& s, vec3 v)
+{
+	return (s << '(' << v.x << ' ' << v.y << ' ' << v.z << ')');
+}
+

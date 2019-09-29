@@ -1,6 +1,8 @@
 #ifndef VEC3_H
 #define VEC3_H
 
+#include <ostream>
+
 class vec3
 {
 	public:
@@ -32,6 +34,8 @@ inline vec3 operator* (float c, vec3 v);
 inline vec3 operator/ (vec3 v, float c);
 
 float abs (const vec3& v);
+
+std::ostream& operator<< (std::ostream& s, vec3 v);
 
 #endif // VEC3_H
 

@@ -4,7 +4,7 @@ SRC = src
 EXEC = $(BIN)/engine
 
 CC = g++
-CFLAGS = -O2 -Wno-attributes -Isrc
+CFLAGS = -O2 -Wno-attributes --std=gnu++17 -Isrc
 
 FILES-CPP = $(shell find src/ -name "*.cpp")
 FILES-H = $(shell find src/ -name "*.h")

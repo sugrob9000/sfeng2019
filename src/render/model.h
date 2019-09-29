@@ -8,6 +8,8 @@ namespace render
 
 class t_model
 {
+	public:
+
 	struct t_vertex
 	{
 		vec3 pos;
@@ -16,8 +18,6 @@ class t_model
 	};
 
 	std::vector<t_vertex> verts;
-
-	public:
 
 	t_model (std::string objpath);
 

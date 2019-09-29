@@ -6,8 +6,8 @@
 namespace core
 {
 
-void error (const std::string& msg, bool fatal);
-void warn (const std::string& msg);
+void error (std::string msg, bool fatal);
+void warn (std::string msg);
 
 }
 

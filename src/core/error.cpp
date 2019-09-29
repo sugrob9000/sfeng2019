@@ -1,10 +1,11 @@
 #include "error.h"
 #include "inc_general.h"
+#include "core.h"
 
 namespace core
 {
 
-void error (const std::string msg, bool fatal)
+void error (std::string msg, bool fatal)
 {
 	std::cerr << "Error: " << msg << std::endl;
 	if (fatal) {
@@ -13,7 +14,7 @@ void error (const std::string msg, bool fatal)
 	}
 }
 
-void warn (const std::string msg)
+void warn (std::string msg)
 {
 	std::cerr << "Warning: " << msg << std::endl;
 }

@@ -33,7 +33,6 @@ COMMAND_ROUTINE (echo)
 
 MOUSEMOVE_ROUTINE (basic_mousemove)
 {
-	std::cout << dx << " " << dy << std::endl;
 }
 
 }

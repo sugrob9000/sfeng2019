@@ -20,6 +20,7 @@ class e_base
 	std::string name;
 
 	virtual void think ();
+	virtual void render ();
 };
 
 #define ENT_DECL(name) class e_##name: public e_base

@@ -5,10 +5,17 @@ namespace core
 
 t_ent_registry ent_reg;
 
+
 void e_base::think ()
 {
 	return;
 }
+
+void e_base::render ()
+{
+	return;
+}
+
 
 template <class e_derived>
 e_base* ent_new ()
@@ -38,6 +45,7 @@ e_base* t_entities::spawn (std::string type)
 
 	e_base* ent = spawner();
 	v.push_back(ent);
+
 	return ent;
 }
 

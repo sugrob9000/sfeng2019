@@ -1,6 +1,7 @@
 #include "inc_general.h"
 #include "inc_gl.h"
 #include "render/render.h"
+#include "core/error.h"
 
 namespace render
 {
@@ -44,29 +45,6 @@ bool init (int resx, int resy)
 	glEnable(GL_DEPTH_TEST);
 
 	return true;
-}
-
-/*
- * Placeholder routine to draw an entity
- * as a square on the screen
- */
-void t_render_info::render (vec3 pos)
-{
-	const float size = 0.05;
-
-	glPushMatrix();
-	glTranslatef(pos.x, pos.y, pos.x);
-
-	glBegin(GL_QUADS);
-
-	glVertex2f(0.0, 0.0);
-	glVertex2f(0.0, size);
-	glVertex2f(size, size);
-	glVertex2f(size, 0.0);
-
-	glEnd();
-
-	glPopMatrix();
 }
 
 t_camera::t_camera (

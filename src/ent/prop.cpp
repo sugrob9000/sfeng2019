@@ -11,4 +11,16 @@ void e_prop::think ()
 {
 }
 
+void e_prop::render ()
+{
+	glPushMatrix();
+
+	glTranslatef(-pos.x, -pos.y, -pos.z);
+
+	material->apply();
+	model->render();
+
+	glPopMatrix();
+}
+
 }

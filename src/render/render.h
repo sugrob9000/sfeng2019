@@ -2,16 +2,10 @@
 #define RENDER_H
 
 #include "inc_gl.h"
+#include "inc_general.h"
 
 namespace render
 {
-
-class t_render_info
-{
-	public:
-
-	void render (vec3 pos);
-};
 
 class t_camera
 {

@@ -36,7 +36,7 @@ bool t_model::load_obj (std::string path)
 	std::vector<vec3> normals;
 	std::vector<t_texcrd> texcoords;
 
-	auto encode2chars =
+	auto pack2chars =
 		[] (char a, char b) constexpr -> uint16_t
 		{
 			return ((a << 8) | b);
@@ -56,31 +56,31 @@ bool t_model::load_obj (std::string path)
 		if (line.size() < 2)
 			return false;
 
-		uint16_t enc = encode2chars(line[0], line[1]);
+		uint16_t enc = pack2chars(line[0], line[1]);
 
 		switch (enc) {
-		case encode2chars('v', ' '): {
+		case pack2chars('v', ' '): {
 			// vertex
 			float x, y, z;
 			sscanf(line.c_str(), "%*s %f %f %f", &x, &y, &z);
 			points.push_back({ x, y, z });
 			break;
 		}
-		case encode2chars('v', 'n'): {
+		case pack2chars('v', 'n'): {
 			// vertex normal
 			float x, y, z;
 			sscanf(line.c_str(), "%*s %f %f %f", &x, &y, &z);
 			normals.push_back({ x, y, z });
 			break;
 		}
-		case encode2chars('v', 't'): {
+		case pack2chars('v', 't'): {
 			// tex coord
 			float u, v;
 			sscanf(line.c_str(), "%*s %f %f", &u, &v);
 			texcoords.push_back({ u, v });
 			break;
 		}
-		case encode2chars('f', ' '): {
+		case pack2chars('f', ' '): {
 			// face
 			int v[3];
 			int n[3];

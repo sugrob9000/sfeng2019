@@ -1,5 +1,6 @@
 *.vim
 *.obj
+*.rvd
 
 # Compiled Object files
 *.slo

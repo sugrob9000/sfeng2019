@@ -25,10 +25,12 @@ class t_model
 
 	std::vector<t_vertex> verts;
 
+	t_model ();
 	t_model (std::string objpath);
 
 	bool load_obj (std::string path);
 	bool load_rvd (std::string path);
+	void dump_rvd (std::string path);
 
 	void render () const;
 };

@@ -5,6 +5,10 @@
 namespace render
 {
 
+t_model::t_model ()
+{
+}
+
 t_model::t_model (std::string objpath)
 {
 	if (!load_obj(objpath))
@@ -106,8 +110,33 @@ bool t_model::load_obj (std::string path)
 	return true;
 }
 
+void t_model::dump_rvd (std::string path)
+{
+	std::ofstream f(path);
+
+	if (!f)
+		return;
+
+	int64_t vertnum = verts.size();
+	f.write((char*) &vertnum, sizeof(vertnum));
+	f.write((char*) verts.data(), verts.size() * sizeof(t_vertex));
+}
+
 bool t_model::load_rvd (std::string path)
 {
+	std::ifstream f(path);
+
+	if (!f)
+		return false;
+
+	int64_t vertnum = -1;
+	f.read((char*) &vertnum, sizeof(vertnum));
+
+	verts.clear();
+	verts.resize(vertnum);
+
+	f.read((char*) verts.data(), vertnum * sizeof(t_vertex));
+
 	return false;
 }
 

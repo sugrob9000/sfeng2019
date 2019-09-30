@@ -59,3 +59,7 @@ $(BIN)/glew.o: include/GL/glew.c
 run: all
 	@echo Running:
 	$(EXEC)
+
+debug:
+	g++ $(CFLAGS) -Og -g $(LIBS) $(FILES-CPP) -o debugbin
+	cgdb debugbin

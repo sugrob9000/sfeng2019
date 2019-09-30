@@ -38,6 +38,8 @@ bool init (int resx, int resy)
 	}
 
 	glewExperimental = true;
+	if (glewInit() != GLEW_OK)
+		return false;
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();

@@ -93,7 +93,7 @@ bool t_model::load_obj (std::string path)
 			for (int i = 0; i < 3; i++) {
 				verts.push_back(
 					{ points[v[i]-1],
-					  normals[v[i]-1],
+					  normals[n[i]-1],
 					  texcoords[t[i]-1] });
 			}
 

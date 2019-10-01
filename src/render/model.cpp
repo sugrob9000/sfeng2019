@@ -36,7 +36,7 @@ bool t_model::load_obj (std::string path)
 	std::vector<vec3> normals;
 	std::vector<t_texcrd> texcoords;
 
-	auto pack2chars =
+	auto pack =
 		[] (char a, char b) constexpr -> uint16_t
 		{
 			return ((a << 8) | b);
@@ -44,8 +44,7 @@ bool t_model::load_obj (std::string path)
 
 	int faces = 0;
 
-	int line_nr = 1;
-	for (std::string line; std::getline(f, line); line_nr++) {
+	for (std::string line; std::getline(f, line); ) {
 
 		int comment = line.find('#');
 		if (comment != std::string::npos)
@@ -56,31 +55,31 @@ bool t_model::load_obj (std::string path)
 		if (line.size() < 2)
 			return false;
 
-		uint16_t enc = pack2chars(line[0], line[1]);
+		uint16_t p = pack(line[0], line[1]);
 
-		switch (enc) {
-		case pack2chars('v', ' '): {
+		switch (p) {
+		case pack('v', ' '): {
 			// vertex
 			float x, y, z;
 			sscanf(line.c_str(), "%*s %f %f %f", &x, &y, &z);
 			points.push_back({ x, y, z });
 			break;
 		}
-		case pack2chars('v', 'n'): {
+		case pack('v', 'n'): {
 			// vertex normal
 			float x, y, z;
 			sscanf(line.c_str(), "%*s %f %f %f", &x, &y, &z);
 			normals.push_back({ x, y, z });
 			break;
 		}
-		case pack2chars('v', 't'): {
+		case pack('v', 't'): {
 			// tex coord
 			float u, v;
 			sscanf(line.c_str(), "%*s %f %f", &u, &v);
 			texcoords.push_back({ u, v });
 			break;
 		}
-		case pack2chars('f', ' '): {
+		case pack('f', ' '): {
 			// face
 			int v[3];
 			int n[3];

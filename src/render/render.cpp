@@ -1,7 +1,6 @@
 #include "inc_general.h"
 #include "inc_gl.h"
 #include "render/render.h"
-#include "core/error.h"
 
 namespace render
 {

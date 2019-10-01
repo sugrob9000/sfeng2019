@@ -11,9 +11,12 @@ t_mousemove_routine mousemove_proc;
 void init (std::string input_conf_path)
 {
 	int input_status = key_binds.load_from_cfg(input_conf_path);
-	if (input_status != 0) {
-		std::cerr << "Failed to initialze input: "
-		          << input_status << std::endl;
+
+	if (input_status == -1) {
+		core::fatal("Failed to open %s", input_conf_path.c_str());
+	} else if (input_status > 0) {
+		core::fatal("Error in %s on line %i",
+				input_conf_path.c_str(), input_status);
 	}
 
 	cmd_registry.register_command("nop", &cmd::nop);

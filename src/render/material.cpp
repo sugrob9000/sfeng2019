@@ -41,16 +41,14 @@ unsigned int compile_glsl (std::string path, GLenum type)
 	if (success)
 		return id;
 
-	std::cerr << "Failed to compile shader \""
-	          << path << "\":\n";
-
 	int log_length = 0;
 	glGetShaderiv(id, GL_INFO_LOG_LENGTH, &log_length);
 
 	char* log = new char[log_length];
 	glGetShaderInfoLog(id, log_length, 0, log);
 
-	std::cerr << log << std::endl;
+	core::warning("Failed to compile shader %s:\n%s\n",
+			path.c_str(), log);
 
 	return 0;
 }

@@ -9,12 +9,6 @@ t_model::t_model ()
 {
 }
 
-t_model::t_model (std::string objpath)
-{
-	if (!load_obj(objpath))
-		std::cout << "model loading failed" << std::flush;
-}
-
 void t_model::render () const
 {
 	glBegin(GL_TRIANGLES);

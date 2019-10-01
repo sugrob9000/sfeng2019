@@ -50,6 +50,8 @@ unsigned int compile_glsl (std::string path, GLenum type)
 	core::warning("Failed to compile shader %s:\n%s\n",
 			path.c_str(), log);
 
+	delete[] log;
+
 	return 0;
 }
 

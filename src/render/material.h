@@ -6,6 +6,18 @@
 namespace render
 {
 
+class t_texture
+{
+	public:
+
+	unsigned int id;
+
+	t_texture ();
+	t_texture (std::string path);
+
+	bool load (std::string path);
+};
+
 class t_material
 {
 	private:

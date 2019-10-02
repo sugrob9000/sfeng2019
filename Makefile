@@ -12,13 +12,15 @@ FILES-O = $(FILES-CPP:$(SRC)/%.cpp=$(BIN)/%.o)
 
 LBITS = $(shell getconf LONG_BIT)
 
+LIBS = -lSDL2_Image
+
 ifeq ($(OS), Windows_NT)
 
 # Windows
 
 CFLAGS += -DWINDOWS -Iinclude
 LIBS += -Llib/$(LBITS)
-LIBS += -lSDL2 -lopengl32 -lmingw32
+LIBS += -lSDL2 -lopengl32 -lmingw32 -lGLU32
 
 EXEC := $(EXEC).exe
 FILES-O += $(BIN)/glew.o

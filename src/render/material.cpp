@@ -70,4 +70,66 @@ void t_material::apply ()
 	// TODO: apply shaders, etc.
 }
 
+
+t_texture::t_texture ()
+{
+}
+
+t_texture::t_texture (std::string path)
+{
+	if (!load(path)) {
+		core::warning("Failed to load texture %s",
+				path.c_str());
+	}
+}
+
+bool t_texture::load (std::string path)
+{
+	SDL_Surface* surf = IMG_Load(path.c_str());
+
+	if (surf == nullptr)
+		return false;
+
+	GLuint texid;
+
+	glGenTextures(1, &texid);
+	glBindTexture(GL_TEXTURE_2D, texid);
+
+	glHint(GL_TEXTURE_COMPRESSION_HINT, GL_NICEST);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+			GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+			GL_LINEAR_MIPMAP_LINEAR);
+
+	// mipmap
+	GLubyte* temp = new GLubyte[4 * surf->w * surf->h];
+
+	int& h = surf->h;
+	int& w = surf->w;
+
+	int level = 0;
+	int format = GL_BGR;
+
+	while (h >= 1 && w >= 1) {
+		glTexImage2D(GL_TEXTURE_2D, level++,
+				GL_COMPRESSED_RGBA, w, h,
+				0, format, GL_UNSIGNED_BYTE,
+				surf->pixels);
+		gluScaleImage(format, w, h, GL_UNSIGNED_BYTE,
+				surf->pixels, w / 2, h / 2,
+				GL_UNSIGNED_BYTE, temp);
+		w /= 2;
+		h /= 2;
+		surf->pixels = temp;
+	}
+	delete[] temp;
+
+	SDL_FreeSurface(surf);
+
+	id = texid;
+	return true;
+}
+
 }

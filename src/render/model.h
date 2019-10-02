@@ -28,6 +28,13 @@ class t_model
 	t_model ();
 
 	bool load_obj (std::string path);
+
+	/*
+	 * RVD (raw vertex data) is a file format that stores
+	 * the model's data in the RAM-efficient format:
+	 * - store the number of vertices
+	 * - store the raw contents of verts.data()
+	 */
 	bool load_rvd (std::string path);
 	void dump_rvd (std::string path);
 

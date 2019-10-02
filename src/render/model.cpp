@@ -32,11 +32,7 @@ bool t_model::load_obj (std::string path)
 
 	auto pack =
 		[] (char a, char b) constexpr -> uint16_t
-		{
-			return ((a << 8) | b);
-		};
-
-	int faces = 0;
+		{ return ((a << 8) | b); };
 
 	for (std::string line; std::getline(f, line); ) {
 

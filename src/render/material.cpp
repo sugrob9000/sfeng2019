@@ -104,27 +104,23 @@ bool t_texture::load (std::string path)
 			GL_LINEAR_MIPMAP_LINEAR);
 
 	// mipmap
-	GLubyte* temp = new GLubyte[4 * surf->w * surf->h];
-
-	int& h = surf->h;
-	int& w = surf->w;
-
 	int level = 0;
 	int format = GL_BGR;
+
+	int w = surf->w;
+	int h = surf->h;
+	GLubyte* p = (GLubyte*) surf->pixels;
 
 	while (h >= 1 && w >= 1) {
 		glTexImage2D(GL_TEXTURE_2D, level++,
 				GL_COMPRESSED_RGBA, w, h,
-				0, format, GL_UNSIGNED_BYTE,
-				surf->pixels);
-		gluScaleImage(format, w, h, GL_UNSIGNED_BYTE,
-				surf->pixels, w / 2, h / 2,
-				GL_UNSIGNED_BYTE, temp);
+				0, format, GL_UNSIGNED_BYTE, p);
+		gluScaleImage(format,
+				w, h, GL_UNSIGNED_BYTE, p,
+				w / 2, h / 2, GL_UNSIGNED_BYTE, p);
 		w /= 2;
 		h /= 2;
-		surf->pixels = temp;
 	}
-	delete[] temp;
 
 	SDL_FreeSurface(surf);
 

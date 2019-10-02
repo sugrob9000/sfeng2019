@@ -19,6 +19,8 @@ int main (int argc, char** argv)
 	input::init("res/cfg/input");
 	core::init();
 
+	render::t_texture tex("res/textures/diffuse_red.tga");
+
 	game.ents.spawn("prop");
 
 	while (!core::game.must_quit) {

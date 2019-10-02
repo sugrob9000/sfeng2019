@@ -1,6 +1,7 @@
 *.vim
 *.obj
 *.rvd
+*.tga
 
 # Compiled Object files
 *.slo

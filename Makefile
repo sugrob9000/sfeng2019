@@ -12,7 +12,7 @@ FILES-O = $(FILES-CPP:$(SRC)/%.cpp=$(BIN)/%.o)
 
 LBITS = $(shell getconf LONG_BIT)
 
-LIBS = -lSDL2_Image
+LIBS = -lSDL2_image
 
 ifeq ($(OS), Windows_NT)
 
@@ -29,7 +29,7 @@ else
 
 # Linux
 
-LIBS += -lSDL2 -lGL -lGLEW
+LIBS += -lSDL2 -lGL -lGLEW -lGLU
 EXEC := $(EXEC).out
 CFLAGS += -DLINUX
 

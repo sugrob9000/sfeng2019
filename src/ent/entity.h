@@ -20,7 +20,10 @@ class e_base
 	std::string name;
 
 	virtual void think ();
-	virtual void render ();
+	virtual void render () const;
+
+	virtual void read (std::istream& s);
+	virtual void write (std::ostream& s) const;
 };
 
 #define ENT_DECL(name) class e_##name: public e_base

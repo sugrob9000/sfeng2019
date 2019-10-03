@@ -110,6 +110,11 @@ float abs (const vec3& v)
 
 std::ostream& operator<< (std::ostream& s, vec3 v)
 {
-	return (s << '(' << v.x << ' ' << v.y << ' ' << v.z << ')');
+	return (s << v.x << ' ' << v.y << ' ' << v.z);
+}
+
+std::istream& operator>> (std::istream& s, vec3 v)
+{
+	return (s >> v.x >> v.y >> v.z);
 }
 

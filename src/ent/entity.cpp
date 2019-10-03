@@ -11,11 +11,20 @@ void e_base::think ()
 	return;
 }
 
-void e_base::render ()
+void e_base::render () const
 {
 	return;
 }
 
+void e_base::read (std::istream& s)
+{
+	s >> pos >> name;
+}
+
+void e_base::write (std::ostream& s) const
+{
+	s << pos << name;
+}
 
 template <class e_derived>
 e_base* ent_new ()

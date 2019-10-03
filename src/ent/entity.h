@@ -8,6 +8,11 @@ namespace core
 {
 
 /*
+ * Holds key/value pairs for entity initialization
+ */
+typedef std::map<std::string, std::string> t_ent_keyvals;
+
+/*
  * The base entity class
  */
 class e_base
@@ -22,8 +27,7 @@ class e_base
 	virtual void think ();
 	virtual void render () const;
 
-	virtual void read (std::istream& s);
-	virtual void write (std::ostream& s) const;
+	virtual void read (t_ent_keyvals& kv);
 };
 
 #define ENT_DECL(name) class e_##name: public e_base

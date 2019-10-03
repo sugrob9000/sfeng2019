@@ -24,6 +24,8 @@ class t_game
 
 	t_game ();
 	void update ();
+
+	bool load_map (std::string path);
 };
 extern t_game game;
 

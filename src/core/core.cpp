@@ -27,4 +27,14 @@ void t_game::update ()
 		e->think();
 }
 
+bool t_game::load_map (std::string path)
+{
+	std::ifstream f(path);
+
+	if (!f)
+		fatal("Could not open world file %s", path.c_str());
+
+	return true;
+}
+
 }

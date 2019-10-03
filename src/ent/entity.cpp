@@ -16,15 +16,15 @@ void e_base::render () const
 	return;
 }
 
-void e_base::read (std::istream& s)
+/*
+ * Mostly an exemplar, since any entity
+ * should really implement the reading of itself
+ */
+void e_base::read (t_ent_keyvals& kv)
 {
-	s >> pos >> name;
 }
 
-void e_base::write (std::ostream& s) const
-{
-	s << pos << name;
-}
+
 
 template <class e_derived>
 e_base* ent_new ()

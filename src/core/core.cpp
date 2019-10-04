@@ -27,14 +27,63 @@ void t_game::update ()
 		e->think();
 }
 
-bool t_game::load_map (std::string path)
+void t_game::load_map (std::string path)
 {
 	std::ifstream f(path);
 
 	if (!f)
 		fatal("Could not open world file %s", path.c_str());
 
-	return true;
+	e_base* cur_ent = nullptr;
+	t_ent_keyvals kv;
+
+	auto finalize = [&] ()
+		{
+			if (cur_ent != nullptr)
+				cur_ent->apply_keyvals(kv);
+		};
+
+	for (std::string line; std::getline(f, line); ) {
+		int comment = line.find('#');
+		if (comment != std::string::npos)
+			line.erase(comment, std::string::npos);
+
+		int ws_end = line.length()-1;
+		while (ws_end >= 0 && isspace(line[ws_end]))
+			ws_end--;
+		line.erase(ws_end+1, std::string::npos);
+
+		if (line.empty())
+			continue;
+
+		if (isspace(line[0])) {
+			// begins with whitespace: is a key-value
+
+			int key_begin = 0;
+			int n = line.length();
+			while (key_begin < n && isspace(line[key_begin]))
+				key_begin++;
+
+			int key_end = key_begin;
+			while (key_end < n && !isspace(line[key_end]))
+				key_end++;
+
+			kv[line.substr(key_begin, key_end - key_begin)] =
+					line.substr(key_end + 1);
+
+		} else {
+			// does not begin with whitespace: is a new entity
+
+			finalize();
+			cur_ent = ents.spawn(line);
+			if (cur_ent == nullptr) {
+				core::fatal(
+					"World %s: cannot spawn entity \"%s\"",
+					path.c_str(), line.c_str());
+			}
+		}
+	}
+	finalize();
 }
 
 }

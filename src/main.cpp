@@ -10,6 +10,9 @@ void render_all ()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	for (const core::e_base* e: game.ents.v)
+		e->render();
+
 	SDL_GL_SwapWindow(render::window);
 }
 
@@ -21,7 +24,7 @@ int main (int argc, char** argv)
 
 	render::t_texture tex("res/textures/diffuse_red.tga");
 
-	game.ents.spawn("prop");
+	game.load_map("res/maps/map1");
 
 	while (!core::game.must_quit) {
 		input::handle_input();

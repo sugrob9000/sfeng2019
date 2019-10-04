@@ -25,7 +25,18 @@ class t_game
 	t_game ();
 	void update ();
 
-	bool load_map (std::string path);
+	/*
+	 * Map format:
+	 * a series of entities, each following the format:
+	 * entity-class
+	 * 	key1 value1
+	 * 	key2 value2
+	 *
+	 * etc.
+	 * The line with the entity class must not start with whitespace;
+	 * the lines with key-value pairs must start with whitespace.
+	 */
+	void load_map (std::string path);
 };
 extern t_game game;
 

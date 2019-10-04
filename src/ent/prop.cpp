@@ -11,6 +11,11 @@ void e_prop::think ()
 {
 }
 
+void e_prop::apply_keyvals (const t_ent_keyvals& kv)
+{
+	kv_read(kv["pos"], pos);
+}
+
 void e_prop::render ()
 {
 	glPushMatrix();

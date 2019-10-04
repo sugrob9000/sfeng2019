@@ -4,7 +4,7 @@ SRC = src
 EXEC = $(BIN)/engine
 
 CC = g++
-CFLAGS = -O2 -Wno-attributes --std=gnu++17 -Isrc
+CFLAGS = -Og -g -Wno-attributes --std=gnu++17 -Isrc
 
 FILES-CPP = $(shell find src/ -name "*.cpp")
 FILES-H = $(shell find src/ -name "*.h")
@@ -63,5 +63,5 @@ run: all
 	$(EXEC)
 
 debug:
-	g++ $(CFLAGS) -Og -g $(LIBS) $(FILES-CPP) -o debugbin
+	@$(CC) $(CFLAGS) -Og -g $(LIBS) $(FILES-CPP) -o debugbin
 	cgdb debugbin

@@ -26,6 +26,7 @@ void warning (const char* format, ...)
 	fprintf(stderr, "Warning: ");
 	vfprintf(stderr, format, args);
 	fprintf(stderr, "\n");
+	fflush(stderr);
 	va_end(args);
 }
 

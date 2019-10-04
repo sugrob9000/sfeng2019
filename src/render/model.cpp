@@ -101,32 +101,35 @@ bool t_model::load_obj (std::string path)
 
 void t_model::dump_rvd (std::string path)
 {
-	std::ofstream f(path);
+	FILE* f = fopen(path.c_str(), "w");
 
-	if (!f)
+	if (f == nullptr)
 		return;
 
-	int64_t vertnum = verts.size();
-	f.write((char*) &vertnum, sizeof(vertnum));
-	f.write((char*) verts.data(), verts.size() * sizeof(t_vertex));
+	int32_t vertnum = verts.size();
+	fwrite(&vertnum, sizeof(vertnum), 1, f);
+	fwrite(verts.data(), sizeof(t_vertex), vertnum, f);
+
+	fclose(f);
 }
 
 bool t_model::load_rvd (std::string path)
 {
-	std::ifstream f(path);
-
-	if (!f)
-		return false;
-
-	int64_t vertnum = -1;
-	f.read((char*) &vertnum, sizeof(vertnum));
+	FILE* f = fopen(path.c_str(), "r");
 
 	verts.clear();
+
+	if (f == nullptr)
+		return false;
+
+	int32_t vertnum = -1;
+	fread(&vertnum, sizeof(vertnum), 1, f);
 	verts.resize(vertnum);
+	fread(verts.data(), sizeof(t_vertex), vertnum, f);
 
-	f.read((char*) verts.data(), vertnum * sizeof(t_vertex));
+	fclose(f);
 
-	return false;
+	return true;
 }
 
 }

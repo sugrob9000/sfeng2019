@@ -22,8 +22,8 @@ void e_base::render () const
  */
 void e_base::apply_keyvals (const t_ent_keyvals& kv)
 {
+	kv_read(kv["pos"], pos);
 }
-
 
 
 template <class e_derived>

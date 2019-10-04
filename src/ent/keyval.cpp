@@ -26,4 +26,16 @@ void kv_read<float> (const std::string& s, float& f)
 	sscanf(s.c_str(), "%f", &f);
 }
 
+template<>
+void kv_read<int> (const std::string& s, int& i)
+{
+	sscanf(s.c_str(), "%i", &i);
+}
+
+template<>
+void kv_read<std::string> (const std::string& s, std::string& ss)
+{
+	ss = s;
+}
+
 }

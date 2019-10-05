@@ -38,5 +38,11 @@ float abs (const vec3& v);
 std::ostream& operator<< (std::ostream& s, vec3 v);
 std::istream& operator>> (std::istream& s, vec3 v);
 
+vec3 atovec3 (const char* s);
+void atovec3 (const char* s, vec3& v);
+
+vec3 atovec3 (const std::string& s);
+void atovec3 (const std::string& s, vec3& v);
+
 #endif // VEC3_H
 

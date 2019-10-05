@@ -20,9 +20,9 @@ void e_base::render () const
  * Mostly an exemplar, since any entity
  * should really implement the reading of itself
  */
-void e_base::apply_keyvals (const t_ent_keyvals& kv)
+void e_base::apply_keyvals (t_ent_keyvals& kv)
 {
-	kv_read(kv["pos"], pos);
+	atovec3(kv["pos"], pos);
 }
 
 

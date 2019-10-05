@@ -11,9 +11,9 @@ void e_prop::think ()
 {
 }
 
-void e_prop::apply_keyvals (const t_ent_keyvals& kv)
+void e_prop::apply_keyvals (t_ent_keyvals& kv)
 {
-	kv_read(kv["pos"], pos);
+	atovec3(kv["pos"], pos);
 }
 
 void e_prop::render ()

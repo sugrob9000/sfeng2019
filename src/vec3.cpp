@@ -118,3 +118,26 @@ std::istream& operator>> (std::istream& s, vec3 v)
 	return (s >> v.x >> v.y >> v.z);
 }
 
+vec3 atovec3 (const char* s)
+{
+	vec3 r;
+	sscanf(s, "%f %f %f", &r.x, &r.y, &r.z);
+	return r;
+}
+
+void atovec3 (const char* s, vec3& v)
+{
+	sscanf(s, "%f %f %f", &v.x, &v.y, &v.z);
+}
+
+vec3 atovec3 (const std::string& s)
+{
+	vec3 r;
+	sscanf(s.c_str(), "%f %f %f", &r.x, &r.y, &r.z);
+	return r;
+}
+
+void atovec3 (const std::string& s, vec3& v)
+{
+	sscanf(s.c_str(), "%f %f %f", &v.x, &v.y, &v.z);
+}

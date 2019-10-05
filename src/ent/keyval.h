@@ -10,13 +10,10 @@ struct t_ent_keyvals
 {
 	public:
 	std::map<std::string, std::string> m;
-	static const std::string none;
+	static std::string none;
 
-	const std::string& operator[] (std::string s) const;
+	std::string& operator[] (std::string s);
 };
-
-template<typename T>
-void kv_read (const std::string& s, T& par);
 
 }
 

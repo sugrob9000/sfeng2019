@@ -24,7 +24,7 @@ class e_base
 	virtual void think ();
 	virtual void render () const;
 
-	virtual void apply_keyvals (const t_ent_keyvals& kv);
+	virtual void apply_keyvals (t_ent_keyvals& kv);
 };
 
 #define ENT_DECL(name) class e_##name: public e_base
@@ -32,7 +32,7 @@ class e_base
 	e_##name (); \
 	void think (); \
 	void render (); \
-	void apply_keyvals (const t_ent_keyvals& kv);
+	void apply_keyvals (t_ent_keyvals& kv);
 
 template <class e_derived> e_base* ent_new ();
 typedef e_base* (*t_ent_new_routine) ();

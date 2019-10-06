@@ -57,6 +57,8 @@ class t_keybind_map
 
 extern t_keybind_map key_binds;
 
+SDL_Scancode scancode_from_name (std::string name);
+
 }
 
 #endif // BIND_H

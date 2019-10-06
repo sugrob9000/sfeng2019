@@ -10,18 +10,12 @@ t_mousemove_routine mousemove_proc;
 
 void init (std::string input_conf_path)
 {
-	int input_status = key_binds.load_from_cfg(input_conf_path);
-
-	if (input_status == -1) {
-		core::fatal("Failed to open %s", input_conf_path.c_str());
-	} else if (input_status > 0) {
-		core::fatal("Error in %s on line %i",
-				input_conf_path.c_str(), input_status);
-	}
-
 	cmd_registry.register_command("nop", &cmd::nop);
 	cmd_registry.register_command("exit", &cmd::exit);
 	cmd_registry.register_command("echo", &cmd::echo);
+	cmd_registry.register_command("bind", &cmd::bind);
+
+	run_script(input_conf_path);
 
 	mousemove_proc = &cmd::basic_mousemove;
 }
@@ -112,6 +106,17 @@ void t_command_registry::run (const t_command& cmd, uint8_t ev)
 
 	if (routine != nullptr)
 		routine(cmd.args, ev);
+}
+
+void run_script (std::string path)
+{
+	std::ifstream f(path);
+	if (!f)
+		return;
+	for (std::string line; std::getline(f, line); ) {
+		if (!line.empty())
+			cmd_registry.run(parse_command(line), PRESS);
+	}
 }
 
 }

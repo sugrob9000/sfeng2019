@@ -28,6 +28,15 @@ COMMAND_ROUTINE (exit);
  */
 COMMAND_ROUTINE (echo);
 
+/*
+ * Bind a key to a command.
+ * The key's name is the first argument
+ * (In key names that contain spaces,
+ *  they are replaced with underscores)
+ * The command is the rest of the arguments
+ */
+COMMAND_ROUTINE (bind);
+
 MOUSEMOVE_ROUTINE (basic_mousemove);
 
 }

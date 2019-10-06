@@ -1,8 +1,8 @@
-Q:exit
-Escape:exit
+bind Q exit
+bind Escape exit
 
-MWheelUp:echo wheel up
-MWheelDown:echo wheel down
-RMB:echo rmb
-LMB:echo lmb
-MMB:echo mmb
+bind MWheelUp echo wheel up
+bind MWheelDown echo wheel down
+bind RMB echo rmb
+bind LMB echo lmb
+bind MMB echo mmb

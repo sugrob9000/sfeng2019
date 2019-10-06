@@ -61,6 +61,8 @@ extern t_mousemove_routine mousemove_proc;
 void init (std::string input_conf_path);
 void handle_input ();
 
+void run_script (std::string path);
+
 t_command parse_command (std::string str);
 
 }

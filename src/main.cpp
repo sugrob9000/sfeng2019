@@ -22,8 +22,6 @@ int main (int argc, char** argv)
 	input::init("res/cfg/input");
 	core::init();
 
-	render::t_texture tex("res/textures/diffuse_red.tga");
-
 	game.load_map("res/maps/map1");
 
 	while (!core::game.must_quit) {

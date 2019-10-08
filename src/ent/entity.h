@@ -21,16 +21,18 @@ class e_base
 
 	std::string name;
 
+	e_base ();
+	virtual void think ();
+	virtual void render () const;
+	virtual void apply_keyvals (t_ent_keyvals& kv);
+};
+
+#define ENT_DECL(name) class e_##name: public e_base
 #define ENT_GENERIC_DECLARATIONS(name) \
 	e_##name (); \
 	void think (); \
 	void render () const; \
 	void apply_keyvals (t_ent_keyvals& kv);
-
-	ENT_GENERIC_DECLARATIONS (base)
-};
-
-#define ENT_DECL(name) class e_##name: public e_base
 
 template <class e_derived> e_base* ent_new ();
 typedef e_base* (*t_ent_new_routine) ();

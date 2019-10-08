@@ -68,9 +68,8 @@ void t_game::load_map (std::string path)
 			while (key_end < n && !isspace(line[key_end]))
 				key_end++;
 
-			kv[line.substr(key_begin, key_end - key_begin)] =
-					line.substr(key_end + 1);
-
+			kv.add(line.substr(key_begin, key_end-key_begin),
+			       line.substr(key_end + 1));
 		} else {
 			// does not begin with whitespace: is a new entity
 

@@ -24,7 +24,6 @@ void e_prop::render () const
 
 	glTranslatef(-pos.x, -pos.y, -pos.z);
 
-	// material->apply();
 	model->render();
 
 	glPopMatrix();

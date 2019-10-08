@@ -12,7 +12,8 @@ struct t_ent_keyvals
 	std::map<std::string, std::string> m;
 	static std::string none;
 
-	std::string& operator[] (std::string s);
+	const std::string& operator[] (std::string s) const;
+	void add (std::string key, std::string value);
 };
 
 }

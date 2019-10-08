@@ -5,16 +5,9 @@ namespace core
 
 t_ent_registry ent_reg;
 
-
-void e_base::think ()
-{
-	return;
-}
-
-void e_base::render () const
-{
-	return;
-}
+e_base::e_base () { }
+void e_base::think () { }
+void e_base::render () const { }
 
 /*
  * Mostly an exemplar, since any entity

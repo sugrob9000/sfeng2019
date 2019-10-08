@@ -16,7 +16,7 @@ ENT_DECL (prop)
 	render::t_model* model;
 	render::t_material* material;
 
-	ENT_GENERIC_DECLARATIONS (prop);
+	ENT_GENERIC_DECLARATIONS (prop)
 };
 
 }

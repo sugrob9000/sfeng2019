@@ -11,7 +11,7 @@
 #include "vec3.h"
 #include "error.h"
 
-#define DEBUG_OUT_EXPR(expr) \
+#define DEBUG_EXPR(expr) \
 	do { \
 		std::cerr << #expr " = " \
 		          << (expr) << std::endl; \

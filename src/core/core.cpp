@@ -78,7 +78,7 @@ void t_game::load_map (std::string path)
 			cur_ent = ents.spawn(line);
 			if (cur_ent == nullptr) {
 				core::fatal(
-					"World %s: cannot spawn entity \"%s\"",
+					"Map %s: cannot spawn entity \"%s\"",
 					path.c_str(), line.c_str());
 			}
 		}

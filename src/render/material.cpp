@@ -71,29 +71,17 @@ void t_material::apply ()
 }
 
 
-t_texture::t_texture ()
-{
-}
-
-t_texture::t_texture (std::string path)
-{
-	if (!load(path)) {
-		core::warning("Failed to load texture %s",
-				path.c_str());
-	}
-}
-
-bool t_texture::load (std::string path)
+t_texture load_texture (std::string path)
 {
 	SDL_Surface* surf = IMG_Load(path.c_str());
 
 	if (surf == nullptr)
-		return false;
+		return 0;
 
-	GLuint texid;
+	GLuint id;
 
-	glGenTextures(1, &texid);
-	glBindTexture(GL_TEXTURE_2D, texid);
+	glGenTextures(1, &id);
+	glBindTexture(GL_TEXTURE_2D, id);
 
 	glHint(GL_TEXTURE_COMPRESSION_HINT, GL_NICEST);
 
@@ -124,8 +112,7 @@ bool t_texture::load (std::string path)
 
 	SDL_FreeSurface(surf);
 
-	id = texid;
-	return true;
+	return id;
 }
 
 }

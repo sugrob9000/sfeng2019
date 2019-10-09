@@ -5,22 +5,26 @@
 namespace render
 {
 
-t_model::t_model ()
-{
-}
-
 void t_model::render () const
 {
+	glCallList(display_list_id);
+}
+
+void t_model::load (const t_vertices& verts)
+{
+	display_list_id = glGenLists(1);
+	glNewList(display_list_id, GL_COMPILE);
 	glBegin(GL_TRIANGLES);
-	for (const t_vertex v: verts) {
+	for (const t_vertex& v: verts.verts) {
 		glNormal3f(v.norm.x, v.norm.y, v.norm.z);
 		glTexCoord2f(v.tex.u, v.tex.v);
 		glVertex3f(v.pos.x, v.pos.y, v.pos.z);
 	}
 	glEnd();
+	glEndList();
 }
 
-bool t_model::load_obj (std::string path)
+bool t_vertices::load_obj (std::string path)
 {
 	std::ifstream f(path);
 	if (!f)
@@ -99,7 +103,7 @@ bool t_model::load_obj (std::string path)
 	return true;
 }
 
-void t_model::dump_rvd (std::string path)
+void t_vertices::dump_rvd (std::string path)
 {
 	FILE* f = fopen(path.c_str(), "w");
 
@@ -113,7 +117,7 @@ void t_model::dump_rvd (std::string path)
 	fclose(f);
 }
 
-bool t_model::load_rvd (std::string path)
+bool t_vertices::load_rvd (std::string path)
 {
 	FILE* f = fopen(path.c_str(), "r");
 

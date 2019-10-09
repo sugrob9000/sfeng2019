@@ -6,26 +6,25 @@
 namespace render
 {
 
-class t_model
+struct t_texcrd
+{
+	float u;
+	float v;
+};
+
+struct t_vertex
+{
+	vec3 pos;
+	vec3 norm;
+	t_texcrd tex;
+};
+
+
+class t_vertices
 {
 	public:
 
-	struct t_texcrd
-	{
-		float u;
-		float v;
-	};
-
-	struct t_vertex
-	{
-		vec3 pos;
-		vec3 norm;
-		t_texcrd tex;
-	};
-
 	std::vector<t_vertex> verts;
-
-	t_model ();
 
 	bool load_obj (std::string path);
 
@@ -37,8 +36,16 @@ class t_model
 	 */
 	bool load_rvd (std::string path);
 	void dump_rvd (std::string path);
+};
+
+class t_model
+{
+	public:
+
+	unsigned int display_list_id;
 
 	void render () const;
+	void load (const t_vertices& verts);
 };
 
 }

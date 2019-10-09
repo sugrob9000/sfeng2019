@@ -1,6 +1,6 @@
 prop
 	pos 1.0 2.0 3.0
-	model muscle_car.rvd
+	model muscle_car
 prop
 	pos -1.0 0.0 3.0
-	model muscle_car.rvd
+	model muscle_car

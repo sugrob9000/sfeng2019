@@ -10,13 +10,18 @@ t_cache_shader cache_shader;
 
 t_model* get_model (std::string path)
 {
+	// we're going to have to return something anyway,
+	// so it's okay to use std::map::operator[]
 	t_model*& ret = cache_mdl[path];
 
 	if (ret != nullptr)
 		return ret;
 
 	ret = new t_model;
-	if (!ret->load_rvd(PATH_MODEL + path))
+
+	path = PATH_MODEL + path + ".obj";
+
+	if (!ret->load_obj(path))
 		core::fatal("Cannot load model %s", path.c_str());
 	return ret;
 }

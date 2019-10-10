@@ -3,8 +3,15 @@ SRC = src
 
 EXEC = $(BIN)/engine
 
+WARNINGS = \
+	-Wall \
+	-Wextra \
+	-Wno-sign-compare \
+	-Wno-attributes \
+	-Wshadow
+
 CC = g++
-CFLAGS = -Og -g -Wno-attributes --std=gnu++17 -Isrc
+CFLAGS = -Og -g $(WARNINGS) --std=gnu++17 -Isrc
 
 FILES-CPP = $(shell find src/ -name "*.cpp")
 FILES-H = $(shell find src/ -name "*.h")

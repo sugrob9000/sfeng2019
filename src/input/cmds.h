@@ -4,9 +4,14 @@
 #include "input.h"
 
 #define COMMAND_ROUTINE(name) \
-	void name (const t_cmd_args& args, uint8_t ev)
+	void name ([[maybe_unused]] const t_cmd_args& args, \
+		   [[maybe_unused]] uint8_t ev)
+
 #define MOUSEMOVE_ROUTINE(name) \
-	void name (int dx, int dy, int abx, int aby)
+	void name ([[maybe_unused]] int dx, \
+		   [[maybe_unused]] int dy, \
+		   [[maybe_unused]] int abx, \
+		   [[maybe_unused]] int aby)
 
 namespace input
 {

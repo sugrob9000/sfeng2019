@@ -7,27 +7,45 @@
 namespace render
 {
 
-typedef unsigned int t_texture;
-typedef unsigned int t_shader;
+typedef unsigned int t_texture_id;
+typedef unsigned int t_shader_id;
 
 class t_material
 {
-	private:
-
-	unsigned int frag;
-	unsigned int vert;
-	unsigned int program;
-
 	public:
 
-	t_material (std::string pathmtf);
+	unsigned int program;
 
-	bool load_mtf (std::string path);
+	struct bitmap_desc {
+		int location;
+		t_texture_id texid;
+	};
+
+	std::vector<bitmap_desc> bitmaps;
+
+	/*
+	 * A material is described by a text file,
+	 * with the following format:
+	 *
+	 * FRAG myfrag
+	 * VERT myvert
+	 * diffuse bricks.tga
+	 * normal bricks-normal.tga
+	 *
+	 * etc.
+	 * FRAG and VERT specify the names of the shaders,
+	 * which resolve to res/shaders/myfrag.glsl
+	 * and res/shaders/myvert.glsl, respectively.
+	 * Other lines specify the names of the bitmap (texture),
+	 * which resolve to res/textures/bricks.tga, etc.
+	 * Materials may have their own maps defined to be used by shaders.
+	 */
+	void load(std::string path);
 	void apply ();
 };
 
-t_shader compile_glsl (std::string path, GLenum shadertype);
-t_texture load_texture (std::string path);
+t_shader_id compile_glsl (std::string path, GLenum shadertype);
+t_texture_id load_texture (std::string path);
 
 }
 

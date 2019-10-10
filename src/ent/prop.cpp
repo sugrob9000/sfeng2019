@@ -16,16 +16,17 @@ void e_prop::apply_keyvals (t_ent_keyvals& kv)
 {
 	atovec3(kv["pos"], pos);
 	model = render::get_model(kv["model"]);
+	material = render::get_material(kv["mat"]);
 }
 
 void e_prop::render () const
 {
 	glPushMatrix();
 
+	material->apply();
+	glScalef(0.02, 0.02, 0.02);
 	glTranslatef(-pos.x, -pos.y, -pos.z);
-
 	model->render();
-
 	glPopMatrix();
 }
 

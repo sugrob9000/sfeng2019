@@ -8,10 +8,14 @@ t_cache_tex cache_tex;
 t_cache_mat cache_mat;
 t_cache_shader cache_shader;
 
+/*
+ * The get_*() functions have to return something
+ * (or crash), so it is okay for them to use
+ * std::map::operator[]
+ */
+
 t_model* get_model (std::string path)
 {
-	// we're going to have to return something anyway,
-	// so it's okay to use std::map::operator[]
 	t_model*& ret = cache_mdl[path];
 
 	if (ret != nullptr)
@@ -27,22 +31,23 @@ t_model* get_model (std::string path)
 	return ret;
 }
 
-t_texture get_texture (std::string path)
+t_texture_id get_texture (std::string path)
 {
-	t_texture& ret = cache_tex[path];
+	t_texture_id& ret = cache_tex[path];
 
 	if (ret != 0)
 		return ret;
 
-	ret = load_texture(PATH_TEXTURE + path);
+	path = PATH_TEXTURE + path;
+	ret = load_texture(path);
 	if (!ret)
 		core::fatal("Cannot load texture %s", path.c_str());
 	return ret;
 }
 
-t_shader get_shader (std::string path, GLenum type)
+t_shader_id get_shader (std::string path, GLenum type)
 {
-	t_shader& ret = cache_shader[path];
+	t_shader_id& ret = cache_shader[path];
 
 	if (ret != 0) {
 		int actual;
@@ -56,9 +61,23 @@ t_shader get_shader (std::string path, GLenum type)
 		return ret;
 	}
 
-	ret = compile_glsl(PATH_SHADER + path, type);
+	path = PATH_SHADER + path + ".glsl";
+	ret = compile_glsl(path, type);
 	if (!ret)
 		core::fatal("Cannot load shader %s", path.c_str());
+	return ret;
+}
+
+t_material* get_material (std::string path)
+{
+	t_material*& ret = cache_mat[path];
+
+	if (ret != nullptr)
+		return ret;
+
+	path = PATH_MATERIAL + path;
+	ret = new t_material;
+	ret->load(path);
 	return ret;
 }
 

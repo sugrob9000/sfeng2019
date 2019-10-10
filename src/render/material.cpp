@@ -2,11 +2,12 @@
 #include "material.h"
 #include "inc_general.h"
 #include "inc_gl.h"
+#include "resource.h"
 
 namespace render
 {
 
-unsigned int compile_glsl (std::string path, GLenum type)
+t_shader_id compile_glsl (std::string path, GLenum type)
 {
 	std::ifstream f(path);
 
@@ -55,23 +56,72 @@ unsigned int compile_glsl (std::string path, GLenum type)
 	return 0;
 }
 
-t_material::t_material (std::string mtfpath)
+void t_material::load(std::string path)
 {
-	load_mtf(mtfpath);
-}
+	std::ifstream f(path);
 
-bool t_material::load_mtf (std::string path)
-{
-	return false;
+	if (!f)
+		core::fatal("Material %s: cannot open file", path.c_str());
+
+	std::string key;
+	std::string value;
+
+	struct bitmap_desc_interm{
+		std::string loc_name;
+		t_texture_id texid;
+	};
+
+	std::vector<bitmap_desc_interm> bitmaps_interm;
+
+	std::string vert_shader_path;
+	std::string frag_shader_path;
+
+	while (true) {
+		f >> key >> value;
+		f.ignore(-1, '\n');
+		if (!f)
+			break;
+
+		if (key == "FRAG") {
+			frag_shader_path = value;
+			continue;
+		} else if (key == "VERT") {
+			vert_shader_path = value;
+			continue;
+		}
+
+		key = "map_" + key;
+		bitmaps_interm.push_back({ key, get_texture(value) });
+	}
+
+	t_shader_id frag = get_shader(frag_shader_path, GL_FRAGMENT_SHADER);
+	t_shader_id vert = get_shader(vert_shader_path, GL_VERTEX_SHADER);
+
+	program = glCreateProgram();
+	glAttachShader(program, frag);
+	glAttachShader(program, vert);
+	glLinkProgram(program);
+
+	glUseProgram(program);
+	for (const bitmap_desc_interm& d: bitmaps_interm) {
+		int location = glGetUniformLocation(program,
+				d.loc_name.c_str());
+		if (location != -1)
+			bitmaps.push_back({ location, d.texid });
+	}
 }
 
 void t_material::apply ()
 {
-	// TODO: apply shaders, etc.
+	glUseProgram(program);
+	for (const bitmap_desc& d: bitmaps) {
+		glUniform1i(d.location, d.texid);
+		DEBUG_EXPR(d.location);
+	}
 }
 
 
-t_texture load_texture (std::string path)
+t_texture_id load_texture (std::string path)
 {
 	SDL_Surface* surf = IMG_Load(path.c_str());
 

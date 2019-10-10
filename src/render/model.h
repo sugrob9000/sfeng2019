@@ -19,8 +19,13 @@ struct t_vertex
 	t_texcrd tex;
 };
 
-
-class t_vertices
+/*
+ * An in-memory representation of a model,
+ * which can be used for reading from/dumping to a file
+ * but not suited for actual rendering
+ * Mostly used for loading models, does not live long
+ */
+class t_model_mem
 {
 	public:
 
@@ -38,6 +43,10 @@ class t_vertices
 	void dump_rvd (std::string path);
 };
 
+/*
+ * A representation of a model which is
+ * suitable for rendering (stores the internal GL object id)
+ */
 class t_model
 {
 	public:
@@ -45,7 +54,7 @@ class t_model
 	unsigned int display_list_id;
 
 	void render () const;
-	void load (const t_vertices& verts);
+	void load (const t_model_mem& verts);
 };
 
 }

@@ -10,7 +10,7 @@ void t_model::render () const
 	glCallList(display_list_id);
 }
 
-void t_model::load (const t_vertices& verts)
+void t_model::load (const t_model_mem& verts)
 {
 	display_list_id = glGenLists(1);
 	glNewList(display_list_id, GL_COMPILE);
@@ -24,7 +24,7 @@ void t_model::load (const t_vertices& verts)
 	glEndList();
 }
 
-bool t_vertices::load_obj (std::string path)
+bool t_model_mem::load_obj (std::string path)
 {
 	std::ifstream f(path);
 	if (!f)
@@ -103,7 +103,7 @@ bool t_vertices::load_obj (std::string path)
 	return true;
 }
 
-void t_vertices::dump_rvd (std::string path)
+void t_model_mem::dump_rvd (std::string path)
 {
 	FILE* f = fopen(path.c_str(), "w");
 
@@ -117,7 +117,7 @@ void t_vertices::dump_rvd (std::string path)
 	fclose(f);
 }
 
-bool t_vertices::load_rvd (std::string path)
+bool t_model_mem::load_rvd (std::string path)
 {
 	FILE* f = fopen(path.c_str(), "r");
 

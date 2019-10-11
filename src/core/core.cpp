@@ -25,6 +25,36 @@ void t_game::update ()
 
 	for (e_base* e: ents.v)
 		e->think();
+
+	const float cam_speed = 1.0;
+	vec3 cam_delta;
+	uint8_t& flags = render::camera_move_flags;
+	vec3& ang = render::camera.ang;
+	if (flags & 1) {
+		cam_delta += vec3(
+				-sinf(ang.y * M_PI / 180.0),
+				sinf(ang.x * M_PI / 180.0),
+				cosf(ang.y * M_PI / 180.0));
+	}
+	if (flags & 2) {
+		cam_delta -= vec3(
+				-sinf(ang.y * M_PI / 180.0),
+				sinf(ang.x * M_PI / 180.0),
+				cosf(ang.y * M_PI / 180.0));
+	}
+	if (flags & 4) {
+		cam_delta += vec3(
+				cosf(ang.y * M_PI / 180.0), 0.0,
+				sinf(ang.y * M_PI / 180.0));
+	}
+	if (flags & 8) {
+		cam_delta -= vec3(
+				cosf(ang.y * M_PI / 180.0), 0.0,
+				sinf(ang.y * M_PI / 180.0));
+	}
+	cam_delta *= cam_speed;
+	render::camera.pos += cam_delta;
+
 }
 
 void t_game::load_map (std::string path)

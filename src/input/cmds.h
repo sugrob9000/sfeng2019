@@ -48,9 +48,7 @@ COMMAND_ROUTINE (bind);
  */
 COMMAND_ROUTINE (stdincmd);
 
-COMMAND_ROUTINE (rotate);
-
-COMMAND_ROUTINE (move_fw);
+COMMAND_ROUTINE (move);
 
 MOUSEMOVE_ROUTINE (basic_mousemove);
 

@@ -41,6 +41,8 @@ extern SDL_Window* window;
 extern SDL_GLContext context;
 extern t_camera camera;
 
+extern uint8_t camera_move_flags;
+
 bool init (int resx, int resy);
 
 }

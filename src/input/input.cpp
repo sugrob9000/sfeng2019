@@ -14,13 +14,14 @@ void init (std::string input_conf_path)
 	cmd_registry.register_command("exit", &cmd::exit);
 	cmd_registry.register_command("echo", &cmd::echo);
 	cmd_registry.register_command("bind", &cmd::bind);
-	cmd_registry.register_command("rotate", &cmd::rotate);
-	cmd_registry.register_command("move_fw", &cmd::move_fw);
 	cmd_registry.register_command("stdincmd", &cmd::stdincmd);
+	cmd_registry.register_command("move", &cmd::move);
 
 	run_script(input_conf_path);
 
 	mousemove_proc = &cmd::basic_mousemove;
+
+	SDL_SetRelativeMouseMode(SDL_TRUE);
 }
 
 inline void handle_key (SDL_Scancode scan, uint8_t action)

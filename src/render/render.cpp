@@ -9,6 +9,8 @@ SDL_Window* window;
 SDL_GLContext context;
 t_camera camera;
 
+uint8_t camera_move_flags = 0;
+
 bool init (int resx, int resy)
 {
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {

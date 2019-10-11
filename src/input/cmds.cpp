@@ -57,19 +57,40 @@ COMMAND_ROUTINE (bind)
 			parse_command(bind));
 }
 
-COMMAND_ROUTINE (rotate)
+COMMAND_ROUTINE (move)
 {
-	if (!args.empty()) {
-		render::camera.ang.x += atof(args[0].c_str());
-		render::camera.ang.y += atof(args[1].c_str());
-		render::camera.ang.z += atof(args[2].c_str());
+	if (args.empty())
+		return;
+	switch (args[0][0]) {
+	case 'f': {
+		if (ev == PRESS)
+			render::camera_move_flags |= 1;
+		else
+			render::camera_move_flags &= ~1;
+		break;
 	}
-}
-
-COMMAND_ROUTINE (move_fw)
-{
-	render::camera.pos.x -= sinf((render::camera.ang.y * 3.1415) / 180.0);
-	render::camera.pos.z += cosf((render::camera.ang.y * 3.1415) / 180.0);
+	case 'b': {
+		if (ev == PRESS)
+			render::camera_move_flags |= 2;
+		else
+			render::camera_move_flags &= ~2;
+		break;
+	}
+	case 'l': {
+		if (ev == PRESS)
+			render::camera_move_flags |= 4;
+		else
+			render::camera_move_flags &= ~4;
+		break;
+	}
+	case 'r': {
+		if (ev == PRESS)
+			render::camera_move_flags |= 8;
+		else
+			render::camera_move_flags &= ~8;
+		break;
+	}
+	}
 }
 
 COMMAND_ROUTINE (stdincmd)

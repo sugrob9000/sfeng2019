@@ -24,7 +24,6 @@ void e_prop::render () const
 	glPushMatrix();
 
 	material->apply();
-	glScalef(0.02, 0.02, 0.02);
 	glTranslatef(-pos.x, -pos.y, -pos.z);
 	model->render();
 	glPopMatrix();

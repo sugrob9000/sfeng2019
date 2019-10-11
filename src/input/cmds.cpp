@@ -1,6 +1,7 @@
 #include "cmds.h"
 #include "core/core.h"
 #include "bind.h"
+#include "render/render.h"
 
 namespace input
 {
@@ -55,8 +56,25 @@ COMMAND_ROUTINE (bind)
 			parse_command(bind));
 }
 
+COMMAND_ROUTINE (rotate)
+{
+	if (!args.empty()) {
+		render::camera.ang.x += atof(args[0].c_str());
+		render::camera.ang.y += atof(args[1].c_str());
+		render::camera.ang.z += atof(args[2].c_str());
+	}
+}
+
+COMMAND_ROUTINE (move_fw)
+{
+	render::camera.pos.x -= sinf((render::camera.ang.y * 3.1415) / 180.0);
+	render::camera.pos.z += cosf((render::camera.ang.y * 3.1415) / 180.0);
+}
+
 MOUSEMOVE_ROUTINE (basic_mousemove)
 {
+	render::camera.ang.x += dy;
+	render::camera.ang.y += dx;
 }
 
 }

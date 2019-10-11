@@ -42,6 +42,10 @@ COMMAND_ROUTINE (echo);
  */
 COMMAND_ROUTINE (bind);
 
+COMMAND_ROUTINE (rotate);
+
+COMMAND_ROUTINE (move_fw);
+
 MOUSEMOVE_ROUTINE (basic_mousemove);
 
 }

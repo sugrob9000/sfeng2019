@@ -7,6 +7,7 @@ namespace render
 
 SDL_Window* window;
 SDL_GLContext context;
+t_camera camera;
 
 bool init (int resx, int resy)
 {
@@ -44,8 +45,11 @@ bool init (int resx, int resy)
 	glLoadIdentity();
 
 	glEnable(GL_DEPTH_TEST);
-
 	return true;
+}
+
+t_camera::t_camera ()
+{
 }
 
 t_camera::t_camera (
@@ -61,7 +65,21 @@ t_camera::t_camera (
 
 void t_camera::apply ()
 {
-	// TODO
+	glRotatef(ang.x, 1.0, 0.0, 0.0);
+	glRotatef(ang.y, 0.0, 1.0, 0.0);
+	glRotatef(ang.z, 0.0, 0.0, 1.0);
+	glTranslatef(pos.x, pos.y, pos.z);
+}
+
+void t_camera::perspective ()
+{
+	float a = 4.0 / 3.0;
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluPerspective(fov, a, z_near, z_far);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
 }
 
 }

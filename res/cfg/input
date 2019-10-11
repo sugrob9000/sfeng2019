@@ -1,5 +1,6 @@
 bind Q exit
 bind Escape exit
+bind W move_fw
 
 bind MWheelUp echo wheel up
 bind MWheelDown echo wheel down

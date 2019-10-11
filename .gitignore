@@ -2,6 +2,7 @@
 *.obj
 *.rvd
 *.tga
+*.bmp
 
 # Compiled Object files
 *.slo

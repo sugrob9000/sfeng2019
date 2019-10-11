@@ -1,6 +1,7 @@
 #include "cmds.h"
 #include "core/core.h"
 #include "bind.h"
+#include "input.h"
 
 namespace input
 {
@@ -53,6 +54,16 @@ COMMAND_ROUTINE (bind)
 
 	key_binds.add_bind(scancode_from_name(keyname),
 			parse_command(bind));
+}
+
+COMMAND_ROUTINE (stdincmd)
+{
+	if (ev != PRESS)
+		return;
+	std::string line;
+	std::cout << "Command:" << std::endl;
+	std::getline(std::cin, line);
+	cmd_registry.run(parse_command(line), PRESS);
 }
 
 MOUSEMOVE_ROUTINE (basic_mousemove)

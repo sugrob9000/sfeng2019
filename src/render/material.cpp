@@ -66,7 +66,7 @@ void t_material::load(std::string path)
 	std::string key;
 	std::string value;
 
-	struct bitmap_desc_interm{
+	struct bitmap_desc_interm {
 		std::string loc_name;
 		t_texture_id texid;
 	};
@@ -114,9 +114,10 @@ void t_material::load(std::string path)
 void t_material::apply ()
 {
 	glUseProgram(program);
-	for (const bitmap_desc& d: bitmaps) {
-		glUniform1i(d.location, d.texid);
-		DEBUG_EXPR(d.location);
+	for (int i = 0; i < bitmaps.size(); i++) {
+		glActiveTexture(GL_TEXTURE0 + i);
+		glBindTexture(GL_TEXTURE_2D, bitmaps[i].texid);
+		glUniform1i(bitmaps[i].location, i);
 	}
 }
 
@@ -151,7 +152,7 @@ t_texture_id load_texture (std::string path)
 
 	while (h >= 1 && w >= 1) {
 		glTexImage2D(GL_TEXTURE_2D, level++,
-				GL_COMPRESSED_RGBA, w, h,
+				GL_RGBA, w, h,
 				0, format, GL_UNSIGNED_BYTE, p);
 		gluScaleImage(format,
 				w, h, GL_UNSIGNED_BYTE, p,

@@ -19,10 +19,10 @@ class vec3
 
 	inline float& operator[] (int i) { return _d[i]; }
 
-	inline vec3& operator+= (vec3 v);
-	inline vec3& operator-= (vec3 v);
-	inline vec3& operator*= (float c);
-	inline vec3& operator/= (float c);
+	vec3& operator+= (vec3 v);
+	vec3& operator-= (vec3 v);
+	vec3& operator*= (float c);
+	vec3& operator/= (float c);
 
 	vec3& norm ();
 };

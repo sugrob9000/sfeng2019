@@ -8,6 +8,7 @@ WARNINGS = \
 	-Wextra \
 	-Wno-sign-compare \
 	-Wno-attributes \
+	-Wno-cast-function-type \
 	-Wshadow
 
 CC = g++

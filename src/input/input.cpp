@@ -16,6 +16,7 @@ void init (std::string input_conf_path)
 	cmd_registry.register_command("bind", &cmd::bind);
 	cmd_registry.register_command("rotate", &cmd::rotate);
 	cmd_registry.register_command("move_fw", &cmd::move_fw);
+	cmd_registry.register_command("stdincmd", &cmd::stdincmd);
 
 	run_script(input_conf_path);
 

@@ -2,6 +2,7 @@
 #include "core/core.h"
 #include "bind.h"
 #include "render/render.h"
+#include "input.h"
 
 namespace input
 {
@@ -69,6 +70,16 @@ COMMAND_ROUTINE (move_fw)
 {
 	render::camera.pos.x -= sinf((render::camera.ang.y * 3.1415) / 180.0);
 	render::camera.pos.z += cosf((render::camera.ang.y * 3.1415) / 180.0);
+}
+
+COMMAND_ROUTINE (stdincmd)
+{
+	if (ev != PRESS)
+		return;
+	std::string line;
+	std::cout << "Command:" << std::endl;
+	std::getline(std::cin, line);
+	cmd_registry.run(parse_command(line), PRESS);
 }
 
 MOUSEMOVE_ROUTINE (basic_mousemove)

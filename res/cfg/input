@@ -7,3 +7,5 @@ bind MWheelDown echo wheel down
 bind RMB echo rmb
 bind LMB echo lmb
 bind MMB echo mmb
+
+bind R stdincmd

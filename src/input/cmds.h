@@ -42,6 +42,12 @@ COMMAND_ROUTINE (echo);
  */
 COMMAND_ROUTINE (bind);
 
+/*
+ * PAUSE THE ENTIRE ENGINE, read a command
+ * from stdin and run it
+ */
+COMMAND_ROUTINE (stdincmd);
+
 COMMAND_ROUTINE (rotate);
 
 COMMAND_ROUTINE (move_fw);

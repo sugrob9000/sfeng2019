@@ -31,7 +31,7 @@ void t_game::update ()
 	auto& flags = render::cam_move_flags;
 
 	float sy = sinf(render::camera.ang.y * DEG_TO_RAD);
-	float sx = sinf(render::camera.ang.y * DEG_TO_RAD);
+	float sx = sinf(render::camera.ang.x * DEG_TO_RAD);
 	float cy = cosf(render::camera.ang.y * DEG_TO_RAD);
 
 	if (flags[render::cam_move_f])
@@ -39,12 +39,11 @@ void t_game::update ()
 	if (flags[render::cam_move_b])
 		cam_delta -= vec3(-sy, sx, cy);
 	if (flags[render::cam_move_r])
-		cam_delta += vec3(cy, 0.0, sy);
-	if (flags[render::cam_move_l])
 		cam_delta -= vec3(cy, 0.0, sy);
+	if (flags[render::cam_move_l])
+		cam_delta += vec3(cy, 0.0, sy);
 	cam_delta.norm();
 	render::camera.pos += cam_delta * cam_speed;
-
 }
 
 void t_game::load_map (std::string path)

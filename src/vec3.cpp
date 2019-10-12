@@ -98,7 +98,14 @@ vec3& vec3::operator/= (float c)
 
 vec3& vec3::norm ()
 {
-	return (*this *= 1 / abs(*this));
+	float r = abs(*this);
+	if (r == 0.0)
+		return *this;
+	r = 1.0 / r;
+	x *= r;
+	y *= r;
+	z *= r;
+	return *this;
 }
 
 float abs (const vec3& v)

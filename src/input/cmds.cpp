@@ -66,19 +66,19 @@ COMMAND_ROUTINE (move)
 
 	switch (args[0][0]) {
 	case 'f': {
-		flags[render::cam_move_f] = ev;
+		flags[render::cam_move_f] = (ev == PRESS);
 		break;
 	}
 	case 'b': {
-		flags[render::cam_move_b] = ev;
+		flags[render::cam_move_b] = (ev == PRESS);
 		break;
 	}
 	case 'l': {
-		flags[render::cam_move_l] = ev;
+		flags[render::cam_move_l] = (ev == PRESS);
 		break;
 	}
 	case 'r': {
-		flags[render::cam_move_r] = ev;
+		flags[render::cam_move_r] = (ev == PRESS);
 		break;
 	}
 	}

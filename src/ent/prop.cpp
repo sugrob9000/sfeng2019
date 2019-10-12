@@ -22,7 +22,7 @@ void e_prop::apply_keyvals (t_ent_keyvals& kv)
 		model = nullptr; );
 	KV_TRY_GET(kv["mat"],
 		material = render::get_material(val);,
-		material = (render::t_material*) &material; );
+		material = nullptr; );
 }
 
 void e_prop::render () const

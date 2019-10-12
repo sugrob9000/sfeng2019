@@ -42,7 +42,8 @@ void handle_input ()
 			break;
 		}
 		case SDL_KEYDOWN: {
-			handle_key(e.key.keysym.scancode, PRESS);
+			if (!e.key.repeat)
+				handle_key(e.key.keysym.scancode, PRESS);
 			break;
 		}
 		case SDL_KEYUP: {

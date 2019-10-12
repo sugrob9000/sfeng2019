@@ -3,13 +3,13 @@
 
 #include "input.h"
 
-#define COMMAND_ROUTINE(name) \
+#define COMMAND_ROUTINE(name)                               \
 	void name ([[maybe_unused]] const t_cmd_args& args, \
 		   [[maybe_unused]] uint8_t ev)
 
-#define MOUSEMOVE_ROUTINE(name) \
-	void name ([[maybe_unused]] int dx, \
-		   [[maybe_unused]] int dy, \
+#define MOUSEMOVE_ROUTINE(name)              \
+	void name ([[maybe_unused]] int dx,  \
+		   [[maybe_unused]] int dy,  \
 		   [[maybe_unused]] int abx, \
 		   [[maybe_unused]] int aby)
 

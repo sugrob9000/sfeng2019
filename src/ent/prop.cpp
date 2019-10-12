@@ -10,13 +10,22 @@ e_prop::e_prop ()
 
 void e_prop::think ()
 {
+	DEBUG_EXPR(pos);
+	DEBUG_EXPR(model);
+	DEBUG_EXPR(material);
 }
 
 void e_prop::apply_keyvals (t_ent_keyvals& kv)
 {
-	atovec3(kv["pos"], pos);
-	model = render::get_model(kv["model"]);
-	material = render::get_material(kv["mat"]);
+	KV_TRY_GET(kv["pos"],
+		atovec3(val, pos);,
+		pos = vec3(0.0, 0.0, 0.0); );
+	KV_TRY_GET(kv["model"],
+		model = render::get_model(val);,
+		model = nullptr; );
+	KV_TRY_GET(kv["mat"],
+		material = render::get_material(val);,
+		material = (render::t_material*) &material; );
 }
 
 void e_prop::render () const

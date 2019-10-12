@@ -4,7 +4,7 @@
 namespace core
 {
 
-std::string t_ent_keyvals::none = "";
+const std::string t_ent_keyvals::none = "";
 
 const std::string& t_ent_keyvals::operator[] (std::string s) const
 {

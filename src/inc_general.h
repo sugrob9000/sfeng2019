@@ -12,9 +12,9 @@
 #include "vec3.h"
 #include "error.h"
 
-#define DEBUG_EXPR(expr) \
-	do { \
-		std::cerr << #expr " = " \
+#define DEBUG_EXPR(expr)                          \
+	do {                                      \
+		std::cerr << #expr " = "          \
 		          << (expr) << std::endl; \
 	} while (false)
 

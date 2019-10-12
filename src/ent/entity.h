@@ -29,9 +29,9 @@ class e_base
 
 #define ENT_DECL(name) class e_##name: public e_base
 #define ENT_GENERIC_DECLARATIONS(name) \
-	e_##name (); \
-	void think (); \
-	void render () const; \
+	e_##name ();                   \
+	void think ();                 \
+	void render () const;          \
 	void apply_keyvals (t_ent_keyvals& kv);
 
 template <class e_derived> e_base* ent_new ();

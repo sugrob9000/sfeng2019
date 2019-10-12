@@ -27,11 +27,11 @@ class vec3
 	vec3& norm ();
 };
 
-inline vec3 operator+ (vec3 one, vec3 other);
-inline vec3 operator- (vec3 one, vec3 other);
-inline vec3 operator* (vec3 v, float c);
-inline vec3 operator* (float c, vec3 v);
-inline vec3 operator/ (vec3 v, float c);
+vec3 operator+ (vec3 one, vec3 other);
+vec3 operator- (vec3 one, vec3 other);
+vec3 operator* (vec3 v, float c);
+vec3 operator* (float c, vec3 v);
+vec3 operator/ (vec3 v, float c);
 
 float abs (const vec3& v);
 

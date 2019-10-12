@@ -61,33 +61,24 @@ COMMAND_ROUTINE (move)
 {
 	if (args.empty())
 		return;
+
+	auto& flags = render::cam_move_flags;
+
 	switch (args[0][0]) {
 	case 'f': {
-		if (ev == PRESS)
-			render::camera_move_flags |= 1;
-		else
-			render::camera_move_flags &= ~1;
+		flags[render::cam_move_f] = ev;
 		break;
 	}
 	case 'b': {
-		if (ev == PRESS)
-			render::camera_move_flags |= 2;
-		else
-			render::camera_move_flags &= ~2;
+		flags[render::cam_move_b] = ev;
 		break;
 	}
 	case 'l': {
-		if (ev == PRESS)
-			render::camera_move_flags |= 4;
-		else
-			render::camera_move_flags &= ~4;
+		flags[render::cam_move_l] = ev;
 		break;
 	}
 	case 'r': {
-		if (ev == PRESS)
-			render::camera_move_flags |= 8;
-		else
-			render::camera_move_flags &= ~8;
+		flags[render::cam_move_r] = ev;
 		break;
 	}
 	}

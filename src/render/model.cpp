@@ -70,7 +70,7 @@ bool t_model_mem::load_obj (std::string path)
 			// tex coord
 			float u, v;
 			sscanf(line.c_str(), "%*s %f %f", &u, &v);
-			texcoords.push_back({ u, 1.0 - v });
+			texcoords.push_back({ u, 1.0f - v });
 			break;
 		}
 		case pack('f', ' '): {

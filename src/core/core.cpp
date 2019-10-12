@@ -28,32 +28,22 @@ void t_game::update ()
 
 	const float cam_speed = 1.0;
 	vec3 cam_delta;
-	uint8_t& flags = render::camera_move_flags;
-	vec3& ang = render::camera.ang;
-	if (flags & 1) {
-		cam_delta += vec3(
-				-sinf(ang.y * M_PI / 180.0),
-				sinf(ang.x * M_PI / 180.0),
-				cosf(ang.y * M_PI / 180.0));
-	}
-	if (flags & 2) {
-		cam_delta -= vec3(
-				-sinf(ang.y * M_PI / 180.0),
-				sinf(ang.x * M_PI / 180.0),
-				cosf(ang.y * M_PI / 180.0));
-	}
-	if (flags & 4) {
-		cam_delta += vec3(
-				cosf(ang.y * M_PI / 180.0), 0.0,
-				sinf(ang.y * M_PI / 180.0));
-	}
-	if (flags & 8) {
-		cam_delta -= vec3(
-				cosf(ang.y * M_PI / 180.0), 0.0,
-				sinf(ang.y * M_PI / 180.0));
-	}
-	cam_delta *= cam_speed;
-	render::camera.pos += cam_delta;
+	auto& flags = render::cam_move_flags;
+
+	float sy = sinf(render::camera.ang.y * DEG_TO_RAD);
+	float sx = sinf(render::camera.ang.y * DEG_TO_RAD);
+	float cy = cosf(render::camera.ang.y * DEG_TO_RAD);
+
+	if (flags[render::cam_move_f])
+		cam_delta += vec3(-sy, sx, cy);
+	if (flags[render::cam_move_b])
+		cam_delta -= vec3(-sy, sx, cy);
+	if (flags[render::cam_move_r])
+		cam_delta += vec3(cy, 0.0, sy);
+	if (flags[render::cam_move_l])
+		cam_delta -= vec3(cy, 0.0, sy);
+	cam_delta.norm();
+	render::camera.pos += cam_delta * cam_speed;
 
 }
 

@@ -10,9 +10,6 @@ e_prop::e_prop ()
 
 void e_prop::think ()
 {
-	DEBUG_EXPR(pos);
-	DEBUG_EXPR(model);
-	DEBUG_EXPR(material);
 }
 
 void e_prop::apply_keyvals (t_ent_keyvals& kv)

@@ -3,10 +3,8 @@
 
 #include <ostream>
 
-class vec3
+struct vec3
 {
-	public:
-
 	union {
 		float _d[3];
 		struct { float x, y, z; };

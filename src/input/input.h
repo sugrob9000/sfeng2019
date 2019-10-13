@@ -41,7 +41,7 @@ struct t_action
 	t_cmd_routine routine;
 };
 
-class t_command_registry
+struct t_command_registry
 {
 	private:
 

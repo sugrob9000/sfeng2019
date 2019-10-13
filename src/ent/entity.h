@@ -41,10 +41,8 @@ typedef e_base* (*t_ent_new_routine) ();
 /*
  * The list of types of entities known to the engine
  */
-class t_ent_registry
+struct t_ent_registry
 {
-	public:
-
 	std::map<std::string, t_ent_new_routine> m;
 
 	t_ent_registry ();
@@ -56,10 +54,8 @@ extern t_ent_registry ent_registry;
 /*
  * A world's currently existing entities
  */
-class t_entities
+struct t_entities
 {
-	public:
-
 	std::vector<e_base*> v;
 
 	e_base* spawn (std::string type);

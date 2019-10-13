@@ -10,10 +10,8 @@ namespace render
 typedef unsigned int t_texture_id;
 typedef unsigned int t_shader_id;
 
-class t_material
+struct t_material
 {
-	public:
-
 	unsigned int program;
 
 	struct bitmap_desc {

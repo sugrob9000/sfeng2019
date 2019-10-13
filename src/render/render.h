@@ -7,10 +7,8 @@
 namespace render
 {
 
-class t_camera
+struct t_camera
 {
-	public:
-
 	vec3 pos;
 	vec3 ang;
 

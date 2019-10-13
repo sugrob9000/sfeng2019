@@ -12,10 +12,8 @@ namespace core
  * Pretty much a singleton to bundle the globals
  * related to the game logic together
  */
-class t_game
+struct t_game
 {
-	public:
-
 	bool must_quit;
 	int exit_code;
 	long long tick;

@@ -25,10 +25,8 @@ struct t_vertex
  * but not suited for actual rendering
  * Mostly used for loading models, does not live long
  */
-class t_model_mem
+struct t_model_mem
 {
-	public:
-
 	std::vector<t_vertex> verts;
 
 	bool load_obj (std::string path);
@@ -47,10 +45,8 @@ class t_model_mem
  * A representation of a model which is
  * suitable for rendering (stores the internal GL object id)
  */
-class t_model
+struct t_model
 {
-	public:
-
 	unsigned int display_list_id;
 
 	void render () const;

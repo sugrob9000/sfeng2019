@@ -28,14 +28,10 @@ const SDL_Scancode scan_mwheel_down = SDL_SCANCODE_F24;
  * does not exist, by instead returning a reference
  * to a static default-initialized empty command.
  */
-class t_keybind_map
+struct t_keybind_map
 {
-	private:
-
 	static t_command empty_cmd;
 	std::unordered_map<SDL_Scancode, t_command> m;
-
-	public:
 
 	void clear ();
 	void add_bind (SDL_Scancode key, t_command value);
@@ -54,7 +50,6 @@ class t_keybind_map
 	 */
 	int load_from_cfg (std::string path);
 };
-
 extern t_keybind_map key_binds;
 
 SDL_Scancode scancode_from_name (std::string name);

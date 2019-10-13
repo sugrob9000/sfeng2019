@@ -54,8 +54,8 @@ t_shader_id get_shader (std::string path, GLenum type)
 		glGetShaderiv(ret, GL_SHADER_TYPE, &actual);
 		if (type != actual) {
 			core::fatal(
-					"Shader %s of the wrong type:\n"
-					"actual %i, requested %i",
+				"Shader %s of the wrong type:\n"
+				"actual %i, requested %i",
 				path.c_str(), actual, type);
 		}
 		return ret;

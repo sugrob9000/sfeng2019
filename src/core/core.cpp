@@ -29,23 +29,28 @@ void t_game::update ()
 	const float cam_speed = 0.2;
 	vec3 cam_delta;
 	auto& flags = render::cam_move_flags;
+	render::t_camera& cam = render::camera;
 
-	float sz = sinf(render::camera.ang.z * DEG_TO_RAD);
-	float sx = sinf(render::camera.ang.x * DEG_TO_RAD);
-	float cz = cosf(render::camera.ang.z * DEG_TO_RAD);
-	float cx = cosf(render::camera.ang.x * DEG_TO_RAD);
+	if (cam.ang.x <= -90.0)
+		cam.ang.x = -90.0;
+	if (cam.ang.x >= 90.0)
+		cam.ang.x = 90.0;
+
+	float sz = sinf(cam.ang.z * DEG_TO_RAD);
+	float sx = sinf(cam.ang.x * DEG_TO_RAD);
+	float cz = cosf(cam.ang.z * DEG_TO_RAD);
 
 	if (flags[render::cam_move_f])
-		cam_delta += vec3(cz, sz, -cx);
+		cam_delta += vec3(sz, cz, -sx);
 	if (flags[render::cam_move_b])
-		cam_delta -= vec3(cz, sz, -cx);
+		cam_delta -= vec3(sz, cz, -sx);
 	if (flags[render::cam_move_l])
-		cam_delta -= vec3(-sz, cz, 0.0);
+		cam_delta -= vec3(cz, -sz, 0.0);
 	if (flags[render::cam_move_r])
-		cam_delta += vec3(-sz, cz, 0.0);
+		cam_delta += vec3(cz, -sz, 0.0);
 
 	cam_delta.norm();
-	render::camera.pos += cam_delta * cam_speed;
+	cam.pos += cam_delta * cam_speed;
 }
 
 void t_game::load_map (std::string path)

@@ -47,6 +47,8 @@ bool init (int resx, int resy)
 	glLoadIdentity();
 
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
+
 	return true;
 }
 
@@ -67,10 +69,11 @@ t_camera::t_camera (
 
 void t_camera::apply ()
 {
+	glRotatef(-90.0, 1.0, 0.0, 0.0);
 	glRotatef(ang.x, 1.0, 0.0, 0.0);
 	glRotatef(ang.y, 0.0, 1.0, 0.0);
 	glRotatef(ang.z, 0.0, 0.0, 1.0);
-	glTranslatef(-pos.y, -pos.x, -pos.z);
+	glTranslatef(-pos.x, -pos.y, -pos.z);
 }
 
 void t_camera::perspective ()

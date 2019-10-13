@@ -36,6 +36,6 @@ struct t_ent_keyvals
 			if_not_there            \
 		else                            \
 			if_there                \
-	} while (0)
+	} while (false)
 
 #endif // KEYVAL_H

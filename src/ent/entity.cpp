@@ -15,7 +15,9 @@ void e_base::render () const { }
  */
 void e_base::apply_keyvals (t_ent_keyvals& kv)
 {
-	atovec3(kv["pos"], pos);
+	KV_TRY_GET(kv["pos"],
+		atovec3(val, pos);,
+		pos = vec3(0.0, 0.0, 0.0); );
 }
 
 

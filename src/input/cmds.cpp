@@ -97,7 +97,7 @@ COMMAND_ROUTINE (stdincmd)
 MOUSEMOVE_ROUTINE (basic_mousemove)
 {
 	render::camera.ang.x += dy;
-	render::camera.ang.y += dx;
+	render::camera.ang.z += dx;
 }
 
 }

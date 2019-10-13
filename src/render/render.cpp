@@ -70,16 +70,16 @@ void t_camera::apply ()
 	glRotatef(ang.x, 1.0, 0.0, 0.0);
 	glRotatef(ang.y, 0.0, 1.0, 0.0);
 	glRotatef(ang.z, 0.0, 0.0, 1.0);
-	glTranslatef(pos.x, pos.y, pos.z);
+	glTranslatef(-pos.y, -pos.x, -pos.z);
 }
 
 void t_camera::perspective ()
 {
-	float a = 4.0 / 3.0;
+	const float aspect = 4.0 / 3.0;
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(fov, a, z_near, z_far);
+	gluPerspective(fov, aspect, z_near, z_far);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 }

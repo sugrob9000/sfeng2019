@@ -30,7 +30,7 @@ void e_prop::render () const
 	glPushMatrix();
 
 	material->apply();
-	glTranslatef(-pos.x, -pos.y, -pos.z);
+	glTranslatef(pos.x, pos.y, pos.z);
 	model->render();
 
 	glPopMatrix();

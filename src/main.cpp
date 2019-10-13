@@ -22,11 +22,10 @@ void render_all ()
 
 int main (int argc, char** argv)
 {
-	vec3 zero(0.0, 0.0, 0.0);
 	render::init(640, 480);
 	input::init("res/cfg/input");
 	core::init();
-	render::camera = render::t_camera(zero, zero, 500.0, 1.0, 60);
+	render::camera = render::t_camera(vec3(), vec3(), 500.0, 1.0, 60);
 	render::camera.perspective();
 
 	game.load_map("res/maps/map1");

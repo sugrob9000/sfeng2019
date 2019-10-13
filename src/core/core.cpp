@@ -26,22 +26,24 @@ void t_game::update ()
 	for (e_base* e: ents.v)
 		e->think();
 
-	const float cam_speed = 1.0;
+	const float cam_speed = 0.2;
 	vec3 cam_delta;
 	auto& flags = render::cam_move_flags;
 
-	float sy = sinf(render::camera.ang.y * DEG_TO_RAD);
+	float sz = sinf(render::camera.ang.z * DEG_TO_RAD);
 	float sx = sinf(render::camera.ang.x * DEG_TO_RAD);
-	float cy = cosf(render::camera.ang.y * DEG_TO_RAD);
+	float cz = cosf(render::camera.ang.z * DEG_TO_RAD);
+	float cx = cosf(render::camera.ang.x * DEG_TO_RAD);
 
 	if (flags[render::cam_move_f])
-		cam_delta += vec3(-sy, sx, cy);
+		cam_delta += vec3(cz, sz, -cx);
 	if (flags[render::cam_move_b])
-		cam_delta -= vec3(-sy, sx, cy);
-	if (flags[render::cam_move_r])
-		cam_delta -= vec3(cy, 0.0, sy);
+		cam_delta -= vec3(cz, sz, -cx);
 	if (flags[render::cam_move_l])
-		cam_delta += vec3(cy, 0.0, sy);
+		cam_delta -= vec3(-sz, cz, 0.0);
+	if (flags[render::cam_move_r])
+		cam_delta += vec3(-sz, cz, 0.0);
+
 	cam_delta.norm();
 	render::camera.pos += cam_delta * cam_speed;
 }

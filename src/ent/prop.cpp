@@ -33,26 +33,6 @@ void e_prop::render () const
 	glTranslatef(pos.x, pos.y, pos.z);
 	model->render();
 
-	// output axes at origin
-	glDisable(GL_DEPTH_TEST);
-	glUseProgram(0);
-	glBegin(GL_TRIANGLES);
-	const float length = 25.0;
-	glColor3f(1.0, 0.0, 0.0);
-	glVertex3f(0.0, 0.0, 0.0);
-	glVertex3f(1.0, 1.0, 1.0);
-	glVertex3f(length, 0.0, 0.0);
-	glColor3f(0.0, 1.0, 0.0);
-	glVertex3f(0.0, 0.0, 0.0);
-	glVertex3f(1.0, 1.0, 1.0);
-	glVertex3f(0.0, length, 0.0);
-	glColor3f(0.0, 0.0, 1.0);
-	glVertex3f(0.0, 0.0, 0.0);
-	glVertex3f(1.0, 1.0, 1.0);
-	glVertex3f(0.0, 0.0, length);
-	glEnd();
-	glEnable(GL_DEPTH_TEST);
-
 	glPopMatrix();
 }
 

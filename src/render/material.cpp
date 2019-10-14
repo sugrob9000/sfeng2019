@@ -135,7 +135,7 @@ t_texture_id load_texture (std::string path)
 	if (surf == nullptr)
 		return 0;
 
-	GLuint id;
+	t_texture_id id;
 
 	glGenTextures(1, &id);
 	glBindTexture(GL_TEXTURE_2D, id);
@@ -150,7 +150,30 @@ t_texture_id load_texture (std::string path)
 
 	// mipmap
 	int level = 0;
-	int format = GL_BGR;
+	int format;
+
+	// checking where alpha and red channels are
+	// should be enough to understand the format
+	switch ((uint64_t) surf->format->Rmask
+		| ((uint64_t) surf->format->Amask << 32)) {
+	// without alpha
+	case 0x00FF0000:
+		format = GL_BGR;
+		break;
+	case 0x000000FF:
+		format = GL_RGB;
+		break;
+	// with alpha
+	case 0xFF00000000FF0000:
+		format = GL_BGRA;
+		break;
+	case 0xFF000000000000FF:
+		format = GL_RGBA;
+		break;
+	default:
+		core::warning("Texture %s uses bogus format", path.c_str());
+		return 0;
+	}
 
 	int w = surf->w;
 	int h = surf->h;

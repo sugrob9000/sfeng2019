@@ -71,9 +71,8 @@ COMMAND_ROUTINE (exec)
 {
 	if (ev != PRESS)
 		return;
-	if (args.empty())
-		return;
-	run_script(args[0]);
+	for (const std::string& s: args)
+		run_script(s);
 }
 
 

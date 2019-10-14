@@ -57,6 +57,26 @@ COMMAND_ROUTINE (bind)
 			parse_command(bind));
 }
 
+COMMAND_ROUTINE (stdincmd)
+{
+	if (ev != PRESS)
+		return;
+	std::string line;
+	std::cout << "Command:" << std::endl;
+	std::getline(std::cin, line);
+	cmd_registry.run(parse_command(line), PRESS);
+}
+
+COMMAND_ROUTINE (exec)
+{
+	if (ev != PRESS)
+		return;
+	if (args.empty())
+		return;
+	run_script(args[0]);
+}
+
+
 COMMAND_ROUTINE (move)
 {
 	if (args.empty())
@@ -82,16 +102,6 @@ COMMAND_ROUTINE (move)
 		break;
 	}
 	}
-}
-
-COMMAND_ROUTINE (stdincmd)
-{
-	if (ev != PRESS)
-		return;
-	std::string line;
-	std::cout << "Command:" << std::endl;
-	std::getline(std::cin, line);
-	cmd_registry.run(parse_command(line), PRESS);
 }
 
 MOUSEMOVE_ROUTINE (basic_mousemove)

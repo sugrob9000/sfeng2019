@@ -15,6 +15,7 @@ void init (std::string input_conf_path)
 	cmd_registry.register_command("echo", &cmd::echo);
 	cmd_registry.register_command("bind", &cmd::bind);
 	cmd_registry.register_command("stdincmd", &cmd::stdincmd);
+	cmd_registry.register_command("exec", &cmd::exec);
 	cmd_registry.register_command("move", &cmd::move);
 
 	run_script(input_conf_path);
@@ -116,8 +117,11 @@ void t_command_registry::run (const t_command& cmd, uint8_t ev)
 void run_script (std::string path)
 {
 	std::ifstream f(path);
-	if (!f)
+	if (!f) {
+		core::warning("Script file %s could not be opened",
+				path.c_str());
 		return;
+	}
 	for (std::string line; std::getline(f, line); ) {
 		if (!line.empty())
 			cmd_registry.run(parse_command(line), PRESS);

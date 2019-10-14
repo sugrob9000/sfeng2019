@@ -48,6 +48,11 @@ COMMAND_ROUTINE (bind);
  */
 COMMAND_ROUTINE (stdincmd);
 
+/*
+ * Run the commands from a file
+ */
+COMMAND_ROUTINE (exec);
+
 COMMAND_ROUTINE (move);
 
 MOUSEMOVE_ROUTINE (basic_mousemove);

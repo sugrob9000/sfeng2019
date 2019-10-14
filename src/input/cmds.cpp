@@ -104,7 +104,7 @@ COMMAND_ROUTINE (move)
 	}
 }
 
-MOUSEMOVE_ROUTINE (basic_mousemove)
+MOUSEMOVE_ROUTINE (mousemove_camera)
 {
 	render::camera.ang.x += dy;
 	render::camera.ang.z += dx;

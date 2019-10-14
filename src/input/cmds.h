@@ -18,44 +18,12 @@ namespace input
 namespace cmd
 {
 
-/*
- * Do nothing.
- */
-COMMAND_ROUTINE (nop);
+#define COMMAND(name) \
+	COMMAND_ROUTINE (name);
+#include "cmds.inc"
+#undef COMMAND
 
-/*
- * Exit the engine.
- */
-COMMAND_ROUTINE (exit);
-
-/*
- * Output arguments to stdout
- */
-COMMAND_ROUTINE (echo);
-
-/*
- * Bind a key to a command.
- * The key's name is the first argument
- * (In key names that contain spaces,
- *  they are replaced with underscores)
- * The command is the rest of the arguments
- */
-COMMAND_ROUTINE (bind);
-
-/*
- * PAUSE THE ENTIRE ENGINE, read a command
- * from stdin and run it
- */
-COMMAND_ROUTINE (stdincmd);
-
-/*
- * Run the commands from a file
- */
-COMMAND_ROUTINE (exec);
-
-COMMAND_ROUTINE (move);
-
-MOUSEMOVE_ROUTINE (basic_mousemove);
+MOUSEMOVE_ROUTINE (mousemove_camera);
 
 }
 }

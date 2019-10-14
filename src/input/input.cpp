@@ -10,17 +10,15 @@ t_mousemove_routine mousemove_proc;
 
 void init (std::string input_conf_path)
 {
-	cmd_registry.register_command("nop", &cmd::nop);
-	cmd_registry.register_command("exit", &cmd::exit);
-	cmd_registry.register_command("echo", &cmd::echo);
-	cmd_registry.register_command("bind", &cmd::bind);
-	cmd_registry.register_command("stdincmd", &cmd::stdincmd);
-	cmd_registry.register_command("exec", &cmd::exec);
-	cmd_registry.register_command("move", &cmd::move);
+	// register all commands
+	#define COMMAND(name) \
+		cmd_registry.register_command(#name, &cmd::name);
+	#include "cmds.inc"
+	#undef COMMAND
 
 	run_script(input_conf_path);
 
-	mousemove_proc = &cmd::basic_mousemove;
+	mousemove_proc = &cmd::mousemove_camera;
 
 	SDL_SetRelativeMouseMode(SDL_TRUE);
 }

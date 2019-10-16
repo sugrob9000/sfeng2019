@@ -82,24 +82,21 @@ COMMAND_ROUTINE (move)
 		return;
 
 	auto& flags = render::cam_move_flags;
+	bool f = (ev == PRESS);
 
-	switch (args[0][0]) {
-	case 'f': {
-		flags[render::cam_move_f] = (ev == PRESS);
+	switch (tolower(args[0][0])) {
+	case 'f':
+		flags[render::cam_move_f] = f;
 		break;
-	}
-	case 'b': {
-		flags[render::cam_move_b] = (ev == PRESS);
+	case 'b':
+		flags[render::cam_move_b] = f;
 		break;
-	}
-	case 'l': {
-		flags[render::cam_move_l] = (ev == PRESS);
+	case 'l':
+		flags[render::cam_move_l] = f;
 		break;
-	}
-	case 'r': {
-		flags[render::cam_move_r] = (ev == PRESS);
+	case 'r':
+		flags[render::cam_move_r] = f;
 		break;
-	}
 	}
 }
 

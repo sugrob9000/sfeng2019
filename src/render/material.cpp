@@ -154,16 +154,14 @@ t_texture_id load_texture (std::string path)
 
 	// checking where alpha and red channels are
 	// should be enough to understand the format
-	switch ((uint64_t) surf->format->Rmask
-		| ((uint64_t) surf->format->Amask << 32)) {
-	// without alpha
+	switch (((uint64_t) surf->format->Amask << 32)
+		| (uint64_t) surf->format->Rmask) {
 	case 0x00FF0000:
 		format = GL_BGR;
 		break;
 	case 0x000000FF:
 		format = GL_RGB;
 		break;
-	// with alpha
 	case 0xFF00000000FF0000:
 		format = GL_BGRA;
 		break;

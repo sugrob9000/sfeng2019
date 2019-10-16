@@ -10,13 +10,9 @@ t_game game;
 
 void init ()
 {
-}
-
-t_game::t_game ()
-{
-	must_quit = false;
-	exit_code = 0;
-	tick = 0;
+	game.must_quit = false;
+	game.exit_code = 0;
+	game.tick = 0;
 }
 
 void t_game::update ()
@@ -31,9 +27,9 @@ void t_game::update ()
 	auto& flags = render::cam_move_flags;
 	render::t_camera& cam = render::camera;
 
-	if (cam.ang.x <= -90.0)
+	if (cam.ang.x < -90.0)
 		cam.ang.x = -90.0;
-	if (cam.ang.x >= 90.0)
+	if (cam.ang.x > 90.0)
 		cam.ang.x = 90.0;
 
 	float sz = sinf(cam.ang.z * DEG_TO_RAD);
@@ -95,7 +91,7 @@ void t_game::load_map (std::string path)
 				key_end++;
 
 			kv.add(line.substr(key_begin, key_end-key_begin),
-			       line.substr(key_end + 1));
+			       line.substr(key_end + 1, std::string::npos));
 		} else {
 			// does not begin with whitespace: is a new entity
 

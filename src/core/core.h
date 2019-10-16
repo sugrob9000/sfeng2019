@@ -20,7 +20,6 @@ struct t_game
 
 	t_entities ents;
 
-	t_game ();
 	void update ();
 
 	/*

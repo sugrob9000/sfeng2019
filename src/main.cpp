@@ -6,20 +6,6 @@
 
 using core::game;
 
-void render_all ()
-{
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	render::camera.apply();
-
-	for (const core::e_base* e: game.ents.v)
-		e->render();
-
-	glLoadIdentity();
-
-	SDL_GL_SwapWindow(render::window);
-}
-
 int main (int argc, char** argv)
 {
 	render::init(640, 480);
@@ -30,13 +16,13 @@ int main (int argc, char** argv)
 
 	game.load_map("res/maps/map1");
 
-
 	while (!core::game.must_quit) {
 		input::handle_input();
 		game.update();
-		render_all();
+		render::render_all();
 	}
 
+	SDL_Quit();
 	return core::game.exit_code;
 }
 

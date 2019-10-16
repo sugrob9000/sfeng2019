@@ -3,6 +3,7 @@
 #include "bind.h"
 #include "render/render.h"
 #include "input.h"
+#include "console.h"
 
 namespace input
 {
@@ -57,14 +58,10 @@ COMMAND_ROUTINE (bind)
 			parse_command(bind));
 }
 
-COMMAND_ROUTINE (stdincmd)
+COMMAND_ROUTINE (console)
 {
-	if (ev != PRESS)
-		return;
-	std::string line;
-	std::cout << "Command:" << std::endl;
-	std::getline(std::cin, line);
-	cmd_registry.run(parse_command(line), PRESS);
+	if (ev == PRESS)
+		input::console.open();
 }
 
 COMMAND_ROUTINE (exec)

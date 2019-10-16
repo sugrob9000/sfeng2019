@@ -1,6 +1,7 @@
 #include "input.h"
 #include "bind.h"
 #include "cmds.h"
+#include "console.h"
 
 namespace input
 {
@@ -20,7 +21,7 @@ void init (std::string input_conf_path)
 
 	mousemove_proc = &cmd::mousemove_camera;
 
-	SDL_SetRelativeMouseMode(SDL_TRUE);
+	console.close();
 }
 
 inline void handle_key (SDL_Scancode scan, uint8_t action)
@@ -31,11 +32,14 @@ inline void handle_key (SDL_Scancode scan, uint8_t action)
 
 void handle_input ()
 {
+	if (console.active) {
+		console.handle_input();
+		return;
+	}
+
 	SDL_Event e;
 	while (SDL_PollEvent(&e)) {
-
 		switch (e.type) {
-
 		case SDL_QUIT: {
 			core::game.must_quit = true;
 			break;
@@ -73,7 +77,6 @@ void handle_input ()
 			               e.motion.x, e.motion.y);
 			break;
 		}
-
 		}
 	}
 }

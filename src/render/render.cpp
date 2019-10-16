@@ -1,6 +1,8 @@
 #include "inc_general.h"
 #include "inc_gl.h"
 #include "render/render.h"
+#include "core/core.h"
+#include "input/input.h"
 
 namespace render
 {
@@ -8,6 +10,20 @@ namespace render
 SDL_Window* window;
 SDL_GLContext context;
 t_camera camera;
+
+void render_all ()
+{
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glLoadIdentity();
+	camera.apply();
+
+	// TODO: visible sets
+	for (const core::e_base* e: core::game.ents.v)
+		e->render();
+
+	SDL_GL_SwapWindow(window);
+}
 
 bool cam_move_flags[4];
 
@@ -52,9 +68,7 @@ bool init (int resx, int resy)
 	return true;
 }
 
-t_camera::t_camera ()
-{
-}
+t_camera::t_camera () { }
 
 t_camera::t_camera (
 		vec3 apos, vec3 aang,
@@ -80,6 +94,7 @@ void t_camera::perspective ()
 	const float aspect = 4.0 / 3.0;
 
 	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
 	gluPerspective(fov, aspect, z_near, z_far);
 	glRotatef(-90.0, 1.0, 0.0, 0.0);
 	glMatrixMode(GL_MODELVIEW);

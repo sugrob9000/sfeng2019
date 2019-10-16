@@ -54,7 +54,6 @@ struct t_command_registry
 			t_cmd_routine routine);
 	void run (const t_command& cmd, uint8_t ev);
 };
-
 extern t_command_registry cmd_registry;
 extern t_mousemove_routine mousemove_proc;
 

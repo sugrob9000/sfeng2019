@@ -23,10 +23,9 @@ COMMAND (echo)
 COMMAND (bind)
 
 /*
- * PAUSE THE ENTIRE ENGINE, read a command
- * from stdin and run it
+ * TODO
  */
-COMMAND (stdincmd)
+COMMAND (console)
 
 /*
  * Run the commands from a file

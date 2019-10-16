@@ -36,19 +36,6 @@ struct t_keybind_map
 	void clear ();
 	void add_bind (SDL_Scancode key, t_command value);
 	const t_command& operator[] (SDL_Scancode scan);
-
-	/*
-	 * Returns 0 on success, -1 on failure to open file,
-	 * line number on failure to parse file
-	 *
-	 * Syntax, one per line:
-	 * keyname:t_command
-	 *
-	 * No unnecessary whitespace is allowed, except
-	 * fully empty lines.
-	 * Comments start with # (must be the first character!).
-	 */
-	int load_from_cfg (std::string path);
 };
 extern t_keybind_map key_binds;
 

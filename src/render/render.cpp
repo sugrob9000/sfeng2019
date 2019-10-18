@@ -15,12 +15,17 @@ void render_all ()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glLoadIdentity();
 	camera.apply();
 
 	// TODO: visible sets
 	for (const core::e_base* e: core::game.ents.v)
 		e->render();
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	glUseProgram(0);
 
 	SDL_GL_SwapWindow(window);
 }
@@ -83,22 +88,18 @@ t_camera::t_camera (
 
 void t_camera::apply ()
 {
+	constexpr float aspect = 4.0 / 3.0;
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluPerspective(fov, aspect, z_near, z_far);
+	glRotatef(-90.0, 1.0, 0.0, 0.0);
+
+	glMatrixMode(GL_MODELVIEW);
 	glRotatef(ang.x, 1.0, 0.0, 0.0);
 	glRotatef(ang.y, 0.0, 1.0, 0.0);
 	glRotatef(ang.z, 0.0, 0.0, 1.0);
 	glTranslatef(-pos.x, -pos.y, -pos.z);
 }
 
-void t_camera::perspective ()
-{
-	const float aspect = 4.0 / 3.0;
-
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluPerspective(fov, aspect, z_near, z_far);
-	glRotatef(-90.0, 1.0, 0.0, 0.0);
-	glMatrixMode(GL_MODELVIEW);
 }
-
-}
-

@@ -31,7 +31,6 @@ struct t_camera
 	 * Transform the current projection matrix
 	 * to correspond to the camera
 	 */
-	void perspective ();
 	void apply ();
 };
 

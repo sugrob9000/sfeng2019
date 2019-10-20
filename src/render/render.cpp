@@ -25,19 +25,18 @@ void render_all ()
 	glLoadIdentity();
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	glUseProgram(0);
+
+	// TODO: draw a hud
 
 	SDL_GL_SwapWindow(window);
 }
 
 bool cam_move_flags[4];
 
-bool init (int resx, int resy)
+void init (int resx, int resy)
 {
-	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-		printf("SDL_Init failed: %s\n", SDL_GetError());
-		return false;
-	}
+	if (SDL_Init(SDL_INIT_VIDEO) < 0)
+		core::fatal("SDL_Init failed: %s", SDL_GetError());
 
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
@@ -48,29 +47,23 @@ bool init (int resx, int resy)
 			SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
 			resx, resy, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
 
-	if (window == nullptr) {
-		printf("SDL window creation failed: %s\n", SDL_GetError());
-		return false;
-	}
+	if (window == nullptr)
+		core::fatal("SDL window creation failed: %s", SDL_GetError());
 
 	context = SDL_GL_CreateContext(window);
 
-	if (context == nullptr) {
-		printf("SDL context creation failed: %s\n", SDL_GetError());
-		return false;
-	}
+	if (context == nullptr)
+		core::fatal("SDL context creation failed: %s", SDL_GetError());
 
 	glewExperimental = true;
 	if (glewInit() != GLEW_OK)
-		return false;
+		core::fatal("GLEW init failed");
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
-
-	return true;
 }
 
 t_camera::t_camera () { }

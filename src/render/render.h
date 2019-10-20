@@ -44,7 +44,7 @@ constexpr short cam_move_l = 2;
 constexpr short cam_move_r = 3;
 extern bool cam_move_flags[4];
 
-bool init (int resx, int resy);
+void init (int resx, int resy);
 void render_all ();
 
 }

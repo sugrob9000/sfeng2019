@@ -20,7 +20,7 @@ FILES-O = $(FILES-CPP:$(SRC)/%.cpp=$(BIN)/%.o)
 
 LBITS = $(shell getconf LONG_BIT)
 
-LIBS = -lSDL2_image
+LIBS = -lSDL2_image -lSDL2_ttf
 
 ifeq ($(OS), Windows_NT)
 

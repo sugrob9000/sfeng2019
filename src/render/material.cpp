@@ -102,7 +102,6 @@ void t_material::load(std::string path)
 	glAttachShader(program, vert);
 	glLinkProgram(program);
 
-	glUseProgram(program);
 	for (const bitmap_desc_interm& d: bitmaps_interm) {
 		int location = glGetUniformLocation(program,
 				d.loc_name.c_str());

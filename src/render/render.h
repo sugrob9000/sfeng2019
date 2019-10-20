@@ -34,10 +34,25 @@ struct t_camera
 	void apply ();
 };
 
-extern SDL_Window* window;
-extern SDL_GLContext context;
+struct t_sdlcontext
+{
+	SDL_Window* window;
+	SDL_GLContext glcont;
+	SDL_Renderer* renderer;
+
+	int res_x;
+	int res_y;
+
+	TTF_Font* font;
+	static constexpr int font_size = 16;
+};
+extern t_sdlcontext cont;
+
 extern t_camera camera;
 
+/*
+ * How the camera is currently moving (demo)
+ */
 constexpr short cam_move_f = 0;
 constexpr short cam_move_b = 1;
 constexpr short cam_move_l = 2;
@@ -46,6 +61,9 @@ extern bool cam_move_flags[4];
 
 void init (int resx, int resy);
 void render_all ();
+
+const SDL_Color text_color = { 120, 120, 120, 255 };
+void draw_text (const char* text, int x, int y);
 
 }
 

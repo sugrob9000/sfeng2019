@@ -4,6 +4,8 @@
 #include "input/input.h"
 #include "input/bind.h"
 
+#include <chrono>
+
 using core::game;
 
 int main (int argc, char** argv)
@@ -15,7 +17,7 @@ int main (int argc, char** argv)
 
 	game.load_map("res/maps/map1");
 
-	while (!core::game.must_quit) {
+	while (!game.must_quit) {
 		input::handle_input();
 		game.update();
 		render::render_all();

@@ -55,4 +55,35 @@ void t_console_info::close ()
 	SDL_StopTextInput();
 }
 
+void t_console_info::render ()
+{
+	int resx = render::cont.res_x;
+	int resy = render::cont.res_y;
+
+	glPushMatrix();
+	glScalef(2.0 / resx, -2.0 / resy, 1.0);
+	glTranslatef(-0.5 * resx, -0.5 * resy, 0.0);
+
+	constexpr int height = render::cont.font_size + 10;
+	constexpr int width = 6;
+
+	glBegin(GL_QUADS);
+	glColor4ubv((GLubyte*) &console_bg_clr);
+	glVertex2i(0, 0);
+	glVertex2i(resx, 0);
+	glVertex2i(resx, height);
+	glVertex2i(0, height);
+	glVertex2i(0, height);
+	glVertex2i(0, 0);
+	glColor4ubv((GLubyte*) &console_prompt_clr);
+	glVertex2i(width, 0);
+	glVertex2i(width, height);
+	glEnd();
+
+	if (!cmd.empty())
+		render::draw_text(cmd.c_str(), width + 2, 4);
+
+	glPopMatrix();
+}
+
 }

@@ -22,7 +22,7 @@ void t_game::update ()
 	for (e_base* e: ents.v)
 		e->think();
 
-	const float cam_speed = 0.2;
+	const float cam_speed = 1.0;
 	vec3 cam_delta;
 	auto& flags = render::cam_move_flags;
 	render::t_camera& cam = render::camera;

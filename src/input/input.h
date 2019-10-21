@@ -43,11 +43,7 @@ struct t_action
 
 struct t_command_registry
 {
-	private:
-
 	std::unordered_map<std::string, t_action> m;
-
-	public:
 
 	void register_command (
 			std::string name,

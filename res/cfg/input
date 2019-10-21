@@ -1,7 +1,7 @@
 bind Q exit
 bind Escape exit
 
-bind R console
+bind R console_open
 
 bind W move f
 bind A move l

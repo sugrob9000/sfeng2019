@@ -12,6 +12,9 @@ struct t_console_info
 	int cursor;
 	std::string cmd;
 
+	std::vector<const std::string*> matches;
+	void update_matches ();
+
 	void handle_input ();
 	void open ();
 	void close ();

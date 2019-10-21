@@ -23,9 +23,10 @@ COMMAND (echo)
 COMMAND (bind)
 
 /*
- * TODO
+ * In-game interactive console
  */
-COMMAND (console)
+COMMAND (console_open)
+COMMAND (console_close)
 
 /*
  * Run the commands from a file

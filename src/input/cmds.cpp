@@ -58,10 +58,16 @@ COMMAND_ROUTINE (bind)
 			parse_command(bind));
 }
 
-COMMAND_ROUTINE (console)
+COMMAND_ROUTINE (console_open)
 {
 	if (ev == PRESS)
 		input::console.open();
+}
+
+COMMAND_ROUTINE (console_close)
+{
+	if (ev == PRESS)
+		input::console.close();
 }
 
 COMMAND_ROUTINE (exec)

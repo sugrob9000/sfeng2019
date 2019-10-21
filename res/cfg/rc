@@ -7,3 +7,5 @@ bind W move f
 bind A move l
 bind S move b
 bind D move r
+
+windowsize 800 600

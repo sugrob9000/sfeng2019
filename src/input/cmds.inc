@@ -38,3 +38,8 @@ COMMAND (exec)
  */
 COMMAND (move)
 
+/*
+ * Set app window size
+ */
+COMMAND (windowsize)
+

@@ -53,7 +53,7 @@ struct t_command_registry
 extern t_command_registry cmd_registry;
 extern t_mousemove_routine mousemove_proc;
 
-void init (std::string input_conf_path);
+void init ();
 void handle_input ();
 
 void run_script (std::string path);

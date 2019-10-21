@@ -9,15 +9,13 @@ namespace input
 t_command_registry cmd_registry;
 t_mousemove_routine mousemove_proc;
 
-void init (std::string input_conf_path)
+void init ()
 {
 	// register all commands
 	#define COMMAND(name) \
 		cmd_registry.register_command(#name, &cmd::name);
 	#include "cmds.inc"
 	#undef COMMAND
-
-	run_script(input_conf_path);
 
 	mousemove_proc = &cmd::mousemove_camera;
 

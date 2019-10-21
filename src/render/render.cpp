@@ -43,9 +43,16 @@ void render_all ()
 
 bool cam_move_flags[4];
 
-void init_text();
-void init (int resx, int resy)
+void init_text ();
+void init ()
 {
+	if (cont.res_x == 0 || cont.res_y == 0) {
+		// resolution has not been initialized,
+		// use a sane default
+		cont.res_x = 640;
+		cont.res_y = 480;
+	}
+
 	if (SDL_Init(SDL_INIT_VIDEO) < 0)
 		core::fatal("SDL_Init failed: %s", SDL_GetError());
 
@@ -56,9 +63,8 @@ void init (int resx, int resy)
 
 	cont.window = SDL_CreateWindow("Engine",
 			SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-			resx, resy, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
-	cont.res_x = resx;
-	cont.res_y = resy;
+			cont.res_x, cont.res_y,
+			SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
 
 	if (cont.window == nullptr)
 		core::fatal("SDL window creation failed: %s", SDL_GetError());
@@ -81,6 +87,14 @@ void init (int resx, int resy)
 	init_text();
 }
 
+void resize_window (int w, int h)
+{
+	cont.res_x = w;
+	cont.res_y = h;
+	SDL_SetWindowSize(cont.window, w, h);
+	glViewport(0, 0, w, h);
+}
+
 t_camera::t_camera () { }
 
 t_camera::t_camera (
@@ -96,7 +110,7 @@ t_camera::t_camera (
 
 void t_camera::apply ()
 {
-	constexpr float aspect = 4.0 / 3.0;
+	float aspect = (float) cont.res_x / cont.res_y;
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -116,7 +130,7 @@ t_texture_id text_texture;
 unsigned int text_program;
 unsigned int text_prg_glyph_loc;
 
-void init_text()
+void init_text ()
 {
 	if (TTF_Init() < 0)
 		core::fatal("TTF init failed");

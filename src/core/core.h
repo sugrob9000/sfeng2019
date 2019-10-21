@@ -37,7 +37,7 @@ struct t_game
 };
 extern t_game game;
 
-void init ();
+void init (std::string conf);
 
 }
 

@@ -104,6 +104,20 @@ COMMAND_ROUTINE (move)
 	}
 }
 
+COMMAND_ROUTINE (windowsize)
+{
+	if (ev != PRESS)
+		return;
+	if (args.size() != 2)
+		return;
+	int w = std::atoi(args[0].c_str());
+	int h = std::atoi(args[1].c_str());
+	if (w == 0 || h == 0)
+		return;
+
+	render::resize_window(w, h);
+}
+
 MOUSEMOVE_ROUTINE (mousemove_camera)
 {
 	render::camera.ang.x += dy;

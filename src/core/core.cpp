@@ -2,17 +2,20 @@
 #include "core.h"
 #include "render/render.h"
 #include "ent/entity.h"
+#include "input/input.h"
 
 namespace core
 {
 
 t_game game;
 
-void init ()
+void init (std::string conf)
 {
 	game.must_quit = false;
 	game.exit_code = 0;
 	game.tick = 0;
+
+	input::run_script(conf);
 }
 
 void t_game::update ()

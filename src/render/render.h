@@ -61,8 +61,9 @@ constexpr short cam_move_l = 2;
 constexpr short cam_move_r = 3;
 extern bool cam_move_flags[4];
 
-void init (int resx, int resy);
+void init ();
 void render_all ();
+void resize_window (int w, int h);
 
 const SDL_Color text_color = { 200, 200, 200, 255 };
 void draw_text (const char* text, int x, int y);

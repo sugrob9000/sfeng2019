@@ -17,22 +17,29 @@ void t_console_info::handle_input ()
 		case SDL_KEYDOWN:
 			switch (e.key.keysym.scancode) {
 			case SDL_SCANCODE_BACKSPACE:
-				if (!cmd.empty()) {
+
+				if (cmd.empty())
+					break;
+				if (SDL_GetModState() & KMOD_SHIFT)
+					cmd.clear();
+				else
 					cmd.pop_back();
-					update_matches();
-				}
+				update_matches();
 				break;
+
 			case SDL_SCANCODE_RETURN:
 				cmd_registry.run(parse_command(cmd), PRESS);
 				cmd.clear();
 				update_matches();
 				break;
+
 			case SDL_SCANCODE_TAB:
 				if (!matches.empty()) {
 					cmd = *matches[0] + ' ';
 					update_matches();
 				}
 				break;
+
 			default:
 				break;
 			}

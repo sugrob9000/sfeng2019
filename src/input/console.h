@@ -5,6 +5,9 @@ namespace input
 
 /*
  * A console window for entering commands
+ * Enter - execute
+ * Esc - get out
+ * Shift-backspace - erase current command
  */
 struct t_console_info
 {

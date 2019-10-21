@@ -17,10 +17,11 @@ COMMAND_ROUTINE (nop)
 
 COMMAND_ROUTINE (exit)
 {
+	if (ev != PRESS)
+		return;
 	core::game.exit_code = 0;
 	if (!args.empty())
 		core::game.exit_code = std::atoi(args[0].c_str());
-
 	core::game.must_quit = true;
 }
 

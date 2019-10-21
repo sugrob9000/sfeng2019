@@ -43,8 +43,10 @@ struct t_sdlcontext
 	int res_x;
 	int res_y;
 
+	const char* const font_path = "res/FreeMono.ttf";
 	TTF_Font* font;
-	static constexpr int font_size = 16;
+	static constexpr int font_h = 16;
+	int font_w;
 };
 extern t_sdlcontext cont;
 
@@ -62,7 +64,7 @@ extern bool cam_move_flags[4];
 void init (int resx, int resy);
 void render_all ();
 
-const SDL_Color text_color = { 120, 120, 120, 255 };
+const SDL_Color text_color = { 200, 200, 200, 255 };
 void draw_text (const char* text, int x, int y);
 
 }

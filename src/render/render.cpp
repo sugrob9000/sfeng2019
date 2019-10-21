@@ -43,7 +43,7 @@ void render_all ()
 
 bool cam_move_flags[4];
 
-void init_text_drawing ();
+void init_text();
 void init (int resx, int resy)
 {
 	if (SDL_Init(SDL_INIT_VIDEO) < 0)
@@ -78,12 +78,7 @@ void init (int resx, int resy)
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 
-	if (TTF_Init() < 0)
-		core::fatal("TTF init failed");
-	cont.font = TTF_OpenFont("res/FreeMono.ttf", cont.font_size);
-	if (cont.font == nullptr)
-		core::fatal("Failed to find font");
-	init_text_drawing();
+	init_text();
 }
 
 t_camera::t_camera () { }
@@ -119,11 +114,25 @@ void t_camera::apply ()
 
 t_texture_id text_texture;
 unsigned int text_program;
-unsigned int text_program_loc;
-int single_char_width;
+unsigned int text_prg_glyph_loc;
 
-void init_text_drawing ()
+void init_text()
 {
+	if (TTF_Init() < 0)
+		core::fatal("TTF init failed");
+	cont.font = TTF_OpenFont(cont.font_path, cont.font_h);
+	if (cont.font == nullptr)
+		core::fatal("Failed to find font %s", cont.font_path);
+	if (!TTF_FontFaceIsFixedWidth(cont.font)) {
+		core::warning("Font %s is not monospace. Text will break",
+				cont.font_path);
+	}
+	TTF_GlyphMetrics(cont.font, '~', nullptr, nullptr,
+			nullptr, nullptr, &cont.font_w);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 	t_shader_id vert = get_shader("vert_identity", GL_VERTEX_SHADER);
 	t_shader_id frag = get_shader("frag_text", GL_FRAGMENT_SHADER);
 
@@ -132,28 +141,28 @@ void init_text_drawing ()
 	glAttachShader(text_program, frag);
 	glLinkProgram(text_program);
 
-	text_program_loc = glGetUniformLocation(text_program, "tex");
+	text_prg_glyph_loc = glGetUniformLocation(text_program, "glyphs");
 
-	char* all_chars = new char[256];
+	char all_chars[257];
+	all_chars[0] = '~';
+	all_chars[256] = 0;
 	for (int i = 1; i < 256; i++)
 		all_chars[i] = i;
-	all_chars[0] = '#';
 
-	SDL_Surface* surf = TTF_RenderText_Solid(cont.font,
+	SDL_Surface* surf = TTF_RenderText_Blended(cont.font,
 			all_chars, text_color);
 
-	delete[] all_chars;
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 	glGenTextures(1, &text_texture);
 	glBindTexture(GL_TEXTURE_RECTANGLE_ARB, text_texture);
-	glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, surf->w, surf->h,
+	glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGBA, surf->w, surf->h,
 			0, GL_RGBA, GL_UNSIGNED_BYTE, surf->pixels);
 
 	SDL_FreeSurface(surf);
-
-	// query the width for a pretty wide character to be safe
-	TTF_GlyphMetrics(cont.font, 'm', nullptr, nullptr,
-			nullptr, &single_char_width, nullptr);
 }
 
 void draw_text (const char* str, int x, int y)
@@ -162,22 +171,22 @@ void draw_text (const char* str, int x, int y)
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_RECTANGLE_ARB, text_texture);
-	glUniform1i(text_program_loc, 0);
+	glUniform1i(text_prg_glyph_loc, 0);
 
 	glBegin(GL_QUADS);
 	for (int i = 0; str[i] != 0; i++) {
 		const char c = str[i];
 
-		glTexCoord2f(single_char_width * c, 0.0);
+		glTexCoord2i(cont.font_w * c, 0);
 		glVertex2i(x, y);
-		glTexCoord2f(single_char_width * c, cont.font_size);
-		glVertex2i(x, y + cont.font_size);
-		glTexCoord2f(single_char_width * (c + 1), cont.font_size);
-		glVertex2i(x + single_char_width, y + cont.font_size);
-		glTexCoord2f(single_char_width * (c + 1), 0.0);
-		glVertex2i(x + single_char_width, y);
+		glTexCoord2i(cont.font_w * c, cont.font_h);
+		glVertex2i(x, y + cont.font_h);
+		glTexCoord2i(cont.font_w * (c + 1), cont.font_h);
+		glVertex2i(x + cont.font_w, y + cont.font_h);
+		glTexCoord2i(cont.font_w * (c + 1), 0);
+		glVertex2i(x + cont.font_w, y);
 
-		x += single_char_width;
+		x += cont.font_w;
 	}
 	glEnd();
 }

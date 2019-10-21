@@ -64,24 +64,30 @@ void t_console_info::render ()
 	glScalef(2.0 / resx, -2.0 / resy, 1.0);
 	glTranslatef(-0.5 * resx, -0.5 * resy, 0.0);
 
-	constexpr int height = render::cont.font_size + 10;
-	constexpr int width = 6;
+	constexpr int height = render::cont.font_h + 10;
+	int startx = render::cont.font_w + 5;
+	int starty = 4;
 
+	const SDL_Color bg_clr = { 20, 20, 20, 255 };
+	const SDL_Color cursor_clr = { 220, 220, 40, 255 };
 	glBegin(GL_QUADS);
-	glColor4ubv((GLubyte*) &console_bg_clr);
+	glColor4ubv((GLubyte*) &bg_clr);
 	glVertex2i(0, 0);
 	glVertex2i(resx, 0);
 	glVertex2i(resx, height);
 	glVertex2i(0, height);
-	glVertex2i(0, height);
-	glVertex2i(0, 0);
-	glColor4ubv((GLubyte*) &console_prompt_clr);
-	glVertex2i(width, 0);
-	glVertex2i(width, height);
+
+	glColor4ubv((GLubyte*) &cursor_clr);
+	int x = cmd.size() * render::cont.font_w + startx;
+	glVertex2i(x, starty);
+	glVertex2i(x + 2, starty);
+	glVertex2i(x + 2, starty + render::cont.font_h);
+	glVertex2i(x, starty + render::cont.font_h);
 	glEnd();
 
+	render::draw_text(">", 4, starty);
 	if (!cmd.empty())
-		render::draw_text(cmd.c_str(), width + 2, 4);
+		render::draw_text(cmd.c_str(), startx, starty);
 
 	glPopMatrix();
 }

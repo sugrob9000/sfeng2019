@@ -18,12 +18,19 @@ int main (int argc, char** argv)
 	game.load_map("res/maps/map1");
 
 	while (!game.must_quit) {
+		namespace cr = std::chrono;
+		using sc = cr::steady_clock;
+		sc::time_point start = sc::now();
+
 		input::handle_input();
 		game.update();
 		render::render_all();
+
+		using frame60 = cr::duration<float, std::ratio<1, 60>>;
+		while (frame60(sc::now() - start).count() < 1.0);
 	}
 
 	SDL_Quit();
-	return core::game.exit_code;
+	return game.exit_code;
 }
 

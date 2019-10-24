@@ -23,9 +23,9 @@ t_model* get_model (std::string path)
 
 	ret = new t_model;
 
-	path = PATH_MODEL + path + ".obj";
+	path = PATH_MODEL + path + ".rvd";
 	t_model_mem verts;
-	if (!verts.load_obj(path))
+	if (!verts.load_rvd(path))
 		core::fatal("Cannot load model %s", path.c_str());
 	ret->load(verts);
 	return ret;

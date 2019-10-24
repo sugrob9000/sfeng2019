@@ -105,34 +105,24 @@ bool t_model_mem::load_obj (std::string path)
 
 void t_model_mem::dump_rvd (std::string path)
 {
-	FILE* f = fopen(path.c_str(), "w");
-
-	if (f == nullptr)
+	std::ofstream f(path, std::ios::binary);
+	if (!f)
 		return;
-
 	int32_t vertnum = verts.size();
-	fwrite(&vertnum, sizeof(vertnum), 1, f);
-	fwrite(verts.data(), sizeof(t_vertex), vertnum, f);
-
-	fclose(f);
+	f.write((char*) &vertnum, sizeof(vertnum));
+	f.write((char*) verts.data(), vertnum * sizeof(t_vertex));
 }
 
 bool t_model_mem::load_rvd (std::string path)
 {
-	FILE* f = fopen(path.c_str(), "r");
-
+	std::ifstream f(path, std::ios::binary);
 	verts.clear();
-
-	if (f == nullptr)
+	if (!f)
 		return false;
-
 	int32_t vertnum = -1;
-	fread(&vertnum, sizeof(vertnum), 1, f);
+	f.read((char*) &vertnum, sizeof(vertnum));
 	verts.resize(vertnum);
-	fread(verts.data(), sizeof(t_vertex), vertnum, f);
-
-	fclose(f);
-
+	f.read((char*) verts.data(), vertnum * sizeof(t_vertex));
 	return true;
 }
 

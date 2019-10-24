@@ -28,53 +28,61 @@ inline void handle_key (SDL_Scancode scan, uint8_t action)
 	cmd_registry.run(cmd, action);
 }
 
+void handle_input_ev (const SDL_Event& e)
+{
+	switch (e.type) {
+	case SDL_KEYDOWN:
+		if (!e.key.repeat)
+			handle_key(e.key.keysym.scancode, PRESS);
+		break;
+	case SDL_KEYUP:
+		handle_key(e.key.keysym.scancode, RELEASE);
+		break;
+	case SDL_MOUSEBUTTONDOWN:
+		handle_key(scan_mouse[e.button.button], PRESS);
+		break;
+	case SDL_MOUSEBUTTONUP:
+		handle_key(scan_mouse[e.button.button], RELEASE);
+		break;
+	case SDL_MOUSEWHEEL: {
+		int y = e.wheel.y;
+		SDL_Scancode scan = scan_mwheel_up;
+		if (y < 0) {
+			scan = scan_mwheel_down;
+			y = -y;
+		}
+		for (int i = 0; i < y; i++)
+			handle_key(scan, PRESS);
+		break;
+	}
+	case SDL_MOUSEMOTION:
+		mousemove_proc(e.motion.xrel, e.motion.yrel,
+				e.motion.x, e.motion.y);
+		break;
+	}
+}
+
 void handle_input ()
 {
-	if (console.active) {
-		console.handle_input();
-		return;
-	}
-
 	SDL_Event e;
 	while (SDL_PollEvent(&e)) {
 		switch (e.type) {
-		case SDL_QUIT: {
+		case SDL_QUIT:
 			core::game.must_quit = true;
 			break;
-		}
-		case SDL_KEYDOWN: {
-			if (!e.key.repeat)
-				handle_key(e.key.keysym.scancode, PRESS);
-			break;
-		}
-		case SDL_KEYUP: {
-			handle_key(e.key.keysym.scancode, RELEASE);
-			break;
-		}
-		case SDL_MOUSEBUTTONDOWN: {
-			handle_key(scan_mouse[e.button.button], PRESS);
-			break;
-		}
-		case SDL_MOUSEBUTTONUP: {
-			handle_key(scan_mouse[e.button.button], RELEASE);
-			break;
-		}
-		case SDL_MOUSEWHEEL: {
-			int y = e.wheel.y;
-			SDL_Scancode scan = scan_mwheel_up;
-			if (y < 0) {
-				scan = scan_mwheel_down;
-				y = -y;
+		case SDL_WINDOWEVENT:
+			if (e.window.event == SDL_WINDOWEVENT_RESIZED) {
+				int w = e.window.data1;
+				int h = e.window.data2;
+				render::resize_window(w, h);
 			}
-			for (int i = 0; i < y; i++)
-				handle_key(scan, PRESS);
 			break;
-		}
-		case SDL_MOUSEMOTION: {
-			mousemove_proc(e.motion.xrel, e.motion.yrel,
-			               e.motion.x, e.motion.y);
+		default:
+			if (console.active)
+				console.handle_input_ev(e);
+			else
+				handle_input_ev(e);
 			break;
-		}
 		}
 	}
 }

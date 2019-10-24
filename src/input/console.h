@@ -18,7 +18,7 @@ struct t_console_info
 	std::vector<const std::string*> matches;
 	void update_matches ();
 
-	void handle_input ();
+	void handle_input_ev (const SDL_Event& e);
 	void open ();
 	void close ();
 	void render ();

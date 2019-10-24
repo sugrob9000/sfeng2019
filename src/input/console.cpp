@@ -6,55 +6,52 @@ namespace input
 
 t_console_info console;
 
-void t_console_info::handle_input ()
+void t_console_info::handle_input_ev (const SDL_Event& e)
 {
-	SDL_Event e;
-	while (SDL_PollEvent(&e)) {
-		switch (e.type) {
-		case SDL_QUIT:
-			core::game.must_quit = true;
-			break;
-		case SDL_KEYDOWN:
-			switch (e.key.keysym.scancode) {
-			case SDL_SCANCODE_BACKSPACE:
+	switch (e.type) {
+	case SDL_QUIT:
+		core::game.must_quit = true;
+		break;
+	case SDL_KEYDOWN:
+		switch (e.key.keysym.scancode) {
+		case SDL_SCANCODE_BACKSPACE:
 
-				if (cmd.empty())
-					break;
-				if (SDL_GetModState() & KMOD_SHIFT)
-					cmd.clear();
-				else
-					cmd.pop_back();
-				update_matches();
+			if (cmd.empty())
 				break;
-
-			case SDL_SCANCODE_RETURN:
-				cmd_registry.run(parse_command(cmd), PRESS);
+			if (SDL_GetModState() & KMOD_SHIFT)
 				cmd.clear();
-				update_matches();
-				break;
-
-			case SDL_SCANCODE_TAB:
-				if (!matches.empty()) {
-					cmd = *matches[0] + ' ';
-					update_matches();
-				}
-				break;
-
-			default:
-				break;
-			}
-			break;
-		// handle esc on keyup to avoid
-		// sending the keyup event to the main game
-		case SDL_KEYUP:
-			if (e.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
-				close();
-			break;
-		case SDL_TEXTINPUT:
-			cmd += e.text.text;
+			else
+				cmd.pop_back();
 			update_matches();
 			break;
+
+		case SDL_SCANCODE_RETURN:
+			cmd_registry.run(parse_command(cmd), PRESS);
+			cmd.clear();
+			update_matches();
+			break;
+
+		case SDL_SCANCODE_TAB:
+			if (!matches.empty()) {
+				cmd = *matches[0] + ' ';
+				update_matches();
+			}
+			break;
+
+		default:
+			break;
 		}
+		break;
+		// handle esc on keyup to avoid
+		// sending the keyup event to the main game
+	case SDL_KEYUP:
+		if (e.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
+			close();
+		break;
+	case SDL_TEXTINPUT:
+		cmd += e.text.text;
+		update_matches();
+		break;
 	}
 }
 

@@ -54,6 +54,7 @@ extern t_command_registry cmd_registry;
 extern t_mousemove_routine mousemove_proc;
 
 void init ();
+void run_argv_commands (int argc, const char* const* argv);
 void handle_input ();
 
 void run_script (std::string path);

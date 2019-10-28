@@ -11,7 +11,9 @@ using core::game;
 int main (int argc, char** argv)
 {
 	input::init();
+
 	core::init("res/cfg/rc");
+	input::run_argv_commands(argc, argv);
 
 	render::init();
 	render::camera = render::t_camera(vec3(), vec3(), 500.0, 1.0, 60);

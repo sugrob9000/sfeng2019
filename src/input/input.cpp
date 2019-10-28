@@ -22,6 +22,12 @@ void init ()
 	console.close();
 }
 
+void run_argv_commands (int argc, const char* const* argv)
+{
+	while (--argc)
+		cmd_registry.run(parse_command(*++argv), PRESS);
+}
+
 inline void handle_key (SDL_Scancode scan, uint8_t action)
 {
 	const t_command& cmd = key_binds[scan];

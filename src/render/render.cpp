@@ -66,6 +66,9 @@ void init ()
 			cont.res_x, cont.res_y,
 			SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
 
+	SDL_SetRelativeMouseMode(SDL_TRUE);
+	SDL_StopTextInput();
+
 	if (cont.window == nullptr)
 		core::fatal("SDL window creation failed: %s", SDL_GetError());
 

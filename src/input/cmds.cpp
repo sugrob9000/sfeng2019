@@ -118,6 +118,32 @@ COMMAND_ROUTINE (windowsize)
 	render::resize_window(w, h);
 }
 
+COMMAND_ROUTINE (obj2rvd)
+{
+	if (ev != PRESS)
+		return;
+	if (args.empty())
+		return;
+
+	const std::string& in = args[0];
+	std::string out;
+
+	// add at the end or instead of .obj
+	if (args.size() > 1) {
+		out = args[1];
+	} else {
+		out = in;
+		int size = out.size();
+		if (size > 4 && out.compare(size-4, 4, ".obj") == 0)
+			out.erase(size-4, std::string::npos);
+		out += ".rvd";
+	}
+
+	render::t_model_mem model;
+	model.load_obj(in);
+	model.dump_rvd(out);
+}
+
 MOUSEMOVE_ROUTINE (mousemove_camera)
 {
 	render::camera.ang.x += dy;

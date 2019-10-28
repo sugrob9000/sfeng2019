@@ -43,3 +43,7 @@ COMMAND (move)
  */
 COMMAND (windowsize)
 
+/*
+ * Convert an obj model to rvd
+ */
+COMMAND (obj2rvd)

@@ -1,8 +1,14 @@
 #include "prop.h"
 #include "render/resource.h"
+#include "signal.h"
 
 namespace core
 {
+
+void e_prop::outcrd ()
+{
+	DEBUG_EXPR(pos);
+}
 
 e_prop::e_prop ()
 {

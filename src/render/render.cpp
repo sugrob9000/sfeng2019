@@ -23,7 +23,7 @@ void render_all ()
 	camera.apply();
 
 	// TODO: visible sets
-	for (const core::e_base* e: core::game.ents.v)
+	for (const core::e_base* e: core::ents.vec)
 		e->render();
 
 	// HUD

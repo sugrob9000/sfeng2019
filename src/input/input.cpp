@@ -74,7 +74,7 @@ void handle_input ()
 	while (SDL_PollEvent(&e)) {
 		switch (e.type) {
 		case SDL_QUIT:
-			core::game.must_quit = true;
+			core::must_quit = true;
 			break;
 		case SDL_WINDOWEVENT:
 			if (e.window.event == SDL_WINDOWEVENT_RESIZED) {

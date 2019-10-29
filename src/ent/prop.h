@@ -17,6 +17,8 @@ ENT_DECL (prop)
 	render::t_material* material;
 
 	ENT_GENERIC_DECLARATIONS (prop)
+
+	void outcrd ();
 };
 
 }

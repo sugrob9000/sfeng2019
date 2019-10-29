@@ -19,10 +19,10 @@ COMMAND_ROUTINE (exit)
 {
 	if (ev != PRESS)
 		return;
-	core::game.exit_code = 0;
+	core::exit_code = 0;
 	if (!args.empty())
-		core::game.exit_code = std::atoi(args[0].c_str());
-	core::game.must_quit = true;
+		core::exit_code = std::atoi(args[0].c_str());
+	core::must_quit = true;
 }
 
 COMMAND_ROUTINE (echo)

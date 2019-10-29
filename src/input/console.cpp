@@ -9,9 +9,6 @@ t_console_info console;
 void t_console_info::handle_input_ev (const SDL_Event& e)
 {
 	switch (e.type) {
-	case SDL_QUIT:
-		core::game.must_quit = true;
-		break;
 	case SDL_KEYDOWN:
 		switch (e.key.keysym.scancode) {
 		case SDL_SCANCODE_BACKSPACE:

@@ -7,22 +7,27 @@
 namespace core
 {
 
-t_game game;
+bool must_quit;
+int exit_code;
+long long tick;
+t_entities ents;
 
 void init (std::string conf)
 {
-	game.must_quit = false;
-	game.exit_code = 0;
-	game.tick = 0;
+	must_quit = false;
+	exit_code = 0;
+	tick = 0;
+
+	fill_ent_registry();
 
 	input::run_script(conf);
 }
 
-void t_game::update ()
+void update ()
 {
 	tick++;
 
-	for (e_base* e: ents.v)
+	for (e_base* e: ents.vec)
 		e->think();
 
 	const float cam_speed = 1.0;
@@ -52,7 +57,7 @@ void t_game::update ()
 	cam.pos += cam_delta * cam_speed;
 }
 
-void t_game::load_map (std::string path)
+void load_map (std::string path)
 {
 	std::ifstream f(path);
 

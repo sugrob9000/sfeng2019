@@ -2,9 +2,8 @@
 #define ENTITY_H
 
 #include "inc_general.h"
-#include <map>
-
 #include "keyval.h"
+#include <map>
 
 namespace core
 {
@@ -28,41 +27,36 @@ class e_base
 };
 
 #define ENT_DECL(name) class e_##name: public e_base
-#define ENT_GENERIC_DECLARATIONS(name) \
-	e_##name ();                   \
-	void think ();                 \
-	void render () const;          \
-	void apply_keyvals (t_ent_keyvals& kv);
-
-template <class e_derived> e_base* ent_new ();
-typedef e_base* (*t_ent_new_routine) ();
-
+#define ENT_GENERIC_DECLARATIONS(name)          \
+	e_##name ();                            \
+	void think ();                          \
+	void render () const;                   \
+	void apply_keyvals (t_ent_keyvals& kv); \
+	static void init_signal_handlers ();
 
 /*
- * The list of types of entities known to the engine
+ * Mapping entity class names (such as prop)
+ * to C++ classes
  */
-struct t_ent_registry
-{
-	std::map<std::string, t_ent_new_routine> m;
-
-	t_ent_registry ();
-	t_ent_new_routine& operator[] (std::string key);
-};
-extern t_ent_registry ent_registry;
-
+template <class e_derived> e_base* ent_new ();
+typedef e_base* (*t_ent_spawner) ();
+typedef std::map<std::string, t_ent_spawner> t_ent_registry;
+extern t_ent_registry ent_reg;
+void fill_ent_registry ();
 
 /*
  * A world's currently existing entities
  */
 struct t_entities
 {
-	std::vector<e_base*> v;
+	std::vector<e_base*> vec;
+	std::map<std::string, e_base*> name_index;
 
 	e_base* spawn (std::string type);
-	e_base* find_by_name (std::string key);
+	e_base* find_by_name (std::string name);
 };
 
-};
+}
 
 #include "ent_headers.inc"
 

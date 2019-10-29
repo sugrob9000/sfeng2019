@@ -27,28 +27,23 @@ e_base* ent_new ()
 	return new e_derived();
 }
 
-t_ent_registry::t_ent_registry ()
+void fill_ent_registry ()
 {
 	#define ENT_REG(name) \
-		m[#name] = &ent_new<e_##name>;
+		ent_reg[#name] = &ent_new<e_##name>;
 	#include "ent_list.inc"
 	#undef ENT_REG
 }
 
-t_ent_new_routine& t_ent_registry::operator[] (std::string key)
-{
-	return m[key];
-}
-
 e_base* t_entities::spawn (std::string type)
 {
-	t_ent_new_routine spawner = ent_reg[type];
+	t_ent_spawner spawner = ent_reg[type];
 
 	if (spawner == nullptr)
 		return nullptr;
 
 	e_base* ent = spawner();
-	v.push_back(ent);
+	vec.push_back(ent);
 
 	return ent;
 }

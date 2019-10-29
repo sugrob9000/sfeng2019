@@ -128,10 +128,10 @@ COMMAND_ROUTINE (obj2rvd)
 	const std::string& in = args[0];
 	std::string out;
 
-	// add at the end or instead of .obj
 	if (args.size() > 1) {
 		out = args[1];
 	} else {
+		// add .rvd at the end or instead of .obj
 		out = in;
 		int size = out.size();
 		if (size > 4 && out.compare(size-4, 4, ".obj") == 0)

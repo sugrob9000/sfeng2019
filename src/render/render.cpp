@@ -12,6 +12,7 @@ namespace render
 
 t_sdlcontext cont;
 
+bool cam_move_flags[4];
 t_camera camera;
 
 void render_all ()
@@ -41,7 +42,26 @@ void render_all ()
 	SDL_GL_SwapWindow(cont.window);
 }
 
-bool cam_move_flags[4];
+void gl_msg_callback (GLenum source, GLenum type, GLenum id, GLenum severity,
+		int msg_len, const char* msg, const void* param)
+{
+	const char* sev;
+	switch (severity) {
+	case GL_DEBUG_SEVERITY_HIGH:
+		sev = "high";
+		break;
+	case GL_DEBUG_SEVERITY_MEDIUM:
+		sev = "medium";
+		break;
+	case GL_DEBUG_SEVERITY_LOW:
+		sev = "low";
+		break;
+	default:
+		return;
+	}
+	core::warning("OpenGL %s-severity message: source %d, id %d\n%s",
+			sev, source, type, msg);
+}
 
 void init_text ();
 void init ()
@@ -83,6 +103,9 @@ void init ()
 
 	cont.renderer = SDL_CreateRenderer(cont.window, -1,
 			SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+
+	glEnable(GL_DEBUG_OUTPUT);
+	glDebugMessageCallback(&gl_msg_callback, nullptr);
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();

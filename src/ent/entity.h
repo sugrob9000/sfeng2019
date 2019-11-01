@@ -9,6 +9,8 @@
 namespace core
 {
 
+typedef std::map<std::string, void*> t_iomap;
+
 /*
  * The base entity class
  */
@@ -25,19 +27,27 @@ class e_base
 	virtual void think ();
 	virtual void render () const;
 	virtual void apply_keyvals (t_ent_keyvals& kv);
+
+	virtual const t_iomap& get_iomap () const;
 };
 
-#define ENT_DECL(name) class e_##name: public e_base
+#define ENT_CLASS(name) class e_##name: public e_base
 
-typedef std::map<std::string, void*> t_iomap;
+#define ENT_HEADER(name) \
+	extern t_iomap io_##name;
 
-#define ENT_GENERIC_DECLARATIONS(name)          \
+#define ENT_CPP(name)                              \
+	t_iomap io_##name;                         \
+	const t_iomap& e_##name::get_iomap() const \
+	{ return io_##name; }
+
+#define ENT_MEMBERS(name)                       \
 	public:                                 \
 	e_##name ();                            \
 	void think ();                          \
 	void render () const;                   \
 	void apply_keyvals (t_ent_keyvals& kv); \
-	static void init_signal_handlers ();    \
+	const t_iomap& get_iomap () const;      \
 	static t_iomap io;
 
 /*

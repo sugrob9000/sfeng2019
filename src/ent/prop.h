@@ -9,16 +9,15 @@
 namespace core
 {
 
-ENT_DECL (prop)
+ENT_HEADER (prop)
+ENT_CLASS (prop)
 {
 	public:
 
 	render::t_model* model;
 	render::t_material* material;
 
-	ENT_GENERIC_DECLARATIONS (prop)
-
-	void outcrd ();
+	ENT_MEMBERS (prop)
 };
 
 }

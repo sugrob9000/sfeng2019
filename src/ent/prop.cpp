@@ -5,10 +5,7 @@
 namespace core
 {
 
-void e_prop::outcrd ()
-{
-	DEBUG_EXPR(pos);
-}
+ENT_CPP(prop)
 
 e_prop::e_prop ()
 {

@@ -70,15 +70,13 @@ void init ()
 			SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
 			cont.res_x, cont.res_y,
 			SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
+	if (cont.window == nullptr)
+		core::fatal("SDL window creation failed: %s", SDL_GetError());
 
 	SDL_SetRelativeMouseMode(SDL_TRUE);
 	SDL_StopTextInput();
 
-	if (cont.window == nullptr)
-		core::fatal("SDL window creation failed: %s", SDL_GetError());
-
 	cont.glcont = SDL_GL_CreateContext(cont.window);
-
 	if (cont.glcont == nullptr)
 		core::fatal("SDL glcont creation failed: %s", SDL_GetError());
 
@@ -88,9 +86,6 @@ void init ()
 
 	cont.renderer = SDL_CreateRenderer(cont.window, -1,
 			SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-
-	glEnable(GL_DEBUG_OUTPUT);
-	glDebugMessageCallback(&gl_msg_callback, nullptr);
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();

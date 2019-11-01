@@ -48,4 +48,11 @@ e_base* t_entities::spawn (std::string type)
 	return ent;
 }
 
+
+std::priority_queue<t_signal> signals;
+bool operator< (const t_signal& a, const t_signal& b)
+{
+	return a.tick_due < b.tick_due;
+}
+
 };

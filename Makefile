@@ -7,6 +7,7 @@ WARNINGS = \
 	-Wall \
 	-Wextra \
 	-Wno-sign-compare \
+	-Wno-unused \
 	-Wno-attributes \
 	-Wno-cast-function-type \
 	-Wshadow

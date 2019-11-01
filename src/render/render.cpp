@@ -45,22 +45,7 @@ void render_all ()
 void gl_msg_callback (GLenum source, GLenum type, GLenum id, GLenum severity,
 		int msg_len, const char* msg, const void* param)
 {
-	const char* sev;
-	switch (severity) {
-	case GL_DEBUG_SEVERITY_HIGH:
-		sev = "high";
-		break;
-	case GL_DEBUG_SEVERITY_MEDIUM:
-		sev = "medium";
-		break;
-	case GL_DEBUG_SEVERITY_LOW:
-		sev = "low";
-		break;
-	default:
-		return;
-	}
-	core::warning("OpenGL %s-severity message: source %d, id %d\n%s",
-			sev, source, type, msg);
+	core::warning("OpenGL: %s", msg);
 }
 
 void init_text ();

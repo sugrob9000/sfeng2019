@@ -1,7 +1,8 @@
-#ifndef IO_H
-#define IO_H
+#ifndef SIGNAL_H
+#define SIGNAL_H
 
 #include "inc_general.h"
+#include <queue>
 
 namespace core
 {
@@ -20,6 +21,8 @@ struct t_signal
 	long long tick_due;
 	std::string in_name;
 	std::string argument;
+
+	void execute () const;
 };
 
 /*
@@ -34,4 +37,4 @@ extern std::priority_queue<t_signal> signals;
 
 }
 
-#endif // IO_H
+#endif // SIGNAL_H

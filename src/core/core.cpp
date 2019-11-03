@@ -1,7 +1,7 @@
 #include "inc_general.h"
 #include "core.h"
+#include "entity.h"
 #include "render/render.h"
-#include "ent/entity.h"
 #include "input/input.h"
 
 namespace core
@@ -23,13 +23,8 @@ void init (std::string conf)
 	input::run_script(conf);
 }
 
-void update ()
+void upd_camera_pos ()
 {
-	tick++;
-
-	for (e_base* e: ents.vec)
-		e->think();
-
 	const float cam_speed = 1.0;
 	vec3 cam_delta;
 	auto& flags = render::cam_move_flags;
@@ -55,6 +50,27 @@ void update ()
 
 	cam_delta.norm();
 	cam.pos += cam_delta * cam_speed;
+}
+
+void update ()
+{
+	tick++;
+
+	for (e_base* e: ents.vec)
+		e->think();
+
+	while (!signals.empty()) {
+		const t_signal& s = signals.top();
+		if (s.tick_due > tick) {
+			// all signals after this one
+			// are for later, too
+			break;
+		}
+		s.execute();
+		signals.pop();
+	}
+
+	upd_camera_pos();
 }
 
 void load_map (std::string path)

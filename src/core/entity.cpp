@@ -35,7 +35,7 @@ void fill_ent_registry ()
 {
 	#define ENT_REG(name) \
 		ent_reg[#name] = &ent_new<e_##name>;
-	#include "ent_list.inc"
+	#include "ent/ent_list.inc"
 	#undef ENT_REG
 }
 
@@ -50,13 +50,6 @@ e_base* t_entities::spawn (std::string type)
 	vec.push_back(ent);
 
 	return ent;
-}
-
-
-std::priority_queue<t_signal> signals;
-bool operator< (const t_signal& a, const t_signal& b)
-{
-	return a.tick_due < b.tick_due;
 }
 
 };

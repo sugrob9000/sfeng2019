@@ -2,7 +2,7 @@
 #define CORE_H
 
 #include "inc_general.h"
-#include "ent/entity.h"
+#include "core/entity.h"
 #include <queue>
 
 namespace core

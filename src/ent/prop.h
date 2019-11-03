@@ -1,7 +1,7 @@
 #ifndef ENT_PROP_H
 #define ENT_PROP_H
 
-#include "ent/entity.h"
+#include "core/entity.h"
 #include "render/render.h"
 #include "render/model.h"
 #include "render/material.h"

@@ -5,7 +5,7 @@
 #include "keyval.h"
 #include <map>
 #include <queue>
-#include "io.h"
+#include "signal.h"
 
 namespace core
 {
@@ -30,16 +30,28 @@ class e_base
 	virtual t_iomap& get_iomap () const;
 };
 
+/*
+ * Declare the entity class with this
+ */
 #define ENT_CLASS(name) class e_##name: public e_base
 
+/*
+ * Should be put in the entity's header
+ */
 #define ENT_HEADER(name) \
 	extern t_iomap io_##name;
 
+/*
+ * Should be put in the entity's implementation
+ */
 #define ENT_CPP(name)                        \
 	t_iomap io_##name;                   \
 	t_iomap& e_##name::get_iomap() const \
 	{ return io_##name; }
 
+/*
+ * Should be put inside the entity class declaration
+ */
 #define ENT_MEMBERS(name)                       \
 	public:                                 \
 	e_##name ();                            \
@@ -74,6 +86,6 @@ struct t_entities
 
 }
 
-#include "ent_headers.inc"
+#include "ent/ent_headers.inc"
 
 #endif // ENTITY_H

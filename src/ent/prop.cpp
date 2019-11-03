@@ -1,6 +1,6 @@
 #include "prop.h"
 #include "render/resource.h"
-#include "ent/io.h"
+#include "core/signal.h"
 
 namespace core
 {

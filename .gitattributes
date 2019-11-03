@@ -1,0 +1,5 @@
+# treat files as binary
+*.obj binary
+*.tga binary
+*.rvd binary
+

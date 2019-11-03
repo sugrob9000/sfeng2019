@@ -1,7 +1,4 @@
 *.vim
-*.obj
-*.rvd
-*.tga
 *.bmp
 
 # Compiled Object files

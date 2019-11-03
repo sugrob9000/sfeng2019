@@ -20,6 +20,8 @@ ENT_CLASS (prop)
 	ENT_MEMBERS (prop)
 };
 
+SIG_HANDLER (prop, showcrd);
+
 }
 
 #endif // ENT_PROP_H

@@ -27,7 +27,7 @@ class e_base
 	virtual void render () const;
 	virtual void apply_keyvals (t_ent_keyvals& kv);
 
-	virtual const t_iomap& get_iomap () const;
+	virtual t_iomap& get_iomap () const;
 };
 
 #define ENT_CLASS(name) class e_##name: public e_base
@@ -37,7 +37,7 @@ class e_base
 
 #define ENT_CPP(name)                        \
 	t_iomap io_##name;                   \
-	const t_iomap& e_##name::get_iomap() const \
+	t_iomap& e_##name::get_iomap() const \
 	{ return io_##name; }
 
 #define ENT_MEMBERS(name)                       \
@@ -46,7 +46,7 @@ class e_base
 	void think ();                          \
 	void render () const;                   \
 	void apply_keyvals (t_ent_keyvals& kv); \
-	const t_iomap& get_iomap () const;      \
+	t_iomap& get_iomap () const;            \
 	static t_iomap io;
 
 

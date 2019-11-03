@@ -9,7 +9,7 @@ e_base::e_base () { }
 void e_base::think () { }
 void e_base::render () const { }
 
-const t_iomap& e_base::get_iomap () const
+t_iomap& e_base::get_iomap () const
 {
 	core::fatal("Tried to get iomap of base entity class");
 }

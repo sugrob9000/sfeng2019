@@ -5,7 +5,12 @@
 namespace core
 {
 
-ENT_CPP(prop)
+ENT_CPP (prop)
+
+SIG_HANDLER (prop, showcrd)
+{
+	DEBUG_EXPR(ent->pos);
+}
 
 e_prop::e_prop ()
 {

@@ -32,10 +32,11 @@ struct t_ent_keyvals
 #define KV_TRY_GET(kvv, if_there, if_not_there) \
 	do {                                    \
 		const std::string& val = kvv;   \
-		if (val.empty())                \
-			if_not_there            \
-		else                            \
-			if_there                \
+		if (val.empty()) {              \
+			if_not_there;           \
+		} else {                        \
+			if_there;               \
+		}                               \
 	} while (false)
 
 #endif // KEYVAL_H

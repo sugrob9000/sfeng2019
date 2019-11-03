@@ -5,6 +5,7 @@
 namespace core
 {
 
+[[noreturn]]
 void fatal (const char* format, ...)
 {
 	va_list args;

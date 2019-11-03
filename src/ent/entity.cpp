@@ -9,15 +9,19 @@ e_base::e_base () { }
 void e_base::think () { }
 void e_base::render () const { }
 
+const t_iomap& e_base::get_iomap () const
+{
+	core::fatal("Tried to get iomap of base entity class");
+}
+
 /*
- * Mostly an exemplar, since any entity
- * should really implement the reading of itself
+ * Exemplar
  */
 void e_base::apply_keyvals (t_ent_keyvals& kv)
 {
 	KV_TRY_GET(kv["pos"],
 		atovec3(val, pos);,
-		pos = vec3(0.0, 0.0, 0.0); );
+		pos = vec3(); );
 }
 
 

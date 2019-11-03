@@ -5,11 +5,10 @@
 #include "keyval.h"
 #include <map>
 #include <queue>
+#include "io.h"
 
 namespace core
 {
-
-typedef std::map<std::string, void*> t_iomap;
 
 /*
  * The base entity class
@@ -36,8 +35,8 @@ class e_base
 #define ENT_HEADER(name) \
 	extern t_iomap io_##name;
 
-#define ENT_CPP(name)                              \
-	t_iomap io_##name;                         \
+#define ENT_CPP(name)                        \
+	t_iomap io_##name;                   \
 	const t_iomap& e_##name::get_iomap() const \
 	{ return io_##name; }
 
@@ -49,6 +48,7 @@ class e_base
 	void apply_keyvals (t_ent_keyvals& kv); \
 	const t_iomap& get_iomap () const;      \
 	static t_iomap io;
+
 
 /*
  * Mapping entity class names (such as prop)
@@ -71,25 +71,6 @@ struct t_entities
 	e_base* spawn (std::string type);
 	e_base* find_by_name (std::string name);
 };
-
-
-/*
- * Entities can be set to send signals
- * to one another
- */
-struct t_signal
-{
-	std::string recipient_name;
-	long long tick_due;
-	std::string in_name;
-	std::string argument;
-};
-/*
- * Keep a queue of signals, sorted by when they
- * are due to happen
- */
-bool operator< (const t_signal& a, const t_signal& b);
-extern std::priority_queue<t_signal> signals;
 
 }
 

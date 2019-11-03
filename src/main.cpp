@@ -3,6 +3,7 @@
 #include "core/core.h"
 #include "input/input.h"
 #include "input/bind.h"
+#include "input/console.h"
 
 #include <chrono>
 
@@ -14,6 +15,8 @@ int main (int argc, char** argv)
 	input::run_argv_commands(argc, argv);
 
 	render::init();
+	input::console.close();
+
 	render::camera = render::t_camera(vec3(), vec3(), 500.0, 1.0, 60);
 
 	core::load_map("res/maps/map1");

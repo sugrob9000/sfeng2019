@@ -73,9 +73,6 @@ void init ()
 	if (cont.window == nullptr)
 		core::fatal("SDL window creation failed: %s", SDL_GetError());
 
-	SDL_SetRelativeMouseMode(SDL_TRUE);
-	SDL_StopTextInput();
-
 	cont.glcont = SDL_GL_CreateContext(cont.window);
 	if (cont.glcont == nullptr)
 		core::fatal("SDL glcont creation failed: %s", SDL_GetError());

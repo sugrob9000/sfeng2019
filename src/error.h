@@ -6,7 +6,7 @@
 namespace core
 {
 
-void fatal (const char* format, ...);
+[[noreturn]] void fatal (const char* format, ...);
 void warning (const char* format, ...);
 
 }

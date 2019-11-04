@@ -7,23 +7,20 @@ namespace core
 
 ENT_CPP (prop)
 
-FILL_IO_MAPS(prop)
-{
-	SET_SIG_HANDLER(prop, showcrd);
-}
-
 SIG_HANDLER (prop, showcrd)
 {
 	DEBUG_EXPR(ent->pos);
 }
 
-e_prop::e_prop ()
+FILL_IO_MAPS(prop)
 {
+	SET_SIG_HANDLER(prop, showcrd);
 }
 
-void e_prop::think ()
-{
-}
+
+e_prop::e_prop () { }
+
+void e_prop::think () { }
 
 void e_prop::apply_keyvals (t_ent_keyvals& kv)
 {

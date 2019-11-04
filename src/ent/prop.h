@@ -21,8 +21,6 @@ class e_prop: public e_base
 	ENT_MEMBERS (prop)
 };
 
-SIG_HANDLER (prop, showcrd);
-
 }
 
 #endif // ENT_PROP_H

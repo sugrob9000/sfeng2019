@@ -32,8 +32,20 @@ struct t_signal
 bool operator< (const t_signal& a, const t_signal& b);
 extern std::priority_queue<t_signal> signals;
 
-template <class e_derived>
+template <class entclass>
 void fill_io_maps ();
+
+/*
+ * With these the entity can set up its own signal handlers.
+ *
+ * Each handler implementation should be declared with
+ *   SIG_HANDLER. Note that it doesn't have to be in the header
+ *
+ * Then there must be a function declared with FILL_IO_MAPS,
+ *   which should call SET_SIG_HANDLER with entity name
+ *   and the handler name. Again, FILL_IO_MAPS doesn't have
+ *   to be in the header, since it's prototyped as a template.
+ */
 
 #define FILL_IO_MAPS(entclass) \
 	template <> void fill_io_maps<e_##entclass> ()

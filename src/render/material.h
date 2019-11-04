@@ -45,6 +45,8 @@ struct t_material
 t_shader_id compile_glsl (std::string path, GLenum shadertype);
 t_texture_id load_texture (std::string path);
 
+int get_surface_gl_format (SDL_Surface* s);
+
 }
 
 #endif // MATERIAL_H

@@ -117,10 +117,22 @@ bool t_model_mem::load_rvd (std::string path)
 {
 	std::ifstream f(path, std::ios::binary);
 	verts.clear();
+
 	if (!f)
 		return false;
+
 	int32_t vertnum = -1;
+
+	int filesize;
+	f.seekg(0, f.end);
+	filesize = f.tellg();
+	f.seekg(0, f.beg);
+
 	f.read((char*) &vertnum, sizeof(vertnum));
+
+	if (filesize != vertnum * sizeof(t_vertex) + sizeof(vertnum))
+		return false;
+
 	verts.resize(vertnum);
 	f.read((char*) verts.data(), vertnum * sizeof(t_vertex));
 	return true;

@@ -56,7 +56,7 @@ t_shader_id compile_glsl (std::string path, GLenum type)
 	return 0;
 }
 
-void t_material::load(std::string path)
+void t_material::load (std::string path)
 {
 	std::ifstream f(path);
 
@@ -126,6 +126,24 @@ void t_material::apply ()
 	}
 }
 
+int get_surface_gl_format (SDL_Surface* s)
+{
+	// checking where alpha and red channels are
+	// should be enough to understand the format
+	switch (((uint64_t) s->format->Amask << 32)
+		| (uint64_t) s->format->Rmask) {
+	case 0x00FF0000:
+		return GL_BGR;
+	case 0x000000FF:
+		return GL_RGB;
+	case 0xFF00000000FF0000:
+		return GL_BGRA;
+	case 0xFF000000000000FF:
+		return GL_RGBA;
+	default:
+		return -1;
+	}
+}
 
 t_texture_id load_texture (std::string path)
 {
@@ -133,6 +151,12 @@ t_texture_id load_texture (std::string path)
 
 	if (surf == nullptr)
 		return 0;
+
+	int format = get_surface_gl_format(surf);
+	if (format == -1) {
+		core::warning("Texture %s uses bogus format", path.c_str());
+		return 0;
+	}
 
 	t_texture_id id;
 
@@ -149,29 +173,6 @@ t_texture_id load_texture (std::string path)
 
 	// mipmap
 	int level = 0;
-	int format;
-
-	// checking where alpha and red channels are
-	// should be enough to understand the format
-	switch (((uint64_t) surf->format->Amask << 32)
-		| (uint64_t) surf->format->Rmask) {
-	case 0x00FF0000:
-		format = GL_BGR;
-		break;
-	case 0x000000FF:
-		format = GL_RGB;
-		break;
-	case 0xFF00000000FF0000:
-		format = GL_BGRA;
-		break;
-	case 0xFF000000000000FF:
-		format = GL_RGBA;
-		break;
-	default:
-		core::warning("Texture %s uses bogus format", path.c_str());
-		return 0;
-	}
-
 	int w = surf->w;
 	int h = surf->h;
 	GLubyte* p = (GLubyte*) surf->pixels;
@@ -180,8 +181,7 @@ t_texture_id load_texture (std::string path)
 		glTexImage2D(GL_TEXTURE_2D, level++,
 				GL_RGBA, w, h,
 				0, format, GL_UNSIGNED_BYTE, p);
-		gluScaleImage(format,
-				w, h, GL_UNSIGNED_BYTE, p,
+		gluScaleImage(format, w, h, GL_UNSIGNED_BYTE, p,
 				w / 2, h / 2, GL_UNSIGNED_BYTE, p);
 		w /= 2;
 		h /= 2;

@@ -1,1 +1,1 @@
-ENT_REG(prop)
+ENTITY(prop)

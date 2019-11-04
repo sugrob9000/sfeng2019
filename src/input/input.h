@@ -14,8 +14,8 @@ const uint8_t RELEASE = 1;
 
 typedef std::vector<std::string> t_cmd_args;
 
-typedef void (*t_cmd_routine) (const t_cmd_args&, uint8_t);
-typedef void (*t_mousemove_routine) (int dx, int dy, int abx, int aby);
+typedef void (*f_cmd_routine) (const t_cmd_args&, uint8_t);
+typedef void (*f_mousemove_routine) (int dx, int dy, int abx, int aby);
 
 /*
  * Instances of this class are *not* supposed to be created
@@ -38,7 +38,7 @@ struct t_command
  */
 struct t_action
 {
-	t_cmd_routine routine;
+	f_cmd_routine routine;
 };
 
 struct t_command_registry
@@ -47,11 +47,11 @@ struct t_command_registry
 
 	void register_command (
 			std::string name,
-			t_cmd_routine routine);
+			f_cmd_routine routine);
 	void run (const t_command& cmd, uint8_t ev);
 };
 extern t_command_registry cmd_registry;
-extern t_mousemove_routine mousemove_proc;
+extern f_mousemove_routine mousemove_proc;
 
 void init ();
 void run_argv_commands (int argc, const char* const* argv);

@@ -7,6 +7,11 @@ namespace core
 
 ENT_CPP (prop)
 
+void fill_prop_iomap ()
+{
+	SET_SIG_HANDLER(prop, showcrd);
+}
+
 SIG_HANDLER (prop, showcrd)
 {
 	DEBUG_EXPR(ent->pos);

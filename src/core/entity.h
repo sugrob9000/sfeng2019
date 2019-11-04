@@ -31,18 +31,14 @@ class e_base
 };
 
 /*
- * Declare the entity class with this
- */
-#define ENT_CLASS(name) class e_##name: public e_base
-
-/*
- * Should be put in the entity's header
+ * Goes in the entity's header
  */
 #define ENT_HEADER(name) \
-	extern t_iomap io_##name;
+	extern t_iomap io_##name; \
+	void fill_##name##_iomap ();
 
 /*
- * Should be put in the entity's implementation
+ * Goes in the entity's implementation
  */
 #define ENT_CPP(name)                        \
 	t_iomap io_##name;                   \
@@ -50,7 +46,7 @@ class e_base
 	{ return io_##name; }
 
 /*
- * Should be put inside the entity class declaration
+ * Goes inside the entity class declaration
  */
 #define ENT_MEMBERS(name)                       \
 	public:                                 \
@@ -67,8 +63,8 @@ class e_base
  * to C++ classes
  */
 template <class e_derived> e_base* ent_new ();
-typedef e_base* (*t_ent_spawner) ();
-typedef std::map<std::string, t_ent_spawner> t_ent_registry;
+typedef e_base* (*f_ent_spawner) ();
+typedef std::map<std::string, f_ent_spawner> t_ent_registry;
 extern t_ent_registry ent_reg;
 void fill_ent_registry ();
 

@@ -33,15 +33,17 @@ e_base* ent_new ()
 
 void fill_ent_registry ()
 {
-	#define ENT_REG(name) \
-		ent_reg[#name] = &ent_new<e_##name>;
+	#define ENTITY(name) {                       \
+		ent_reg[#name] = &ent_new<e_##name>; \
+		fill_##name##_iomap();               \
+	}
 	#include "ent/ent_list.inc"
-	#undef ENT_REG
+	#undef ENTITY
 }
 
 e_base* t_entities::spawn (std::string type)
 {
-	t_ent_spawner spawner = ent_reg[type];
+	f_ent_spawner spawner = ent_reg[type];
 
 	if (spawner == nullptr)
 		return nullptr;

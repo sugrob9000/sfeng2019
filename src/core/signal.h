@@ -8,8 +8,8 @@ namespace core
 {
 
 class e_base;
-typedef void (*t_sig_handler) (e_base* ent, std::string arg);
-typedef std::map<std::string, void*> t_iomap;
+typedef void (*f_sig_handler) (e_base* ent, std::string arg);
+typedef std::map<std::string, f_sig_handler> t_iomap;
 
 /*
  * Entities can be set to send signals
@@ -32,8 +32,15 @@ struct t_signal
 bool operator< (const t_signal& a, const t_signal& b);
 extern std::priority_queue<t_signal> signals;
 
+
 #define SIG_HANDLER(entclass, name) \
 	void sig_##entclass##_##name (e_##entclass* ent, std::string arg)
+
+#define SET_SIG_HANDLER(entclass, name)                   \
+	do {                                              \
+		io_##entclass[#name] = (f_sig_handler)    \
+				&sig_##entclass##_##name; \
+	} while (false)
 
 }
 

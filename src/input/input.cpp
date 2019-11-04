@@ -7,7 +7,7 @@ namespace input
 {
 
 t_command_registry cmd_registry;
-t_mousemove_routine mousemove_proc;
+f_mousemove_routine mousemove_proc;
 
 void init ()
 {
@@ -109,7 +109,7 @@ t_command parse_command (std::string str)
 
 void t_command_registry::register_command (
 		std::string name,
-		t_cmd_routine routine)
+		f_cmd_routine routine)
 {
 	m[name].routine = routine;
 }
@@ -121,7 +121,7 @@ void t_command_registry::run (const t_command& cmd, uint8_t ev)
 		return;
 
 	t_action& action = i->second;
-	t_cmd_routine& routine = action.routine;
+	f_cmd_routine& routine = action.routine;
 
 	if (routine != nullptr)
 		routine(cmd.args, ev);

@@ -19,7 +19,7 @@ struct t_signal
 {
 	std::string recipient_name;
 	long long tick_due;
-	std::string in_name;
+	std::string signal_name;
 	std::string argument;
 
 	void execute () const;
@@ -32,6 +32,11 @@ struct t_signal
 bool operator< (const t_signal& a, const t_signal& b);
 extern std::priority_queue<t_signal> signals;
 
+template <class e_derived>
+void fill_io_maps ();
+
+#define FILL_IO_MAPS(entclass) \
+	template <> void fill_io_maps<e_##entclass> ()
 
 #define SIG_HANDLER(entclass, name) \
 	void sig_##entclass##_##name (e_##entclass* ent, std::string arg)

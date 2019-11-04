@@ -50,6 +50,12 @@ void handle_input_ev (const SDL_Event& e)
 	case SDL_MOUSEBUTTONUP:
 		handle_key(scan_mouse[e.button.button], RELEASE);
 		break;
+	case SDL_MOUSEMOTION:
+		if (mousemove_proc != nullptr) {
+			mousemove_proc(e.motion.xrel, e.motion.yrel,
+					e.motion.x, e.motion.y);
+		}
+		break;
 	case SDL_MOUSEWHEEL: {
 		int y = e.wheel.y;
 		SDL_Scancode scan = scan_mwheel_up;
@@ -61,10 +67,6 @@ void handle_input_ev (const SDL_Event& e)
 			handle_key(scan, PRESS);
 		break;
 	}
-	case SDL_MOUSEMOTION:
-		mousemove_proc(e.motion.xrel, e.motion.yrel,
-				e.motion.x, e.motion.y);
-		break;
 	}
 }
 

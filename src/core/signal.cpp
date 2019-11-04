@@ -13,7 +13,7 @@ void t_signal::execute () const
 {
 	DEBUG_EXPR(tick_due);
 	DEBUG_EXPR(recipient_name);
-	DEBUG_EXPR(in_name);
+	DEBUG_EXPR(signal_name);
 	DEBUG_EXPR(argument);
 }
 

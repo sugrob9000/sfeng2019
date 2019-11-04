@@ -7,7 +7,7 @@ namespace core
 
 ENT_CPP (prop)
 
-void fill_prop_iomap ()
+FILL_IO_MAPS(prop)
 {
 	SET_SIG_HANDLER(prop, showcrd);
 }

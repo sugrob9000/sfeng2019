@@ -35,7 +35,6 @@ class e_base
  */
 #define ENT_HEADER(name) \
 	extern t_iomap io_##name; \
-	void fill_##name##_iomap ();
 
 /*
  * Goes in the entity's implementation

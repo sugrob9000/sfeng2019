@@ -1,6 +1,7 @@
 #include "inc_general.h"
 #include "model.h"
 #include "render.h"
+#include "input/cmds.h"
 
 namespace render
 {
@@ -138,4 +139,30 @@ bool t_model_mem::load_rvd (std::string path)
 	return true;
 }
 
+} // namespace render
+
+COMMAND_ROUTINE (obj2rvd)
+{
+	if (ev != PRESS)
+		return;
+	if (args.empty())
+		return;
+
+	const std::string& in = args[0];
+	std::string out;
+
+	if (args.size() > 1) {
+		out = args[1];
+	} else {
+		// add .rvd at the end or instead of .obj
+		out = in;
+		int size = out.size();
+		if (size > 4 && out.compare(size-4, 4, ".obj") == 0)
+			out.erase(size-4, std::string::npos);
+		out += ".rvd";
+	}
+
+	render::t_model_mem model;
+	model.load_obj(in);
+	model.dump_rvd(out);
 }

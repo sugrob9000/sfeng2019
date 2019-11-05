@@ -6,6 +6,7 @@
 #include "core/core.h"
 #include "input/input.h"
 #include "input/console.h"
+#include "input/cmds.h"
 
 namespace render
 {
@@ -237,4 +238,48 @@ void draw_text (const char* str, int x, int y)
 	glEnd();
 }
 
+} // namespace render
+
+COMMAND_ROUTINE (move_cam)
+{
+	if (args.empty())
+		return;
+
+	auto& flags = render::cam_move_flags;
+	bool f = (ev == PRESS);
+
+	switch (tolower(args[0][0])) {
+	case 'f':
+		flags[render::cam_move_f] = f;
+		break;
+	case 'b':
+		flags[render::cam_move_b] = f;
+		break;
+	case 'l':
+		flags[render::cam_move_l] = f;
+		break;
+	case 'r':
+		flags[render::cam_move_r] = f;
+		break;
+	}
+}
+
+MOUSEMOVE_ROUTINE (mousemove_camera)
+{
+	render::camera.ang.x += dy;
+	render::camera.ang.z += dx;
+}
+
+COMMAND_ROUTINE (windowsize)
+{
+	if (ev != PRESS)
+		return;
+	if (args.size() != 2)
+		return;
+	int w = std::atoi(args[0].c_str());
+	int h = std::atoi(args[1].c_str());
+	if (w == 0 || h == 0)
+		return;
+
+	render::resize_window(w, h);
 }

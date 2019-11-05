@@ -3,9 +3,9 @@ bind Escape exit
 
 bind R console_open
 
-bind W move f
-bind A move l
-bind S move b
-bind D move r
+bind W move_cam f
+bind A move_cam l
+bind S move_cam b
+bind D move_cam r
 
 windowsize 800 600

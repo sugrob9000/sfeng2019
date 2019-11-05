@@ -34,9 +34,10 @@ COMMAND (console_close)
 COMMAND (exec)
 
 /*
- * Move the camera
+ * Start/stop moving the camera in a direction
+ * (f, l, r, b for forward, left, right, backward respectively)
  */
-COMMAND (move)
+COMMAND (move_cam)
 
 /*
  * Set app window size

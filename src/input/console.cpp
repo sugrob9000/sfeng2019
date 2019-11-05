@@ -1,5 +1,6 @@
 #include "console.h"
 #include <algorithm>
+#include "cmds.h"
 
 namespace input
 {
@@ -154,4 +155,16 @@ void t_console_info::render ()
 	glPopMatrix();
 }
 
+} // namespace input
+
+COMMAND_ROUTINE (console_open)
+{
+	if (ev == PRESS)
+		input::console.open();
+}
+
+COMMAND_ROUTINE (console_close)
+{
+	if (ev == PRESS)
+		input::console.close();
 }

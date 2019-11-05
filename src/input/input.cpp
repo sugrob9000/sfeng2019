@@ -141,4 +141,35 @@ void run_script (std::string path)
 	}
 }
 
+} // namespace input
+
+COMMAND_ROUTINE (bind)
+{
+	if (ev != PRESS)
+		return;
+	if (args.size() < 2)
+		return;
+
+	std::string keyname = args[0];
+	for (char& c: keyname) {
+		if (c == '_')
+			c = ' ';
+	}
+
+	std::string bind;
+	for (int i = 1; i < args.size(); i++) {
+		bind += args[i];
+		bind += ' ';
+	}
+
+	key_binds.add_bind(scancode_from_name(keyname),
+			parse_command(bind));
+}
+
+COMMAND_ROUTINE (exec)
+{
+	if (ev != PRESS)
+		return;
+	for (const std::string& s: args)
+		run_script(s);
 }

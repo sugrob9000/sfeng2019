@@ -60,6 +60,7 @@ constexpr short cam_move_b = 1;
 constexpr short cam_move_l = 2;
 constexpr short cam_move_r = 3;
 extern bool cam_move_flags[4];
+void upd_camera_pos ();
 
 void init ();
 void render_all ();

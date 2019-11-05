@@ -32,8 +32,6 @@ struct t_signal
 bool operator< (const t_signal& a, const t_signal& b);
 extern std::priority_queue<t_signal> signals;
 
-template <class entclass>
-void fill_io_maps ();
 
 /*
  * With these the entity can set up its own signal handlers.
@@ -53,11 +51,14 @@ void fill_io_maps ();
 #define SIG_HANDLER(entclass, name) \
 	void sig_##entclass##_##name (e_##entclass* ent, std::string arg)
 
-#define SET_SIG_HANDLER(entclass, name)                   \
-	do {                                              \
-		io_##entclass[#name] = (f_sig_handler)    \
-				&sig_##entclass##_##name; \
+#define SET_SIG_HANDLER(entclass, name)                      \
+	do {                                                 \
+		iomap<e_##entclass>[#name] = (f_sig_handler) \
+				&sig_##entclass##_##name;    \
 	} while (false)
+
+template <class entclass> void fill_io_maps ();
+template <class entclass> t_iomap iomap;
 
 }
 

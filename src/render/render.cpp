@@ -15,6 +15,35 @@ t_sdlcontext cont;
 bool cam_move_flags[4];
 t_camera camera;
 
+void upd_camera_pos ()
+{
+	const float speed = 1.0;
+	vec3 delta;
+	auto& flags = cam_move_flags;
+	t_camera& cam = camera;
+
+	if (cam.ang.x < -90.0)
+		cam.ang.x = -90.0;
+	if (cam.ang.x > 90.0)
+		cam.ang.x = 90.0;
+
+	float sz = sinf(cam.ang.z * DEG_TO_RAD);
+	float sx = sinf(cam.ang.x * DEG_TO_RAD);
+	float cz = cosf(cam.ang.z * DEG_TO_RAD);
+
+	if (flags[cam_move_f])
+		delta += vec3(sz, cz, -sx);
+	if (flags[cam_move_b])
+		delta -= vec3(sz, cz, -sx);
+	if (flags[cam_move_l])
+		delta -= vec3(cz, -sz, 0.0);
+	if (flags[cam_move_r])
+		delta += vec3(cz, -sz, 0.0);
+
+	delta.norm();
+	cam.pos += delta * speed;
+}
+
 void render_all ()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

@@ -155,6 +155,7 @@ t_texture_id load_texture (std::string path)
 	int format = get_surface_gl_format(surf);
 	if (format == -1) {
 		core::warning("Texture %s uses bogus format", path.c_str());
+		SDL_FreeSurface(surf);
 		return 0;
 	}
 

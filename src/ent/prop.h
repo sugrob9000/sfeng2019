@@ -9,8 +9,6 @@
 namespace core
 {
 
-ENT_HEADER (prop)
-
 class e_prop: public e_base
 {
 	public:

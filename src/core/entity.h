@@ -31,20 +31,6 @@ class e_base
 };
 
 /*
- * Goes in the entity's header
- */
-#define ENT_HEADER(name) \
-	extern t_iomap io_##name; \
-
-/*
- * Goes in the entity's implementation
- */
-#define ENT_CPP(name)                        \
-	t_iomap io_##name;                   \
-	t_iomap& e_##name::get_iomap() const \
-	{ return io_##name; }
-
-/*
  * Goes inside the entity class declaration
  */
 #define ENT_MEMBERS(name)                       \
@@ -52,9 +38,7 @@ class e_base
 	e_##name ();                            \
 	void think ();                          \
 	void render () const;                   \
-	void apply_keyvals (t_ent_keyvals& kv); \
-	t_iomap& get_iomap () const;            \
-	static t_iomap io;
+	void apply_keyvals (t_ent_keyvals& kv);
 
 
 /*

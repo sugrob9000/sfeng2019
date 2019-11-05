@@ -18,8 +18,6 @@ void init ()
 	#undef COMMAND
 
 	mousemove_proc = &cmd::mousemove_camera;
-
-	console.close();
 }
 
 void run_argv_commands (int argc, const char* const* argv)

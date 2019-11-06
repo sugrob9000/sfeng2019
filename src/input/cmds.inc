@@ -48,3 +48,9 @@ COMMAND (windowsize)
  * Convert an obj model to rvd
  */
 COMMAND (obj2rvd)
+
+/*
+ * Fire a signal to an entity:
+ * signal [recipient] [delay] [signal name] [arguments...]
+ */
+COMMAND (signal)

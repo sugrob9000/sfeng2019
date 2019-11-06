@@ -17,7 +17,7 @@ typedef std::map<std::string, f_sig_handler> t_iomap;
  */
 struct t_signal
 {
-	std::string recipient_name;
+	std::string target;
 	long long tick_due;
 	std::string signal_name;
 	std::string argument;
@@ -32,6 +32,11 @@ struct t_signal
 bool operator< (const t_signal& a, const t_signal& b);
 extern std::priority_queue<t_signal> signals;
 
+/*
+ * The basic routine used to fire a signal
+ */
+void sig_add (std::string recipient, int delay,
+		std::string name, std::string arg);
 
 /*
  * With these the entity can set up its own signal handlers.

@@ -45,4 +45,4 @@ SDL_Scancode scancode_from_name (std::string name)
 	return SDL_GetScancodeFromName(name.c_str());
 }
 
-}
+} // namespace input

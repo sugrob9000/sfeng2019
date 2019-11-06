@@ -44,4 +44,4 @@ void e_prop::render () const
 	glPopMatrix();
 }
 
-}
+} // namespace core

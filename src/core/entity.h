@@ -26,18 +26,16 @@ class e_base
 	virtual void think ();
 	virtual void render () const;
 	virtual void apply_keyvals (t_ent_keyvals& kv);
-
-	virtual t_iomap& get_iomap () const;
 };
 
 /*
  * Goes inside the entity class declaration
  */
-#define ENT_MEMBERS(name)                       \
-	public:                                 \
-	e_##name ();                            \
-	void think ();                          \
-	void render () const;                   \
+#define ENT_MEMBERS(name)     \
+	public:               \
+	e_##name ();          \
+	void think ();        \
+	void render () const; \
 	void apply_keyvals (t_ent_keyvals& kv);
 
 

@@ -9,11 +9,6 @@ e_base::e_base () { }
 void e_base::think () { }
 void e_base::render () const { }
 
-t_iomap& e_base::get_iomap () const
-{
-	core::fatal("Tried to get iomap of base entity class");
-}
-
 /*
  * Exemplar
  */
@@ -54,4 +49,4 @@ e_base* t_entities::spawn (std::string type)
 	return ent;
 }
 
-};
+} // namespace core

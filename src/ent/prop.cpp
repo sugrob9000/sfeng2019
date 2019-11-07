@@ -20,11 +20,10 @@ e_prop::e_prop () { }
 
 void e_prop::think () { }
 
-void e_prop::apply_keyvals (t_ent_keyvals& kv)
+void e_prop::apply_keyvals (const t_ent_keyvals& kv)
 {
-	KV_TRY_GET(kv["pos"],
-		atovec3(val, pos);,
-		pos = vec3(0.0, 0.0, 0.0); );
+	apply_basic_keyvals(kv);
+
 	KV_TRY_GET(kv["model"],
 		model = render::get_model(val);,
 		model = nullptr; );
@@ -38,6 +37,8 @@ void e_prop::render () const
 	glPushMatrix();
 
 	material->apply();
+
+	render::rotate_gl_matrix(ang);
 	glTranslatef(pos.x, pos.y, pos.z);
 	model->render();
 

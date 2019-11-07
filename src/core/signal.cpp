@@ -1,5 +1,6 @@
 #include "signal.h"
 #include "input/cmds.h"
+#include "core.h"
 
 namespace core
 {
@@ -12,10 +13,19 @@ bool operator< (const t_signal& a, const t_signal& b)
 
 void t_signal::execute () const
 {
-	DEBUG_EXPR(tick_due);
-	DEBUG_EXPR(target);
-	DEBUG_EXPR(signal_name);
-	DEBUG_EXPR(argument);
+	e_base* e = ents.find_by_name(target);
+	if (e == nullptr)
+		return;
+
+	const t_iomap& sigmap = e->get_iomap();
+	auto i = sigmap.find(signal_name);
+
+	if (i == sigmap.end())
+		return;
+
+	f_sig_handler routine = i->second;
+	if (routine != nullptr)
+		routine(e, argument);
 }
 
 void sig_add (std::string target, int delay,

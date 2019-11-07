@@ -128,6 +128,14 @@ void resize_window (int w, int h)
 	glViewport(0, 0, w, h);
 }
 
+void rotate_gl_matrix (vec3 angs)
+{
+	glRotatef(angs.x, 1.0, 0.0, 0.0);
+	glRotatef(angs.y, 0.0, 1.0, 0.0);
+	glRotatef(angs.z, 0.0, 0.0, 1.0);
+}
+
+
 t_camera::t_camera () { }
 
 t_camera::t_camera (
@@ -152,9 +160,7 @@ void t_camera::apply ()
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	glRotatef(ang.x, 1.0, 0.0, 0.0);
-	glRotatef(ang.y, 0.0, 1.0, 0.0);
-	glRotatef(ang.z, 0.0, 0.0, 1.0);
+	rotate_gl_matrix(ang);
 	glTranslatef(-pos.x, -pos.y, -pos.z);
 }
 

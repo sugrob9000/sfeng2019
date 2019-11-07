@@ -69,6 +69,11 @@ void resize_window (int w, int h);
 const SDL_Color text_color = { 200, 200, 200, 255 };
 void draw_text (const char* text, int x, int y);
 
+/*
+ * To use instead of 3 glRotatef's on the spot
+ */
+void rotate_gl_matrix (vec3 angs);
+
 }
 
 #endif // RENDER_H

@@ -8,12 +8,12 @@ namespace core
 
 struct t_ent_keyvals
 {
-	public:
 	std::map<std::string, std::string> m;
 	static const std::string none;
 
 	const std::string& operator[] (std::string s) const;
 	void add (std::string key, std::string value);
+	void clear ();
 };
 
 }

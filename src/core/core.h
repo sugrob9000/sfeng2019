@@ -12,8 +12,6 @@ extern bool must_quit;
 extern int exit_code;
 extern long long tick;
 
-extern t_entities ents;
-
 void update ();
 
 /*

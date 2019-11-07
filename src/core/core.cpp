@@ -11,7 +11,6 @@ namespace core
 bool must_quit;
 int exit_code;
 long long tick;
-t_entities ents;
 
 void init (std::string conf)
 {
@@ -59,6 +58,7 @@ void load_map (std::string path)
 		{
 			if (cur_ent != nullptr)
 				cur_ent->apply_keyvals(kv);
+			kv.clear();
 		};
 
 	for (std::string line; std::getline(f, line); ) {
@@ -87,7 +87,7 @@ void load_map (std::string path)
 				key_end++;
 
 			kv.add(line.substr(key_begin, key_end-key_begin),
-			       line.substr(key_end + 1, std::string::npos));
+			       line.substr(key_end + 1));
 		} else {
 			// does not begin with whitespace: is a new entity
 

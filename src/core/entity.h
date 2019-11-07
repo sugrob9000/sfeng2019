@@ -22,10 +22,19 @@ class e_base
 
 	std::string name;
 
-	e_base ();
-	virtual void think ();
-	virtual void render () const;
-	virtual void apply_keyvals (t_ent_keyvals& kv);
+	/*
+	 * Get pos, ang, and name. Your entity should probably do this
+	 */
+	void apply_basic_keyvals (const t_ent_keyvals& kv);
+
+	e_base () { };
+	virtual void think () = 0;
+	virtual void render () const = 0;
+	virtual void apply_keyvals (const t_ent_keyvals& kv) = 0;
+	virtual const t_iomap& get_iomap () const = 0;
+
+	private:
+	void set_name (std::string name);
 };
 
 /*
@@ -36,7 +45,9 @@ class e_base
 	e_##name ();          \
 	void think ();        \
 	void render () const; \
-	void apply_keyvals (t_ent_keyvals& kv);
+	const t_iomap& get_iomap () const \
+	{ return iomap<e_##name>; } \
+	void apply_keyvals (const t_ent_keyvals& kv);
 
 
 /*
@@ -60,6 +71,7 @@ struct t_entities
 	e_base* spawn (std::string type);
 	e_base* find_by_name (std::string name);
 };
+extern t_entities ents;
 
 }
 

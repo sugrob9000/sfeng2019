@@ -19,4 +19,9 @@ void t_ent_keyvals::add (std::string key, std::string value)
 	m[key] = value;
 }
 
+void t_ent_keyvals::clear ()
+{
+	m.clear();
+}
+
 }

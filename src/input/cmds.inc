@@ -54,3 +54,9 @@ COMMAND (obj2rvd)
  * signal [recipient] [delay] [signal name] [arguments...]
  */
 COMMAND (signal)
+
+/*
+ * !!! DOES NOT CLEAR THE CURRENTLY EXISTING WORLD !!!
+ * Load a map. Fatal on fail.
+ */
+COMMAND (map)

@@ -31,7 +31,8 @@ void t_signal::execute () const
 void sig_add (std::string target, int delay,
 		std::string name, std::string arg)
 {
-	signals.push({ target, delay, name, arg });
+	int tick_due = tick + delay;
+	signals.push({ target, tick_due, name, arg });
 }
 
 } // namespace core

@@ -51,7 +51,7 @@ class e_base
 	void think ();                     \
 	void render () const;              \
 	const t_iomap& get_iomap () const  \
-	{ return iomap<decltype(*this)>; } \
+	{ return iomap<e_##name>; } \
 	void apply_keyvals (const t_ent_keyvals& kv);
 
 

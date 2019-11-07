@@ -26,7 +26,7 @@ void update ();
  * the lines with key-value pairs must start with whitespace.
  */
 void load_map (std::string path);
-void init (std::string conf);
+void init ();
 
 }
 

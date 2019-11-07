@@ -10,16 +10,15 @@
 int main (int argc, char** argv)
 {
 	input::init();
-
-	core::init("res/cfg/rc");
-	input::run_argv_commands(argc, argv);
-
+	core::init();
 	render::init();
+
 	input::console.close();
 
 	render::camera = render::t_camera(vec3(), vec3(), 500.0, 1.0, 60);
 
-	core::load_map("res/maps/map1");
+	input::run_script("res/cfg/rc");
+	input::run_argv_commands(argc, argv);
 
 	while (!core::must_quit) {
 		namespace cr = std::chrono;

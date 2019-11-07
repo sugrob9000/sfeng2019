@@ -110,7 +110,7 @@ void t_console_info::render ()
 	int starty = 4;
 
 	const SDL_Color bg_clr = { 20, 20, 20, 255 };
-	const SDL_Color bg_match_clr = { 30, 30, 30, 255 };
+	const SDL_Color bg_match_clr = { 30, 30, 30, 240 };
 	const SDL_Color cursor_clr = { 220, 220, 40, 255 };
 
 	glUseProgram(0);
@@ -135,7 +135,7 @@ void t_console_info::render ()
 	if (!matches.empty()) {
 		int single_match_h = render::cont.font_h + 3;
 		int matches_h = single_match_h * matches.size();
-		constexpr int matches_w = 200;
+		int matches_w = resx - startx;
 
 		glUseProgram(0);
 		glBegin(GL_QUADS);

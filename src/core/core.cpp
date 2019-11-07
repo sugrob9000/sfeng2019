@@ -12,15 +12,13 @@ bool must_quit;
 int exit_code;
 long long tick;
 
-void init (std::string conf)
+void init ()
 {
 	must_quit = false;
 	exit_code = 0;
 	tick = 0;
 
 	fill_ent_registry();
-
-	input::run_script(conf);
 }
 
 void update ()
@@ -32,11 +30,8 @@ void update ()
 
 	while (!signals.empty()) {
 		const t_signal& s = signals.top();
-		if (s.tick_due > tick) {
-			// all signals after this one
-			// are for later, too
+		if (s.tick_due > tick)
 			break;
-		}
 		s.execute();
 		signals.pop();
 	}
@@ -129,4 +124,15 @@ COMMAND_ROUTINE (echo)
 		std::cout << arg << " ";
 
 	std::cout << std::endl;
+}
+
+COMMAND_ROUTINE (map)
+{
+	if (ev != PRESS)
+		return;
+	if (args.empty())
+		return;
+
+	std::string path = "res/maps/" + args[0];
+	core::load_map(path);
 }

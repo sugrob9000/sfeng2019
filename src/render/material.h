@@ -3,6 +3,7 @@
 
 #include "inc_gl.h"
 #include "inc_general.h"
+#include <vector>
 
 namespace render
 {

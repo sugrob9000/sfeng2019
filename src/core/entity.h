@@ -3,9 +3,9 @@
 
 #include "inc_general.h"
 #include "keyval.h"
+#include "signal.h"
 #include <map>
 #include <queue>
-#include "signal.h"
 
 namespace core
 {
@@ -31,6 +31,11 @@ class e_base
 	virtual void think () = 0;
 	virtual void render () const = 0;
 	virtual void apply_keyvals (const t_ent_keyvals& kv) = 0;
+
+	/*
+	 * We have to be able to get the iomap knowing only the pointer
+	 * to the entity, while in runtime - templates won't help with this
+	 */
 	virtual const t_iomap& get_iomap () const = 0;
 
 	private:
@@ -40,13 +45,13 @@ class e_base
 /*
  * Goes inside the entity class declaration
  */
-#define ENT_MEMBERS(name)     \
-	public:               \
-	e_##name ();          \
-	void think ();        \
-	void render () const; \
-	const t_iomap& get_iomap () const \
-	{ return iomap<e_##name>; } \
+#define ENT_MEMBERS(name)                  \
+	public:                            \
+	e_##name ();                       \
+	void think ();                     \
+	void render () const;              \
+	const t_iomap& get_iomap () const  \
+	{ return iomap<decltype(*this)>; } \
 	void apply_keyvals (const t_ent_keyvals& kv);
 
 

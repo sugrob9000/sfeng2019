@@ -3,6 +3,7 @@
 
 #include "inc_general.h"
 #include <queue>
+#include <map>
 
 namespace core
 {

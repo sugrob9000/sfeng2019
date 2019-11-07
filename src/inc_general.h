@@ -1,13 +1,9 @@
 #ifndef INC_GENERAL_H
 #define INC_GENERAL_H
 
+#include <cmath>
 #include <iostream>
 #include <fstream>
-
-#include <vector>
-#include <map>
-#include <unordered_map>
-#include <cmath>
 
 #include "vec3.h"
 #include "error.h"

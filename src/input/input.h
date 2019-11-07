@@ -5,6 +5,7 @@
 #include "inc_gl.h"
 #include "core/core.h"
 #include <sstream>
+#include <unordered_map>
 
 namespace input
 {

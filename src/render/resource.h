@@ -3,6 +3,7 @@
 
 #include "material.h"
 #include "model.h"
+#include <map>
 
 namespace render
 {

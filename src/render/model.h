@@ -2,6 +2,7 @@
 #define MODEL_H
 
 #include "inc_general.h"
+#include <vector>
 
 namespace render
 {

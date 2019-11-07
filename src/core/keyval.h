@@ -2,6 +2,7 @@
 #define KEYVAL_H
 
 #include "inc_general.h"
+#include <map>
 
 namespace core
 {

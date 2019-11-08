@@ -5,17 +5,29 @@
 #include <queue>
 #include <map>
 
+/*
+ * Entities can be sent signals to. Each entity class can implement
+ *   handlers for its own signals, and set them up at engine startup.
+ *
+ * A signal can specify:
+ *   - its target entity, by name
+ *   - the tick on which it is due to happen
+ *   - what signal for the target to execute and with which argument
+ *
+ * Name resolution happens *after* the delay is up.
+ */
+
 namespace core
 {
 
 class e_base;
+
+/*
+ * Let each class map signal names to handlers
+ */
 typedef void (*f_sig_handler) (e_base* ent, std::string arg);
 typedef std::map<std::string, f_sig_handler> t_iomap;
 
-/*
- * Entities can be set to send signals
- * to one another
- */
 struct t_signal
 {
 	std::string target;
@@ -28,7 +40,7 @@ struct t_signal
 
 /*
  * Keep a queue of signals, sorted by when they
- * are due to happen
+ * are due to happen, ascending
  */
 bool operator< (const t_signal& a, const t_signal& b);
 extern std::priority_queue<t_signal> signals;

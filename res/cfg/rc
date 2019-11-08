@@ -8,4 +8,5 @@ bind A move_cam l
 bind S move_cam b
 bind D move_cam r
 
+windowsize 800 600
 map map1

@@ -8,25 +8,24 @@
 /*
  * Entities can be sent signals to. Each entity class can implement
  *   handlers for its own signals, and set them up at engine startup.
+ * For example, a door class may have a handler for
+ *   "open" and "close" signals.
  *
- * A signal can specify:
+ * A signal knows:
  *   - its target entity, by name
  *   - the tick on which it is due to happen
  *   - what signal for the target to execute and with which argument
+ * Note that it does not know the class of which its target is,
+ *   so invalid signals should be tolerated.
  *
- * Name resolution happens *after* the delay is up.
+ * Name resolution happens *when the delay is up*,
+ *   not when the signal is sent.
  */
 
 namespace core
 {
 
 class e_base;
-
-/*
- * Let each class map signal names to handlers
- */
-typedef void (*f_sig_handler) (e_base* ent, std::string arg);
-typedef std::map<std::string, f_sig_handler> t_iomap;
 
 struct t_signal
 {
@@ -48,8 +47,7 @@ extern std::priority_queue<t_signal> signals;
 /*
  * The basic routine used to fire a signal
  */
-void sig_add (std::string recipient, int delay,
-		std::string name, std::string arg);
+void add_signal (t_signal s);
 
 /*
  * With these the entity can set up its own signal handlers.
@@ -75,9 +73,22 @@ void sig_add (std::string recipient, int delay,
 				&sig_##entclass##_##name;    \
 	} while (false)
 
+typedef void (*f_sig_handler) (e_base* ent, std::string arg);
+typedef std::map<std::string, f_sig_handler> t_iomap;
+
 template <class entclass> void fill_io_maps ();
 template <class entclass> t_iomap iomap;
 
-}
+/*
+ * Events: each entity object (as opposed to class) may specify
+ *   on which events it wants to fire certain signals
+ *   (maybe, several on one event).
+ * For exmaple, a particular trigger volume may want to tell a
+ *   particular door to open when someone steps in it.
+ */
+
+typedef std::map<std::string, std::vector<t_signal>> t_eventmap;
+
+} // namespace core
 
 #endif // SIGNAL_H

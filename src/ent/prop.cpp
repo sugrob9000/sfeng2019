@@ -22,8 +22,6 @@ FILL_IO_MAPS(prop)
 }
 
 
-e_prop::e_prop () { }
-
 void e_prop::think () { }
 
 void e_prop::apply_keyvals (const t_ent_keyvals& kv)

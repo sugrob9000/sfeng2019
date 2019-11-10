@@ -6,7 +6,7 @@ namespace core
 
 t_ent_registry ent_reg;
 
-void e_base::set_name (std::string new_name)
+void e_base::set_name (const std::string& new_name)
 {
 	name = new_name;
 	e_base* another = ents.find_by_name(new_name);
@@ -15,6 +15,15 @@ void e_base::set_name (std::string new_name)
 				this, name.c_str(), another);
 	}
 	ents.name_index[name] = this;
+}
+
+void e_base::on_event (const std::string& event) const
+{
+	auto i = events.find(event);
+	if (i == events.end())
+		return;
+	for (const t_signal& s: i->second)
+		add_signal(s);
 }
 
 void e_base::apply_basic_keyvals (const t_ent_keyvals& kv)

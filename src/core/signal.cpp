@@ -28,11 +28,10 @@ void t_signal::execute () const
 		routine(e, argument);
 }
 
-void sig_add (std::string target, int delay,
-		std::string name, std::string arg)
+void add_signal (t_signal s)
 {
-	int tick_due = tick + delay;
-	signals.push({ target, tick_due, name, arg });
+	s.tick_due += tick;
+	signals.push(s);
 }
 
 } // namespace core
@@ -57,5 +56,6 @@ COMMAND_ROUTINE (signal)
 		}
 		sigarg.pop_back();
 	}
-	core::sig_add(recipient, delay, signame, sigarg);
+	core::t_signal s = { recipient, delay, signame, sigarg };
+	core::add_signal(s);
 }

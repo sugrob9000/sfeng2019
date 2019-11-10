@@ -22,8 +22,11 @@ class e_base
 
 	std::string name;
 
+	t_eventmap events;
+
 	/*
-	 * Get pos, ang, and name. Your entity should probably do this
+	 * Gets pos, ang, and name.
+	 * Your entity should probably do this.
 	 */
 	void apply_basic_keyvals (const t_ent_keyvals& kv);
 
@@ -38,8 +41,8 @@ class e_base
 	 */
 	virtual const t_iomap& get_iomap () const = 0;
 
-	private:
-	void set_name (std::string name);
+	void set_name (const std::string& name);
+	void on_event (const std::string& event) const;
 };
 
 /*
@@ -47,7 +50,6 @@ class e_base
  */
 #define ENT_MEMBERS(name)                  \
 	public:                            \
-	e_##name ();                       \
 	void think ();                     \
 	void render () const;              \
 	const t_iomap& get_iomap () const  \

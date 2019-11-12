@@ -39,8 +39,8 @@ COMMAND_ROUTINE (signal)
 	if (args.size() < 3)
 		return;
 
-	const std::string& recipient = args[0];
-	int delay = atoi(args[1].c_str());
+	int delay = atoi(args[0].c_str());
+	const std::string& recipient = args[1];
 	const std::string& signame = args[2];
 
 	std::string sigarg;

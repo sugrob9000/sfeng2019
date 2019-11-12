@@ -4,6 +4,7 @@
 #include "input/cmds.h"
 #include "input/input.h"
 #include "render/render.h"
+#include <cassert>
 
 bool must_quit;
 int exit_code;
@@ -36,6 +37,68 @@ void update ()
 	upd_camera_pos();
 }
 
+e_base* read_single_entity (std::istream& is)
+{
+	std::string line;
+	std::getline(is, line);
+
+	if (line.empty() || isspace(line[0]))
+		fatal("Invalid entity syntax: doesn't start with nonspace");
+
+	while (isspace(line.back()))
+		line.pop_back();
+
+	e_base* ent = ents.spawn(line);
+	if (ent == nullptr)
+		fatal("Unable to spawn entity \"%s\"", line.c_str());
+
+	t_ent_keyvals kv;
+	int kstart, kend;
+
+	while (std::getline(is, line)) {
+		while (!line.empty() && isspace(line.back()))
+			line.pop_back();
+		if (line.empty())
+			goto out_loop;
+
+		if (!isspace(line[0])) {
+			fatal("Invalid entity syntax: "
+				"keyval starts with nonspace");
+		}
+
+		kstart = 0;
+		while (isspace(line[kstart]))
+			kstart++;
+		kend = kstart + 1;
+		while (kend < line.length() && !isspace(line[kend]))
+			kend++;
+
+		if (line[kstart] == '!') {
+			// line describes an event
+			std::istringstream iss(line.c_str() + kstart + 1);
+
+			std::string event_name;
+			t_signal s;
+			iss >> event_name >> s.tick_due >> s.target
+				>> s.signal_name >> s.argument;
+			ent->events[event_name].push_back(s);
+
+		} else {
+			// line describes a key-value pair
+			kv.add(line.substr(kstart, kend-kstart),
+					line.substr(kend + 1));
+		}
+
+		out_loop:
+		int nextchar = is.peek();
+		if (nextchar == EOF || !isspace(nextchar))
+			break;
+	}
+	ent->apply_keyvals(kv);
+
+	return ent;
+}
+
 void load_map (std::string path)
 {
 	std::ifstream f(path);
@@ -43,56 +106,8 @@ void load_map (std::string path)
 	if (!f)
 		fatal("Could not open world file %s", path.c_str());
 
-	e_base* cur_ent = nullptr;
-	t_ent_keyvals kv;
-
-	auto finalize = [&] ()
-		{
-			if (cur_ent != nullptr)
-				cur_ent->apply_keyvals(kv);
-			kv.clear();
-		};
-
-	for (std::string line; std::getline(f, line); ) {
-		int comment = line.find('#');
-		if (comment != std::string::npos)
-			line.erase(comment, std::string::npos);
-
-		int ws_end = line.length()-1;
-		while (ws_end >= 0 && isspace(line[ws_end]))
-			ws_end--;
-		line.erase(ws_end+1, std::string::npos);
-
-		if (line.empty())
-			continue;
-
-		if (isspace(line[0])) {
-			// begins with whitespace: is a key-value
-
-			int key_begin = 0;
-			int n = line.length();
-			while (key_begin < n && isspace(line[key_begin]))
-				key_begin++;
-
-			int key_end = key_begin;
-			while (key_end < n && !isspace(line[key_end]))
-				key_end++;
-
-			kv.add(line.substr(key_begin, key_end-key_begin),
-			       line.substr(key_end + 1));
-		} else {
-			// does not begin with whitespace: is a new entity
-
-			finalize();
-			cur_ent = ents.spawn(line);
-			if (cur_ent == nullptr) {
-				fatal(
-					"Map %s: cannot spawn entity \"%s\"",
-					path.c_str(), line.c_str());
-			}
-		}
-	}
-	finalize();
+	while (f.good())
+		read_single_entity(f);
 }
 
 COMMAND_ROUTINE (nop)

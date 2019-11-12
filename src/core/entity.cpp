@@ -50,7 +50,7 @@ void fill_ent_registry ()
 {
 	#define ENTITY(name) {                       \
 		ent_reg[#name] = &ent_new<e_##name>; \
-		fill_io_maps<e_##name>();            \
+		fill_io_data<e_##name>();            \
 	}
 	#include "ent/ent_list.inc"
 	#undef ENTITY

@@ -36,10 +36,10 @@ class e_base
 	virtual void apply_keyvals (const t_ent_keyvals& kv) = 0;
 
 	/*
-	 * We have to be able to get the iomap knowing only the pointer
+	 * We have to be able to get the sigmap knowing only the pointer
 	 * to the entity, while in runtime - templates won't help with this
 	 */
-	virtual const t_iomap& get_iomap () const = 0;
+	virtual const t_sigmap& get_sigmap () const = 0;
 
 	void set_name (const std::string& name);
 	void on_event (const std::string& event) const;
@@ -52,8 +52,8 @@ class e_base
 	public:                            \
 	void think ();                     \
 	void render () const;              \
-	const t_iomap& get_iomap () const  \
-	{ return iomap<e_##name>; } \
+	const t_sigmap& get_sigmap () const  \
+	{ return sigmap<e_##name>; } \
 	void apply_keyvals (const t_ent_keyvals& kv);
 
 

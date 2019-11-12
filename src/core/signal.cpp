@@ -17,7 +17,7 @@ void t_signal::execute () const
 	if (e == nullptr)
 		return;
 
-	const t_iomap& sigmap = e->get_iomap();
+	const t_sigmap& sigmap = e->get_sigmap();
 	auto i = sigmap.find(signal_name);
 
 	if (i == sigmap.end())

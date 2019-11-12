@@ -15,12 +15,11 @@ SIG_HANDLER (prop, showpos)
 	DEBUG_EXPR(ent->pos);
 }
 
-FILL_IO_MAPS(prop)
+FILL_IO_DATA (prop)
 {
 	SET_SIG_HANDLER(prop, setpos);
 	SET_SIG_HANDLER(prop, showpos);
 }
-
 
 void e_prop::think () { }
 

@@ -4,9 +4,6 @@
 #include "inc_gl.h"
 #include "resource.h"
 
-namespace render
-{
-
 t_shader_id compile_glsl (std::string path, GLenum type)
 {
 	std::ifstream f(path);
@@ -48,7 +45,7 @@ t_shader_id compile_glsl (std::string path, GLenum type)
 	char* log = new char[log_length];
 	glGetShaderInfoLog(id, log_length, 0, log);
 
-	core::warning("Failed to compile shader %s:\n%s\n",
+	warning("Failed to compile shader %s:\n%s\n",
 			path.c_str(), log);
 
 	delete[] log;
@@ -61,7 +58,7 @@ void t_material::load (std::string path)
 	std::ifstream f(path);
 
 	if (!f)
-		core::fatal("Material %s: cannot open file", path.c_str());
+		fatal("Material %s: cannot open file", path.c_str());
 
 	std::string key;
 	std::string value;
@@ -108,7 +105,7 @@ void t_material::load (std::string path)
 		if (location != -1) {
 			bitmaps.push_back({ location, d.texid });
 		} else {
-			core::warning("Material %s:\n"
+			warning("Material %s:\n"
 				"%s is not a valid uniform in shaders %s, %s",
 				path.c_str(), d.loc_name.c_str(),
 				frag_name.c_str(), vert_name.c_str());
@@ -154,7 +151,7 @@ t_texture_id load_texture (std::string path)
 
 	int format = get_surface_gl_format(surf);
 	if (format == -1) {
-		core::warning("Texture %s uses bogus format", path.c_str());
+		warning("Texture %s uses bogus format", path.c_str());
 		SDL_FreeSurface(surf);
 		return 0;
 	}
@@ -191,6 +188,4 @@ t_texture_id load_texture (std::string path)
 	SDL_FreeSurface(surf);
 
 	return id;
-}
-
 }

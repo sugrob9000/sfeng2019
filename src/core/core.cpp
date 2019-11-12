@@ -5,14 +5,11 @@
 #include "input/input.h"
 #include "render/render.h"
 
-namespace core
-{
-
 bool must_quit;
 int exit_code;
 long long tick;
 
-void init ()
+void init_core ()
 {
 	must_quit = false;
 	exit_code = 0;
@@ -36,7 +33,7 @@ void update ()
 		signals.pop();
 	}
 
-	render::upd_camera_pos();
+	upd_camera_pos();
 }
 
 void load_map (std::string path)
@@ -89,7 +86,7 @@ void load_map (std::string path)
 			finalize();
 			cur_ent = ents.spawn(line);
 			if (cur_ent == nullptr) {
-				core::fatal(
+				fatal(
 					"Map %s: cannot spawn entity \"%s\"",
 					path.c_str(), line.c_str());
 			}
@@ -97,8 +94,6 @@ void load_map (std::string path)
 	}
 	finalize();
 }
-
-} // namespace core
 
 COMMAND_ROUTINE (nop)
 {
@@ -109,10 +104,10 @@ COMMAND_ROUTINE (exit)
 {
 	if (ev != PRESS)
 		return;
-	core::exit_code = 0;
+	exit_code = 0;
 	if (!args.empty())
-		core::exit_code = std::atoi(args[0].c_str());
-	core::must_quit = true;
+		exit_code = std::atoi(args[0].c_str());
+	must_quit = true;
 }
 
 COMMAND_ROUTINE (echo)
@@ -134,5 +129,5 @@ COMMAND_ROUTINE (map)
 		return;
 
 	std::string path = "res/maps/" + args[0];
-	core::load_map(path);
+	load_map(path);
 }

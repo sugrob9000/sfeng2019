@@ -9,31 +9,31 @@
 
 int main (int argc, char** argv)
 {
-	input::init();
-	core::init();
-	render::init();
+	init_input();
+	init_core();
+	init_render();
 
-	input::console.close();
+	console.close();
 
-	render::camera = render::t_camera(vec3(), vec3(), 500.0, 1.0, 60);
+	camera = t_camera(vec3(), vec3(), 500.0f, 1.0f, 60.0f);
 
-	input::run_script("res/cfg/rc");
-	input::run_argv_commands(argc, argv);
+	run_script("res/cfg/rc");
+	run_argv_commands(argc, argv);
 
-	while (!core::must_quit) {
+	while (!must_quit) {
 		namespace cr = std::chrono;
 		using sc = cr::steady_clock;
 		sc::time_point start = sc::now();
 
-		input::handle_input();
-		core::update();
-		render::render_all();
+		handle_input();
+		update();
+		render_all();
 
 		using frame60 = cr::duration<float, std::ratio<1, 60>>;
 		while (frame60(sc::now() - start).count() < 1.0);
 	}
 
 	SDL_Quit();
-	return core::exit_code;
+	return exit_code;
 }
 

@@ -2,9 +2,6 @@
 #include "render/resource.h"
 #include "core/signal.h"
 
-namespace core
-{
-
 SIG_HANDLER (prop, setpos)
 {
 	atovec3(arg, ent->pos);
@@ -28,10 +25,10 @@ void e_prop::apply_keyvals (const t_ent_keyvals& kv)
 	apply_basic_keyvals(kv);
 
 	KV_TRY_GET(kv["model"],
-		model = render::get_model(val);,
+		model = get_model(val);,
 		model = nullptr; );
 	KV_TRY_GET(kv["mat"],
-		material = render::get_material(val);,
+		material = get_material(val);,
 		material = nullptr; );
 }
 
@@ -41,11 +38,9 @@ void e_prop::render () const
 
 	material->apply();
 
-	render::rotate_gl_matrix(ang);
+	rotate_gl_matrix(ang);
 	glTranslatef(pos.x, pos.y, pos.z);
 	model->render();
 
 	glPopMatrix();
 }
-
-} // namespace core

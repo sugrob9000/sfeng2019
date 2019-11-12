@@ -8,10 +8,7 @@
 #include "input/console.h"
 #include "input/cmds.h"
 
-namespace render
-{
-
-t_sdlcontext cont;
+t_sdlcontext sdlcont;
 
 bool cam_move_flags[4];
 t_camera camera;
@@ -45,6 +42,30 @@ void upd_camera_pos ()
 	cam.pos += delta * speed;
 }
 
+COMMAND_ROUTINE (move_cam)
+{
+	if (args.empty())
+		return;
+
+	auto& flags = cam_move_flags;
+	bool f = (ev == PRESS);
+
+	switch (tolower(args[0][0])) {
+	case 'f':
+		flags[cam_move_f] = f;
+		break;
+	case 'b':
+		flags[cam_move_b] = f;
+		break;
+	case 'l':
+		flags[cam_move_l] = f;
+		break;
+	case 'r':
+		flags[cam_move_r] = f;
+		break;
+	}
+}
+
 void render_all ()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -54,7 +75,7 @@ void render_all ()
 	camera.apply();
 
 	// TODO: visible sets
-	for (const core::e_base* e: core::ents.vec)
+	for (const e_base* e: ents.vec)
 		e->render();
 
 	// HUD
@@ -66,52 +87,52 @@ void render_all ()
 	glDisable(GL_DEPTH_TEST);
 	glUseProgram(0);
 
-	if (input::console.active)
-		input::console.render();
+	if (console.active)
+		console.render();
 
-	SDL_GL_SwapWindow(cont.window);
+	SDL_GL_SwapWindow(sdlcont.window);
 }
 
 void gl_msg_callback (GLenum source, GLenum type, GLenum id, GLenum severity,
 		int msg_len, const char* msg, const void* param)
 {
-	core::warning("OpenGL: %s", msg);
+	warning("OpenGL: %s", msg);
 }
 
 void init_text ();
-void init ()
+void init_render ()
 {
-	if (cont.res_x == 0 || cont.res_y == 0) {
+	if (sdlcont.res_x == 0 || sdlcont.res_y == 0) {
 		// resolution has not been initialized,
 		// use a sane default
-		cont.res_x = 640;
-		cont.res_y = 480;
+		sdlcont.res_x = 640;
+		sdlcont.res_y = 480;
 	}
 
 	if (SDL_Init(SDL_INIT_VIDEO) < 0)
-		core::fatal("SDL_Init failed: %s", SDL_GetError());
+		fatal("SDL_Init failed: %s", SDL_GetError());
 
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,
 	                    SDL_GL_CONTEXT_PROFILE_CORE);
 
-	cont.window = SDL_CreateWindow("Engine",
+	sdlcont.window = SDL_CreateWindow("Engine",
 			SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-			cont.res_x, cont.res_y,
+			sdlcont.res_x, sdlcont.res_y,
 			SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
-	if (cont.window == nullptr)
-		core::fatal("SDL window creation failed: %s", SDL_GetError());
+	if (sdlcont.window == nullptr)
+		fatal("SDL window creation failed: %s", SDL_GetError());
 
-	cont.glcont = SDL_GL_CreateContext(cont.window);
-	if (cont.glcont == nullptr)
-		core::fatal("SDL glcont creation failed: %s", SDL_GetError());
+	sdlcont.glcont = SDL_GL_CreateContext(sdlcont.window);
+	if (sdlcont.glcont == nullptr)
+		fatal("SDL glcont creation failed: %s", SDL_GetError());
 
 	glewExperimental = true;
 	if (glewInit() != GLEW_OK)
-		core::fatal("GLEW init failed");
+		fatal("GLEW init failed");
 
-	cont.renderer = SDL_CreateRenderer(cont.window, -1,
+	sdlcont.renderer = SDL_CreateRenderer(sdlcont.window, -1,
 			SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
 	glMatrixMode(GL_PROJECTION);
@@ -122,9 +143,9 @@ void init ()
 
 void resize_window (int w, int h)
 {
-	cont.res_x = w;
-	cont.res_y = h;
-	SDL_SetWindowSize(cont.window, w, h);
+	sdlcont.res_x = w;
+	sdlcont.res_y = h;
+	SDL_SetWindowSize(sdlcont.window, w, h);
 	glViewport(0, 0, w, h);
 }
 
@@ -151,7 +172,7 @@ t_camera::t_camera (
 
 void t_camera::apply ()
 {
-	float aspect = (float) cont.res_x / cont.res_y;
+	float aspect = (float) sdlcont.res_x / sdlcont.res_y;
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -172,16 +193,16 @@ unsigned int text_prg_glyph_loc;
 void init_text ()
 {
 	if (TTF_Init() < 0)
-		core::fatal("TTF init failed");
-	cont.font = TTF_OpenFont(cont.font_path, cont.font_h);
-	if (cont.font == nullptr)
-		core::fatal("Failed to find font %s", cont.font_path);
-	if (!TTF_FontFaceIsFixedWidth(cont.font)) {
-		core::warning("Font %s is not monospace. Text will break",
-				cont.font_path);
+		fatal("TTF init failed");
+	sdlcont.font = TTF_OpenFont(sdlcont.font_path, sdlcont.font_h);
+	if (sdlcont.font == nullptr)
+		fatal("Failed to find font %s", sdlcont.font_path);
+	if (!TTF_FontFaceIsFixedWidth(sdlcont.font)) {
+		warning("Font %s is not monospace. Text will break",
+				sdlcont.font_path);
 	}
-	TTF_GlyphMetrics(cont.font, '~', nullptr, nullptr,
-			nullptr, nullptr, &cont.font_w);
+	TTF_GlyphMetrics(sdlcont.font, '~', nullptr, nullptr,
+			nullptr, nullptr, &sdlcont.font_w);
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -202,7 +223,7 @@ void init_text ()
 	for (int i = 1; i < 256; i++)
 		all_chars[i] = i;
 
-	SDL_Surface* surf = TTF_RenderText_Blended(cont.font,
+	SDL_Surface* surf = TTF_RenderText_Blended(sdlcont.font,
 			all_chars, text_color);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -230,50 +251,24 @@ void draw_text (const char* str, int x, int y)
 	for (int i = 0; str[i] != 0; i++) {
 		const char c = str[i];
 
-		glTexCoord2i(cont.font_w * c, 0);
+		glTexCoord2i(sdlcont.font_w * c, 0);
 		glVertex2i(x, y);
-		glTexCoord2i(cont.font_w * c, cont.font_h);
-		glVertex2i(x, y + cont.font_h);
-		glTexCoord2i(cont.font_w * (c + 1), cont.font_h);
-		glVertex2i(x + cont.font_w, y + cont.font_h);
-		glTexCoord2i(cont.font_w * (c + 1), 0);
-		glVertex2i(x + cont.font_w, y);
+		glTexCoord2i(sdlcont.font_w * c, sdlcont.font_h);
+		glVertex2i(x, y + sdlcont.font_h);
+		glTexCoord2i(sdlcont.font_w * (c + 1), sdlcont.font_h);
+		glVertex2i(x + sdlcont.font_w, y + sdlcont.font_h);
+		glTexCoord2i(sdlcont.font_w * (c + 1), 0);
+		glVertex2i(x + sdlcont.font_w, y);
 
-		x += cont.font_w;
+		x += sdlcont.font_w;
 	}
 	glEnd();
 }
 
-} // namespace render
-
-COMMAND_ROUTINE (move_cam)
-{
-	if (args.empty())
-		return;
-
-	auto& flags = render::cam_move_flags;
-	bool f = (ev == PRESS);
-
-	switch (tolower(args[0][0])) {
-	case 'f':
-		flags[render::cam_move_f] = f;
-		break;
-	case 'b':
-		flags[render::cam_move_b] = f;
-		break;
-	case 'l':
-		flags[render::cam_move_l] = f;
-		break;
-	case 'r':
-		flags[render::cam_move_r] = f;
-		break;
-	}
-}
-
 MOUSEMOVE_ROUTINE (mousemove_camera)
 {
-	render::camera.ang.x += dy;
-	render::camera.ang.z += dx;
+	camera.ang.x += dy;
+	camera.ang.z += dx;
 }
 
 COMMAND_ROUTINE (windowsize)
@@ -287,5 +282,5 @@ COMMAND_ROUTINE (windowsize)
 	if (w == 0 || h == 0)
 		return;
 
-	render::resize_window(w, h);
+	resize_window(w, h);
 }

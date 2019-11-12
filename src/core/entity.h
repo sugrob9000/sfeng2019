@@ -7,9 +7,6 @@
 #include <map>
 #include <queue>
 
-namespace core
-{
-
 /*
  * The base entity class
  */
@@ -79,8 +76,6 @@ struct t_entities
 	e_base* find_by_name (std::string name);
 };
 extern t_entities ents;
-
-}
 
 #include "ent/ent_headers.inc"
 

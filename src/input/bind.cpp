@@ -1,7 +1,5 @@
 #include "bind.h"
-
-namespace input
-{
+#include "cmds.h"
 
 t_command t_keybind_map::empty_cmd;
 t_keybind_map key_binds;
@@ -45,4 +43,25 @@ SDL_Scancode scancode_from_name (std::string name)
 	return SDL_GetScancodeFromName(name.c_str());
 }
 
-} // namespace input
+COMMAND_ROUTINE (bind)
+{
+	if (ev != PRESS)
+		return;
+	if (args.size() < 2)
+		return;
+
+	std::string keyname = args[0];
+	for (char& c: keyname) {
+		if (c == '_')
+			c = ' ';
+	}
+
+	std::string bind;
+	for (int i = 1; i < args.size(); i++) {
+		bind += args[i];
+		bind += ' ';
+	}
+
+	key_binds.add_bind(scancode_from_name(keyname),
+			parse_command(bind));
+}

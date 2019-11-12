@@ -4,9 +4,6 @@
 #include "inc_gl.h"
 #include "inc_general.h"
 
-namespace render
-{
-
 struct t_camera
 {
 	vec3 pos;
@@ -48,7 +45,7 @@ struct t_sdlcontext
 	static constexpr int font_h = 16;
 	int font_w;
 };
-extern t_sdlcontext cont;
+extern t_sdlcontext sdlcont;
 
 extern t_camera camera;
 
@@ -62,7 +59,7 @@ constexpr short cam_move_r = 3;
 extern bool cam_move_flags[4];
 void upd_camera_pos ();
 
-void init ();
+void init_render ();
 void render_all ();
 void resize_window (int w, int h);
 
@@ -73,8 +70,6 @@ void draw_text (const char* text, int x, int y);
  * To use instead of 3 glRotatef's on the spot
  */
 void rotate_gl_matrix (vec3 angs);
-
-}
 
 #endif // RENDER_H
 

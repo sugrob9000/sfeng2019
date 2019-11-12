@@ -4,9 +4,6 @@
 #include "inc_general.h"
 #include "input.h"
 
-namespace input
-{
-
 /*
  * Use obscure but valid scancodes for mouse.
  * Starts with an invalid scancode because mouse buttons
@@ -40,7 +37,5 @@ struct t_keybind_map
 extern t_keybind_map key_binds;
 
 SDL_Scancode scancode_from_name (std::string name);
-
-}
 
 #endif // BIND_H

@@ -4,9 +4,6 @@
 #include "inc_general.h"
 #include <map>
 
-namespace core
-{
-
 struct t_ent_keyvals
 {
 	std::map<std::string, std::string> m;
@@ -16,8 +13,6 @@ struct t_ent_keyvals
 	void add (std::string key, std::string value);
 	void clear ();
 };
-
-}
 
 /*
  * Try to get a value from a t_ent_keyvals,

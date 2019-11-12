@@ -7,9 +7,6 @@
 #include <sstream>
 #include <unordered_map>
 
-namespace input
-{
-
 const uint8_t PRESS = 0;
 const uint8_t RELEASE = 1;
 
@@ -54,15 +51,13 @@ struct t_command_registry
 extern t_command_registry cmd_registry;
 extern f_mousemove_routine mousemove_proc;
 
-void init ();
+void init_input ();
 void run_argv_commands (int argc, const char* const* argv);
 void handle_input ();
 
 void run_script (std::string path);
 
 t_command parse_command (std::string str);
-
-}
 
 #endif // INPUT_H
 

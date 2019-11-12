@@ -4,9 +4,6 @@
 #include "inc_general.h"
 #include <vector>
 
-namespace render
-{
-
 struct t_texcrd
 {
 	float u;
@@ -53,7 +50,5 @@ struct t_model
 	void render () const;
 	void load (const t_model_mem& verts);
 };
-
-}
 
 #endif // MODEL_H

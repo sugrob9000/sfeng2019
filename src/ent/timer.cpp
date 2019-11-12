@@ -1,8 +1,5 @@
 #include "timer.h"
 
-namespace core
-{
-
 SIG_HANDLER (timer, start)
 {
 	ent->running = true;
@@ -50,5 +47,3 @@ void e_timer::apply_keyvals (const t_ent_keyvals& kv)
 }
 
 void e_timer::render () const { }
-
-} // namespace core

@@ -4,9 +4,6 @@
 #include "core/entity.h"
 #include "core/core.h"
 
-namespace core
-{
-
 class e_timer: public e_base
 {
 	public:
@@ -16,7 +13,5 @@ class e_timer: public e_base
 
 	ENT_MEMBERS (timer)
 };
-
-}
 
 #endif // ENT_TIMER_H

@@ -3,21 +3,18 @@
 #include "cmds.h"
 #include "console.h"
 
-namespace input
-{
-
 t_command_registry cmd_registry;
 f_mousemove_routine mousemove_proc;
 
-void init ()
+void init_input ()
 {
 	// register all commands
 	#define COMMAND(name) \
-		cmd_registry.register_command(#name, &cmd::name);
+		cmd_registry.register_command(#name, &cmd_##name);
 	#include "cmds.inc"
 	#undef COMMAND
 
-	mousemove_proc = &cmd::mousemove_camera;
+	mousemove_proc = &mouse_mousemove_camera;
 }
 
 void run_argv_commands (int argc, const char* const* argv)
@@ -74,13 +71,13 @@ void handle_input ()
 	while (SDL_PollEvent(&e)) {
 		switch (e.type) {
 		case SDL_QUIT:
-			core::must_quit = true;
+			must_quit = true;
 			break;
 		case SDL_WINDOWEVENT:
 			if (e.window.event == SDL_WINDOWEVENT_RESIZED) {
 				int w = e.window.data1;
 				int h = e.window.data2;
-				render::resize_window(w, h);
+				resize_window(w, h);
 			}
 			break;
 		default:
@@ -131,7 +128,7 @@ void run_script (std::string path)
 {
 	std::ifstream f(path);
 	if (!f) {
-		core::warning("Script file %s could not be opened",
+		warning("Script file %s could not be opened",
 				path.c_str());
 		return;
 	}
@@ -139,31 +136,6 @@ void run_script (std::string path)
 		if (!line.empty())
 			cmd_registry.run(parse_command(line), PRESS);
 	}
-}
-
-} // namespace input
-
-COMMAND_ROUTINE (bind)
-{
-	if (ev != PRESS)
-		return;
-	if (args.size() < 2)
-		return;
-
-	std::string keyname = args[0];
-	for (char& c: keyname) {
-		if (c == '_')
-			c = ' ';
-	}
-
-	std::string bind;
-	for (int i = 1; i < args.size(); i++) {
-		bind += args[i];
-		bind += ' ';
-	}
-
-	key_binds.add_bind(scancode_from_name(keyname),
-			parse_command(bind));
 }
 
 COMMAND_ROUTINE (exec)

@@ -2,9 +2,6 @@
 #include "input/cmds.h"
 #include "core.h"
 
-namespace core
-{
-
 std::priority_queue<t_signal> signals;
 bool operator< (const t_signal& a, const t_signal& b)
 {
@@ -34,8 +31,6 @@ void add_signal (t_signal s)
 	signals.push(s);
 }
 
-} // namespace core
-
 COMMAND_ROUTINE (signal)
 {
 	if (ev != PRESS)
@@ -56,6 +51,6 @@ COMMAND_ROUTINE (signal)
 		}
 		sigarg.pop_back();
 	}
-	core::t_signal s = { recipient, delay, signame, sigarg };
-	core::add_signal(s);
+	t_signal s = { recipient, delay, signame, sigarg };
+	add_signal(s);
 }

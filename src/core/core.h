@@ -5,9 +5,6 @@
 #include "core/entity.h"
 #include <queue>
 
-namespace core
-{
-
 extern bool must_quit;
 extern int exit_code;
 extern long long tick;
@@ -26,8 +23,6 @@ void update ();
  * the lines with key-value pairs must start with whitespace.
  */
 void load_map (std::string path);
-void init ();
-
-}
+void init_core ();
 
 #endif // CORE_H

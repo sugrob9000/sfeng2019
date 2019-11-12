@@ -22,9 +22,6 @@
  *   not when the signal is sent.
  */
 
-namespace core
-{
-
 class e_base;
 
 struct t_signal
@@ -90,7 +87,5 @@ typedef std::map<std::string, std::vector<t_signal>> t_eventmap;
 
 template <class entclass> void fill_io_data ();
 template <class entclass> t_sigmap sigmap;
-
-} // namespace core
 
 #endif // SIGNAL_H

@@ -2,9 +2,6 @@
 #include <cstdio>
 #include <cstdlib>
 
-namespace core
-{
-
 [[noreturn]]
 void fatal (const char* format, ...)
 {
@@ -29,6 +26,4 @@ void warning (const char* format, ...)
 	fprintf(stderr, "\n");
 	fflush(stderr);
 	va_end(args);
-}
-
 }

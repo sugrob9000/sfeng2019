@@ -6,19 +6,14 @@
 #include "render/model.h"
 #include "render/material.h"
 
-namespace core
-{
-
 class e_prop: public e_base
 {
 	public:
 
-	render::t_model* model;
-	render::t_material* material;
+	t_model* model;
+	t_material* material;
 
 	ENT_MEMBERS (prop)
 };
-
-}
 
 #endif // ENT_PROP_H

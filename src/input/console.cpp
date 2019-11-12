@@ -2,9 +2,6 @@
 #include <algorithm>
 #include "cmds.h"
 
-namespace input
-{
-
 t_console_info console;
 
 void t_console_info::handle_input_ev (const SDL_Event& e)
@@ -98,15 +95,15 @@ void t_console_info::update_matches ()
 
 void t_console_info::render ()
 {
-	int resx = render::cont.res_x;
-	int resy = render::cont.res_y;
+	int resx = sdlcont.res_x;
+	int resy = sdlcont.res_y;
 
 	glPushMatrix();
 	glScalef(2.0 / resx, -2.0 / resy, 1.0);
 	glTranslatef(-0.5 * resx, -0.5 * resy, 0.0);
 
-	constexpr int height = render::cont.font_h + 10;
-	int startx = render::cont.font_w + 5;
+	constexpr int height = sdlcont.font_h + 10;
+	int startx = sdlcont.font_w + 5;
 	int starty = 4;
 
 	const SDL_Color bg_clr = { 20, 20, 20, 255 };
@@ -121,33 +118,32 @@ void t_console_info::render ()
 	glVertex2i(resx, height);
 	glVertex2i(0, height);
 	glColor4ubv((GLubyte*) &cursor_clr);
-	int x = cmd.size() * render::cont.font_w + startx;
+	int x = cmd.size() * sdlcont.font_w + startx;
 	glVertex2i(x, starty);
 	glVertex2i(x + 2, starty);
-	glVertex2i(x + 2, starty + render::cont.font_h);
-	glVertex2i(x, starty + render::cont.font_h);
+	glVertex2i(x + 2, starty + sdlcont.font_h);
+	glVertex2i(x, starty + sdlcont.font_h);
 	glEnd();
 
 	if (!cmd.empty())
-		render::draw_text(cmd.c_str(), startx, starty);
-	render::draw_text(">", 4, starty);
+		draw_text(cmd.c_str(), startx, starty);
+	draw_text(">", 4, starty);
 
 	if (!matches.empty()) {
-		int single_match_h = render::cont.font_h + 3;
+		int single_match_h = sdlcont.font_h + 3;
 		int matches_h = single_match_h * matches.size();
-		int matches_w = resx - startx;
 
 		glUseProgram(0);
 		glBegin(GL_QUADS);
 		glColor4ubv((GLubyte*) &bg_match_clr);
 		glVertex2i(startx, height);
-		glVertex2i(startx + matches_w, height);
-		glVertex2i(startx + matches_w, height + matches_h);
+		glVertex2i(resx, height);
+		glVertex2i(resx, height + matches_h);
 		glVertex2i(startx, height + matches_h);
 		glEnd();
 
 		for (int i = 0; i < matches.size(); i++) {
-			render::draw_text(matches[i]->c_str(), startx + 4,
+			draw_text(matches[i]->c_str(), startx + 4,
 					height + single_match_h * i);
 		}
 	}
@@ -155,16 +151,14 @@ void t_console_info::render ()
 	glPopMatrix();
 }
 
-} // namespace input
-
 COMMAND_ROUTINE (console_open)
 {
 	if (ev == PRESS)
-		input::console.open();
+		console.open();
 }
 
 COMMAND_ROUTINE (console_close)
 {
 	if (ev == PRESS)
-		input::console.close();
+		console.close();
 }

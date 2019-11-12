@@ -3,9 +3,6 @@
 #include "render.h"
 #include "input/cmds.h"
 
-namespace render
-{
-
 void t_model::render () const
 {
 	glCallList(display_list_id);
@@ -139,8 +136,6 @@ bool t_model_mem::load_rvd (std::string path)
 	return true;
 }
 
-} // namespace render
-
 COMMAND_ROUTINE (obj2rvd)
 {
 	if (ev != PRESS)
@@ -162,7 +157,7 @@ COMMAND_ROUTINE (obj2rvd)
 		out += ".rvd";
 	}
 
-	render::t_model_mem model;
+	t_model_mem model;
 	model.load_obj(in);
 	model.dump_rvd(out);
 }

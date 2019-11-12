@@ -1,8 +1,5 @@
 #include "input.h"
 
-namespace input
-{
-
 /*
  * A console window for entering commands
  * Enter - execute
@@ -24,5 +21,3 @@ struct t_console_info
 	void render ();
 };
 extern t_console_info console;
-
-}

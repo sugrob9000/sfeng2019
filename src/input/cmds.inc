@@ -51,7 +51,7 @@ COMMAND (obj2rvd)
 
 /*
  * Fire a signal to an entity:
- * signal [recipient] [delay] [signal name] [arguments...]
+ * signal [delay] [target name] [signal name] [arguments...]
  */
 COMMAND (signal)
 

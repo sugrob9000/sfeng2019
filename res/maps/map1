@@ -9,3 +9,7 @@ prop
 	model muscle_car
 	mat car-blue
 	name blue_car
+timer
+	time 200
+	start-running 0
+	name timer

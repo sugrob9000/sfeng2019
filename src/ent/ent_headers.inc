@@ -1,6 +1,7 @@
 #ifndef ALL_ENT_HEADERS_INC
 #define ALL_ENT_HEADERS_INC
 
-#include "ent/prop.h"
+#include "prop.h"
+#include "timer.h"
 
 #endif // ALL_ENT_HEADERS_INC

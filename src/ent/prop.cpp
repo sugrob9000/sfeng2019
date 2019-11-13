@@ -7,15 +7,9 @@ SIG_HANDLER (prop, setpos)
 	atovec3(arg, ent->pos);
 }
 
-SIG_HANDLER (prop, showpos)
-{
-	DEBUG_EXPR(ent->pos);
-}
-
 FILL_IO_DATA (prop)
 {
 	SET_SIG_HANDLER(prop, setpos);
-	SET_SIG_HANDLER(prop, showpos);
 }
 
 void e_prop::think () { }

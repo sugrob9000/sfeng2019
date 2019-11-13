@@ -14,4 +14,4 @@ timer
 	start-running 0
 	name timer
 	! time_up 0 red_car showpos
-
+	! time_up 20 blue_car showpos

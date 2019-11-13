@@ -27,6 +27,7 @@ void e_timer::think ()
 	if (running) {
 		if (ticks_left <= 0) {
 			running = false;
+			ticks_left = 0;
 			on_event("time_up");
 		} else {
 			ticks_left--;

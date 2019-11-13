@@ -45,12 +45,12 @@ class e_base
 /*
  * Goes inside the entity class declaration
  */
-#define ENT_MEMBERS(name)                  \
-	public:                            \
-	void think ();                     \
-	void render () const;              \
-	const t_sigmap& get_sigmap () const  \
-	{ return sigmap<e_##name>; } \
+#define ENT_MEMBERS(name)                   \
+	public:                             \
+	void think ();                      \
+	void render () const;               \
+	const t_sigmap& get_sigmap () const \
+	{ return sigmap<e_##name>; }        \
 	void apply_keyvals (const t_ent_keyvals& kv);
 
 
@@ -71,7 +71,6 @@ struct t_entities
 {
 	std::vector<e_base*> vec;
 	std::map<std::string, e_base*> name_index;
-
 	e_base* spawn (std::string type);
 	e_base* find_by_name (std::string name);
 };

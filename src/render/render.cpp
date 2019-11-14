@@ -1,21 +1,28 @@
+#include "core/core.h"
 #include "inc_general.h"
 #include "inc_gl.h"
+#include "input/cmds.h"
+#include "input/console.h"
+#include "input/input.h"
+#include "render/material.h"
 #include "render/render.h"
 #include "render/resource.h"
-#include "render/material.h"
-#include "core/core.h"
-#include "input/input.h"
-#include "input/console.h"
-#include "input/cmds.h"
+#include "render/vis.h"
 
 t_sdlcontext sdlcont;
 
 bool cam_move_flags[4];
 t_camera camera;
 
+constexpr short cam_move_f = 0;
+constexpr short cam_move_b = 1;
+constexpr short cam_move_l = 2;
+constexpr short cam_move_r = 3;
+extern bool cam_move_flags[4];
+
 void upd_camera_pos ()
 {
-	const float speed = 1.0;
+	constexpr float speed = 1.0;
 	vec3 delta;
 	auto& flags = cam_move_flags;
 	t_camera& cam = camera;
@@ -70,12 +77,17 @@ void render_all ()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
 	camera.apply();
 
-	// TODO: visible sets
-	for (const e_base* e: ents.vec)
+	fill_visible_set();
+
+	glViewport(0, 0, sdlcont.res_x, sdlcont.res_y);
+	glEnable(GL_CULL_FACE);
+	glEnable(GL_DEPTH_TEST);
+	glDepthMask(GL_TRUE);
+	glDepthFunc(GL_LESS);
+
+	for (const e_base* e: visible_set)
 		e->render();
 
 	// HUD
@@ -135,10 +147,15 @@ void init_render ()
 	sdlcont.renderer = SDL_CreateRenderer(sdlcont.window, -1,
 			SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
+	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+	glDebugMessageCallback(&gl_msg_callback, nullptr);
+
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 
 	init_text();
+
+	init_vis();
 }
 
 void resize_window (int w, int h)
@@ -154,6 +171,11 @@ void rotate_gl_matrix (vec3 angs)
 	glRotatef(angs.x, 1.0, 0.0, 0.0);
 	glRotatef(angs.y, 0.0, 1.0, 0.0);
 	glRotatef(angs.z, 0.0, 0.0, 1.0);
+}
+
+void translate_gl_matrix (vec3 pos)
+{
+	glTranslatef(pos.x, pos.y, pos.z);
 }
 
 
@@ -207,8 +229,8 @@ void init_text ()
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	t_shader_id vert = get_shader("vert_identity", GL_VERTEX_SHADER);
-	t_shader_id frag = get_shader("frag_text", GL_FRAGMENT_SHADER);
+	t_shader_id vert = get_shader("int/vert_identity", GL_VERTEX_SHADER);
+	t_shader_id frag = get_shader("int/frag_text", GL_FRAGMENT_SHADER);
 
 	text_program = glCreateProgram();
 	glAttachShader(text_program, vert);
@@ -239,7 +261,7 @@ void init_text ()
 	SDL_FreeSurface(surf);
 }
 
-void draw_text (const char* str, int x, int y)
+void draw_text (const char* str, float x, float y, float size)
 {
 	glUseProgram(text_program);
 
@@ -248,19 +270,21 @@ void draw_text (const char* str, int x, int y)
 	glUniform1i(text_prg_glyph_loc, 0);
 
 	glBegin(GL_QUADS);
+	int w = sdlcont.font_w;
+	int h = sdlcont.font_h;
+	float sizew = size * (float) w / h;
+
 	for (int i = 0; str[i] != 0; i++) {
 		const char c = str[i];
-
-		glTexCoord2i(sdlcont.font_w * c, 0);
-		glVertex2i(x, y);
-		glTexCoord2i(sdlcont.font_w * c, sdlcont.font_h);
-		glVertex2i(x, y + sdlcont.font_h);
-		glTexCoord2i(sdlcont.font_w * (c + 1), sdlcont.font_h);
-		glVertex2i(x + sdlcont.font_w, y + sdlcont.font_h);
-		glTexCoord2i(sdlcont.font_w * (c + 1), 0);
-		glVertex2i(x + sdlcont.font_w, y);
-
-		x += sdlcont.font_w;
+		glTexCoord2i(w * c, 0);
+		glVertex2f(x, y);
+		glTexCoord2i(w * c, h);
+		glVertex2f(x, y + size);
+		glTexCoord2i(w * (c + 1), h);
+		glVertex2f(x + sizew, y + size);
+		glTexCoord2i(w * (c + 1), 0);
+		glVertex2f(x + sizew, y);
+		x += w;
 	}
 	glEnd();
 }

@@ -20,6 +20,8 @@ void t_model::load (const t_model_mem& verts)
 	}
 	glEnd();
 	glEndList();
+
+	bbox = verts.bbox;
 }
 
 bool t_model_mem::load_obj (std::string path)
@@ -133,6 +135,23 @@ bool t_model_mem::load_rvd (std::string path)
 
 	verts.resize(vertnum);
 	f.read((char*) verts.data(), vertnum * sizeof(t_vertex));
+
+	// calculate bounding box
+	bbox = { { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } };
+	for (const t_vertex& v: verts) {
+		bbox.start =
+			{ std::min(bbox.start.x, v.pos.x),
+			  std::min(bbox.start.y, v.pos.y),
+			  std::min(bbox.start.z, v.pos.z) };
+		bbox.end =
+			{ std::max(bbox.end.x, v.pos.x),
+			  std::max(bbox.end.y, v.pos.y),
+			  std::max(bbox.end.z, v.pos.z) };
+	}
+	// extend slightly just in case
+	bbox.start -= { 0.5, 0.5, 0.5 };
+	bbox.end += { 0.5, 0.5, 0.5 };
+
 	return true;
 }
 

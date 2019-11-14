@@ -48,3 +48,8 @@ void e_timer::apply_keyvals (const t_ent_keyvals& kv)
 }
 
 void e_timer::render () const { }
+
+t_bound_box e_timer::get_bbox () const
+{
+	return { { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } };
+}

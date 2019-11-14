@@ -2,6 +2,7 @@
 #define MODEL_H
 
 #include "inc_general.h"
+#include "render/vis.h"
 #include <vector>
 
 struct t_texcrd
@@ -26,14 +27,12 @@ struct t_vertex
 struct t_model_mem
 {
 	std::vector<t_vertex> verts;
+	t_bound_box bbox;
 
 	bool load_obj (std::string path);
-
 	/*
-	 * RVD (raw vertex data) is a file format that stores
-	 * the model's data in the RAM-efficient format:
-	 * - store the number of vertices
-	 * - store the raw contents of verts.data()
+	 * Binary file format that stores the number of vertices,
+	 * then vertices themselves
 	 */
 	bool load_rvd (std::string path);
 	void dump_rvd (std::string path);
@@ -46,6 +45,7 @@ struct t_model_mem
 struct t_model
 {
 	unsigned int display_list_id;
+	t_bound_box bbox;
 
 	void render () const;
 	void load (const t_model_mem& verts);

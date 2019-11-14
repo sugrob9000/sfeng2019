@@ -38,3 +38,8 @@ void e_prop::render () const
 
 	glPopMatrix();
 }
+
+t_bound_box e_prop::get_bbox () const
+{
+	return model->bbox;
+}

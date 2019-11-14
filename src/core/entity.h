@@ -4,6 +4,7 @@
 #include "inc_general.h"
 #include "keyval.h"
 #include "signal.h"
+#include "render/vis.h"
 #include <map>
 #include <queue>
 
@@ -29,8 +30,10 @@ class e_base
 
 	e_base () { };
 	virtual void think () = 0;
-	virtual void render () const = 0;
 	virtual void apply_keyvals (const t_ent_keyvals& kv) = 0;
+
+	virtual void render () const = 0;
+	virtual t_bound_box get_bbox () const = 0;
 
 	/*
 	 * We have to be able to get the sigmap knowing only the pointer
@@ -48,9 +51,10 @@ class e_base
 #define ENT_MEMBERS(name)                   \
 	public:                             \
 	void think ();                      \
-	void render () const;               \
 	const t_sigmap& get_sigmap () const \
 	{ return sigmap<e_##name>; }        \
+	void render () const;               \
+	t_bound_box get_bbox () const;      \
 	void apply_keyvals (const t_ent_keyvals& kv);
 
 

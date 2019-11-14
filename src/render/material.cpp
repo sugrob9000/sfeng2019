@@ -26,7 +26,7 @@ t_shader_id compile_glsl (std::string path, GLenum type)
 
 	unsigned int id = glCreateShader(type);
 
-	const char* source_ptr = source.c_str();
+	const char* const source_ptr = source.c_str();
 
 	// to glShaderSource, pretend the source is just one line
 	// which does not affect the syntax because we put linebreaks
@@ -41,14 +41,12 @@ t_shader_id compile_glsl (std::string path, GLenum type)
 
 	int log_length = 0;
 	glGetShaderiv(id, GL_INFO_LOG_LENGTH, &log_length);
-
-	char* log = new char[log_length];
+	char log[log_length+1];
+	log[log_length] = 0;
 	glGetShaderInfoLog(id, log_length, 0, log);
 
 	warning("Failed to compile shader %s:\n%s\n",
 			path.c_str(), log);
-
-	delete[] log;
 
 	return 0;
 }

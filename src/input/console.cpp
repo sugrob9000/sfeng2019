@@ -126,8 +126,8 @@ void t_console_info::render ()
 	glEnd();
 
 	if (!cmd.empty())
-		draw_text(cmd.c_str(), startx, starty);
-	draw_text(">", 4, starty);
+		draw_text(cmd.c_str(), startx, starty, 16);
+	draw_text(">", 4, starty, 16);
 
 	if (!matches.empty()) {
 		int single_match_h = sdlcont.font_h + 3;
@@ -144,7 +144,7 @@ void t_console_info::render ()
 
 		for (int i = 0; i < matches.size(); i++) {
 			draw_text(matches[i]->c_str(), startx + 4,
-					height + single_match_h * i);
+					height + single_match_h * i, 16);
 		}
 	}
 

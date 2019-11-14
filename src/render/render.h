@@ -48,15 +48,6 @@ struct t_sdlcontext
 extern t_sdlcontext sdlcont;
 
 extern t_camera camera;
-
-/*
- * How the camera is currently moving (demo)
- */
-constexpr short cam_move_f = 0;
-constexpr short cam_move_b = 1;
-constexpr short cam_move_l = 2;
-constexpr short cam_move_r = 3;
-extern bool cam_move_flags[4];
 void upd_camera_pos ();
 
 void init_render ();
@@ -64,12 +55,10 @@ void render_all ();
 void resize_window (int w, int h);
 
 const SDL_Color text_color = { 200, 200, 200, 255 };
-void draw_text (const char* text, int x, int y);
+void draw_text (const char* text, float x, float y, float size);
 
-/*
- * To use instead of 3 glRotatef's on the spot
- */
 void rotate_gl_matrix (vec3 angs);
+void translate_gl_matrix (vec3 pos);
 
 #endif // RENDER_H
 

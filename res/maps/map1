@@ -1,17 +1,22 @@
 prop
-	pos 0.0 0.0 -25.0
-	ang 0 30 90
-	name red_car
+	pos 0 0 1
+	model floor1
+	mat stone-floor
+prop
+	pos 20 0 1
+	model floor2
+	mat stone-floor
+prop
+	pos 20 20 1
+	model floor3
+	mat stone-floor
+prop
+	pos 0 20 1
+	model floor4
+	mat stone-floor
+
+prop
+	pos 0 0 2
 	model muscle_car
 	mat car-red
-prop
-	pos 0.0 0.0 25.0
-	model muscle_car
-	mat car-blue
-	name blue_car
-timer
-	time 200
-	start-running 0
-	name timer
-	! time_up 0 red_car showpos
-	! time_up 20 blue_car showpos
+	name car

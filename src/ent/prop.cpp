@@ -20,10 +20,10 @@ void e_prop::apply_keyvals (const t_ent_keyvals& kv)
 
 	KV_TRY_GET(kv["model"],
 		model = get_model(val);,
-		model = nullptr; );
+		model = get_model("error"); );
 	KV_TRY_GET(kv["mat"],
 		material = get_material(val);,
-		material = nullptr; );
+		material = get_material("error"); );
 }
 
 void e_prop::render () const
@@ -33,7 +33,8 @@ void e_prop::render () const
 	material->apply();
 
 	rotate_gl_matrix(ang);
-	glTranslatef(pos.x, pos.y, pos.z);
+	translate_gl_matrix(pos);
+
 	model->render();
 
 	glPopMatrix();

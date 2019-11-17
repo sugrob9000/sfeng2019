@@ -24,6 +24,25 @@ void t_model::load (const t_model_mem& verts)
 	bbox = verts.bbox;
 }
 
+void t_model_mem::calc_bbox ()
+{
+	// just in case, make sure 0 is in
+	bbox = { { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } };
+	for (const t_vertex& v: verts) {
+		bbox.start =
+			{ std::min(bbox.start.x, v.pos.x),
+			  std::min(bbox.start.y, v.pos.y),
+			  std::min(bbox.start.z, v.pos.z) };
+		bbox.end =
+			{ std::max(bbox.end.x, v.pos.x),
+			  std::max(bbox.end.y, v.pos.y),
+			  std::max(bbox.end.z, v.pos.z) };
+	}
+	// just in case, extend slightly
+	bbox.start -= { 0.5, 0.5, 0.5 };
+	bbox.end += { 0.5, 0.5, 0.5 };
+}
+
 bool t_model_mem::load_obj (std::string path)
 {
 	std::ifstream f(path);
@@ -100,10 +119,12 @@ bool t_model_mem::load_obj (std::string path)
 		}
 	}
 
+	calc_bbox();
+
 	return true;
 }
 
-void t_model_mem::dump_rvd (std::string path)
+void t_model_mem::dump_rvd (std::string path) const
 {
 	std::ofstream f(path, std::ios::binary);
 	if (!f)
@@ -136,21 +157,7 @@ bool t_model_mem::load_rvd (std::string path)
 	verts.resize(vertnum);
 	f.read((char*) verts.data(), vertnum * sizeof(t_vertex));
 
-	// calculate bounding box
-	bbox = { { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } };
-	for (const t_vertex& v: verts) {
-		bbox.start =
-			{ std::min(bbox.start.x, v.pos.x),
-			  std::min(bbox.start.y, v.pos.y),
-			  std::min(bbox.start.z, v.pos.z) };
-		bbox.end =
-			{ std::max(bbox.end.x, v.pos.x),
-			  std::max(bbox.end.y, v.pos.y),
-			  std::max(bbox.end.z, v.pos.z) };
-	}
-	// extend slightly just in case
-	bbox.start -= { 0.5, 0.5, 0.5 };
-	bbox.end += { 0.5, 0.5, 0.5 };
+	calc_bbox();
 
 	return true;
 }

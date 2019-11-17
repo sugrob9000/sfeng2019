@@ -147,9 +147,6 @@ void init_render ()
 	sdlcont.renderer = SDL_CreateRenderer(sdlcont.window, -1,
 			SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
-	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-	glDebugMessageCallback(&gl_msg_callback, nullptr);
-
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 
@@ -284,7 +281,7 @@ void draw_text (const char* str, float x, float y, float size)
 		glVertex2f(x + sizew, y + size);
 		glTexCoord2i(w * (c + 1), 0);
 		glVertex2f(x + sizew, y);
-		x += w;
+		x += sizew;
 	}
 	glEnd();
 }

@@ -89,12 +89,9 @@ void t_material::load (std::string path)
 		bitmaps_interm.push_back({ key, get_texture(value) });
 	}
 
-	t_shader_id frag = get_shader(frag_name, GL_FRAGMENT_SHADER);
-	t_shader_id vert = get_shader(vert_name, GL_VERTEX_SHADER);
-
 	program = glCreateProgram();
-	glAttachShader(program, frag);
-	glAttachShader(program, vert);
+	glAttachShader(program, get_shader(frag_name, GL_FRAGMENT_SHADER));
+	glAttachShader(program, get_shader(vert_name, GL_VERTEX_SHADER));
 	glLinkProgram(program);
 
 	for (const bitmap_desc_interm& d: bitmaps_interm) {
@@ -103,8 +100,8 @@ void t_material::load (std::string path)
 		if (location != -1) {
 			bitmaps.push_back({ location, d.texid });
 		} else {
-			warning("Material %s:\n"
-				"%s is not a valid uniform in shaders %s, %s",
+			warning("Material %s: %s is not a valid "
+				"uniform in shaders %s, %s",
 				path.c_str(), d.loc_name.c_str(),
 				frag_name.c_str(), vert_name.c_str());
 		}

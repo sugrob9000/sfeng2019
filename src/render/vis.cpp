@@ -111,21 +111,20 @@ void fill_visible_set ()
 	for (int i = 0; i < n; i++) {
 		e_base* e = ents.vec[i];
 
-		glBeginQuery(GL_ANY_SAMPLES_PASSED, queries[i]);
+		glBeginQuery(GL_SAMPLES_PASSED, queries[i]);
 		glPushMatrix();
 		rotate_gl_matrix(e->ang);
 		translate_gl_matrix(e->pos);
 
-		t_bound_box bb = e->get_bbox();
-		bb.render();
+		e->get_bbox().render();
 
 		glPopMatrix();
-		glEndQuery(GL_ANY_SAMPLES_PASSED);
+		glEndQuery(GL_SAMPLES_PASSED);
 
-		unsigned int visible;
-		glGetQueryObjectuiv(queries[i], GL_QUERY_RESULT, &visible);
+		unsigned int pixels;
+		glGetQueryObjectuiv(queries[i], GL_QUERY_RESULT, &pixels);
 
-		if (visible)
+		if (pixels > 0)
 			visible_set.push_back(e);
 	}
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);

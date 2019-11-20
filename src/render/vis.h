@@ -14,6 +14,8 @@ struct t_bound_box
 
 	/* Return this box, expanded to include other */
 	t_bound_box updated (const t_bound_box& other) const;
+
+	bool point_in (vec3 pt) const;
 };
 
 struct t_occlusion_plane
@@ -21,10 +23,6 @@ struct t_occlusion_plane
 	std::vector<vec3> points;
 };
 extern std::vector<t_occlusion_plane> occ_planes;
-
-class e_base;
-extern std::vector<e_base*> visible_set;
-void fill_visible_set ();
 
 void init_vis ();
 

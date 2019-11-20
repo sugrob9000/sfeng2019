@@ -32,6 +32,7 @@ void t_bound_box::render () const
 		glVertex3f(d.x, d.y, d.z);
 	};
 
+	glDisable(GL_CULL_FACE);
 	glBegin(GL_QUADS);
 	quad(s, { s.x, e.y, s.z }, { s.x, e.y, e.z }, { s.x, s.y, e.z });
 	quad(s, { e.x, s.y, s.z }, { e.x, e.y, s.z }, { s.x, e.y, s.z });
@@ -41,6 +42,13 @@ void t_bound_box::render () const
 	quad(e, { e.x, e.y, s.z }, { s.x, e.y, s.z }, { s.x, e.y, e.z });
 	glEnd();
 }
+
+bool t_bound_box::point_in (vec3 pt) const
+{
+	return (pt.x >= start.x) && (pt.y >= start.y) && (pt.z >= start.z)
+		&& (pt.x <= end.x) && (pt.y <= end.y) && (pt.z <= end.z);
+}
+
 
 unsigned int occ_shader_prog;
 unsigned int occ_fbo;
@@ -100,15 +108,15 @@ void draw_occlusion_planes ()
 
 
 /*
- * Octets:
- *     x ->
- * low   0 1 | y
- *       2 3 v
- * high: 4 5
- *       6 7
+ * An octree is used to store the world polygons, then walked to
+ *   determine the currently visible set.
+ * The map can specify the leaf capacity, which will get a leaf
+ *   split when exceeded, and maximum leaf depth, beyond which
+ *   no leaf will ever be split.
  */
-constexpr int OCTREE_LEAF_CAPACITY = 50;
-constexpr int OCTREE_MAX_DEPTH = 20;
+
+int oct_leaf_capacity = 0;
+int oct_max_depth = 0;
 
 t_model_mem* p_world_tris;
 struct oct_data
@@ -129,13 +137,19 @@ struct oct_node
 
 	void build (t_bound_box bounds);
 
-	oct_node (): leaf(true), level(0) { }
+	vec3 color;
+
+	oct_node (int lvl);
 	~oct_node ();
 };
 
-oct_node root;
+oct_node root(0);
 t_model_mem world_tris;
 
+/*
+ * The ID of the octet in which point is
+ * if the midpoint of the bbox is origin
+ */
 uint8_t which_octet (vec3 origin, vec3 point)
 {
 	return (point.x > origin.x)
@@ -143,68 +157,57 @@ uint8_t which_octet (vec3 origin, vec3 point)
 	    + ((point.z > origin.z) << 2);
 }
 
-t_bound_box octet_bound (t_bound_box b, int octet_num)
+/*
+ * The bbox of an octet with this ID
+ * if the parent bbox is b
+ */
+t_bound_box octet_bound (t_bound_box b, uint8_t octet_num)
 {
-	const vec3& s = b.start;
-	const vec3& e = b.end;
-	vec3 m = (s + e) * 0.5;
-
-	t_bound_box r;
-
-	if (octet_num & 1) {
-		r.start.x = s.x;
-		r.end.x = m.x;
-	} else {
-		r.start.x = m.x;
-		r.end.x = e.x;
-	}
-	if (octet_num & 1) {
-		r.start.y = s.y;
-		r.end.y = m.y;
-	} else {
-		r.start.y = m.y;
-		r.end.y = e.y;
-	}
-	if (octet_num & 1) {
-		r.start.z = s.z;
-		r.end.z = m.z;
-	} else {
-		r.start.z = m.z;
-		r.end.z = e.z;
-	}
+	vec3 mid = (b.start + b.end) * 0.5;
+	t_bound_box r = b;
+	(octet_num & 1 ? r.start : r.end).x = mid.x;
+	(octet_num & 2 ? r.start : r.end).y = mid.y;
+	(octet_num & 4 ? r.start : r.end).z = mid.z;
 	return r;
 }
 
 void oct_node::build (t_bound_box bounds)
 {
-	if (level > OCTREE_MAX_DEPTH) {
-		DEBUG_EXPR(level);
+	if (level > oct_max_depth)
 		return;
-	}
-	if (bucket.size() <= OCTREE_LEAF_CAPACITY) {
-		DEBUG_EXPR(bucket.size());
+	if (bucket.size() <= oct_leaf_capacity)
 		return;
-	}
 
 	leaf = false;
-	for (int i = 0; i < 8; i++) {
-		children[i] = new oct_node;
-		children[i]->level = level + 1;
-	}
+	for (int i = 0; i < 8; i++)
+		children[i] = new oct_node(level + 1);
 
 	vec3 bb_mid = (bounds.start + bounds.end) * 0.5;
 
 	for (oct_data d: bucket) {
-		int i = d.triangle_index;
-		vec3 tri_mid = (world_tris.verts[i].pos
-		              + world_tris.verts[i + 1].pos
-		              + world_tris.verts[i + 2].pos) / 3.0;
+
+		vec3 tri_mid = { };
+		for (int i = 0; i < 3; i++)
+			tri_mid += world_tris.verts[d.triangle_index + i].pos;
+		tri_mid /= 3.0;
+
 		children[which_octet(bb_mid, tri_mid)]->bucket.push_back(d);
 	}
+
 	bucket.clear();
 
 	for (int i = 0; i < 8; i++)
 		children[i]->build(octet_bound(bounds, i));
+}
+
+oct_node::oct_node (int lvl)
+{
+	leaf = true;
+	level = lvl;
+
+	color = { (float) rand() / RAND_MAX,
+	          (float) rand() / RAND_MAX,
+	          (float) rand() / RAND_MAX };
 }
 
 oct_node::~oct_node ()
@@ -215,32 +218,24 @@ oct_node::~oct_node ()
 		delete children[i];
 }
 
-void build_world_from_obj (std::string obj_path)
-{
-	world_tris.load_obj(obj_path);
-	world_tris.bbox = { { -512, -512, -512 },
-	                    { 512, 512, 512 } };
-
-	for (int i = 0; i < world_tris.verts.size(); i += 3)
-		root.bucket.push_back({ i });
-
-	// DEBUG_EXPR(root.bucket[0].triangle_index);
-	root.build(world_tris.bbox);
-}
-
 void draw_octree_sub (oct_node* node, t_bound_box b)
 {
 	glUseProgram(0);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	glBegin(GL_QUADS);
-	glColor3f(1.0, 0.0, 0.0);
-	glVertex2f(b.start.x, b.start.y);
-	glVertex2f(b.start.x, b.end.y);
-	glVertex2f(b.end.x, b.end.y);
-	glVertex2f(b.end.x, b.start.y);
-
-	glEnd();
+	glColor3f(0.5, 0.5, 0.5);
+	b.render();
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+	glBegin(GL_TRIANGLES);
+	glColor4f(node->color.x, node->color.y, node->color.z, 0.6);
+	for (oct_data d: node->bucket) {
+		for (int i = 0; i < 3; i++) {
+			int idx = d.triangle_index + i;
+			const vec3& v = world_tris.verts[idx].pos;
+			glVertex3f(v.x, v.y, v.z);
+		}
+	}
+	glEnd();
 
 	if (!node->leaf) {
 		for (int i = 0; i < 8; i++)
@@ -250,9 +245,19 @@ void draw_octree_sub (oct_node* node, t_bound_box b)
 
 void draw_octree ()
 {
-	glPushMatrix();
-	glScalef(1.0 / 520.0, -1.0 / 520.0, 1.0);
-
 	draw_octree_sub(&root, world_tris.bbox);
-	glPopMatrix();
 }
+
+void build_world_from_obj (std::string obj_path)
+{
+	world_tris.load_obj(obj_path);
+
+	oct_leaf_capacity = 60;
+	oct_max_depth = 20;
+
+	for (int i = 0; i < world_tris.verts.size(); i += 3)
+		root.bucket.push_back({ i });
+
+	root.build(world_tris.bbox);
+}
+

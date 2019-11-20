@@ -85,6 +85,8 @@ void render_all ()
 	glDepthMask(GL_TRUE);
 	glDepthFunc(GL_LESS);
 
+	draw_octree();
+
 	// HUD
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -93,8 +95,6 @@ void render_all ()
 	glDisable(GL_CULL_FACE);
 	glDisable(GL_DEPTH_TEST);
 	glUseProgram(0);
-
-	draw_octree();
 
 	if (console.active)
 		console.render();

@@ -9,6 +9,11 @@ struct t_bound_box
 	vec3 start;
 	vec3 end;
 	void render () const;
+
+	float volume () const;
+
+	/* Return this box, expanded to include other */
+	t_bound_box updated (const t_bound_box& other) const;
 };
 
 struct t_occlusion_plane
@@ -23,6 +28,6 @@ void fill_visible_set ();
 
 void init_vis ();
 
-extern unsigned int occ_fbo_texture;
+void build_world_from_obj (std::string path);
 
 #endif // VIS_H

@@ -2,6 +2,7 @@
 #include "model.h"
 #include "render.h"
 #include "input/cmds.h"
+#include <cassert>
 
 void t_model::render () const
 {
@@ -42,12 +43,10 @@ bool t_model_mem::load_obj (std::string path)
 
 		int comment = line.find('#');
 		if (comment != std::string::npos)
-			line.erase(comment, std::string::npos);
+			line.erase(comment);
 
-		if (line.empty())
-			continue;
 		if (line.size() < 2)
-			return false;
+			continue;
 
 		uint16_t p = pack(line[0], line[1]);
 
@@ -100,6 +99,8 @@ bool t_model_mem::load_obj (std::string path)
 		}
 	}
 
+	assert(verts.size() % 3 == 0);
+
 	return true;
 }
 
@@ -132,6 +133,8 @@ bool t_model_mem::load_rvd (std::string path)
 
 	if (filesize != vertnum * sizeof(t_vertex) + sizeof(vertnum))
 		return false;
+
+	assert(vertnum % 3 == 0);
 
 	verts.resize(vertnum);
 	f.read((char*) verts.data(), vertnum * sizeof(t_vertex));

@@ -22,7 +22,7 @@ extern bool cam_move_flags[4];
 
 void upd_camera_pos ()
 {
-	constexpr float speed = 1.0;
+	constexpr float speed = 4.0;
 	vec3 delta;
 	auto& flags = cam_move_flags;
 	t_camera& cam = camera;
@@ -79,16 +79,11 @@ void render_all ()
 
 	camera.apply();
 
-	fill_visible_set();
-
 	glViewport(0, 0, sdlcont.res_x, sdlcont.res_y);
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
 	glDepthMask(GL_TRUE);
 	glDepthFunc(GL_LESS);
-
-	for (const e_base* e: visible_set)
-		e->render();
 
 	// HUD
 	glMatrixMode(GL_PROJECTION);

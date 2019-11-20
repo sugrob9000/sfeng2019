@@ -98,11 +98,161 @@ void draw_occlusion_planes ()
 	glEnable(GL_CULL_FACE);
 }
 
-void build_world_from_obj (std::string obj_path)
-{
-	t_model_mem world_tris;
-	world_tris.load_obj(obj_path);
 
-	// TODO
+/*
+ * Octets:
+ *     x ->
+ * low   0 1 | y
+ *       2 3 v
+ * high: 4 5
+ *       6 7
+ */
+constexpr int OCTREE_LEAF_CAPACITY = 50;
+constexpr int OCTREE_MAX_DEPTH = 20;
+
+t_model_mem* p_world_tris;
+struct oct_data
+{
+	/*
+	 * index of the first vert in world_tris,
+	 * e.g. 0, 3, 6, ...
+	 */
+	int triangle_index;
+};
+
+struct oct_node
+{
+	std::vector<oct_data> bucket;
+	bool leaf;
+	int level;
+	oct_node* children[8];
+
+	void build (t_bound_box bounds);
+
+	oct_node (): leaf(true), level(0) { }
+	~oct_node ();
+};
+
+oct_node root;
+t_model_mem world_tris;
+
+uint8_t which_octet (vec3 origin, vec3 point)
+{
+	return (point.x > origin.x)
+	    + ((point.y > origin.y) << 1)
+	    + ((point.z > origin.z) << 2);
 }
 
+t_bound_box octet_bound (t_bound_box b, int octet_num)
+{
+	const vec3& s = b.start;
+	const vec3& e = b.end;
+	vec3 m = (s + e) * 0.5;
+
+	t_bound_box r;
+
+	if (octet_num & 1) {
+		r.start.x = s.x;
+		r.end.x = m.x;
+	} else {
+		r.start.x = m.x;
+		r.end.x = e.x;
+	}
+	if (octet_num & 1) {
+		r.start.y = s.y;
+		r.end.y = m.y;
+	} else {
+		r.start.y = m.y;
+		r.end.y = e.y;
+	}
+	if (octet_num & 1) {
+		r.start.z = s.z;
+		r.end.z = m.z;
+	} else {
+		r.start.z = m.z;
+		r.end.z = e.z;
+	}
+	return r;
+}
+
+void oct_node::build (t_bound_box bounds)
+{
+	if (level > OCTREE_MAX_DEPTH) {
+		DEBUG_EXPR(level);
+		return;
+	}
+	if (bucket.size() <= OCTREE_LEAF_CAPACITY) {
+		DEBUG_EXPR(bucket.size());
+		return;
+	}
+
+	leaf = false;
+	for (int i = 0; i < 8; i++) {
+		children[i] = new oct_node;
+		children[i]->level = level + 1;
+	}
+
+	vec3 bb_mid = (bounds.start + bounds.end) * 0.5;
+
+	for (oct_data d: bucket) {
+		int i = d.triangle_index;
+		vec3 tri_mid = (world_tris.verts[i].pos
+		              + world_tris.verts[i + 1].pos
+		              + world_tris.verts[i + 2].pos) / 3.0;
+		children[which_octet(bb_mid, tri_mid)]->bucket.push_back(d);
+	}
+	bucket.clear();
+
+	for (int i = 0; i < 8; i++)
+		children[i]->build(octet_bound(bounds, i));
+}
+
+oct_node::~oct_node ()
+{
+	if (leaf)
+		return;
+	for (int i = 0; i < 8; i++)
+		delete children[i];
+}
+
+void build_world_from_obj (std::string obj_path)
+{
+	world_tris.load_obj(obj_path);
+	world_tris.bbox = { { -512, -512, -512 },
+	                    { 512, 512, 512 } };
+
+	for (int i = 0; i < world_tris.verts.size(); i += 3)
+		root.bucket.push_back({ i });
+
+	// DEBUG_EXPR(root.bucket[0].triangle_index);
+	root.build(world_tris.bbox);
+}
+
+void draw_octree_sub (oct_node* node, t_bound_box b)
+{
+	glUseProgram(0);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glBegin(GL_QUADS);
+	glColor3f(1.0, 0.0, 0.0);
+	glVertex2f(b.start.x, b.start.y);
+	glVertex2f(b.start.x, b.end.y);
+	glVertex2f(b.end.x, b.end.y);
+	glVertex2f(b.end.x, b.start.y);
+
+	glEnd();
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+	if (!node->leaf) {
+		for (int i = 0; i < 8; i++)
+			draw_octree_sub(node->children[i], octet_bound(b, i));
+	}
+}
+
+void draw_octree ()
+{
+	glPushMatrix();
+	glScalef(1.0 / 520.0, -1.0 / 520.0, 1.0);
+
+	draw_octree_sub(&root, world_tris.bbox);
+	glPopMatrix();
+}

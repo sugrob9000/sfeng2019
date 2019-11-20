@@ -94,6 +94,8 @@ void render_all ()
 	glDisable(GL_DEPTH_TEST);
 	glUseProgram(0);
 
+	draw_octree();
+
 	if (console.active)
 		console.render();
 

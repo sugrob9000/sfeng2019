@@ -29,5 +29,6 @@ void fill_visible_set ();
 void init_vis ();
 
 void build_world_from_obj (std::string path);
+void draw_octree ();
 
 #endif // VIS_H

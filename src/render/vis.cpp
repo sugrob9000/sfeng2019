@@ -1,6 +1,24 @@
 #include "vis.h"
 #include "resource.h"
 #include "core/entity.h"
+#include <algorithm>
+
+float t_bound_box::volume () const
+{
+	return (end.x - start.x)
+	     * (end.y - start.y)
+	     * (end.z - start.z);
+}
+
+t_bound_box t_bound_box::updated (const t_bound_box& other) const
+{
+	return { { std::min(start.x, other.start.x),
+	           std::min(start.y, other.start.y),
+	           std::min(start.z, other.start.z) },
+	         { std::max(end.x, other.end.x),
+	           std::max(end.y, other.end.y),
+	           std::max(end.z, other.end.z) } };
+}
 
 void t_bound_box::render () const
 {
@@ -39,13 +57,6 @@ void init_vis ()
 	glAttachShader(occ_shader_prog,
 		get_shader("int/frag_null", GL_FRAGMENT_SHADER));
 	glLinkProgram(occ_shader_prog);
-
-	constexpr float z = 0.0;
-	occ_planes.push_back(
-		{ { { -100, -100, z },
-		    { -100, 100, z },
-		    { 100, 100, z },
-		    { 100, -100, z } } } );
 
 	glGenFramebuffers(1, &occ_fbo);
 	glBindFramebuffer(GL_FRAMEBUFFER, occ_fbo);
@@ -87,47 +98,11 @@ void draw_occlusion_planes ()
 	glEnable(GL_CULL_FACE);
 }
 
-std::vector<e_base*> visible_set;
-void fill_visible_set ()
+void build_world_from_obj (std::string obj_path)
 {
-	visible_set.clear();
+	t_model_mem world_tris;
+	world_tris.load_obj(obj_path);
 
-	glViewport(0, 0, occ_fbo_size, occ_fbo_size);
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, occ_fbo);
-
-	glClear(GL_DEPTH_BUFFER_BIT);
-
-	draw_occlusion_planes();
-
-	int n = ents.vec.size();
-	unsigned int queries[n];
-	glGenQueries(n, queries);
-
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
-	glDepthMask(GL_FALSE);
-	glDisable(GL_CULL_FACE);
-
-	for (int i = 0; i < n; i++) {
-		e_base* e = ents.vec[i];
-
-		glBeginQuery(GL_SAMPLES_PASSED, queries[i]);
-		glPushMatrix();
-		rotate_gl_matrix(e->ang);
-		translate_gl_matrix(e->pos);
-
-		e->get_bbox().render();
-
-		glPopMatrix();
-		glEndQuery(GL_SAMPLES_PASSED);
-
-		unsigned int pixels;
-		glGetQueryObjectuiv(queries[i], GL_QUERY_RESULT, &pixels);
-
-		if (pixels > 0)
-			visible_set.push_back(e);
-	}
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-
-	glDeleteQueries(n, queries);
+	// TODO
 }
+

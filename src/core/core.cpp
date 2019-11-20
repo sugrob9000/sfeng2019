@@ -101,6 +101,9 @@ e_base* read_single_entity (std::istream& is)
 
 void load_map (std::string path)
 {
+	build_world_from_obj(path + "/w.obj");
+	return;
+
 	std::ifstream f(path);
 
 	if (!f)

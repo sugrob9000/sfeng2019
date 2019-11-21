@@ -101,16 +101,8 @@ e_base* read_single_entity (std::istream& is)
 
 void load_map (std::string path)
 {
-	build_world_from_obj(path + "/w.obj");
-	return;
-
-	std::ifstream f(path);
-
-	if (!f)
-		fatal("Could not open world file %s", path.c_str());
-
-	while (f.good())
-		read_single_entity(f);
+	read_world_vis_data(path + "/vis");
+	read_world_geo(path + "/geo.obj");
 }
 
 COMMAND_ROUTINE (nop)

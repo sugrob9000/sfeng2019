@@ -26,7 +26,8 @@ extern std::vector<t_occlusion_plane> occ_planes;
 
 void init_vis ();
 
-void build_world_from_obj (std::string path);
+void read_world_vis_data (std::string path);
+void read_world_geo (std::string obj_path);
 void draw_octree ();
 
 #endif // VIS_H

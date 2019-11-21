@@ -34,7 +34,7 @@ vec3 operator+ (vec3 one, vec3 other)
 	return vec3(
 		one.x + other.x,
 		one.y + other.y,
-		one.z + other.z );
+		one.z + other.z);
 }
 
 vec3 operator- (vec3 one, vec3 other)
@@ -42,8 +42,25 @@ vec3 operator- (vec3 one, vec3 other)
 	return vec3(
 		one.x - other.x,
 		one.y - other.y,
-		one.z - other.z );
+		one.z - other.z);
 }
+
+vec3 operator* (vec3 one, vec3 other)
+{
+	return vec3(
+		one.x * other.x,
+		one.y * other.y,
+		one.z * other.z);
+}
+
+vec3 operator/ (vec3 one, vec3 other)
+{
+	return vec3(
+		one.x / other.x,
+		one.y / other.y,
+		one.z / other.z);
+}
+
 
 vec3 operator* (vec3 v, float c)
 {
@@ -120,7 +137,9 @@ std::ostream& operator<< (std::ostream& s, vec3 v)
 	return (s << v.x << ' ' << v.y << ' ' << v.z);
 }
 
-std::istream& operator>> (std::istream& s, vec3 v)
+#include "inc_general.h"
+
+std::istream& operator>> (std::istream& s, vec3& v)
 {
 	return (s >> v.x >> v.y >> v.z);
 }

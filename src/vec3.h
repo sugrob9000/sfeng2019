@@ -29,16 +29,23 @@ static_assert(offsetof(vec3, x) == offsetof(vec3, _d[0]));
 static_assert(offsetof(vec3, y) == offsetof(vec3, _d[1]));
 static_assert(offsetof(vec3, z) == offsetof(vec3, _d[2]));
 
-vec3 operator+ (vec3 one, vec3 other);
-vec3 operator- (vec3 one, vec3 other);
 vec3 operator* (vec3 v, float c);
 vec3 operator* (float c, vec3 v);
 vec3 operator/ (vec3 v, float c);
 
+/*
+ * Component-wise
+ */
+vec3 operator+ (vec3 one, vec3 other);
+vec3 operator- (vec3 one, vec3 other);
+vec3 operator* (vec3 one, vec3 other);
+vec3 operator/ (vec3 one, vec3 other);
+
+
 float abs (const vec3& v);
 
 std::ostream& operator<< (std::ostream& s, vec3 v);
-std::istream& operator>> (std::istream& s, vec3 v);
+std::istream& operator>> (std::istream& s, vec3& v);
 
 vec3 atovec3 (const char* s);
 void atovec3 (const char* s, vec3& v);

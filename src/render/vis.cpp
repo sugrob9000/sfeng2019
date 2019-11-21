@@ -118,12 +118,10 @@ void draw_occlusion_planes ()
 int oct_leaf_capacity = 0;
 int oct_max_depth = 0;
 
-t_model_mem* p_world_tris;
 struct oct_data
 {
 	/*
-	 * index of the first vert in world_tris,
-	 * e.g. 0, 3, 6, ...
+	 * First vertex of triangle, e.g. 0, 3, 6, ...
 	 */
 	int triangle_index;
 };
@@ -136,8 +134,6 @@ struct oct_node
 	oct_node* children[8];
 
 	void build (t_bound_box bounds);
-
-	vec3 color;
 
 	oct_node (int lvl);
 	~oct_node ();
@@ -158,16 +154,15 @@ uint8_t which_octet (vec3 origin, vec3 point)
 }
 
 /*
- * The bbox of an octet with this ID
- * if the parent bbox is b
+ * The bbox of an octet with given ID, given the parent
  */
-t_bound_box octet_bound (t_bound_box b, uint8_t octet_num)
+t_bound_box octet_bound (t_bound_box parent, uint8_t octet_id)
 {
-	vec3 mid = (b.start + b.end) * 0.5;
-	t_bound_box r = b;
-	(octet_num & 1 ? r.start : r.end).x = mid.x;
-	(octet_num & 2 ? r.start : r.end).y = mid.y;
-	(octet_num & 4 ? r.start : r.end).z = mid.z;
+	vec3 mid = (parent.start + parent.end) * 0.5;
+	t_bound_box r = parent;
+	(octet_id & 1 ? r.start : r.end).x = mid.x;
+	(octet_id & 2 ? r.start : r.end).y = mid.y;
+	(octet_id & 4 ? r.start : r.end).z = mid.z;
 	return r;
 }
 
@@ -204,10 +199,6 @@ oct_node::oct_node (int lvl)
 {
 	leaf = true;
 	level = lvl;
-
-	color = { (float) rand() / RAND_MAX,
-	          (float) rand() / RAND_MAX,
-	          (float) rand() / RAND_MAX };
 }
 
 oct_node::~oct_node ()
@@ -227,7 +218,8 @@ void draw_octree_sub (oct_node* node, t_bound_box b)
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	glBegin(GL_TRIANGLES);
-	glColor4f(node->color.x, node->color.y, node->color.z, 0.6);
+	vec3 color = (0.5 * (b.start + b.end)) / 1000.0;
+	glColor4f(color.x, color.y, color.z, 1.0);
 	for (oct_data d: node->bucket) {
 		for (int i = 0; i < 3; i++) {
 			int idx = d.triangle_index + i;
@@ -248,12 +240,34 @@ void draw_octree ()
 	draw_octree_sub(&root, world_tris.bbox);
 }
 
-void build_world_from_obj (std::string obj_path)
+t_bound_box bounds_override;
+void read_world_vis_data (std::string path)
+{
+	std::ifstream f(path);
+	if (!f)
+		fatal("Vis data for world unavailable: %s", path.c_str());
+
+	std::string option;
+	while (f >> option) {
+		if (option == "oct_depth") {
+			f >> oct_max_depth;
+		} else if (option == "oct_capacity") {
+			f >> oct_leaf_capacity;
+		} else if (option == "bounds") {
+			f >> bounds_override.start >> bounds_override.end;
+		} else {
+			fatal("Unrecognized option in vis data %s: %s",
+					path.c_str(), option.c_str());
+		}
+	}
+}
+
+void read_world_geo (std::string obj_path)
 {
 	world_tris.load_obj(obj_path);
 
-	oct_leaf_capacity = 60;
-	oct_max_depth = 20;
+	if (bounds_override.volume() > 0.0)
+		world_tris.bbox = bounds_override;
 
 	for (int i = 0; i < world_tris.verts.size(); i += 3)
 		root.bucket.push_back({ i });

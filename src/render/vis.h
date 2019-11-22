@@ -28,6 +28,8 @@ void init_vis ();
 
 void read_world_vis_data (std::string path);
 void read_world_geo (std::string obj_path);
-void draw_octree ();
+
+extern int total_visible_nodes;
+void draw_visible ();
 
 #endif // VIS_H

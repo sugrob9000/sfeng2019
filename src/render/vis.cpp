@@ -53,7 +53,7 @@ bool t_bound_box::point_in (vec3 pt) const
 unsigned int occ_shader_prog;
 unsigned int occ_fbo;
 unsigned int occ_fbo_texture;
-unsigned int occ_fbo_renderbuffer;
+unsigned int occ_query;
 
 constexpr int occ_fbo_size = 256;
 
@@ -88,12 +88,13 @@ void init_vis ()
 	glReadBuffer(GL_NONE);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glGenQueries(1, &occ_query);
 }
 
 std::vector<t_occlusion_plane> occ_planes;
 void draw_occlusion_planes ()
 {
-	glUseProgram(occ_shader_prog);
 	glDisable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
 
@@ -123,7 +124,7 @@ struct oct_data
 	/*
 	 * First vertex of triangle, e.g. 0, 3, 6, ...
 	 */
-	int triangle_index;
+	int tri_idx;
 };
 
 struct oct_node
@@ -183,7 +184,7 @@ void oct_node::build (t_bound_box bounds)
 
 		vec3 tri_mid = { };
 		for (int i = 0; i < 3; i++)
-			tri_mid += world_tris.verts[d.triangle_index + i].pos;
+			tri_mid += world_tris.verts[d.tri_idx + i].pos;
 		tri_mid /= 3.0;
 
 		children[which_octant(bb_mid, tri_mid)]->bucket.push_back(d);
@@ -209,35 +210,70 @@ oct_node::~oct_node ()
 		delete children[i];
 }
 
-void draw_octree_sub (oct_node* node, t_bound_box b)
-{
-	glUseProgram(0);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	glColor3f(0.5, 0.5, 0.5);
-	b.render();
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+std::vector<oct_node*> visible_octants;
+int total_visible_nodes;
 
+void fill_visible_sub (oct_node* node, t_bound_box box)
+{
+	glBeginQuery(GL_SAMPLES_PASSED, occ_query);
+	box.render();
+	glEndQuery(GL_SAMPLES_PASSED);
+
+	unsigned int visible;
+	glGetQueryObjectuiv(occ_query, GL_QUERY_RESULT, &visible);
+	if (visible <= 0)
+		return;
+
+	if (node->leaf) {
+		visible_octants.push_back(node);
+		return;
+	}
+	for (int i = 0; i < 8; i++)
+		fill_visible_sub(node->children[i], octant_bound(box, i));
+}
+
+void draw_visible ()
+{
+	// setup occlusion rendering
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, occ_fbo);
+	glViewport(0, 0, occ_fbo_size, occ_fbo_size);
+	glClear(GL_DEPTH_BUFFER_BIT);
+	glUseProgram(occ_shader_prog);
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+	glDisable(GL_CULL_FACE);
+
+	// fill z-buffer with data from occlusion planes
+	glDepthMask(GL_TRUE);
+	draw_occlusion_planes();
+	glDepthMask(GL_FALSE);
+
+	// walk the tree nodes which pass the z-test
+	visible_octants.clear();
+	fill_visible_sub(&root, world_tris.bbox);
+	total_visible_nodes = visible_octants.size();
+
+	// setup proper rendering
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	glViewport(0, 0, sdlcont.res_x, sdlcont.res_y);
+	glEnable(GL_CULL_FACE);
+	glDepthMask(GL_TRUE);
+
+	// draw world
+	static t_material* mat = get_material("worldmat");
+	mat->apply();
 	glBegin(GL_TRIANGLES);
-	vec3 color = (0.5 * (b.start + b.end)) / 1000.0;
-	glColor4f(color.x, color.y, color.z, 1.0);
-	for (oct_data d: node->bucket) {
-		for (int i = 0; i < 3; i++) {
-			int idx = d.triangle_index + i;
-			const vec3& v = world_tris.verts[idx].pos;
-			glVertex3f(v.x, v.y, v.z);
+	for (oct_node* n: visible_octants) {
+		for (const oct_data& d: n->bucket) {
+			for (int i = 0; i < 3; i++) {
+				t_vertex& v = world_tris.verts[d.tri_idx + i];
+				glNormal3f(v.norm.x, v.norm.y, v.norm.z);
+				glTexCoord2f(v.tex.u, v.tex.v);
+				glVertex3f(v.pos.x, v.pos.y, v.pos.z);
+			}
 		}
 	}
 	glEnd();
-
-	if (!node->leaf) {
-		for (int i = 0; i < 8; i++)
-			draw_octree_sub(node->children[i], octant_bound(b, i));
-	}
-}
-
-void draw_octree ()
-{
-	draw_octree_sub(&root, world_tris.bbox);
 }
 
 t_bound_box bounds_override;

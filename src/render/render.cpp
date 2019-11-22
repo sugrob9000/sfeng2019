@@ -85,16 +85,21 @@ void render_all ()
 	glDepthMask(GL_TRUE);
 	glDepthFunc(GL_LESS);
 
-	draw_octree();
+	draw_visible();
 
 	// HUD
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+	glScalef(1.0, -1.0, 1.0);
 	glDisable(GL_CULL_FACE);
 	glDisable(GL_DEPTH_TEST);
 	glUseProgram(0);
+
+	char str[128];
+	sprintf(str, "%i nodes", total_visible_nodes);
+	draw_text(str, -1, -1, 0.05);
 
 	if (console.active)
 		console.render();

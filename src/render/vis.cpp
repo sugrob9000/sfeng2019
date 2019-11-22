@@ -143,10 +143,10 @@ oct_node root(0);
 t_model_mem world_tris;
 
 /*
- * The ID of the octet in which point is
+ * The ID of the octant in which point is
  * if the midpoint of the bbox is origin
  */
-uint8_t which_octet (vec3 origin, vec3 point)
+uint8_t which_octant (vec3 origin, vec3 point)
 {
 	return (point.x > origin.x)
 	    + ((point.y > origin.y) << 1)
@@ -154,15 +154,15 @@ uint8_t which_octet (vec3 origin, vec3 point)
 }
 
 /*
- * The bbox of an octet with given ID, given the parent
+ * The bbox of an octant with given ID, given the parent
  */
-t_bound_box octet_bound (t_bound_box parent, uint8_t octet_id)
+t_bound_box octant_bound (t_bound_box parent, uint8_t octant_id)
 {
 	vec3 mid = (parent.start + parent.end) * 0.5;
 	t_bound_box r = parent;
-	(octet_id & 1 ? r.start : r.end).x = mid.x;
-	(octet_id & 2 ? r.start : r.end).y = mid.y;
-	(octet_id & 4 ? r.start : r.end).z = mid.z;
+	(octant_id & 1 ? r.start : r.end).x = mid.x;
+	(octant_id & 2 ? r.start : r.end).y = mid.y;
+	(octant_id & 4 ? r.start : r.end).z = mid.z;
 	return r;
 }
 
@@ -186,13 +186,13 @@ void oct_node::build (t_bound_box bounds)
 			tri_mid += world_tris.verts[d.triangle_index + i].pos;
 		tri_mid /= 3.0;
 
-		children[which_octet(bb_mid, tri_mid)]->bucket.push_back(d);
+		children[which_octant(bb_mid, tri_mid)]->bucket.push_back(d);
 	}
 
 	bucket.clear();
 
 	for (int i = 0; i < 8; i++)
-		children[i]->build(octet_bound(bounds, i));
+		children[i]->build(octant_bound(bounds, i));
 }
 
 oct_node::oct_node (int lvl)
@@ -231,7 +231,7 @@ void draw_octree_sub (oct_node* node, t_bound_box b)
 
 	if (!node->leaf) {
 		for (int i = 0; i < 8; i++)
-			draw_octree_sub(node->children[i], octet_bound(b, i));
+			draw_octree_sub(node->children[i], octant_bound(b, i));
 	}
 }
 
@@ -245,7 +245,7 @@ void read_world_vis_data (std::string path)
 {
 	std::ifstream f(path);
 	if (!f)
-		fatal("Vis data for world unavailable: %s", path.c_str());
+		warning("Vis data for world unavailable: %s", path.c_str());
 
 	std::string option;
 	while (f >> option) {
@@ -256,7 +256,7 @@ void read_world_vis_data (std::string path)
 		} else if (option == "bounds") {
 			f >> bounds_override.start >> bounds_override.end;
 		} else {
-			fatal("Unrecognized option in vis data %s: %s",
+			warning("Unrecognized option in vis data %s: %s",
 					path.c_str(), option.c_str());
 		}
 	}

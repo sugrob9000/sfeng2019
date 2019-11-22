@@ -164,21 +164,8 @@ t_texture_id load_texture (std::string path)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
 			GL_LINEAR_MIPMAP_LINEAR);
 
-	// mipmap
-	int level = 0;
-	int w = surf->w;
-	int h = surf->h;
-	GLubyte* p = (GLubyte*) surf->pixels;
-
-	while (h >= 1 && w >= 1) {
-		glTexImage2D(GL_TEXTURE_2D, level++,
-				GL_RGBA, w, h,
-				0, format, GL_UNSIGNED_BYTE, p);
-		gluScaleImage(format, w, h, GL_UNSIGNED_BYTE, p,
-				w / 2, h / 2, GL_UNSIGNED_BYTE, p);
-		w /= 2;
-		h /= 2;
-	}
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surf->w, surf->h,
+			0, format, GL_UNSIGNED_BYTE, surf->pixels);
 
 	SDL_FreeSurface(surf);
 

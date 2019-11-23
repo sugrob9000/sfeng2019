@@ -28,10 +28,6 @@ int main (int argc, char** argv)
 		handle_input();
 		update();
 		render_all();
-
-		using frame60 = cr::duration<float, std::ratio<1, 60>>;
-		while (frame60(sc::now() - start).count() < 1.0)
-			continue;
 	}
 
 	SDL_Quit();

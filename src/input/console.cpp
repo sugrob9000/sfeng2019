@@ -95,60 +95,63 @@ void t_console_info::update_matches ()
 
 void t_console_info::render ()
 {
-	int resx = sdlcont.res_x;
-	int resy = sdlcont.res_y;
-
-	glPushMatrix();
-	glScalef(2.0 / resx, -2.0 / resy, 1.0);
-	glTranslatef(-0.5 * resx, -0.5 * resy, 0.0);
-
-	constexpr int height = sdlcont.font_h + 10;
-	int startx = sdlcont.font_w + 5;
-	int starty = 4;
-
 	const SDL_Color bg_clr = { 20, 20, 20, 255 };
 	const SDL_Color bg_match_clr = { 30, 30, 30, 240 };
 	const SDL_Color cursor_clr = { 220, 220, 40, 255 };
 
+	// try to match the actual font size in pixels,
+	// and be 4 away from the top
+	float text_height = sdlcont.font_h * 2.0 / sdlcont.res_y;
+	float text_offs_y = 4.0 * 2.0 / sdlcont.res_y;
+	float height = text_height + 2.0 * text_offs_y;
+
+	float char_width = text_height
+		* ((float) sdlcont.font_w / sdlcont.font_h)
+		* ((float) sdlcont.res_y / sdlcont.res_x);
+	float text_width = char_width * cmd.length();
+	float text_offs_x = char_width + 0.01;
+
 	glUseProgram(0);
 	glBegin(GL_QUADS);
 	glColor4ubv((GLubyte*) &bg_clr);
-	glVertex2i(0, 0);
-	glVertex2i(resx, 0);
-	glVertex2i(resx, height);
-	glVertex2i(0, height);
-	glColor4ubv((GLubyte*) &cursor_clr);
-	int x = cmd.size() * sdlcont.font_w + startx;
-	glVertex2i(x, starty);
-	glVertex2i(x + 2, starty);
-	glVertex2i(x + 2, starty + sdlcont.font_h);
-	glVertex2i(x, starty + sdlcont.font_h);
+	glVertex2f(-1.0, -1.0);
+	glVertex2f(1.0, -1.0);
+	glVertex2f(1.0, -1.0 + height);
+	glVertex2f(-1.0, -1.0 + height);
 	glEnd();
 
-	if (!cmd.empty())
-		draw_text(cmd.c_str(), startx, starty, 16);
-	draw_text(">", 4, starty, 16);
+	glBegin(GL_LINES);
+	glColor4ubv((GLubyte*) &cursor_clr);
+	glVertex2f(-1.0 + text_offs_x + text_width, -1.0 + text_offs_y);
+	glVertex2f(-1.0 + text_offs_x + text_width,
+	           -1.0 + text_offs_y + text_height);
+	glEnd();
+
+	if (!cmd.empty()) {
+		draw_text(cmd.c_str(), -1.0 + text_offs_x,
+			-1.0 + text_offs_y, char_width, text_height);
+	}
+	draw_text(">", -1.0, -1.0 + text_offs_y, char_width, text_height);
 
 	if (!matches.empty()) {
-		int single_match_h = sdlcont.font_h + 3;
-		int matches_h = single_match_h * matches.size();
+		float single_match_h = text_height + 0.015;
+		float matches_h = single_match_h * matches.size();
 
 		glUseProgram(0);
 		glBegin(GL_QUADS);
 		glColor4ubv((GLubyte*) &bg_match_clr);
-		glVertex2i(startx, height);
-		glVertex2i(resx, height);
-		glVertex2i(resx, height + matches_h);
-		glVertex2i(startx, height + matches_h);
+		glVertex2f(-1.0, -1.0 + height);
+		glVertex2f(1.0, -1.0 + height);
+		glVertex2f(1.0, -1.0 + height + matches_h);
+		glVertex2f(-1.0, -1.0 + height + matches_h);
 		glEnd();
 
 		for (int i = 0; i < matches.size(); i++) {
-			draw_text(matches[i]->c_str(), startx + 4,
-					height + single_match_h * i, 16);
+			draw_text(matches[i]->c_str(), -1.0 + text_offs_x,
+					-1.0 + height + single_match_h * i,
+					char_width, text_height);
 		}
 	}
-
-	glPopMatrix();
 }
 
 COMMAND_ROUTINE (console_open)

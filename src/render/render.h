@@ -55,7 +55,7 @@ void render_all ();
 void resize_window (int w, int h);
 
 const SDL_Color text_color = { 200, 200, 200, 255 };
-void draw_text (const char* text, float x, float y, float size);
+void draw_text (const char* text, float x, float y, float charw, float charh);
 
 void rotate_gl_matrix (vec3 angs);
 void translate_gl_matrix (vec3 pos);

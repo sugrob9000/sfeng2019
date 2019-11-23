@@ -8,6 +8,7 @@
 #include "render/render.h"
 #include "render/resource.h"
 #include "render/vis.h"
+#include <chrono>
 
 t_sdlcontext sdlcont;
 
@@ -75,6 +76,12 @@ COMMAND_ROUTINE (move_cam)
 
 void render_all ()
 {
+	namespace cr = std::chrono;
+	using sc = cr::steady_clock;
+
+	sc::time_point frame_start = sc::now();
+	static float last_frame_sec;
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	camera.apply();
@@ -99,10 +106,14 @@ void render_all ()
 
 	char str[128];
 	sprintf(str, "%i nodes", total_visible_nodes);
-	draw_text(str, -1, -1, 0.05);
+	draw_text(str, -1, -1, 0.025, 0.05);
+	sprintf(str, "%f ms", last_frame_sec * 1000.0);
+	draw_text(str, -1, -1 + 0.06, 0.025, 0.05);
 
 	if (console.active)
 		console.render();
+
+	last_frame_sec = cr::duration<float>(sc::now() - frame_start).count();
 
 	SDL_GL_SwapWindow(sdlcont.window);
 }
@@ -148,6 +159,8 @@ void init_render ()
 
 	sdlcont.renderer = SDL_CreateRenderer(sdlcont.window, -1,
 			SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+
+	SDL_GL_SetSwapInterval(-1);
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -260,7 +273,7 @@ void init_text ()
 	SDL_FreeSurface(surf);
 }
 
-void draw_text (const char* str, float x, float y, float size)
+void draw_text (const char* str, float x, float y, float charw, float charh)
 {
 	glUseProgram(text_program);
 
@@ -271,19 +284,18 @@ void draw_text (const char* str, float x, float y, float size)
 	glBegin(GL_QUADS);
 	int w = sdlcont.font_w;
 	int h = sdlcont.font_h;
-	float sizew = size * (float) w / h;
 
 	for (int i = 0; str[i] != 0; i++) {
 		const char c = str[i];
 		glTexCoord2i(w * c, 0);
 		glVertex2f(x, y);
 		glTexCoord2i(w * c, h);
-		glVertex2f(x, y + size);
+		glVertex2f(x, y + charh);
 		glTexCoord2i(w * (c + 1), h);
-		glVertex2f(x + sizew, y + size);
+		glVertex2f(x + charw, y + charh);
 		glTexCoord2i(w * (c + 1), 0);
-		glVertex2f(x + sizew, y);
-		x += sizew;
+		glVertex2f(x + charw, y);
+		x += charw;
 	}
 	glEnd();
 }

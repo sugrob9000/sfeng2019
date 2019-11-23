@@ -20,4 +20,13 @@ t_texture_id get_texture (std::string path);
 t_material* get_material (std::string path);
 t_shader_id get_shader (std::string path, GLenum type);
 
+/*
+ * Declare these because some initializers may want to
+ * put special things into cache to avoid edge cases
+ */
+extern t_cache_mdl cache_mdl;
+extern t_cache_tex cache_tex;
+extern t_cache_mat cache_mat;
+extern t_cache_shader cache_shader;
+
 #endif // RESOURCE_H

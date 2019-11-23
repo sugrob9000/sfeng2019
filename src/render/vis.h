@@ -19,16 +19,9 @@ struct t_bound_box
 	bool point_in (vec3 pt) const;
 };
 
-struct t_occlusion_plane
-{
-	std::vector<vec3> points;
-};
-extern std::vector<t_occlusion_plane> occ_planes;
-
 void init_vis ();
 
-void read_world_vis_data (std::string path);
-void read_world_geo (std::string obj_path);
+void vis_initialize_world (std::string path);
 
 extern int total_visible_nodes;
 void draw_visible ();

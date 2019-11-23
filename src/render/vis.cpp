@@ -61,6 +61,7 @@ constexpr int occ_fbo_size = 256;
 
 void init_vis ()
 {
+	// setup the framebuffer in which to test for occlusion
 	occ_shader_prog = glCreateProgram();
 	glAttachShader(occ_shader_prog,
 		get_shader("int/vert_identity", GL_VERTEX_SHADER));
@@ -91,24 +92,32 @@ void init_vis ()
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+	// setup the query for occlusion testing
 	glGenQueries(1, &occ_query);
 }
 
-std::vector<t_occlusion_plane> occ_planes;
+
+struct t_occlusion_plane
+{
+	std::vector<vec3> points;
+};
+unsigned int occ_planes_display_list;
+
 void draw_occlusion_planes ()
 {
 	glDisable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
-
-	for (const t_occlusion_plane p: occ_planes) {
-		glBegin(GL_POLYGON);
-		for (const vec3& v: p.points)
-			glVertex3f(v.x, v.y, v.z);
-		glEnd();
-	}
+	glCallList(occ_planes_display_list);
 	glEnable(GL_CULL_FACE);
 }
 
+struct t_world_triangle
+{
+	t_vertex v[3];
+	t_material* mat;
+};
+std::vector<t_world_triangle> world_tris;
+t_bound_box world_bounds;
 
 /*
  * An octree is used to store the world polygons, then walked to
@@ -141,7 +150,6 @@ struct oct_node
 };
 
 oct_node root;
-t_model_mem world_tris;
 
 /*
  * The ID of the octant in which point is
@@ -173,7 +181,7 @@ void oct_node::build (t_bound_box bounds, int level)
 	actual_bounds = bounds;
 	for (const oct_data& d: bucket) {
 		for (int i = 0; i < 3; i++) {
-			vec3& v = world_tris.verts[d.tri_idx + i].pos;
+			vec3& v = world_tris[d.tri_idx].v[i].pos;
 			actual_bounds.update(v);
 		}
 	}
@@ -192,7 +200,7 @@ void oct_node::build (t_bound_box bounds, int level)
 	for (oct_data d: bucket) {
 		vec3 tri_mid(0.0);
 		for (int i = 0; i < 3; i++)
-			tri_mid += world_tris.verts[d.tri_idx + i].pos;
+			tri_mid += world_tris[d.tri_idx].v[i].pos;
 		tri_mid /= 3.0;
 		children[which_octant(bb_mid, tri_mid)]->bucket.push_back(d);
 	}
@@ -272,7 +280,7 @@ void draw_visible ()
 	for (oct_node* n: visible_octants) {
 		for (const oct_data& d: n->bucket) {
 			for (int i = 0; i < 3; i++) {
-				t_vertex& v = world_tris.verts[d.tri_idx + i];
+				t_vertex& v = world_tris[d.tri_idx].v[i];
 				glNormal3f(v.norm.x, v.norm.y, v.norm.z);
 				glTexCoord2f(v.tex.u, v.tex.v);
 				glVertex3f(v.pos.x, v.pos.y, v.pos.z);
@@ -282,7 +290,6 @@ void draw_visible ()
 	glEnd();
 }
 
-t_bound_box bounds_override;
 void read_world_vis_data (std::string path)
 {
 	std::ifstream f(path);
@@ -296,7 +303,7 @@ void read_world_vis_data (std::string path)
 		} else if (option == "oct_capacity") {
 			f >> oct_leaf_capacity;
 		} else if (option == "bounds") {
-			f >> bounds_override.start >> bounds_override.end;
+			f >> world_bounds.start >> world_bounds.end;
 		} else {
 			warning("Unrecognized option in vis data %s: %s",
 					path.c_str(), option.c_str());
@@ -304,16 +311,128 @@ void read_world_vis_data (std::string path)
 	}
 }
 
-void read_world_geo (std::string obj_path)
+/*
+ * Read world in a different way than what t_model_mem does
+ * because we're better off working with faces rather than vertices,
+ * and we need to handle materials specified in the obj in
+ * a very special way (ie OCCLUDE means it's an occlusion plane
+ *                     and goes to a different vector)
+ * TODO: maybe redesign OBJ reading to reduce the blatant code duplication
+ */
+void read_world_obj (std::string path)
 {
-	world_tris.load_obj(obj_path);
+	std::ifstream f(path);
+	if (!f)
+		fatal("world obj not found: %s", path.c_str());
 
-	if (bounds_override.volume() > 0.0)
-		world_tris.bbox = bounds_override;
+	std::vector<vec3> points;
+	std::vector<vec3> normals;
+	std::vector<t_texcrd> texcoords;
 
-	for (int i = 0; i < world_tris.verts.size(); i += 3)
-		root.bucket.push_back({ i });
+	// we will draw them into a display list right away
+	std::vector<vec3> occ_plane_verts;
 
-	root.build(world_tris.bbox, 0);
+	auto pack =
+		[] (char a, char b) constexpr -> uint16_t
+		{ return ((a << 8) | b); };
+
+	std::string cur_material;
+
+	for (std::string line; std::getline(f, line); ) {
+
+		int comment = line.find('#');
+		if (comment != std::string::npos)
+			line.erase(comment);
+
+		if (line.size() < 2)
+			continue;
+
+		uint16_t p = pack(line[0], line[1]);
+
+		switch (p) {
+		case pack('v', ' '): {
+			// vertex
+			float x, y, z;
+			sscanf(line.c_str(), "%*s %f %f %f", &x, &y, &z);
+			points.push_back({ x, y, z });
+			break;
+		}
+		case pack('v', 'n'): {
+			// vertex normal
+			float x, y, z;
+			sscanf(line.c_str(), "%*s %f %f %f", &x, &y, &z);
+			normals.push_back({ x, y, z });
+			break;
+		}
+		case pack('v', 't'): {
+			// tex coord
+			float u, v;
+			sscanf(line.c_str(), "%*s %f %f", &u, &v);
+			texcoords.push_back({ u, 1.0f - v });
+			break;
+		}
+		case pack('f', ' '): {
+			// face
+			int v[3];
+			int n[3];
+			int t[3];
+			sscanf(line.c_str(), "%*s %i/%i/%i %i/%i/%i %i/%i/%i",
+					&v[0], &t[0], &n[0],
+					&v[1], &t[1], &n[1],
+					&v[2], &t[2], &n[2]);
+
+			if (cur_material == "OCCLUDE") {
+				// an occlusion plane
+				for (int i = 0; i < 3; i++)
+					occ_plane_verts.push_back(points[v[i]]);
+			} else {
+				// a regular plane
+				t_world_triangle tri;
+				for (int i = 0; i < 3; i++) {
+					tri.v[i] = { points[v[i]-1],
+					             normals[n[i]-1],
+					             texcoords[t[i]-1] };
+				}
+				tri.mat = get_material(cur_material);
+				world_tris.push_back(tri);
+			}
+
+			break;
+		}
+		case pack('u', 's'): {
+			// usemtl - update current material
+			char buf[line.length()];
+			sscanf(line.c_str(), "%*s %s", buf);
+			cur_material = std::string(buf);
+		}
+		default: {
+			// something in the format we are unaware of
+			continue;
+		}
+		}
+	}
+
+	occ_planes_display_list = glGenLists(1);
+	glNewList(occ_planes_display_list, GL_COMPILE);
+	glBegin(GL_TRIANGLES);
+	for (const vec3& v: occ_plane_verts)
+		glVertex3f(v.x, v.y, v.z);
+	glEnd();
+	glEndList();
 }
 
+void vis_initialize_world (std::string path)
+{
+	read_world_obj(path + "/geo.obj");
+	read_world_vis_data(path + "/vis");
+
+	if (world_bounds.volume() <= 0.0) {
+		fatal("Map %s does not specify valid world bounds",
+				path.c_str());
+	}
+
+	for (int i = 0; i < world_tris.size(); i++)
+		root.bucket.push_back({ i });
+
+	root.build(world_bounds, 0);
+}

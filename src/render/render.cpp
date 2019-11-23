@@ -165,8 +165,8 @@ void init_render ()
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 
+	init_materials();
 	init_text();
-
 	init_vis();
 }
 

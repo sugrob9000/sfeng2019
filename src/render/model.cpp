@@ -92,19 +92,16 @@ bool t_model_mem::load_obj (std::string path)
 					&v[0], &t[0], &n[0],
 					&v[1], &t[1], &n[1],
 					&v[2], &t[2], &n[2]);
-
 			for (int i = 0; i < 3; i++) {
 				verts.push_back(
 					{ points[v[i]-1],
 					  normals[n[i]-1],
 					  texcoords[t[i]-1] });
 			}
-
 			break;
 		}
 		default: {
-			// might be something in the format
-			// we are unaware of
+			// something in the format we are unaware of
 			continue;
 		}
 		}

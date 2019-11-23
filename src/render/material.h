@@ -45,4 +45,11 @@ t_texture_id load_texture (std::string path);
 
 int get_surface_gl_format (SDL_Surface* s);
 
+/*
+ * Material that draws nothing, for various edge cases
+ */
+extern t_material mat_none;
+
+void init_materials ();
+
 #endif // MATERIAL_H

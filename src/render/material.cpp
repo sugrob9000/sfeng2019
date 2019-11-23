@@ -51,6 +51,13 @@ t_shader_id compile_glsl (std::string path, GLenum type)
 	return 0;
 }
 
+t_material mat_none;
+void init_materials ()
+{
+	mat_none.program = 0;
+	cache_mat[""] = &mat_none;
+}
+
 void t_material::load (std::string path)
 {
 	std::ifstream f(path);

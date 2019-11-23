@@ -12,8 +12,9 @@ struct t_bound_box
 
 	float volume () const;
 
-	/* Return this box, expanded to include other */
-	t_bound_box updated (const t_bound_box& other) const;
+	/* Expand to include the argument */
+	void update (vec3 pt);
+	void update (const t_bound_box& other);
 
 	bool point_in (vec3 pt) const;
 };

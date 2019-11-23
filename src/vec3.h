@@ -36,11 +36,13 @@ vec3 operator/ (vec3 v, float c);
 /*
  * Component-wise
  */
-vec3 operator+ (vec3 one, vec3 other);
-vec3 operator- (vec3 one, vec3 other);
-vec3 operator* (vec3 one, vec3 other);
-vec3 operator/ (vec3 one, vec3 other);
+vec3 operator+ (vec3 a, vec3 b);
+vec3 operator- (vec3 a, vec3 b);
+vec3 operator* (vec3 a, vec3 b);
+vec3 operator/ (vec3 a, vec3 b);
 
+vec3 min (vec3 a, vec3 b);
+vec3 max (vec3 a, vec3 b);
 
 float abs (const vec3& v);
 

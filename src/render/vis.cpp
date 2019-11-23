@@ -10,14 +10,16 @@ float t_bound_box::volume () const
 	     * (end.z - start.z);
 }
 
-t_bound_box t_bound_box::updated (const t_bound_box& other) const
+void t_bound_box::update (vec3 pt)
 {
-	return { { std::min(start.x, other.start.x),
-	           std::min(start.y, other.start.y),
-	           std::min(start.z, other.start.z) },
-	         { std::max(end.x, other.end.x),
-	           std::max(end.y, other.end.y),
-	           std::max(end.z, other.end.z) } };
+	start = min(start, pt);
+	end = max(end, pt);
+}
+
+void t_bound_box::update (const t_bound_box& other)
+{
+	start = min(start, other.start);
+	end = max(end, other.end);
 }
 
 void t_bound_box::render () const
@@ -121,9 +123,7 @@ int oct_max_depth = 0;
 
 struct oct_data
 {
-	/*
-	 * First vertex of triangle, e.g. 0, 3, 6, ...
-	 */
+	/* First vertex of triangle, e.g. 0, 3, 6, ...  */
 	int tri_idx;
 };
 
@@ -131,16 +131,16 @@ struct oct_node
 {
 	std::vector<oct_data> bucket;
 	bool leaf;
-	int level;
 	oct_node* children[8];
+	t_bound_box actual_bounds;
 
-	void build (t_bound_box bounds);
+	void build (t_bound_box bounds, int level);
 
-	oct_node (int lvl);
+	oct_node ();
 	~oct_node ();
 };
 
-oct_node root(0);
+oct_node root;
 t_model_mem world_tris;
 
 /*
@@ -167,39 +167,45 @@ t_bound_box octant_bound (t_bound_box parent, uint8_t octant_id)
 	return r;
 }
 
-void oct_node::build (t_bound_box bounds)
+void oct_node::build (t_bound_box bounds, int level)
 {
-	if (level > oct_max_depth)
+	// build the bounds
+	actual_bounds = bounds;
+	for (const oct_data& d: bucket) {
+		for (int i = 0; i < 3; i++) {
+			vec3& v = world_tris.verts[d.tri_idx + i].pos;
+			actual_bounds.update(v);
+		}
+	}
+
+	if (level > oct_max_depth || bucket.size() <= oct_leaf_capacity) {
+		// this should be a leaf
 		return;
-	if (bucket.size() <= oct_leaf_capacity)
-		return;
+	}
 
 	leaf = false;
 	for (int i = 0; i < 8; i++)
-		children[i] = new oct_node(level + 1);
+		children[i] = new oct_node;
 
 	vec3 bb_mid = (bounds.start + bounds.end) * 0.5;
 
 	for (oct_data d: bucket) {
-
-		vec3 tri_mid = { };
+		vec3 tri_mid(0.0);
 		for (int i = 0; i < 3; i++)
 			tri_mid += world_tris.verts[d.tri_idx + i].pos;
 		tri_mid /= 3.0;
-
 		children[which_octant(bb_mid, tri_mid)]->bucket.push_back(d);
 	}
 
 	bucket.clear();
 
 	for (int i = 0; i < 8; i++)
-		children[i]->build(octant_bound(bounds, i));
+		children[i]->build(octant_bound(bounds, i), level + 1);
 }
 
-oct_node::oct_node (int lvl)
+oct_node::oct_node ()
 {
 	leaf = true;
-	level = lvl;
 }
 
 oct_node::~oct_node ()
@@ -213,10 +219,10 @@ oct_node::~oct_node ()
 std::vector<oct_node*> visible_octants;
 int total_visible_nodes;
 
-void fill_visible_sub (oct_node* node, t_bound_box box)
+void fill_visible_sub (oct_node* node)
 {
 	glBeginQuery(GL_SAMPLES_PASSED, occ_query);
-	box.render();
+	node->actual_bounds.render();
 	glEndQuery(GL_SAMPLES_PASSED);
 
 	unsigned int visible;
@@ -229,7 +235,7 @@ void fill_visible_sub (oct_node* node, t_bound_box box)
 		return;
 	}
 	for (int i = 0; i < 8; i++)
-		fill_visible_sub(node->children[i], octant_bound(box, i));
+		fill_visible_sub(node->children[i]);
 }
 
 void draw_visible ()
@@ -248,9 +254,9 @@ void draw_visible ()
 	draw_occlusion_planes();
 	glDepthMask(GL_FALSE);
 
-	// walk the tree nodes which pass the z-test
+	// walk the tree nodes which pass the z-test (and are on screen)
 	visible_octants.clear();
-	fill_visible_sub(&root, world_tris.bbox);
+	fill_visible_sub(&root);
 	total_visible_nodes = visible_octants.size();
 
 	// setup proper rendering
@@ -308,6 +314,6 @@ void read_world_geo (std::string obj_path)
 	for (int i = 0; i < world_tris.verts.size(); i += 3)
 		root.bucket.push_back({ i });
 
-	root.build(world_tris.bbox);
+	root.build(world_tris.bbox, 0);
 }
 

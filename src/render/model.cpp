@@ -29,16 +29,8 @@ void t_model_mem::calc_bbox ()
 {
 	// just in case, make sure 0 is in
 	bbox = { { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } };
-	for (const t_vertex& v: verts) {
-		bbox.start =
-			{ std::min(bbox.start.x, v.pos.x),
-			  std::min(bbox.start.y, v.pos.y),
-			  std::min(bbox.start.z, v.pos.z) };
-		bbox.end =
-			{ std::max(bbox.end.x, v.pos.x),
-			  std::max(bbox.end.y, v.pos.y),
-			  std::max(bbox.end.z, v.pos.z) };
-	}
+	for (const t_vertex& v: verts)
+		bbox.update(v.pos);
 	// just in case, extend slightly
 	bbox.start -= { 0.5, 0.5, 0.5 };
 	bbox.end += { 0.5, 0.5, 0.5 };

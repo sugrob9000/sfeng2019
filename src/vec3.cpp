@@ -1,5 +1,6 @@
 #include "vec3.h"
 #include <cmath>
+#include "inc_general.h"
 
 vec3::vec3 (float xx, float yy, float zz)
 {
@@ -137,8 +138,6 @@ std::ostream& operator<< (std::ostream& s, vec3 v)
 	return (s << v.x << ' ' << v.y << ' ' << v.z);
 }
 
-#include "inc_general.h"
-
 std::istream& operator>> (std::istream& s, vec3& v)
 {
 	return (s >> v.x >> v.y >> v.z);
@@ -149,6 +148,22 @@ vec3 atovec3 (const char* s)
 	vec3 r;
 	sscanf(s, "%f %f %f", &r.x, &r.y, &r.z);
 	return r;
+}
+
+vec3 min (vec3 a, vec3 b)
+{
+	using std::min;
+	return vec3(min(a.x, b.x),
+	            min(a.y, b.y),
+		    min(a.z, b.z));
+}
+
+vec3 max (vec3 a, vec3 b)
+{
+	using std::max;
+	return vec3(max(a.x, b.x),
+	            max(a.y, b.y),
+		    max(a.z, b.z));
 }
 
 void atovec3 (const char* s, vec3& v)

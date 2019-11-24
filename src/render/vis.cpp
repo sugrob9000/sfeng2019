@@ -10,16 +10,26 @@
  * The map can specify the leaf capacity, which will get a leaf
  *   split when exceeded, and maximum leaf depth, beyond which
  *   no leaf will ever be split.
+ *
+ * The map specifies certain "occlusion planes", which are polygons
+ *   that are rendered every frame into a depth buffer and against
+ *   which the leaves in the octree are tested. (These are rendered
+ *   into a single display list)
  */
 
 int oct_leaf_capacity = 0;
 int oct_max_depth = 0;
 
-unsigned int occ_shader_prog;
 unsigned int occ_fbo;
 unsigned int occ_fbo_texture;
+unsigned int occ_shader_prog;
 unsigned int occ_query;
+unsigned int occ_planes_display_list;
 
+/*
+ * Rather than being screen-sized, the occlusion framebuffer
+ * is a smallish square
+ */
 constexpr int occ_fbo_size = 256;
 
 /*
@@ -46,13 +56,6 @@ t_bound_box octant_bound (t_bound_box parent, uint8_t octant_id)
 	return r;
 }
 
-struct t_occlusion_plane
-{
-	std::vector<vec3> points;
-};
-unsigned int occ_planes_display_list;
-
-
 struct t_world_triangle
 {
 	t_vertex v[3];
@@ -69,6 +72,11 @@ struct oct_node
 		unsigned int display_list;
 	};
 
+	/*
+	 * Invariant:
+	 * for leaves, the vector material_buckets is in a valid state;
+	 * otherwise, the vector bucket is in a valid state and empty
+	 */
 	union {
 		/* First vertex of triangle in world_tris, eg 0, 3, 6 */
 		std::vector<int> bucket;
@@ -422,6 +430,8 @@ void vis_render_bbox (const t_bound_box& box)
 void init_vis ()
 {
 	// setup the framebuffer in which to test for occlusion
+	// the shader for occlusion rendering just does nothing
+	// but write to the z-buffer
 	occ_shader_prog = glCreateProgram();
 	glAttachShader(occ_shader_prog,
 		get_shader("int/vert_identity", GL_VERTEX_SHADER));

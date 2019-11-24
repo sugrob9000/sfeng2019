@@ -160,7 +160,10 @@ void init_render ()
 	sdlcont.renderer = SDL_CreateRenderer(sdlcont.window, -1,
 			SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
-	SDL_GL_SetSwapInterval(-1);
+	if (SDL_GL_SetSwapInterval(-1) == -1) {
+		warning("Failed to set adaptive vsync, setting regular");
+		SDL_GL_SetSwapInterval(1);
+	}
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();

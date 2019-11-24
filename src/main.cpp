@@ -5,8 +5,6 @@
 #include "input/bind.h"
 #include "input/console.h"
 
-#include <chrono>
-
 int main (int argc, char** argv)
 {
 	init_input();
@@ -22,10 +20,6 @@ int main (int argc, char** argv)
 	run_argv_commands(argc, argv);
 
 	while (!must_quit) {
-		namespace cr = std::chrono;
-		using sc = cr::steady_clock;
-		sc::time_point start = sc::now();
-
 		handle_input();
 		update();
 		render_all();

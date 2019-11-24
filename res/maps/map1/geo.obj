@@ -1,6 +1,7 @@
 # Blender v2.80 (sub 75) OBJ File: 'scene.blend'
 # www.blender.org
 o Cube
+usemtl worldmat
 v -141.931030 251.159531 -52.236713
 v -130.101593 249.771561 23.887032
 v 9.660896 241.973557 36.199257

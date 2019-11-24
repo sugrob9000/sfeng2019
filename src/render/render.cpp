@@ -105,9 +105,9 @@ void render_all ()
 	glUseProgram(0);
 
 	char str[128];
-	sprintf(str, "%i nodes", total_visible_nodes);
+	sprintf(str, "%i leaves", total_visible_nodes);
 	draw_text(str, -1, -1, 0.025, 0.05);
-	sprintf(str, "%f ms", last_frame_sec * 1000.0);
+	sprintf(str, "%i fps", (int) round(1.0 / last_frame_sec));
 	draw_text(str, -1, -1 + 0.06, 0.025, 0.05);
 
 	if (console.active)

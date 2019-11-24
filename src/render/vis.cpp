@@ -23,7 +23,6 @@ int oct_max_depth = 0;
 unsigned int occ_fbo;
 unsigned int occ_fbo_texture;
 unsigned int occ_shader_prog;
-unsigned int occ_query;
 unsigned int occ_planes_display_list;
 
 /*
@@ -73,7 +72,7 @@ struct oct_node
 	};
 
 	/*
-	 * Invariant:
+	 * Invariant, after build() has been called:
 	 * for leaves, the vector material_buckets is in a valid state;
 	 * otherwise, the vector bucket is in a valid state and empty
 	 */
@@ -82,6 +81,9 @@ struct oct_node
 		std::vector<int> bucket;
 		std::vector<mat_group> material_buckets;
 	};
+
+	/* To query OpenGL as to whether the bounding box is visible */
+	unsigned int query;
 
 	bool leaf;
 	oct_node* children[8];
@@ -95,7 +97,7 @@ struct oct_node
 	oct_node ();
 	~oct_node ();
 };
-oct_node root;
+oct_node* root;
 
 
 void oct_node::build (t_bound_box bounds, int level)
@@ -139,15 +141,16 @@ void oct_node::make_leaf ()
 	std::map<t_material*, std::vector<t_vertex>> m;
 
 	for (const int& d: bucket) {
-		for (int i = 0; i < 3; i++)
+		for (int i = 0; i < 3; i++) {
 			m[world_tris[d].mat].push_back(
-					world_tris[d].v[i]);
+				world_tris[d].v[i]);
+		}
 	}
 
 	// the bucket is in union with material buckets,
 	// so we have to destroy and construct them manually
 	bucket.~vector();
-	material_buckets = std::vector<mat_group>();
+	new (&material_buckets) std::vector<mat_group>;
 	material_buckets.reserve(m.size());
 
 	for (std::pair<t_material* const, std::vector<t_vertex>>& p: m) {
@@ -180,15 +183,17 @@ void oct_node::render_tris () const
 oct_node::oct_node ()
 {
 	leaf = true;
-	bucket = std::vector<int>(0);
+	new (&bucket) std::vector<int>;
+	glGenQueries(1, &query);
 }
 
 oct_node::~oct_node ()
 {
-	if (leaf)
-		return;
-	for (int i = 0; i < 8; i++)
-		delete children[i];
+	glDeleteQueries(1, &query);
+	if (!leaf) {
+		for (int i = 0; i < 8; i++)
+			delete children[i];
+	}
 }
 
 
@@ -199,21 +204,28 @@ int total_visible_nodes;
 void vis_render_bbox (const t_bound_box& box);
 void fill_visible_sub (oct_node* node)
 {
-	glBeginQuery(GL_SAMPLES_PASSED, occ_query);
-	vis_render_bbox(node->actual_bounds);
-	glEndQuery(GL_SAMPLES_PASSED);
-
-	unsigned int visible;
-	glGetQueryObjectuiv(occ_query, GL_QUERY_RESULT, &visible);
-	if (visible <= 0)
-		return;
-
 	if (node->leaf) {
 		visible_leaves.push_back(node);
 		return;
 	}
-	for (int i = 0; i < 8; i++)
-		fill_visible_sub(node->children[i]);
+
+	unsigned int child_vis[8] = { };
+
+	for (int i = 0; i < 8; i++) {
+		glBeginQuery(GL_SAMPLES_PASSED, node->children[i]->query);
+		vis_render_bbox(node->children[i]->actual_bounds);
+		glEndQuery(GL_SAMPLES_PASSED);
+	}
+
+	for (int i = 0; i < 8; i++) {
+		glGetQueryObjectuiv(node->children[i]->query,
+			GL_QUERY_RESULT, &child_vis[i]);
+	}
+
+	for (int i = 0; i < 8; i++) {
+		if (child_vis[i] > 0)
+			fill_visible_sub(node->children[i]);
+	}
 }
 
 void draw_visible ()
@@ -234,7 +246,7 @@ void draw_visible ()
 
 	// walk the tree nodes which pass the z-test (and are on screen)
 	visible_leaves.clear();
-	fill_visible_sub(&root);
+	fill_visible_sub(root);
 	total_visible_nodes = visible_leaves.size();
 
 	// setup proper rendering
@@ -392,10 +404,12 @@ void vis_initialize_world (std::string path)
 				path.c_str());
 	}
 
-	for (int i = 0; i < world_tris.size(); i++)
-		root.bucket.push_back({ i });
+	root = new oct_node;
 
-	root.build(world_bounds, 0);
+	for (int i = 0; i < world_tris.size(); i++)
+		root->bucket.push_back({ i });
+
+	root->build(world_bounds, 0);
 }
 
 bool t_bound_box::point_in (vec3 pt) const
@@ -461,7 +475,4 @@ void init_vis ()
 	glReadBuffer(GL_NONE);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	// setup the query for occlusion testing
-	glGenQueries(1, &occ_query);
 }

@@ -14,6 +14,11 @@
 		          << (expr) << std::endl; \
 	} while (false)
 
+#define DEBUG_MSG(msg)                                    \
+	do {                                              \
+		std::cerr << "d: " << (msg) << std::endl; \
+	} while (false)
+
 constexpr float DEG_TO_RAD = M_PI / 180.0;
 constexpr float RAD_TO_DEG = 180.0 / M_PI;
 

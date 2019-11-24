@@ -2,7 +2,7 @@
 #define MODEL_H
 
 #include "inc_general.h"
-#include "render/vis.h"
+#include "core/core.h"
 #include <vector>
 
 struct t_texcrd

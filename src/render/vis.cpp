@@ -1,123 +1,8 @@
 #include "vis.h"
+#include "render.h"
 #include "resource.h"
-#include "core/entity.h"
+#include "core/core.h"
 #include <algorithm>
-
-float t_bound_box::volume () const
-{
-	return (end.x - start.x)
-	     * (end.y - start.y)
-	     * (end.z - start.z);
-}
-
-void t_bound_box::update (vec3 pt)
-{
-	start = min(start, pt);
-	end = max(end, pt);
-}
-
-void t_bound_box::update (const t_bound_box& other)
-{
-	start = min(start, other.start);
-	end = max(end, other.end);
-}
-
-void t_bound_box::render () const
-{
-	const vec3& s = start;
-	const vec3& e = end;
-	auto quad = [] (vec3 a, vec3 b, vec3 c, vec3 d)
-	{
-		glVertex3f(a.x, a.y, a.z);
-		glVertex3f(b.x, b.y, b.z);
-		glVertex3f(c.x, c.y, c.z);
-		glVertex3f(d.x, d.y, d.z);
-	};
-
-	glDisable(GL_CULL_FACE);
-	glBegin(GL_QUADS);
-	quad(s, { s.x, e.y, s.z }, { s.x, e.y, e.z }, { s.x, s.y, e.z });
-	quad(s, { e.x, s.y, s.z }, { e.x, e.y, s.z }, { s.x, e.y, s.z });
-	quad(s, { e.x, s.y, s.z }, { e.x, s.y, e.z }, { s.x, s.y, e.z });
-	quad(e, { e.x, e.y, s.z }, { e.x, s.y, s.z }, { e.x, s.y, e.z });
-	quad(e, { e.x, s.y, e.z }, { s.x, s.y, e.z }, { s.x, e.y, e.z });
-	quad(e, { e.x, e.y, s.z }, { s.x, e.y, s.z }, { s.x, e.y, e.z });
-	glEnd();
-}
-
-bool t_bound_box::point_in (vec3 pt) const
-{
-	return (pt.x >= start.x) && (pt.y >= start.y) && (pt.z >= start.z)
-		&& (pt.x <= end.x) && (pt.y <= end.y) && (pt.z <= end.z);
-}
-
-
-unsigned int occ_shader_prog;
-unsigned int occ_fbo;
-unsigned int occ_fbo_texture;
-unsigned int occ_query;
-
-constexpr int occ_fbo_size = 256;
-
-void init_vis ()
-{
-	// setup the framebuffer in which to test for occlusion
-	occ_shader_prog = glCreateProgram();
-	glAttachShader(occ_shader_prog,
-		get_shader("int/vert_identity", GL_VERTEX_SHADER));
-	glAttachShader(occ_shader_prog,
-		get_shader("int/frag_null", GL_FRAGMENT_SHADER));
-	glLinkProgram(occ_shader_prog);
-
-	glGenFramebuffers(1, &occ_fbo);
-	glBindFramebuffer(GL_FRAMEBUFFER, occ_fbo);
-
-	glGenTextures(1, &occ_fbo_texture);
-	glBindTexture(GL_TEXTURE_2D, occ_fbo_texture);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_FALSE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
-			occ_fbo_size, occ_fbo_size,
-			0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-			GL_TEXTURE_2D, occ_fbo_texture, 0);
-	glDrawBuffer(GL_NONE);
-	glReadBuffer(GL_NONE);
-
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	// setup the query for occlusion testing
-	glGenQueries(1, &occ_query);
-}
-
-
-struct t_occlusion_plane
-{
-	std::vector<vec3> points;
-};
-unsigned int occ_planes_display_list;
-
-void draw_occlusion_planes ()
-{
-	glDisable(GL_CULL_FACE);
-	glEnable(GL_DEPTH_TEST);
-	glCallList(occ_planes_display_list);
-	glEnable(GL_CULL_FACE);
-}
-
-struct t_world_triangle
-{
-	t_vertex v[3];
-	t_material* mat;
-};
-std::vector<t_world_triangle> world_tris;
-t_bound_box world_bounds;
 
 /*
  * An octree is used to store the world polygons, then walked to
@@ -130,26 +15,12 @@ t_bound_box world_bounds;
 int oct_leaf_capacity = 0;
 int oct_max_depth = 0;
 
-struct oct_data
-{
-	/* First vertex of triangle, e.g. 0, 3, 6, ...  */
-	int tri_idx;
-};
+unsigned int occ_shader_prog;
+unsigned int occ_fbo;
+unsigned int occ_fbo_texture;
+unsigned int occ_query;
 
-struct oct_node
-{
-	std::vector<oct_data> bucket;
-	bool leaf;
-	oct_node* children[8];
-	t_bound_box actual_bounds;
-
-	void build (t_bound_box bounds, int level);
-
-	oct_node ();
-	~oct_node ();
-};
-
-oct_node root;
+constexpr int occ_fbo_size = 256;
 
 /*
  * The ID of the octant in which point is
@@ -175,19 +46,63 @@ t_bound_box octant_bound (t_bound_box parent, uint8_t octant_id)
 	return r;
 }
 
+struct t_occlusion_plane
+{
+	std::vector<vec3> points;
+};
+unsigned int occ_planes_display_list;
+
+
+struct t_world_triangle
+{
+	t_vertex v[3];
+	t_material* mat;
+};
+std::vector<t_world_triangle> world_tris;
+t_bound_box world_bounds;
+
+struct oct_node
+{
+	/* Triangles within this node with the same material */
+	struct mat_group {
+		t_material* mat;
+		unsigned int display_list;
+	};
+
+	union {
+		/* First vertex of triangle in world_tris, eg 0, 3, 6 */
+		std::vector<int> bucket;
+		std::vector<mat_group> material_buckets;
+	};
+
+	bool leaf;
+	oct_node* children[8];
+	t_bound_box actual_bounds;
+
+	void build (t_bound_box bounds, int level);
+	void make_leaf ();
+
+	void render_tris () const;
+
+	oct_node ();
+	~oct_node ();
+};
+oct_node root;
+
+
 void oct_node::build (t_bound_box bounds, int level)
 {
 	// build the bounds
 	actual_bounds = bounds;
-	for (const oct_data& d: bucket) {
+	for (const int& d: bucket) {
 		for (int i = 0; i < 3; i++) {
-			vec3& v = world_tris[d.tri_idx].v[i].pos;
+			vec3& v = world_tris[d].v[i].pos;
 			actual_bounds.update(v);
 		}
 	}
 
 	if (level > oct_max_depth || bucket.size() <= oct_leaf_capacity) {
-		// this should be a leaf
+		make_leaf();
 		return;
 	}
 
@@ -197,10 +112,10 @@ void oct_node::build (t_bound_box bounds, int level)
 
 	vec3 bb_mid = (bounds.start + bounds.end) * 0.5;
 
-	for (oct_data d: bucket) {
+	for (int d: bucket) {
 		vec3 tri_mid(0.0);
 		for (int i = 0; i < 3; i++)
-			tri_mid += world_tris[d.tri_idx].v[i].pos;
+			tri_mid += world_tris[d].v[i].pos;
 		tri_mid /= 3.0;
 		children[which_octant(bb_mid, tri_mid)]->bucket.push_back(d);
 	}
@@ -211,9 +126,53 @@ void oct_node::build (t_bound_box bounds, int level)
 		children[i]->build(octant_bound(bounds, i), level + 1);
 }
 
+void oct_node::make_leaf ()
+{
+	std::map<t_material*, std::vector<t_vertex>> m;
+
+	for (const int& d: bucket) {
+		for (int i = 0; i < 3; i++)
+			m[world_tris[d].mat].push_back(
+					world_tris[d].v[i]);
+	}
+
+	// the bucket is in union with material buckets,
+	// so we have to destroy and construct them manually
+	bucket.~vector();
+	material_buckets = std::vector<mat_group>();
+	material_buckets.reserve(m.size());
+
+	for (std::pair<t_material* const, std::vector<t_vertex>>& p: m) {
+		t_material* mat = p.first;
+		std::vector<t_vertex>& vertices = p.second;
+
+		unsigned int dlist = glGenLists(1);
+		glNewList(dlist, GL_COMPILE);
+		glBegin(GL_TRIANGLES);
+		for (const t_vertex& v: vertices) {
+			glNormal3f(v.norm.x, v.norm.y, v.norm.z);
+			glTexCoord2f(v.tex.u, v.tex.v);
+			glVertex3f(v.pos.x, v.pos.y, v.pos.z);
+		}
+		glEnd();
+		glEndList();
+
+		material_buckets.push_back({ mat, dlist });
+	}
+}
+
+void oct_node::render_tris () const
+{
+	for (const mat_group& gr: material_buckets) {
+		gr.mat->apply();
+		glCallList(gr.display_list);
+	}
+}
+
 oct_node::oct_node ()
 {
 	leaf = true;
+	bucket = std::vector<int>(0);
 }
 
 oct_node::~oct_node ()
@@ -224,13 +183,16 @@ oct_node::~oct_node ()
 		delete children[i];
 }
 
-std::vector<oct_node*> visible_octants;
+
+
+std::vector<oct_node*> visible_leaves;
 int total_visible_nodes;
 
+void vis_render_bbox (const t_bound_box& box);
 void fill_visible_sub (oct_node* node)
 {
 	glBeginQuery(GL_SAMPLES_PASSED, occ_query);
-	node->actual_bounds.render();
+	vis_render_bbox(node->actual_bounds);
 	glEndQuery(GL_SAMPLES_PASSED);
 
 	unsigned int visible;
@@ -239,7 +201,7 @@ void fill_visible_sub (oct_node* node)
 		return;
 
 	if (node->leaf) {
-		visible_octants.push_back(node);
+		visible_leaves.push_back(node);
 		return;
 	}
 	for (int i = 0; i < 8; i++)
@@ -259,13 +221,13 @@ void draw_visible ()
 
 	// fill z-buffer with data from occlusion planes
 	glDepthMask(GL_TRUE);
-	draw_occlusion_planes();
+	glCallList(occ_planes_display_list);
 	glDepthMask(GL_FALSE);
 
 	// walk the tree nodes which pass the z-test (and are on screen)
-	visible_octants.clear();
+	visible_leaves.clear();
 	fill_visible_sub(&root);
-	total_visible_nodes = visible_octants.size();
+	total_visible_nodes = visible_leaves.size();
 
 	// setup proper rendering
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
@@ -274,20 +236,8 @@ void draw_visible ()
 	glDepthMask(GL_TRUE);
 
 	// draw world
-	static t_material* mat = get_material("worldmat");
-	mat->apply();
-	glBegin(GL_TRIANGLES);
-	for (oct_node* n: visible_octants) {
-		for (const oct_data& d: n->bucket) {
-			for (int i = 0; i < 3; i++) {
-				t_vertex& v = world_tris[d.tri_idx].v[i];
-				glNormal3f(v.norm.x, v.norm.y, v.norm.z);
-				glTexCoord2f(v.tex.u, v.tex.v);
-				glVertex3f(v.pos.x, v.pos.y, v.pos.z);
-			}
-		}
-	}
-	glEnd();
+	for (const oct_node* node: visible_leaves)
+		node->render_tris();
 }
 
 void read_world_vis_data (std::string path)
@@ -311,13 +261,16 @@ void read_world_vis_data (std::string path)
 	}
 }
 
+
 /*
  * Read world in a different way than what t_model_mem does
  * because we're better off working with faces rather than vertices,
  * and we need to handle materials specified in the obj in
  * a very special way (ie OCCLUDE means it's an occlusion plane
  *                     and goes to a different vector)
- * TODO: maybe redesign OBJ reading to reduce the blatant code duplication
+ * TODO: maybe redesign OBJ reading to reduce the blatant
+ *   code duplication - the only things that are different
+ *   are usemtl and face handling
  */
 void read_world_obj (std::string path)
 {
@@ -435,4 +388,70 @@ void vis_initialize_world (std::string path)
 		root.bucket.push_back({ i });
 
 	root.build(world_bounds, 0);
+}
+
+bool t_bound_box::point_in (vec3 pt) const
+{
+	return (pt.x >= start.x) && (pt.y >= start.y) && (pt.z >= start.z)
+		&& (pt.x <= end.x) && (pt.y <= end.y) && (pt.z <= end.z);
+}
+
+void vis_render_bbox (const t_bound_box& box)
+{
+	const vec3& s = box.start;
+	const vec3& e = box.end;
+	auto quad = [] (vec3 a, vec3 b, vec3 c, vec3 d)
+	{
+		glVertex3f(a.x, a.y, a.z);
+		glVertex3f(b.x, b.y, b.z);
+		glVertex3f(c.x, c.y, c.z);
+		glVertex3f(d.x, d.y, d.z);
+	};
+
+	glDisable(GL_CULL_FACE);
+	glBegin(GL_QUADS);
+	quad(s, { s.x, e.y, s.z }, { s.x, e.y, e.z }, { s.x, s.y, e.z });
+	quad(s, { e.x, s.y, s.z }, { e.x, e.y, s.z }, { s.x, e.y, s.z });
+	quad(s, { e.x, s.y, s.z }, { e.x, s.y, e.z }, { s.x, s.y, e.z });
+	quad(e, { e.x, e.y, s.z }, { e.x, s.y, s.z }, { e.x, s.y, e.z });
+	quad(e, { e.x, s.y, e.z }, { s.x, s.y, e.z }, { s.x, e.y, e.z });
+	quad(e, { e.x, e.y, s.z }, { s.x, e.y, s.z }, { s.x, e.y, e.z });
+	glEnd();
+}
+
+void init_vis ()
+{
+	// setup the framebuffer in which to test for occlusion
+	occ_shader_prog = glCreateProgram();
+	glAttachShader(occ_shader_prog,
+		get_shader("int/vert_identity", GL_VERTEX_SHADER));
+	glAttachShader(occ_shader_prog,
+		get_shader("int/frag_null", GL_FRAGMENT_SHADER));
+	glLinkProgram(occ_shader_prog);
+
+	glGenFramebuffers(1, &occ_fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER, occ_fbo);
+
+	glGenTextures(1, &occ_fbo_texture);
+	glBindTexture(GL_TEXTURE_2D, occ_fbo_texture);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_FALSE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
+			occ_fbo_size, occ_fbo_size,
+			0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+			GL_TEXTURE_2D, occ_fbo_texture, 0);
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	// setup the query for occlusion testing
+	glGenQueries(1, &occ_query);
 }

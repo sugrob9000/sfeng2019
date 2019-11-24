@@ -2,7 +2,6 @@
 #define CORE_H
 
 #include "inc_general.h"
-#include "core/entity.h"
 #include <queue>
 
 extern bool must_quit;
@@ -27,5 +26,22 @@ void update ();
  */
 void load_map (std::string path);
 void init_core ();
+
+
+/*
+ * General-purpose axially-aligned bounding box
+ */
+struct t_bound_box
+{
+	vec3 start;
+	vec3 end;
+
+	/* Expand to include the argument */
+	void update (vec3 pt);
+	void update (const t_bound_box& other);
+
+	bool point_in (vec3 pt) const;
+	float volume () const;
+};
 
 #endif // CORE_H

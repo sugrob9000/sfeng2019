@@ -23,7 +23,7 @@ void e_prop::apply_keyvals (const t_ent_keyvals& kv)
 		model = get_model("error"); );
 	KV_TRY_GET(kv["mat"],
 		material = get_material(val);,
-		material = get_material("error"); );
+		material = &mat_none; );
 }
 
 void e_prop::render () const

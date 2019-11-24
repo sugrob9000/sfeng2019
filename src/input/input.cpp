@@ -2,6 +2,7 @@
 #include "bind.h"
 #include "cmds.h"
 #include "console.h"
+#include "render/render.h"
 
 t_command_registry cmd_registry;
 f_mousemove_routine mousemove_proc;

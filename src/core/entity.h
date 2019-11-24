@@ -4,7 +4,7 @@
 #include "inc_general.h"
 #include "keyval.h"
 #include "signal.h"
-#include "render/vis.h"
+#include "core.h"
 #include <map>
 #include <queue>
 

@@ -4,6 +4,7 @@
 #include "input/cmds.h"
 #include "input/input.h"
 #include "render/render.h"
+#include "render/vis.h"
 #include <cassert>
 
 bool must_quit;
@@ -17,6 +18,32 @@ void init_core ()
 	tick = 0;
 
 	fill_ent_registry();
+}
+
+COMMAND_ROUTINE (nop)
+{
+	return;
+}
+
+COMMAND_ROUTINE (exit)
+{
+	if (ev != PRESS)
+		return;
+	exit_code = 0;
+	if (!args.empty())
+		exit_code = std::atoi(args[0].c_str());
+	must_quit = true;
+}
+
+COMMAND_ROUTINE (echo)
+{
+	if (ev != PRESS)
+		return;
+
+	for (const std::string& arg: args)
+		std::cout << arg << " ";
+
+	std::cout << std::endl;
 }
 
 void update ()
@@ -104,32 +131,6 @@ void load_map (std::string path)
 	vis_initialize_world(path);
 }
 
-COMMAND_ROUTINE (nop)
-{
-	return;
-}
-
-COMMAND_ROUTINE (exit)
-{
-	if (ev != PRESS)
-		return;
-	exit_code = 0;
-	if (!args.empty())
-		exit_code = std::atoi(args[0].c_str());
-	must_quit = true;
-}
-
-COMMAND_ROUTINE (echo)
-{
-	if (ev != PRESS)
-		return;
-
-	for (const std::string& arg: args)
-		std::cout << arg << " ";
-
-	std::cout << std::endl;
-}
-
 COMMAND_ROUTINE (map)
 {
 	if (ev != PRESS)
@@ -139,4 +140,24 @@ COMMAND_ROUTINE (map)
 
 	std::string path = "res/maps/" + args[0];
 	load_map(path);
+}
+
+
+float t_bound_box::volume () const
+{
+	return (end.x - start.x)
+	     * (end.y - start.y)
+	     * (end.z - start.z);
+}
+
+void t_bound_box::update (vec3 pt)
+{
+	start = min(start, pt);
+	end = max(end, pt);
+}
+
+void t_bound_box::update (const t_bound_box& other)
+{
+	start = min(start, other.start);
+	end = max(end, other.end);
 }

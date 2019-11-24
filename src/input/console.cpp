@@ -1,6 +1,7 @@
 #include "console.h"
-#include <algorithm>
 #include "cmds.h"
+#include "render/render.h"
+#include <algorithm>
 
 t_console_info console;
 

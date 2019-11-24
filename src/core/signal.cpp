@@ -1,6 +1,7 @@
 #include "signal.h"
 #include "input/cmds.h"
 #include "core.h"
+#include "entity.h"
 
 std::priority_queue<t_signal> signals;
 bool operator< (const t_signal& a, const t_signal& b)

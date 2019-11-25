@@ -5,12 +5,14 @@
 #include "inc_general.h"
 #include <vector>
 
-typedef unsigned int t_texture_id;
-typedef unsigned int t_shader_id;
+typedef GLuint t_texture_id;
+typedef GLuint t_shader_id;
 
 struct t_material
 {
-	unsigned int program;
+	GLuint program;
+	GLuint frag;
+	GLuint vert;
 
 	struct bitmap_desc {
 		int location;

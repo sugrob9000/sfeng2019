@@ -20,10 +20,12 @@
 int oct_leaf_capacity = 0;
 int oct_max_depth = 0;
 
-unsigned int occ_fbo;
-unsigned int occ_fbo_texture;
-unsigned int occ_shader_prog;
-unsigned int occ_planes_display_list;
+GLuint occ_fbo;
+GLuint occ_fbo_texture;
+GLuint occ_shader_prog;
+GLuint occ_planes_display_list;
+/* To query OpenGL as to whether the bounding box is visible */
+GLuint occ_queries[8];
 
 /*
  * Rather than being screen-sized, the occlusion framebuffer
@@ -82,9 +84,6 @@ struct oct_node
 		std::vector<mat_group> material_buckets;
 	};
 
-	/* To query OpenGL as to whether the bounding box is visible */
-	unsigned int query;
-
 	bool leaf;
 	oct_node* children[8];
 	t_bound_box actual_bounds;
@@ -92,6 +91,7 @@ struct oct_node
 	void build (t_bound_box bounds, int level);
 	void make_leaf ();
 
+	void walk_for_vis () const;
 	void render_tris () const;
 
 	oct_node ();
@@ -184,13 +184,14 @@ oct_node::oct_node ()
 {
 	leaf = true;
 	new (&bucket) std::vector<int>;
-	glGenQueries(1, &query);
 }
 
 oct_node::~oct_node ()
 {
-	glDeleteQueries(1, &query);
-	if (!leaf) {
+	if (leaf) {
+		material_buckets.~vector();
+	} else {
+		bucket.~vector();
 		for (int i = 0; i < 8; i++)
 			delete children[i];
 	}
@@ -198,33 +199,33 @@ oct_node::~oct_node ()
 
 
 
-std::vector<oct_node*> visible_leaves;
+std::vector<const oct_node*> visible_leaves;
 int total_visible_nodes;
 
 void vis_render_bbox (const t_bound_box& box);
-void fill_visible_sub (oct_node* node)
+void oct_node::walk_for_vis () const
 {
-	if (node->leaf) {
-		visible_leaves.push_back(node);
+	if (leaf) {
+		visible_leaves.push_back(this);
 		return;
 	}
 
 	unsigned int child_vis[8] = { };
 
 	for (int i = 0; i < 8; i++) {
-		glBeginQuery(GL_SAMPLES_PASSED, node->children[i]->query);
-		vis_render_bbox(node->children[i]->actual_bounds);
+		glBeginQuery(GL_SAMPLES_PASSED, occ_queries[i]);
+		vis_render_bbox(children[i]->actual_bounds);
 		glEndQuery(GL_SAMPLES_PASSED);
 	}
 
 	for (int i = 0; i < 8; i++) {
-		glGetQueryObjectuiv(node->children[i]->query,
+		glGetQueryObjectuiv(occ_queries[i],
 			GL_QUERY_RESULT, &child_vis[i]);
 	}
 
 	for (int i = 0; i < 8; i++) {
 		if (child_vis[i] > 0)
-			fill_visible_sub(node->children[i]);
+			children[i]->walk_for_vis();
 	}
 }
 
@@ -246,7 +247,7 @@ void draw_visible ()
 
 	// walk the tree nodes which pass the z-test (and are on screen)
 	visible_leaves.clear();
-	fill_visible_sub(root);
+	root->walk_for_vis();
 	total_visible_nodes = visible_leaves.size();
 
 	// setup proper rendering
@@ -475,4 +476,6 @@ void init_vis ()
 	glReadBuffer(GL_NONE);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glGenQueries(8, occ_queries);
 }

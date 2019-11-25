@@ -3,6 +3,7 @@
 #include "inc_general.h"
 #include "inc_gl.h"
 #include "resource.h"
+#include "input/cmds.h"
 
 t_shader_id compile_glsl (std::string path, GLenum type)
 {
@@ -96,9 +97,12 @@ void t_material::load (std::string path)
 		bitmaps_interm.push_back({ key, get_texture(value) });
 	}
 
+	frag = get_shader(frag_name, GL_FRAGMENT_SHADER);
+	vert = get_shader(vert_name, GL_VERTEX_SHADER);
+
 	program = glCreateProgram();
-	glAttachShader(program, get_shader(frag_name, GL_FRAGMENT_SHADER));
-	glAttachShader(program, get_shader(vert_name, GL_VERTEX_SHADER));
+	glAttachShader(program, frag);
+	glAttachShader(program, vert);
 	glLinkProgram(program);
 
 	for (const bitmap_desc_interm& d: bitmaps_interm) {

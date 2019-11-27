@@ -7,6 +7,16 @@
 #include <cstring>
 
 bool debug_draw_wireframe = false;
+COMMAND_ROUTINE (vis_worldwireframe)
+{
+	debug_draw_wireframe = (ev == PRESS);
+}
+
+bool debug_draw_occ_planes = false;
+COMMAND_ROUTINE (vis_occluders)
+{
+	debug_draw_occ_planes = (ev == PRESS);
+}
 
 /*
  * An octree is used to store the world polygons, then walked to
@@ -268,17 +278,25 @@ void draw_visible (const vec3& cam)
 	for (const oct_node* node: visible_leaves)
 		node->render_tris();
 
+	glUseProgram(0);
 	if (debug_draw_wireframe) {
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		glDisable(GL_CULL_FACE);
 		glDisable(GL_DEPTH_TEST);
-		glUseProgram(0);
-		glColor3f(1.0, 1.0, 1.0);
+		glColor4f(0.0, 0.0, 0.0, 0.5);
 		for (const oct_node* node: visible_leaves) {
 			for (const auto& gr: node->material_buckets)
 				glCallList(gr.display_list);
 		}
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
+	}
+	if (debug_draw_occ_planes) {
+		glDisable(GL_CULL_FACE);
+		glDisable(GL_DEPTH_TEST);
+		glColor4f(0.8, 0.2, 0.2, 0.5);
+		glCallList(occ_planes_display_list);
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
 	}
@@ -510,9 +528,4 @@ void init_vis ()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	glGenQueries(8, occ_queries);
-}
-
-COMMAND_ROUTINE (vis_worldwireframe)
-{
-	debug_draw_wireframe = (ev == PRESS);
 }

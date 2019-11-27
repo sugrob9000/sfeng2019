@@ -62,4 +62,8 @@ COMMAND (signal)
  */
 COMMAND (map)
 
+/*
+ * Render & visibility debugging commands
+ */
 COMMAND (vis_worldwireframe)
+COMMAND (vis_occluders)

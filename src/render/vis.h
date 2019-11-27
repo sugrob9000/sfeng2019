@@ -13,6 +13,7 @@ void init_vis ();
 void vis_initialize_world (std::string path);
 
 extern int total_visible_nodes;
-void draw_visible ();
+
+void draw_visible (const vec3& cam);
 
 #endif // VIS_H

@@ -3,6 +3,7 @@
 #include "resource.h"
 #include "core/core.h"
 #include <algorithm>
+#include <cstring>
 
 /*
  * An octree is used to store the world polygons, then walked to
@@ -91,7 +92,7 @@ struct oct_node
 	void build (t_bound_box bounds, int level);
 	void make_leaf ();
 
-	void walk_for_vis () const;
+	void walk_for_vis (const vec3& cam) const;
 	void render_tris () const;
 
 	oct_node ();
@@ -204,14 +205,14 @@ std::vector<const oct_node*> visible_leaves;
 int total_visible_nodes;
 
 void vis_render_bbox (const t_bound_box& box);
-void oct_node::walk_for_vis () const
+void oct_node::walk_for_vis (const vec3& cam) const
 {
 	if (leaf) {
 		visible_leaves.push_back(this);
 		return;
 	}
 
-	unsigned int child_vis[8] = { };
+	unsigned int child_pixels[8];
 
 	for (int i = 0; i < 8; i++) {
 		glBeginQuery(GL_SAMPLES_PASSED, occ_queries[i]);
@@ -221,16 +222,19 @@ void oct_node::walk_for_vis () const
 
 	for (int i = 0; i < 8; i++) {
 		glGetQueryObjectuiv(occ_queries[i],
-			GL_QUERY_RESULT, &child_vis[i]);
+			GL_QUERY_RESULT, &child_pixels[i]);
 	}
 
 	for (int i = 0; i < 8; i++) {
-		if (child_vis[i] > 0)
-			children[i]->walk_for_vis();
+		// pass the node if we are inside it,
+		// which is not otherwise guaranteed
+		if (child_pixels[i] > 0
+		|| children[i]->actual_bounds.point_in(cam))
+			children[i]->walk_for_vis(cam);
 	}
 }
 
-void draw_visible ()
+void draw_visible (const vec3& cam)
 {
 	// setup occlusion rendering
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, occ_fbo);
@@ -248,7 +252,7 @@ void draw_visible ()
 
 	// walk the tree nodes which pass the z-test (and are on screen)
 	visible_leaves.clear();
-	root->walk_for_vis();
+	root->walk_for_vis(cam);
 	total_visible_nodes = visible_leaves.size();
 
 	// setup proper rendering
@@ -361,7 +365,7 @@ void read_world_obj (std::string path)
 			if (occlusion_plane_mode) {
 				for (int i = 0; i < 3; i++) {
 					occ_plane_verts.push_back(
-							points[v[i]-1]);
+						points[v[i]-1]);
 				}
 			} else {
 				t_world_triangle tri;

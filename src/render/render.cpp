@@ -96,7 +96,7 @@ void render_all ()
 	glDepthMask(GL_TRUE);
 	glDepthFunc(GL_LESS);
 
-	draw_visible();
+	draw_visible(camera.pos);
 
 	// HUD
 	glMatrixMode(GL_PROJECTION);

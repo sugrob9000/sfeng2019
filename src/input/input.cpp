@@ -82,8 +82,8 @@ void handle_input ()
 			}
 			break;
 		default:
-			if (console.active)
-				console.handle_input_ev(e);
+			if (console_active)
+				console_handle_input_ev(e);
 			else
 				handle_input_ev(e);
 			break;
@@ -91,12 +91,10 @@ void handle_input ()
 	}
 }
 
-t_command parse_command (std::string str)
+t_command parse_command (const char* cmd)
 {
 	t_command ret;
-
-	std::istringstream is(str);
-
+	std::istringstream is(cmd);
 	is >> ret.name;
 
 	for (std::string arg; is >> arg; )
@@ -106,8 +104,7 @@ t_command parse_command (std::string str)
 }
 
 void t_command_registry::register_command (
-		std::string name,
-		f_cmd_routine routine)
+		std::string name, f_cmd_routine routine)
 {
 	m[name].routine = routine;
 }
@@ -125,6 +122,19 @@ void t_command_registry::run (const t_command& cmd, uint8_t ev)
 		routine(cmd.args, ev);
 }
 
+void run_cmd_ext (const std::string& cmd)
+{
+	uint8_t ev = PRESS;
+	const char* ptr = cmd.c_str();
+	if (ptr[0] == '+') {
+		ptr++;
+	} else if (ptr[0] == '-') {
+		ptr++;
+		ev = RELEASE;
+	}
+	cmd_registry.run(parse_command(ptr), ev);
+}
+
 void run_script (std::string path)
 {
 	std::ifstream f(path);
@@ -135,7 +145,7 @@ void run_script (std::string path)
 	}
 	for (std::string line; std::getline(f, line); ) {
 		if (!line.empty())
-			cmd_registry.run(parse_command(line), PRESS);
+			run_cmd_ext(line);
 	}
 }
 

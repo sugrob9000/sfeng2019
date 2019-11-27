@@ -114,8 +114,8 @@ void render_all ()
 	sprintf(str, "%i fps", (int) round(1.0 / last_frame_sec));
 	draw_text(str, -1, -1 + 0.06, 0.025, 0.05);
 
-	if (console.active)
-		console.render();
+	if (console_active)
+		console_render();
 
 	last_frame_sec = cr::duration<float>(sc::now() - frame_start).count();
 

@@ -63,5 +63,5 @@ COMMAND_ROUTINE (bind)
 	}
 
 	key_binds.add_bind(scancode_from_name(keyname),
-			parse_command(bind));
+			parse_command(bind.c_str()));
 }

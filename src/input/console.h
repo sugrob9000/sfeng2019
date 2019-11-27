@@ -6,18 +6,10 @@
  * Esc - get out
  * Shift-backspace - erase current command
  */
-struct t_console_info
-{
-	bool active;
-	int cursor;
-	std::string cmd;
 
-	std::vector<const std::string*> matches;
-	void update_matches ();
+void console_handle_input_ev (const SDL_Event& e);
+void console_open ();
+void console_close ();
+void console_render ();
 
-	void handle_input_ev (const SDL_Event& e);
-	void open ();
-	void close ();
-	void render ();
-};
-extern t_console_info console;
+extern bool console_active;

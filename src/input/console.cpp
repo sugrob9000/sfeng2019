@@ -3,9 +3,15 @@
 #include "render/render.h"
 #include <algorithm>
 
-t_console_info console;
+bool console_active;
 
-void t_console_info::handle_input_ev (const SDL_Event& e)
+int cursor;
+std::string cmd;
+std::vector<const std::string*> matches;
+std::string cmd_prefix;
+
+void update_matches ();
+void console_handle_input_ev (const SDL_Event& e)
 {
 	switch (e.type) {
 	case SDL_KEYDOWN:
@@ -22,14 +28,14 @@ void t_console_info::handle_input_ev (const SDL_Event& e)
 			break;
 
 		case SDL_SCANCODE_RETURN:
-			cmd_registry.run(parse_command(cmd), PRESS);
+			run_cmd_ext(cmd);
 			cmd.clear();
 			update_matches();
 			break;
 
 		case SDL_SCANCODE_TAB:
 			if (!matches.empty()) {
-				cmd = *matches[0] + ' ';
+				cmd = cmd_prefix + *matches[0] + ' ';
 				update_matches();
 			}
 			break;
@@ -42,7 +48,7 @@ void t_console_info::handle_input_ev (const SDL_Event& e)
 		// sending the keyup event to the main game
 	case SDL_KEYUP:
 		if (e.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
-			close();
+			console_close();
 		break;
 	case SDL_TEXTINPUT:
 		cmd += e.text.text;
@@ -51,36 +57,57 @@ void t_console_info::handle_input_ev (const SDL_Event& e)
 	}
 }
 
-void t_console_info::open ()
+void console_open ()
 {
-	active = true;
+	console_active = true;
 	SDL_SetRelativeMouseMode(SDL_FALSE);
 	SDL_StartTextInput();
 	update_matches();
 }
 
-void t_console_info::close ()
+void console_close ()
 {
-	active = false;
+	console_active = false;
 	cmd.clear();
 	SDL_SetRelativeMouseMode(SDL_TRUE);
 	SDL_StopTextInput();
 }
 
-void t_console_info::update_matches ()
+
+bool is_cmd_char (char c)
+{
+	return isalnum(c) || c == '_'
+		|| c == '+' || c == '-';
+}
+
+
+void update_matches ()
 {
 	matches.clear();
+
+	int n = cmd.length();
+	const char* cmd_str = cmd.c_str();
+
+	if (cmd_str[0] == '+' || cmd_str[0] == '-') {
+		cmd_prefix = cmd_str[0];
+		cmd_str++;
+		n--;
+	} else {
+		cmd_prefix = "";
+	}
+
 	for (char c: cmd) {
-		if (!isalnum(c) && c != '_')
+		if (!is_cmd_char(c))
 			return;
 	}
+
 	for (const auto& p: cmd_registry.m) {
 		const std::string& s = p.first;
-		if (cmd.length() > s.length())
+		if (n > s.length())
 			continue;
 		bool match = true;
-		for (int i = 0; i < cmd.length(); i++) {
-			if (cmd[i] != s[i]) {
+		for (int i = 0; i < n; i++) {
+			if (cmd_str[i] != s[i]) {
 				match = false;
 				break;
 			}
@@ -88,13 +115,14 @@ void t_console_info::update_matches ()
 		if (match)
 			matches.push_back(&s);
 	}
+
 	std::sort(matches.begin(), matches.end(),
 		[] (const std::string* a, const std::string* b) {
 			return *a < *b;
 		});
 }
 
-void t_console_info::render ()
+void console_render ()
 {
 	const SDL_Color bg_clr = { 20, 20, 20, 255 };
 	const SDL_Color bg_match_clr = { 30, 30, 30, 240 };
@@ -158,11 +186,11 @@ void t_console_info::render ()
 COMMAND_ROUTINE (console_open)
 {
 	if (ev == PRESS)
-		console.open();
+		console_open();
 }
 
 COMMAND_ROUTINE (console_close)
 {
 	if (ev == PRESS)
-		console.close();
+		console_close();
 }

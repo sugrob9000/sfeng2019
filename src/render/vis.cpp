@@ -2,8 +2,11 @@
 #include "render.h"
 #include "resource.h"
 #include "core/core.h"
+#include "input/cmds.h"
 #include <algorithm>
 #include <cstring>
+
+bool debug_draw_wireframe = false;
 
 /*
  * An octree is used to store the world polygons, then walked to
@@ -264,6 +267,21 @@ void draw_visible (const vec3& cam)
 	// draw world
 	for (const oct_node* node: visible_leaves)
 		node->render_tris();
+
+	if (debug_draw_wireframe) {
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glDisable(GL_CULL_FACE);
+		glDisable(GL_DEPTH_TEST);
+		glUseProgram(0);
+		glColor3f(1.0, 1.0, 1.0);
+		for (const oct_node* node: visible_leaves) {
+			for (const auto& gr: node->material_buckets)
+				glCallList(gr.display_list);
+		}
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
+	}
 }
 
 void read_world_vis_data (std::string path)
@@ -492,4 +510,9 @@ void init_vis ()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	glGenQueries(8, occ_queries);
+}
+
+COMMAND_ROUTINE (vis_worldwireframe)
+{
+	debug_draw_wireframe = (ev == PRESS);
 }

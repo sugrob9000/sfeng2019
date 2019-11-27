@@ -61,3 +61,5 @@ COMMAND (signal)
  * Load a map. Fatal on fail.
  */
 COMMAND (map)
+
+COMMAND (vis_worldwireframe)

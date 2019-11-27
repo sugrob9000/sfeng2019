@@ -38,6 +38,7 @@ COMMAND (exec)
  * (f, l, r, b for forward, left, right, backward respectively)
  */
 COMMAND (move_cam)
+COMMAND (cam_accelerate)
 
 /*
  * Set app window size

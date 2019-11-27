@@ -7,6 +7,7 @@ bind W move_cam f
 bind A move_cam l
 bind S move_cam b
 bind D move_cam r
+bind Left_Shift cam_accelerate
 
 windowsize 800 600
 map map1

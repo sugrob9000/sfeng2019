@@ -12,18 +12,17 @@
 
 t_sdlcontext sdlcont;
 
-bool cam_move_flags[4];
-t_camera camera;
-
 constexpr short cam_move_f = 0;
 constexpr short cam_move_b = 1;
 constexpr short cam_move_l = 2;
 constexpr short cam_move_r = 3;
-extern bool cam_move_flags[4];
+bool cam_speedup = false;
+bool cam_move_flags[4];
+t_camera camera;
 
 void upd_camera_pos ()
 {
-	constexpr float speed = 4.0;
+	float speed = cam_speedup ? 10.0 : 4.0;
 	vec3 delta;
 	auto& flags = cam_move_flags;
 	t_camera& cam = camera;
@@ -72,6 +71,11 @@ COMMAND_ROUTINE (move_cam)
 		flags[cam_move_r] = f;
 		break;
 	}
+}
+
+COMMAND_ROUTINE (cam_accelerate)
+{
+	cam_speedup = (ev == PRESS);
 }
 
 void render_all ()

@@ -63,7 +63,7 @@ struct t_world_triangle
 	t_material* mat;
 };
 std::vector<t_world_triangle> world_tris;
-t_bound_box world_bounds;
+t_bound_box world_bounds_override;
 
 struct oct_node
 {
@@ -172,6 +172,7 @@ void oct_node::make_leaf ()
 	}
 }
 
+void vis_render_bbox (const t_bound_box&);
 void oct_node::render_tris () const
 {
 	for (const mat_group& gr: material_buckets) {
@@ -274,7 +275,8 @@ void read_world_vis_data (std::string path)
 		} else if (option == "oct_capacity") {
 			f >> oct_leaf_capacity;
 		} else if (option == "bounds") {
-			f >> world_bounds.start >> world_bounds.end;
+			f >> world_bounds_override.start >>
+				world_bounds_override.end;
 		} else {
 			warning("Unrecognized option in vis data %s: %s",
 					path.c_str(), option.c_str());
@@ -310,7 +312,8 @@ void read_world_obj (std::string path)
 		[] (char a, char b) constexpr -> uint16_t
 		{ return ((a << 8) | b); };
 
-	std::string cur_material;
+	t_material* cur_material = get_material("worldmat");
+	bool occlusion_plane_mode = false;
 
 	for (std::string line; std::getline(f, line); ) {
 
@@ -355,19 +358,19 @@ void read_world_obj (std::string path)
 					&v[1], &t[1], &n[1],
 					&v[2], &t[2], &n[2]);
 
-			if (cur_material == "OCCLUDE") {
-				// an occlusion plane
-				for (int i = 0; i < 3; i++)
-					occ_plane_verts.push_back(points[v[i]]);
+			if (occlusion_plane_mode) {
+				for (int i = 0; i < 3; i++) {
+					occ_plane_verts.push_back(
+							points[v[i]-1]);
+				}
 			} else {
-				// a regular plane
 				t_world_triangle tri;
 				for (int i = 0; i < 3; i++) {
 					tri.v[i] = { points[v[i]-1],
 					             normals[n[i]-1],
 					             texcoords[t[i]-1] };
 				}
-				tri.mat = get_material(cur_material);
+				tri.mat = cur_material;
 				world_tris.push_back(tri);
 			}
 
@@ -377,7 +380,14 @@ void read_world_obj (std::string path)
 			// usemtl - update current material
 			char buf[line.length()];
 			sscanf(line.c_str(), "%*s %s", buf);
-			cur_material = std::string(buf);
+			if (strncmp(buf, "OCCLUDE", 7) == 0) {
+				occlusion_plane_mode = true;
+				cur_material = nullptr;
+			} else {
+				occlusion_plane_mode = false;
+				// cur_material = get_material(buf);
+			}
+			break;
 		}
 		default: {
 			// something in the format we are unaware of
@@ -400,7 +410,7 @@ void vis_initialize_world (std::string path)
 	read_world_obj(path + "/geo.obj");
 	read_world_vis_data(path + "/vis");
 
-	if (world_bounds.volume() <= 0.0) {
+	if (world_bounds_override.volume() <= 0.0) {
 		fatal("Map %s does not specify valid world bounds",
 				path.c_str());
 	}
@@ -410,7 +420,7 @@ void vis_initialize_world (std::string path)
 	for (int i = 0; i < world_tris.size(); i++)
 		root->bucket.push_back({ i });
 
-	root->build(world_bounds, 0);
+	root->build(world_bounds_override, 0);
 }
 
 bool t_bound_box::point_in (vec3 pt) const

@@ -14,7 +14,7 @@ int main (int argc, char** argv)
 	console.close();
 
 	camera = t_camera({ 0.0, 0.0, 200.0 }, { 0.0, 0.0, 90.0 },
-			2000.0f, 1.0f, 60.0f);
+			5000.0f, 1.0f, 60.0f);
 
 	run_script("res/cfg/rc");
 	run_argv_commands(argc, argv);

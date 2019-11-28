@@ -422,7 +422,6 @@ void read_world_obj (std::string path)
 			sscanf(line.c_str(), "%*s %s", buf);
 			if (strncmp(buf, "OCCLUDE", 7) == 0) {
 				occlusion_plane_mode = true;
-				cur_material = nullptr;
 			} else {
 				occlusion_plane_mode = false;
 				// cur_material = get_material(buf);

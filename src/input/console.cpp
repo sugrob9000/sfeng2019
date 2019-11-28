@@ -131,14 +131,14 @@ void console_render ()
 	// try to match the actual font size in pixels,
 	// and be 4 away from the top
 	float text_height = sdlcont.font_h * 2.0 / sdlcont.res_y;
-	float text_offs_y = 4.0 * 2.0 / sdlcont.res_y;
-	float height = text_height + 2.0 * text_offs_y;
+	float text_y = 4.0 * 2.0 / sdlcont.res_y;
+	float height = text_height + 2.0 * text_y;
 
 	float char_width = text_height
 		* ((float) sdlcont.font_w / sdlcont.font_h)
 		* ((float) sdlcont.res_y / sdlcont.res_x);
 	float text_width = char_width * cmd.length();
-	float text_offs_x = char_width + 0.01;
+	float text_x = char_width + 0.01;
 
 	glUseProgram(0);
 	glBegin(GL_QUADS);
@@ -151,16 +151,16 @@ void console_render ()
 
 	glBegin(GL_LINES);
 	glColor4ubv((GLubyte*) &cursor_clr);
-	glVertex2f(-1.0 + text_offs_x + text_width, -1.0 + text_offs_y);
-	glVertex2f(-1.0 + text_offs_x + text_width,
-	           -1.0 + text_offs_y + text_height);
+	glVertex2f(-1.0 + text_x + text_width, -1.0 + text_y);
+	glVertex2f(-1.0 + text_x + text_width,
+	           -1.0 + text_y + text_height);
 	glEnd();
 
 	if (!cmd.empty()) {
-		draw_text(cmd.c_str(), -1.0 + text_offs_x,
-			-1.0 + text_offs_y, char_width, text_height);
+		draw_text(cmd.c_str(), -1.0 + text_x,
+			-1.0 + text_y, char_width, text_height);
 	}
-	draw_text(">", -1.0, -1.0 + text_offs_y, char_width, text_height);
+	draw_text(">", -1.0, -1.0 + text_y, char_width, text_height);
 
 	if (!matches.empty()) {
 		float single_match_h = text_height + 0.015;
@@ -175,8 +175,10 @@ void console_render ()
 		glVertex2f(-1.0, -1.0 + height + matches_h);
 		glEnd();
 
+		float matches_x = text_x + cmd_prefix.length() * char_width;
+
 		for (int i = 0; i < matches.size(); i++) {
-			draw_text(matches[i]->c_str(), -1.0 + text_offs_x,
+			draw_text(matches[i]->c_str(), -1.0 + matches_x,
 					-1.0 + height + single_match_h * i,
 					char_width, text_height);
 		}

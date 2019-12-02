@@ -49,7 +49,7 @@ void upd_camera_pos ()
 	cam.pos += delta * speed;
 }
 
-COMMAND_ROUTINE (move_cam)
+COMMAND_ROUTINE (cam_move)
 {
 	if (args.empty())
 		return;
@@ -78,6 +78,7 @@ COMMAND_ROUTINE (cam_accelerate)
 	cam_speedup = (ev == PRESS);
 }
 
+void draw_sky ();
 void render_all ()
 {
 	namespace cr = std::chrono;
@@ -86,15 +87,9 @@ void render_all ()
 	sc::time_point frame_start = sc::now();
 	static float last_frame_sec;
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 	camera.apply();
 
-	glViewport(0, 0, sdlcont.res_x, sdlcont.res_y);
-	glEnable(GL_CULL_FACE);
-	glEnable(GL_DEPTH_TEST);
-	glDepthMask(GL_TRUE);
-	glDepthFunc(GL_LESS);
+	draw_sky();
 
 	draw_visible(camera.pos);
 
@@ -122,13 +117,9 @@ void render_all ()
 	SDL_GL_SwapWindow(sdlcont.window);
 }
 
-void gl_msg_callback (GLenum source, GLenum type, GLenum id, GLenum severity,
-		int msg_len, const char* msg, const void* param)
-{
-	warning("OpenGL: %s", msg);
-}
 
 void init_text ();
+void init_sky ();
 void init_render ()
 {
 	if (sdlcont.res_x == 0 || sdlcont.res_y == 0) {
@@ -171,10 +162,14 @@ void init_render ()
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
 
 	init_materials();
 	init_text();
 	init_vis();
+
+	init_sky();
 }
 
 void resize_window (int w, int h)
@@ -306,6 +301,32 @@ void draw_text (const char* str, float x, float y, float charw, float charh)
 	}
 	glEnd();
 }
+
+GLuint sky_shader_program;
+void init_sky ()
+{
+	sky_shader_program = glCreateProgram();
+	t_shader_id vert = get_shader("int/vert_sky", GL_VERTEX_SHADER);
+	t_shader_id frag = get_shader("int/frag_sky", GL_FRAGMENT_SHADER);
+	glAttachShader(sky_shader_program, vert);
+	glAttachShader(sky_shader_program, frag);
+	glLinkProgram(sky_shader_program);
+}
+
+void draw_sky ()
+{
+	glUseProgram(sky_shader_program);
+	glClear(GL_DEPTH_BUFFER_BIT);
+
+	constexpr float radius = 1.0;
+	const t_bound_box skybox = { { -radius, -radius, -radius },
+	                             { radius, radius, radius } };
+	glPushMatrix();
+	translate_gl_matrix(camera.pos);
+	vis_render_bbox(skybox);
+	glPopMatrix();
+}
+
 
 MOUSEMOVE_ROUTINE (mousemove_camera)
 {

@@ -143,13 +143,6 @@ std::istream& operator>> (std::istream& s, vec3& v)
 	return (s >> v.x >> v.y >> v.z);
 }
 
-vec3 atovec3 (const char* s)
-{
-	vec3 r;
-	sscanf(s, "%f %f %f", &r.x, &r.y, &r.z);
-	return r;
-}
-
 vec3 min (vec3 a, vec3 b)
 {
 	using std::min;
@@ -164,6 +157,23 @@ vec3 max (vec3 a, vec3 b)
 	return vec3(max(a.x, b.x),
 	            max(a.y, b.y),
 		    max(a.z, b.z));
+}
+
+vec3 operator- (vec3 v)
+{
+	return vec3(-v.x, -v.y, -v.z);
+}
+
+vec3 operator+ (vec3 v)
+{
+	return v;
+}
+
+vec3 atovec3 (const char* s)
+{
+	vec3 r;
+	sscanf(s, "%f %f %f", &r.x, &r.y, &r.z);
+	return r;
 }
 
 void atovec3 (const char* s, vec3& v)

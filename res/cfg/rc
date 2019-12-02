@@ -3,10 +3,10 @@ bind Escape exit
 
 bind R console_open
 
-bind W move_cam f
-bind A move_cam l
-bind S move_cam b
-bind D move_cam r
+bind W cam_move f
+bind A cam_move l
+bind S cam_move b
+bind D cam_move r
 bind Left_Shift cam_accelerate
 
 bind Z vis_occluders

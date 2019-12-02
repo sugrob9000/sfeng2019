@@ -40,9 +40,14 @@ vec3 operator+ (vec3 a, vec3 b);
 vec3 operator- (vec3 a, vec3 b);
 vec3 operator* (vec3 a, vec3 b);
 vec3 operator/ (vec3 a, vec3 b);
-
 vec3 min (vec3 a, vec3 b);
 vec3 max (vec3 a, vec3 b);
+
+/*
+ * Unary
+ */
+vec3 operator- (vec3 v);
+vec3 operator+ (vec3 v);
 
 float abs (const vec3& v);
 

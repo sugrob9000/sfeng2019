@@ -37,7 +37,7 @@ COMMAND (exec)
  * Start/stop moving the camera in a direction
  * (f, l, r, b for forward, left, right, backward respectively)
  */
-COMMAND (move_cam)
+COMMAND (cam_move)
 COMMAND (cam_accelerate)
 
 /*

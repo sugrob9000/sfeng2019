@@ -1,0 +1,5 @@
+VERT int/vert_identity
+FRAG frag_sand
+diffuse sand.tga
+ao ground_ao.png
+

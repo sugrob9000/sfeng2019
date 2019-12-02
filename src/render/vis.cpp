@@ -118,7 +118,7 @@ void oct_node::build (t_bound_box bounds, int level)
 {
 	// build the bounds
 	actual_bounds = bounds;
-	for (const int& d: bucket) {
+	for (int d: bucket) {
 		for (int i = 0; i < 3; i++) {
 			vec3& v = world_tris[d].v[i].pos;
 			actual_bounds.update(v);
@@ -424,7 +424,7 @@ void read_world_obj (std::string path)
 				occlusion_plane_mode = true;
 			} else {
 				occlusion_plane_mode = false;
-				// cur_material = get_material(buf);
+				cur_material = get_material(buf);
 			}
 			break;
 		}
@@ -460,12 +460,6 @@ void vis_initialize_world (std::string path)
 		root->bucket.push_back({ i });
 
 	root->build(world_bounds_override, 0);
-}
-
-bool t_bound_box::point_in (vec3 pt) const
-{
-	return (pt.x >= start.x) && (pt.y >= start.y) && (pt.z >= start.z)
-		&& (pt.x <= end.x) && (pt.y <= end.y) && (pt.z <= end.z);
 }
 
 void vis_render_bbox (const t_bound_box& box)

@@ -47,12 +47,12 @@ t_shader_id get_shader (std::string path, GLenum type)
 	t_shader_id& ret = cache_shader[path];
 
 	if (ret != 0) {
-		int actual;
-		glGetShaderiv(ret, GL_SHADER_TYPE, &actual);
-		if (type != actual) {
+		int actual_shader_type;
+		glGetShaderiv(ret, GL_SHADER_TYPE, &actual_shader_type);
+		if (type != actual_shader_type) {
 			fatal("Shader %s of the wrong type:\n"
 				"actual %i, requested %i",
-				path.c_str(), actual, type);
+				path.c_str(), actual_shader_type, type);
 		}
 		return ret;
 	}

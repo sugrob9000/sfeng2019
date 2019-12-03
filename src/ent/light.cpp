@@ -37,43 +37,43 @@ t_bound_box e_light::get_bbox () const
 }
 
 
-GLuint light_fbo;
-GLuint light_fbo_texture;
-GLuint light_program;
-constexpr int light_fbo_size = 1024;
+GLuint lightspace_fbo;
+GLuint lightspace_fbo_texture;
+GLuint lightspace_program;
+constexpr int lightspace_fbo_size = 1024;
 
 void init_lighting ()
 {
-	glGenTextures(1, &light_fbo_texture);
-	glBindTexture(GL_TEXTURE_2D, light_fbo_texture);
+	glGenTextures(1, &lightspace_fbo_texture);
+	glBindTexture(GL_TEXTURE_2D, lightspace_fbo_texture);
 	glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_FALSE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
-			light_fbo_size, light_fbo_size, 0,
+			lightspace_fbo_size, lightspace_fbo_size, 0,
 			GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	glGenFramebuffers(1, &light_fbo);
-	glBindFramebuffer(GL_FRAMEBUFFER, light_fbo);
+	glGenFramebuffers(1, &lightspace_fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER, lightspace_fbo);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-			GL_TEXTURE_2D, light_fbo_texture, 0);
+			GL_TEXTURE_2D, lightspace_fbo_texture, 0);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	light_program = glCreateProgram();
-	glAttachShader(light_program, get_shader("int/frag_null",
+	lightspace_program = glCreateProgram();
+	glAttachShader(lightspace_program, get_shader("common/frag_null",
 				GL_FRAGMENT_SHADER));
-	glAttachShader(light_program, get_shader("int/vert_identity",
+	glAttachShader(lightspace_program, get_shader("common/vert_identity",
 				GL_VERTEX_SHADER));
-	glLinkProgram(light_program);
+	glLinkProgram(lightspace_program);
 }
 
 void compute_lighting ()
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, light_fbo);
-	glViewport(0, 0, light_fbo_size, light_fbo_size);
+	glBindFramebuffer(GL_FRAMEBUFFER, lightspace_fbo);
+	glViewport(0, 0, lightspace_fbo_size, lightspace_fbo_size);
 	
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
@@ -84,7 +84,7 @@ void compute_lighting ()
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 
-	glUseProgram(light_program);
+	glUseProgram(lightspace_program);
 	for (const e_light* l: lights) {
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();

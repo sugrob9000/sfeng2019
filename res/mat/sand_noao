@@ -1,6 +1,6 @@
-VERT int/vert_identity
+VERT common/vert_identity
 FRAG frag_sand
 diffuse sand.tga
-ao int/white.png
+ao common/white.png
 
 

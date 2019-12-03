@@ -23,6 +23,4 @@ constexpr float LIGHT_Z_NEAR = 0.5;
 void init_lighting ();
 void compute_lighting ();
 
-extern GLuint light_fbo_texture;
-
 #endif // ENT_LIGHT_H

@@ -118,8 +118,6 @@ void render_all ()
 	sprintf(str, "%i fps", (int) round(1.0 / last_frame_sec));
 	draw_text(str, -1, -1 + 0.06, 0.025, 0.05);
 
-	debug_texture_onscreen(light_fbo_texture);
-
 	if (console_active)
 		console_render();
 
@@ -255,8 +253,8 @@ void init_text ()
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	t_shader_id vert = get_shader("int/vert_identity", GL_VERTEX_SHADER);
-	t_shader_id frag = get_shader("int/frag_text", GL_FRAGMENT_SHADER);
+	t_shader_id vert = get_shader("common/vert_identity", GL_VERTEX_SHADER);
+	t_shader_id frag = get_shader("common/frag_text", GL_FRAGMENT_SHADER);
 
 	text_program = glCreateProgram();
 	glAttachShader(text_program, vert);
@@ -318,8 +316,8 @@ GLuint sky_shader_program;
 void init_sky ()
 {
 	sky_shader_program = glCreateProgram();
-	t_shader_id vert = get_shader("int/vert_sky", GL_VERTEX_SHADER);
-	t_shader_id frag = get_shader("int/frag_sky", GL_FRAGMENT_SHADER);
+	t_shader_id vert = get_shader("common/vert_sky", GL_VERTEX_SHADER);
+	t_shader_id frag = get_shader("common/frag_sky", GL_FRAGMENT_SHADER);
 	glAttachShader(sky_shader_program, vert);
 	glAttachShader(sky_shader_program, frag);
 	glLinkProgram(sky_shader_program);

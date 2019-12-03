@@ -18,7 +18,12 @@ class e_light: public e_base
 	ENT_MEMBERS (light)
 };
 
-constexpr float LIGHT_Z_NEAR = 0.5;
+constexpr float LIGHT_Z_NEAR = 10.0;
+
+extern GLuint lspace_fbo_texture;
+extern GLuint sspace_fbo_texture;
+
+extern std::vector<e_light*> lights;
 
 void init_lighting ();
 void compute_lighting ();

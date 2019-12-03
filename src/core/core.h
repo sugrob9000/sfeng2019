@@ -11,8 +11,7 @@ extern long long tick;
 void update ();
 
 /*
- * Map format:
- * a series of entities, each following the format:
+ * Entity format:
  * entity-class
  * 	key1 value1
  * 	key2 value2
@@ -24,12 +23,16 @@ void update ();
  *   are event handlers, which tell the entity to send a signal
  *   when something happens.
  */
+
 void load_map (std::string path);
 void init_core ();
 
+/*
+ * General purpose
+ */
 
 /*
- * General-purpose axially-aligned bounding box
+ * Axially-aligned bounding box
  */
 struct t_bound_box
 {

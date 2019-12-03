@@ -14,7 +14,7 @@ int main (int argc, char** argv)
 
 	console_close();
 
-	camera = t_camera({ 0.0, 0.0, 200.0 }, { 0.0, 0.0, 90.0 },
+	camera = t_camera({ 0.0, 0.0, 200.0 }, { 0.0, 0.0, 0.0 },
 			5000.0f, 0.5f, 60.0f);
 
 	run_script("res/cfg/rc");
@@ -23,10 +23,11 @@ int main (int argc, char** argv)
 
 	e_base* light = ents.spawn("light");
 	t_ent_keyvals kv;
-	kv.add("pos", "20.0 0.0 200.0");
+	kv.add("pos", "20.0 60.0 200.0");
 	kv.add("ang", "0.0 0.0 0.0");
 	kv.add("name", "light");
-	kv.add("reach", "200");
+	kv.add("reach", "500");
+	kv.add("cone", "30");
 	light->apply_keyvals(kv);
 
 	e_base* car = ents.spawn("prop");

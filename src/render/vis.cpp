@@ -1,38 +1,14 @@
 #include "vis.h"
-#include "render.h"
 #include "resource.h"
 #include "core/core.h"
 #include "input/cmds.h"
 #include <algorithm>
 #include <cstring>
 
-bool debug_draw_wireframe = false;
-COMMAND_ROUTINE (vis_worldwireframe)
-{
-	debug_draw_wireframe = (ev == PRESS);
-}
-
-bool debug_draw_occ_planes = false;
-COMMAND_ROUTINE (vis_occluders)
-{
-	debug_draw_occ_planes = (ev == PRESS);
-}
-
-/*
- * An octree is used to store the world polygons, then walked to
- *   determine the currently visible set.
- * The map can specify the leaf capacity, which will get a leaf
- *   split when exceeded, and maximum leaf depth, beyond which
- *   no leaf will ever be split.
- *
- * The map specifies certain "occlusion planes", which are polygons
- *   that are rendered every frame into a depth buffer and against
- *   which the leaves in the octree are tested. (These are rendered
- *   into a single display list)
- */
-
 int oct_leaf_capacity = 0;
 int oct_max_depth = 0;
+
+oct_node* root;
 
 GLuint occ_fbo;
 GLuint occ_fbo_texture;
@@ -46,6 +22,9 @@ GLuint occ_queries[8];
  * is a smallish square
  */
 constexpr int occ_fbo_size = 256;
+
+std::vector<t_world_triangle> world_tris;
+t_bound_box world_bounds_override;
 
 /*
  * The ID of the octant in which point is
@@ -70,49 +49,6 @@ t_bound_box octant_bound (t_bound_box parent, uint8_t octant_id)
 	(octant_id & 4 ? r.start : r.end).z = mid.z;
 	return r;
 }
-
-struct t_world_triangle
-{
-	t_vertex v[3];
-	t_material* mat;
-};
-std::vector<t_world_triangle> world_tris;
-t_bound_box world_bounds_override;
-
-struct oct_node
-{
-	/* Triangles within this node with the same material */
-	struct mat_group {
-		t_material* mat;
-		unsigned int display_list;
-	};
-
-	/*
-	 * Invariant, after build() has been called:
-	 * for leaves, the vector material_buckets is in a valid state;
-	 * otherwise, the vector bucket is in a valid state and empty
-	 */
-	union {
-		/* First vertex of triangle in world_tris, eg 0, 3, 6 */
-		std::vector<int> bucket;
-		std::vector<mat_group> material_buckets;
-	};
-
-	bool leaf;
-	oct_node* children[8];
-	t_bound_box actual_bounds;
-
-	void build (t_bound_box bounds, int level);
-	void make_leaf ();
-
-	void walk_for_vis (const vec3& cam) const;
-	void render_tris () const;
-
-	oct_node ();
-	~oct_node ();
-};
-oct_node* root;
-
 
 void oct_node::build (t_bound_box bounds, int level)
 {
@@ -215,7 +151,6 @@ oct_node::~oct_node ()
 
 
 std::vector<const oct_node*> visible_leaves;
-int total_visible_nodes;
 
 void vis_render_bbox (const t_bound_box& box);
 void oct_node::walk_for_vis (const vec3& cam) const
@@ -247,7 +182,7 @@ void oct_node::walk_for_vis (const vec3& cam) const
 	}
 }
 
-void draw_visible (const vec3& cam)
+void vis_fill_visible (const vec3& cam)
 {
 	// setup occlusion rendering
 	glBindFramebuffer(GL_FRAMEBUFFER, occ_fbo);
@@ -266,40 +201,6 @@ void draw_visible (const vec3& cam)
 	// walk the tree nodes which pass the z-test (and are on screen)
 	visible_leaves.clear();
 	root->walk_for_vis(cam);
-	total_visible_nodes = visible_leaves.size();
-
-	// setup proper rendering
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-	glViewport(0, 0, sdlcont.res_x, sdlcont.res_y);
-	glEnable(GL_CULL_FACE);
-	glDepthMask(GL_TRUE);
-
-	// draw world
-	for (const oct_node* node: visible_leaves)
-		node->render_tris();
-
-	glUseProgram(0);
-	if (debug_draw_wireframe) {
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		glDisable(GL_CULL_FACE);
-		glDisable(GL_DEPTH_TEST);
-		glColor4f(0.0, 0.0, 0.0, 0.5);
-		for (const oct_node* node: visible_leaves) {
-			for (const auto& gr: node->material_buckets)
-				glCallList(gr.display_list);
-		}
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_CULL_FACE);
-	}
-	if (debug_draw_occ_planes) {
-		glDisable(GL_CULL_FACE);
-		glDisable(GL_DEPTH_TEST);
-		glColor4f(0.8, 0.2, 0.2, 0.5);
-		glCallList(occ_planes_display_list);
-		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_CULL_FACE);
-	}
 }
 
 void read_world_vis_data (std::string path)
@@ -466,8 +367,7 @@ void vis_render_bbox (const t_bound_box& box)
 {
 	const vec3& s = box.start;
 	const vec3& e = box.end;
-	auto quad = [] (vec3 a, vec3 b, vec3 c, vec3 d)
-	{
+	auto quad = [] (vec3 a, vec3 b, vec3 c, vec3 d) -> void {
 		glVertex3f(a.x, a.y, a.z);
 		glVertex3f(b.x, b.y, b.z);
 		glVertex3f(c.x, c.y, c.z);
@@ -521,4 +421,42 @@ void init_vis ()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	glGenQueries(8, occ_queries);
+}
+
+bool debug_draw_wireframe = false;
+COMMAND_ROUTINE (vis_worldwireframe)
+{
+	debug_draw_wireframe = (ev == PRESS);
+}
+
+bool debug_draw_occ_planes = false;
+COMMAND_ROUTINE (vis_occluders)
+{
+	debug_draw_occ_planes = (ev == PRESS);
+}
+
+void vis_debug_renders ()
+{
+	glUseProgram(0);
+	if (debug_draw_wireframe) {
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glDisable(GL_CULL_FACE);
+		glDisable(GL_DEPTH_TEST);
+		glColor4f(0.0, 0.0, 0.0, 0.5);
+		for (const oct_node* node: visible_leaves) {
+			for (const auto& gr: node->material_buckets)
+				glCallList(gr.display_list);
+		}
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
+	}
+	if (debug_draw_occ_planes) {
+		glDisable(GL_CULL_FACE);
+		glDisable(GL_DEPTH_TEST);
+		glColor4f(0.8, 0.2, 0.2, 0.5);
+		glCallList(occ_planes_display_list);
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
+	}
 }

@@ -168,3 +168,4 @@ bool t_bound_box::point_in (vec3 pt) const
 	return (pt.x >= start.x) && (pt.y >= start.y) && (pt.z >= start.z)
 		&& (pt.x <= end.x) && (pt.y <= end.y) && (pt.z <= end.z);
 }
+

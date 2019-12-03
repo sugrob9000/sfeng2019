@@ -89,18 +89,24 @@ void render_all ()
 	static float last_frame_sec;
 
 	camera.apply();
+	vis_fill_visible(camera.pos);
 
 	compute_lighting();
 
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glViewport(0, 0, sdlcont.res_x, sdlcont.res_y);
+	glEnable(GL_CULL_FACE);
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+	glDepthMask(GL_TRUE);
+
 	draw_sky();
-	draw_visible(camera.pos);
-	for (const e_base* e: ents.vec) {
-		glPushMatrix();
-		translate_gl_matrix(e->pos);
-		rotate_gl_matrix(e->ang);
+	for (const oct_node* node: visible_leaves)
+		node->render_tris();
+	for (const e_base* e: ents.vec)
 		e->render();
-		glPopMatrix();
-	}
+
+	vis_debug_renders();
 
 	// HUD
 	glMatrixMode(GL_PROJECTION);
@@ -113,10 +119,12 @@ void render_all ()
 	glUseProgram(0);
 
 	char str[128];
-	sprintf(str, "%i leaves", total_visible_nodes);
+	sprintf(str, "%li leaves", visible_leaves.size());
 	draw_text(str, -1, -1, 0.025, 0.05);
 	sprintf(str, "%i fps", (int) round(1.0 / last_frame_sec));
 	draw_text(str, -1, -1 + 0.06, 0.025, 0.05);
+
+	debug_texture_onscreen(sspace_fbo_texture, 0.0, 0.0);
 
 	if (console_active)
 		console_render();
@@ -251,14 +259,12 @@ void init_text ()
 			nullptr, nullptr, &sdlcont.font_w);
 
 	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	t_shader_id vert = get_shader("common/vert_identity", GL_VERTEX_SHADER);
-	t_shader_id frag = get_shader("common/frag_text", GL_FRAGMENT_SHADER);
 
 	text_program = glCreateProgram();
-	glAttachShader(text_program, vert);
-	glAttachShader(text_program, frag);
+	glAttachShader(text_program,
+			get_shader("common/vert_identity", GL_VERTEX_SHADER));
+	glAttachShader(text_program,
+			get_shader("common/frag_text", GL_FRAGMENT_SHADER));
 	glLinkProgram(text_program);
 
 	text_prg_glyph_loc = glGetUniformLocation(text_program, "glyphs");
@@ -288,6 +294,8 @@ void init_text ()
 void draw_text (const char* str, float x, float y, float charw, float charh)
 {
 	glUseProgram(text_program);
+
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_RECTANGLE_ARB, text_texture);
@@ -340,29 +348,28 @@ void draw_sky ()
 }
 
 
-void debug_texture_onscreen (GLuint texture)
+void debug_texture_onscreen (GLuint texture, float cx, float cy)
 {
 	glUseProgram(0);
 	glEnable(GL_TEXTURE_2D);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture);
 
-	constexpr float cx = 0.25;
-	constexpr float cy = 0.25;
-	constexpr float w = 0.5;
-	float h = w * ((float) sdlcont.res_x / sdlcont.res_y);
+	glPushMatrix();
+	glTranslatef(cx, cy, 0.0);
 
 	glColor4f(1.0, 1.0, 1.0, 1.0);
 	glBegin(GL_QUADS);
 	glTexCoord2i(0, 0);
-	glVertex2f(cx - w, cy - h);
-	glTexCoord2i(1, 0);
-	glVertex2f(cx + w, cy - h);
-	glTexCoord2i(1, 1);
-	glVertex2f(cx + w, cy + h);
+	glVertex2i(0, 1);
 	glTexCoord2i(0, 1);
-	glVertex2f(cx - w, cy + h);
+	glVertex2i(0, 0);
+	glTexCoord2i(1, 1);
+	glVertex2i(1, 0);
+	glTexCoord2i(1, 0);
+	glVertex2i(1, 1);
 	glEnd();
+	glPopMatrix();
 }
 
 

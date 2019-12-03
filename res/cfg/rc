@@ -12,5 +12,4 @@ bind Left_Shift cam_accelerate
 bind Z vis_occluders
 bind X vis_worldwireframe
 
-windowsize 800 600
 map map1

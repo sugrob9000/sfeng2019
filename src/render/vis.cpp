@@ -250,7 +250,7 @@ void oct_node::walk_for_vis (const vec3& cam) const
 void draw_visible (const vec3& cam)
 {
 	// setup occlusion rendering
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, occ_fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER, occ_fbo);
 	glViewport(0, 0, occ_fbo_size, occ_fbo_size);
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glUseProgram(occ_shader_prog);

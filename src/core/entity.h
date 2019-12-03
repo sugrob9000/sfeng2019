@@ -17,44 +17,54 @@ class e_base
 
 	vec3 pos;
 	vec3 ang;
-
 	std::string name;
-
-	t_eventmap events;
-
-	/*
-	 * Gets pos, ang, and name.
-	 * Your entity should probably do this.
-	 */
-	void apply_basic_keyvals (const t_ent_keyvals& kv);
 
 	e_base () { };
 	virtual void think () = 0;
 	virtual void apply_keyvals (const t_ent_keyvals& kv) = 0;
 
-	virtual void render () const = 0;
-	virtual t_bound_box get_bbox () const = 0;
+	/* Read pos, ang, and name. Your entity should probably do this. */
+	void apply_basic_keyvals (const t_ent_keyvals& kv);
 
+	/*
+	 * Signals & events
+	 */
+
+	t_eventmap events;
 	/*
 	 * We have to be able to get the sigmap knowing only the pointer
 	 * to the entity, while in runtime - templates won't help with this
+	 * This is "implemented" by the preprocessor
 	 */
 	virtual const t_sigmap& get_sigmap () const = 0;
 
-	void set_name (const std::string& name);
 	void on_event (const std::string& event) const;
+	void set_name (const std::string& name);
+
+	/*
+	 * Rendering & vis
+	 */
+
+	/* As to cast a shadow */
+	virtual void cast_shadow () const = 0;
+	/* As on screen */
+	virtual void render () const = 0;
+
+	/* The entity promises that it is fully inside the box returned */
+	virtual t_bound_box get_bbox () const = 0;
 };
 
 /*
  * Goes inside the entity class declaration
  */
-#define ENT_MEMBERS(name)                   \
-	public:                             \
-	void think ();                      \
-	const t_sigmap& get_sigmap () const \
-	{ return sigmap<e_##name>; }        \
-	void render () const;               \
-	t_bound_box get_bbox () const;      \
+#define ENT_MEMBERS(name)                    \
+	public:                              \
+	void think ();                       \
+	const t_sigmap& get_sigmap () const  \
+		{ return sigmap<e_##name>; } \
+	void cast_shadow () const;           \
+	void render () const;                \
+	t_bound_box get_bbox () const;       \
 	void apply_keyvals (const t_ent_keyvals& kv);
 
 

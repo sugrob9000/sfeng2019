@@ -1,4 +1,5 @@
 #include "core/core.h"
+#include "core/entity.h"
 #include "inc_general.h"
 #include "inc_gl.h"
 #include "input/cmds.h"
@@ -89,9 +90,17 @@ void render_all ()
 
 	camera.apply();
 
-	draw_sky();
+	compute_lighting();
 
+	draw_sky();
 	draw_visible(camera.pos);
+	for (const e_base* e: ents.vec) {
+		glPushMatrix();
+		translate_gl_matrix(e->pos);
+		rotate_gl_matrix(e->ang);
+		e->render();
+		glPopMatrix();
+	}
 
 	// HUD
 	glMatrixMode(GL_PROJECTION);
@@ -108,6 +117,8 @@ void render_all ()
 	draw_text(str, -1, -1, 0.025, 0.05);
 	sprintf(str, "%i fps", (int) round(1.0 / last_frame_sec));
 	draw_text(str, -1, -1 + 0.06, 0.025, 0.05);
+
+	debug_texture_onscreen(light_fbo_texture);
 
 	if (console_active)
 		console_render();
@@ -169,6 +180,7 @@ void init_render ()
 	init_text();
 	init_vis();
 
+	init_lighting();
 	init_sky();
 }
 
@@ -218,7 +230,7 @@ void t_camera::apply ()
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	rotate_gl_matrix(ang);
-	glTranslatef(-pos.x, -pos.y, -pos.z);
+	translate_gl_matrix(-pos);
 }
 
 
@@ -317,6 +329,7 @@ void draw_sky ()
 {
 	glUseProgram(sky_shader_program);
 	glClear(GL_DEPTH_BUFFER_BIT);
+	glDisable(GL_DEPTH_TEST);
 
 	constexpr float radius = 1.0;
 	const t_bound_box skybox = { { -radius, -radius, -radius },
@@ -325,6 +338,33 @@ void draw_sky ()
 	translate_gl_matrix(camera.pos);
 	vis_render_bbox(skybox);
 	glPopMatrix();
+	glEnable(GL_DEPTH_TEST);
+}
+
+
+void debug_texture_onscreen (GLuint texture)
+{
+	glUseProgram(0);
+	glEnable(GL_TEXTURE_2D);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	constexpr float cx = 0.25;
+	constexpr float cy = 0.25;
+	constexpr float w = 0.5;
+	float h = w * ((float) sdlcont.res_x / sdlcont.res_y);
+
+	glColor4f(1.0, 1.0, 1.0, 1.0);
+	glBegin(GL_QUADS);
+	glTexCoord2i(0, 0);
+	glVertex2f(cx - w, cy - h);
+	glTexCoord2i(1, 0);
+	glVertex2f(cx + w, cy - h);
+	glTexCoord2i(1, 1);
+	glVertex2f(cx + w, cy + h);
+	glTexCoord2i(0, 1);
+	glVertex2f(cx - w, cy + h);
+	glEnd();
 }
 
 

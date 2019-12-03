@@ -60,5 +60,7 @@ void draw_text (const char* text, float x, float y, float charw, float charh);
 void rotate_gl_matrix (vec3 angs);
 void translate_gl_matrix (vec3 pos);
 
+void debug_texture_onscreen (GLuint texture);
+
 #endif // RENDER_H
 

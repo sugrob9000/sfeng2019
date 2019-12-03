@@ -2,6 +2,7 @@
 #define VIS_H
 
 #include "inc_general.h"
+#include "core/core.h"
 
 /*
  * See vis.cpp for details on the implementation

@@ -130,6 +130,11 @@ void load_map (std::string path)
 {
 	vis_initialize_world(path);
 
+	std::ifstream f(path + "/ents");
+	if (!f)
+		fatal("Cannot load map %s: no ents file", path.c_str());
+	while (!f.eof())
+		read_single_entity(f);
 }
 
 COMMAND_ROUTINE (map)

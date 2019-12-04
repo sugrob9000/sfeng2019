@@ -4,4 +4,3 @@
  * Do nothing, just fill z-buffer
  */
 void main () { }
-

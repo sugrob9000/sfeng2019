@@ -1,9 +1,12 @@
-#ifndef ENT_LIGHT_H
-#define ENT_LIGHT_H
+#ifndef ENT_LIGHTS_H
+#define ENT_LIGHTS_H
 
 #include "core/entity.h"
 #include "render/render.h"
 
+/*
+ * Directional light
+ */
 class e_light: public e_base
 {
 	public:
@@ -28,4 +31,4 @@ extern std::vector<e_light*> lights;
 void init_lighting ();
 void compute_lighting ();
 
-#endif // ENT_LIGHT_H
+#endif // ENT_LIGHTS_H

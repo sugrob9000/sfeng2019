@@ -121,7 +121,7 @@ void render_all ()
 	glUseProgram(0);
 
 	char str[128];
-	sprintf(str, "%li leaves", visible_leaves.size());
+	sprintf(str, "%i leaves", (int) visible_leaves.size());
 	draw_text(str, -1, -1, 0.025, 0.05);
 	sprintf(str, "%i fps", (int) round(1.0 / last_frame_sec));
 	draw_text(str, -1, -1 + 0.06, 0.025, 0.05);

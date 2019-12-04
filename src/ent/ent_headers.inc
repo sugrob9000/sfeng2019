@@ -3,6 +3,6 @@
 
 #include "prop.h"
 #include "timer.h"
-#include "light.h"
+#include "lights.h"
 
 #endif // ALL_ENT_HEADERS_INC

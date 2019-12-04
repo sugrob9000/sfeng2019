@@ -1,4 +1,4 @@
-#include "light.h"
+#include "lights.h"
 #include "error.h"
 #include "render/vis.h"
 #include "render/resource.h"

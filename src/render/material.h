@@ -14,6 +14,12 @@ struct t_material
 	GLuint frag;
 	GLuint vert;
 
+	/*
+	 * Location of boolean that tells the shader
+	 * whether we are doing a lighting pass or final pass
+	 */
+	int light_pass_flag_loc;
+
 	struct bitmap_desc {
 		int location;
 		t_texture_id texid;
@@ -31,15 +37,19 @@ struct t_material
 	 * normal bricks-normal.tga
 	 *
 	 * etc.
-	 * FRAG and VERT specify the names of the shaders,
-	 * which resolve to res/shaders/myfrag.glsl
-	 * and res/shaders/myvert.glsl, respectively.
+	 *
+	 * FRAG specifies the fragment shader (resolves to res/mat/myfrag.glsl)
+	 * VERT specifies the vertex shader
+	 *
 	 * Other lines specify the names of the bitmap (texture),
-	 * which resolve to res/textures/bricks.tga, etc.
+	 *   which resolve to res/mat/bricks.tga, etc.
 	 * Materials may have their own maps defined to be used by shaders.
+	 * The bitmap will be connected with the appropriate
+	 *   uniform sampler2D in the fragment shaders:
+	 *   diffuse -> uniform sampler2D map_diffuse; etc.
 	 */
-	void load(std::string path);
-	void apply ();
+	void load (std::string path);
+	void apply (bool light_pass = false);
 };
 
 t_shader_id compile_glsl (std::string path, GLenum shadertype);

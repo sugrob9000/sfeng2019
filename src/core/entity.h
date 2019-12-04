@@ -45,12 +45,18 @@ class e_base
 	 * Rendering & vis
 	 */
 
-	/* As to cast a shadow */
-	virtual void cast_shadow () const = 0;
-	/* As on screen */
+	/* Renders to screen */
 	virtual void render () const = 0;
+	/* Renders to a light's depth map */
+	virtual void cast_shadow () const = 0;
+	/* Renders to screenspace lighting buffer */
+	virtual void receive_light () const = 0;
 
-	/* The entity promises that it is fully inside the box returned */
+	/*
+	 * The entity promises that it is fully inside the box returned
+	 * Entities that have no physical appearance (ie logical ones)
+	 *   may express this by returning a box with volume 0
+	 */
 	virtual t_bound_box get_bbox () const = 0;
 };
 
@@ -62,8 +68,11 @@ class e_base
 	void think ();                       \
 	const t_sigmap& get_sigmap () const  \
 		{ return sigmap<e_##name>; } \
-	void cast_shadow () const;           \
+                                             \
 	void render () const;                \
+	void cast_shadow () const;           \
+	void receive_light () const;        \
+                                             \
 	t_bound_box get_bbox () const;       \
 	void apply_keyvals (const t_ent_keyvals& kv);
 

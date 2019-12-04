@@ -1,0 +1,11 @@
+light
+	pos 20 60 200
+	ang 0 0 0
+	name light
+	reach 500
+	cone 30
+prop
+	pos 20 140 180
+	ang 0 0 30
+	model muscle_car
+	mat car-red

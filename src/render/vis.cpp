@@ -191,7 +191,6 @@ void vis_fill_visible (const vec3& cam)
 	glUseProgram(occ_shader_prog);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
-	glDisable(GL_CULL_FACE);
 
 	// fill z-buffer with data from occlusion planes
 	glDepthMask(GL_TRUE);
@@ -374,14 +373,13 @@ void vis_render_bbox (const t_bound_box& box)
 		glVertex3f(d.x, d.y, d.z);
 	};
 
-	glDisable(GL_CULL_FACE);
 	glBegin(GL_QUADS);
 	quad(s, { s.x, e.y, s.z }, { s.x, e.y, e.z }, { s.x, s.y, e.z });
 	quad(s, { e.x, s.y, s.z }, { e.x, e.y, s.z }, { s.x, e.y, s.z });
-	quad(s, { e.x, s.y, s.z }, { e.x, s.y, e.z }, { s.x, s.y, e.z });
+	quad(s, { s.x, s.y, e.z }, { e.x, s.y, e.z }, { e.x, s.y, s.z });
 	quad(e, { e.x, e.y, s.z }, { e.x, s.y, s.z }, { e.x, s.y, e.z });
 	quad(e, { e.x, s.y, e.z }, { s.x, s.y, e.z }, { s.x, e.y, e.z });
-	quad(e, { e.x, e.y, s.z }, { s.x, e.y, s.z }, { s.x, e.y, e.z });
+	quad(e, { s.x, e.y, e.z }, { s.x, e.y, s.z }, { e.x, e.y, s.z });
 	glEnd();
 }
 

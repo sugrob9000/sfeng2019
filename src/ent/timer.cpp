@@ -49,6 +49,7 @@ void e_timer::apply_keyvals (const t_ent_keyvals& kv)
 
 void e_timer::render () const { }
 void e_timer::cast_shadow () const { }
+void e_timer::receive_light () const { }
 
 t_bound_box e_timer::get_bbox () const
 {

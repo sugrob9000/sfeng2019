@@ -100,10 +100,27 @@ void t_material::load (std::string path)
 	frag = get_shader(frag_name, GL_FRAGMENT_SHADER);
 	vert = get_shader(vert_name, GL_VERTEX_SHADER);
 
+	GLuint frag_lib = get_shader("common/frag_lib", GL_FRAGMENT_SHADER);
+
 	program = glCreateProgram();
+	glAttachShader(program, frag_lib);
 	glAttachShader(program, frag);
 	glAttachShader(program, vert);
 	glLinkProgram(program);
+
+	int link_success = 0;
+	glGetProgramiv(program, GL_LINK_STATUS, &link_success);
+	if (!link_success) {
+		int log_length = 0;
+		glGetProgramiv(program, GL_INFO_LOG_LENGTH, &log_length);
+		char log[log_length+1];
+		log[log_length] = 0;
+		glGetProgramInfoLog(program, log_length, &log_length, log);
+		fatal("OpenGL shader program for material %s "
+				"failed to link:\n%s", path.c_str(), log);
+	}
+
+	light_pass_flag_loc = glGetUniformLocation(program, "light_pass");
 
 	for (const bitmap_desc_interm& d: bitmaps_interm) {
 		int location = glGetUniformLocation(program,
@@ -119,7 +136,7 @@ void t_material::load (std::string path)
 	}
 }
 
-void t_material::apply ()
+void t_material::apply (bool light_pass)
 {
 	glUseProgram(program);
 	for (int i = 0; i < bitmaps.size(); i++) {
@@ -127,6 +144,7 @@ void t_material::apply ()
 		glBindTexture(GL_TEXTURE_2D, bitmaps[i].texid);
 		glUniform1i(bitmaps[i].location, i);
 	}
+	glUniform1i(light_pass_flag_loc, light_pass);
 }
 
 int get_surface_gl_format (SDL_Surface* s)

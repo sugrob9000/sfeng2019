@@ -95,11 +95,13 @@ void render_all ()
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, sdlcont.res_x, sdlcont.res_y);
+
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	glDepthMask(GL_TRUE);
 
+	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 	draw_sky();
 	for (const oct_node* node: visible_leaves)
 		node->render_tris();
@@ -342,7 +344,9 @@ void draw_sky ()
 	                             { radius, radius, radius } };
 	glPushMatrix();
 	translate_gl_matrix(camera.pos);
+
 	vis_render_bbox(skybox);
+
 	glPopMatrix();
 	glEnable(GL_DEPTH_TEST);
 }

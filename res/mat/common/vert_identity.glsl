@@ -16,3 +16,4 @@ void main ()
 	world_normal = gl_Normal.xyz;
 	world_pos = gl_Vertex.xyz;
 }
+

@@ -31,11 +31,9 @@ void e_light::apply_keyvals (const t_ent_keyvals& kv)
 
 void e_light::render () const { }
 void e_light::cast_shadow () const { }
+void e_light::receive_light () const { }
 
-t_bound_box e_light::get_bbox () const
-{
-	return { };
-}
+t_bound_box e_light::get_bbox () const { return { }; }
 
 /*
  * Light space framebuffer
@@ -158,7 +156,7 @@ void compose_add_depth_map ()
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
 	for (const e_base* e: ents.vec)
-		e->render();
+		e->receive_light();
 }
 
 void compute_lighting ()

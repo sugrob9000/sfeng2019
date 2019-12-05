@@ -25,9 +25,10 @@ struct vec3
 	vec3& norm ();
 };
 
-static_assert(offsetof(vec3, x) == offsetof(vec3, _d[0]));
-static_assert(offsetof(vec3, y) == offsetof(vec3, _d[1]));
-static_assert(offsetof(vec3, z) == offsetof(vec3, _d[2]));
+static_assert(offsetof(vec3, x) == offsetof(vec3, _d[0])
+           && offsetof(vec3, y) == offsetof(vec3, _d[1])
+           && offsetof(vec3, z) == offsetof(vec3, _d[2]),
+	   "Memory alignment for vec3 is broken");
 
 vec3 operator* (vec3 v, float c);
 vec3 operator* (float c, vec3 v);

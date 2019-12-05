@@ -62,6 +62,12 @@ int get_surface_gl_format (SDL_Surface* s);
  */
 extern t_material mat_none;
 
+/*
+ * Discard previous material info to assure that the next
+ * material will actually be applied
+ */
+void material_barrier ();
+
 void init_materials ();
 
 #endif // MATERIAL_H

@@ -85,9 +85,10 @@ void render_all ()
 {
 	namespace cr = std::chrono;
 	using sc = cr::steady_clock;
-
 	sc::time_point frame_start = sc::now();
 	static float last_frame_sec;
+
+	material_barrier();
 
 	camera.apply();
 	vis_fill_visible(camera.pos);

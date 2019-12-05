@@ -136,8 +136,25 @@ void t_material::load (std::string path)
 	}
 }
 
+/*
+ * Material application is idempotent, so we can avoid redundancy
+ */
+const t_material* latest_material = nullptr;
+t_render_stage latest_render_stage;
+
+void material_barrier ()
+{
+	latest_material = nullptr;
+}
+
 void t_material::apply (t_render_stage s) const
 {
+	if (latest_material == this && s == latest_render_stage)
+		return;
+
+	latest_material = this;
+	latest_render_stage = s;
+
 	glUseProgram(program);
 	for (int i = 0; i < bitmaps.size(); i++) {
 		glActiveTexture(GL_TEXTURE0 + i);

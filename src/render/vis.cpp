@@ -121,7 +121,6 @@ void oct_node::make_leaf ()
 	}
 }
 
-void vis_render_bbox (const t_bound_box&);
 void oct_node::render_tris (t_render_stage s) const
 {
 	for (const mat_group& gr: leaf.mat_buckets) {
@@ -173,8 +172,8 @@ void oct_node::check_visibility (const vec3& cam) const
 	}
 
 	for (int i = 0; i < 8; i++) {
-		// pass the node if we are inside it,
-		// which is not otherwise guaranteed
+		// we always want to render the node we are in, but its
+		// polygons may be culled, so pass it specially
 		if (child_pixels[i] > 0
 		|| children[i]->actual_bounds.point_in(cam))
 			children[i]->check_visibility(cam);

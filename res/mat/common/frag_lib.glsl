@@ -7,21 +7,32 @@
 lowp vec4 final_shade ();
 vec3 surface_normal ();
 
-/*
- * True when we are generating the shadow buffer for the frame
- */
-uniform bool light_pass;
+const uint LIGHTING_LSPACE = 0u;
+const uint LIGHTING_SSPACE = 1u;
+const uint SHADE_FINAL = 2u;
+uniform uint stage;
 
 in vec3 world_normal;
 in vec3 world_pos;
 
 void main ()
 {
-	if (light_pass) {
+	switch (stage) {
+	case LIGHTING_LSPACE:
+		// do nothing except fill z-buffer
+		break;
+
+	case LIGHTING_SSPACE:
+		// get the surface normal specified by
+		// user shader and (TODO) calculate lighting
 		vec3 norm = surface_normal();
 		gl_FragColor = vec4(norm, 1.0);
-	} else {
+		break;
+
+	case SHADE_FINAL:
+		// call the actual user shader
 		gl_FragColor = final_shade();
+		break;
 	}
 }
 

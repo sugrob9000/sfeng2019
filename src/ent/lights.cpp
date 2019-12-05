@@ -1,5 +1,6 @@
 #include "lights.h"
 #include "error.h"
+#include "render/render.h"
 #include "render/vis.h"
 #include "render/resource.h"
 
@@ -27,9 +28,7 @@ void e_light::apply_keyvals (const t_ent_keyvals& kv)
 		reach = 500.0; );
 }
 
-void e_light::render () const { }
-void e_light::cast_shadow () const { }
-void e_light::receive_light () const { }
+void e_light::render (t_render_stage s) const { }
 
 t_bound_box e_light::get_bbox () const { return { }; }
 
@@ -38,7 +37,6 @@ t_bound_box e_light::get_bbox () const { return { }; }
  */
 GLuint lspace_fbo;
 GLuint lspace_fbo_texture;
-GLuint lspace_program;
 constexpr int lspace_fbo_size = 1024;
 
 /*
@@ -77,16 +75,7 @@ void init_lighting ()
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
 			GL_TEXTURE_2D, lspace_fbo_texture, 0);
 
-	// TODO: this should actually use the user vertex shader
-	lspace_program = glCreateProgram();
-	glAttachShader(lspace_program, get_shader("common/frag_null",
-				GL_FRAGMENT_SHADER));
-	glAttachShader(lspace_program, get_shader("common/vert_identity",
-				GL_VERTEX_SHADER));
-	glLinkProgram(lspace_program);
-
 	// screen space framebuffer
-
 	glGenFramebuffers(1, &sspace_fbo);
 	glBindFramebuffer(GL_FRAMEBUFFER, sspace_fbo);
 
@@ -117,11 +106,17 @@ void fill_depth_map (const e_light* l)
 	glBindFramebuffer(GL_FRAMEBUFFER, lspace_fbo);
 	glViewport(0, 0, lspace_fbo_size, lspace_fbo_size);
 	glClear(GL_DEPTH_BUFFER_BIT);
+	glDepthMask(GL_TRUE);
+	glDepthFunc(GL_LESS);
 
 	// GL_PROJECTION and GL_MODELVIEW in this function are
 	// as meaningless as MTX_* - we only send one matrix
 
 	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	glLoadIdentity();
+
+	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 
 	glLoadIdentity();
@@ -130,17 +125,12 @@ void fill_depth_map (const e_light* l)
 	rotate_gl_matrix(l->ang);
 	translate_gl_matrix(-l->pos);
 
-	glUseProgram(lspace_program);
+	for (const e_base* e: ents.vec)
+		e->render(LIGHTING_LSPACE);
 
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	for (const e_base* e: ents.vec) {
-		glLoadIdentity();
-		e->cast_shadow();
-	}
-	glPopMatrix();
 	glGetFloatv(GL_MODELVIEW_MATRIX, lspace_matrix);
 
+	glPopMatrix();
 	glMatrixMode(GL_PROJECTION);
 	glPopMatrix();
 }
@@ -160,7 +150,7 @@ void compose_add_depth_map ()
 	glPushMatrix();
 	for (const e_base* e: ents.vec) {
 		glLoadIdentity();
-		e->receive_light();
+		e->render(LIGHTING_SSPACE);
 	}
 	glPopMatrix();
 }

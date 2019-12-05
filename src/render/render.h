@@ -62,5 +62,12 @@ void translate_gl_matrix (vec3 pos);
 
 void debug_texture_onscreen (GLuint texture, float cx, float cy);
 
+enum t_render_stage: uint32_t
+{
+	LIGHTING_LSPACE = 0,
+	LIGHTING_SSPACE = 1,
+	SHADE_FINAL = 2,
+};
+
 #endif // RENDER_H
 

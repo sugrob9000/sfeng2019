@@ -10,6 +10,7 @@
 #include "render/resource.h"
 #include "render/vis.h"
 #include <chrono>
+#include <cassert>
 
 t_sdlcontext sdlcont;
 
@@ -108,11 +109,11 @@ void render_all ()
 	draw_sky();
 	for (const oct_node* node: visible_leaves) {
 		glLoadIdentity();
-		node->render_tris();
+		node->render_tris(SHADE_FINAL);
 	}
 	glPopMatrix();
 	for (const e_base* e: ents.vec)
-		e->render();
+		e->render(SHADE_FINAL);
 
 	vis_debug_renders();
 
@@ -130,7 +131,8 @@ void render_all ()
 	sprintf(str, "%i fps", (int) round(1.0 / last_frame_sec));
 	draw_text(str, -1, -1 + 0.06, 0.025, 0.05);
 
-	debug_texture_onscreen(sspace_fbo_texture, 0.0, 0.0);
+	// debug_texture_onscreen(sspace_fbo_texture, 0.0, 0.0);
+	// debug_texture_onscreen(lspace_fbo_texture, -1.0, 0.0);
 
 	if (console_active)
 		console_render();
@@ -143,6 +145,7 @@ void render_all ()
 
 void init_text ();
 void init_sky ();
+void gl_limits_sanity_check ();
 void init_render ()
 {
 	if (sdlcont.res_x == 0 || sdlcont.res_y == 0) {
@@ -182,6 +185,8 @@ void init_render ()
 		warning("Failed to set adaptive vsync, setting regular");
 		SDL_GL_SetSwapInterval(1);
 	}
+
+	gl_limits_sanity_check();
 
 	glMatrixMode(MTX_VIEWPROJ);
 	glLoadIdentity();
@@ -380,7 +385,6 @@ void debug_texture_onscreen (GLuint texture, float cx, float cy)
 	glPopMatrix();
 }
 
-
 MOUSEMOVE_ROUTINE (mousemove_camera)
 {
 	camera.ang.x += dy;
@@ -399,4 +403,15 @@ COMMAND_ROUTINE (windowsize)
 		return;
 
 	resize_window(w, h);
+}
+
+void gl_limits_sanity_check ()
+{
+	int modelview_depth;
+	int projection_depth;
+	glGetIntegerv(GL_MAX_MODELVIEW_STACK_DEPTH, &modelview_depth);
+	glGetIntegerv(GL_MAX_PROJECTION_STACK_DEPTH, &projection_depth);
+
+	assert(modelview_depth >= 32);
+	assert(projection_depth >= 4);
 }

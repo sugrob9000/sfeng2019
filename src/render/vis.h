@@ -65,7 +65,7 @@ struct oct_node
 	void check_visibility (const vec3& cam) const;
 	void query_entity (const e_base* e);
 
-	void render_tris () const;
+	void render_tris (t_render_stage s = SHADE_FINAL) const;
 
 	oct_node ();
 	~oct_node ();

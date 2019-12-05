@@ -120,7 +120,7 @@ void t_material::load (std::string path)
 				"failed to link:\n%s", path.c_str(), log);
 	}
 
-	light_pass_flag_loc = glGetUniformLocation(program, "light_pass");
+	render_stage_loc = glGetUniformLocation(program, "stage");
 
 	for (const bitmap_desc_interm& d: bitmaps_interm) {
 		int location = glGetUniformLocation(program,
@@ -136,7 +136,7 @@ void t_material::load (std::string path)
 	}
 }
 
-void t_material::apply (bool light_pass)
+void t_material::apply (t_render_stage s) const
 {
 	glUseProgram(program);
 	for (int i = 0; i < bitmaps.size(); i++) {
@@ -144,7 +144,7 @@ void t_material::apply (bool light_pass)
 		glBindTexture(GL_TEXTURE_2D, bitmaps[i].texid);
 		glUniform1i(bitmaps[i].location, i);
 	}
-	glUniform1i(light_pass_flag_loc, light_pass);
+	glUniform1ui(render_stage_loc, s);
 }
 
 int get_surface_gl_format (SDL_Surface* s)

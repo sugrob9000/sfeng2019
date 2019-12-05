@@ -3,6 +3,7 @@
 
 #include "inc_gl.h"
 #include "inc_general.h"
+#include "render.h"
 #include <vector>
 
 typedef GLuint t_texture_id;
@@ -15,10 +16,9 @@ struct t_material
 	GLuint vert;
 
 	/*
-	 * Location of boolean that tells the shader
-	 * whether we are doing a lighting pass or final pass
+	 * Tell the shader which stage of rendering we are at
 	 */
-	int light_pass_flag_loc;
+	int render_stage_loc;
 
 	struct bitmap_desc {
 		int location;
@@ -49,7 +49,7 @@ struct t_material
 	 *   diffuse -> uniform sampler2D map_diffuse; etc.
 	 */
 	void load (std::string path);
-	void apply (bool light_pass = false);
+	void apply (t_render_stage stage = SHADE_FINAL) const;
 };
 
 t_shader_id compile_glsl (std::string path, GLenum shadertype);

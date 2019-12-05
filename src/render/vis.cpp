@@ -122,10 +122,10 @@ void oct_node::make_leaf ()
 }
 
 void vis_render_bbox (const t_bound_box&);
-void oct_node::render_tris () const
+void oct_node::render_tris (t_render_stage s) const
 {
 	for (const mat_group& gr: leaf.mat_buckets) {
-		gr.mat->apply();
+		gr.mat->apply(s);
 		glCallList(gr.display_list);
 	}
 }

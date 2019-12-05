@@ -110,13 +110,16 @@ void init_lighting ()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-float lspace_view_matrix[16];
+float lspace_matrix[16];
 
 void fill_depth_map (const e_light* l)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, lspace_fbo);
 	glViewport(0, 0, lspace_fbo_size, lspace_fbo_size);
 	glClear(GL_DEPTH_BUFFER_BIT);
+
+	// GL_PROJECTION and GL_MODELVIEW in this function are
+	// as meaningless as MTX_* - we only send one matrix
 
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
@@ -136,8 +139,7 @@ void fill_depth_map (const e_light* l)
 		e->cast_shadow();
 	}
 	glPopMatrix();
-
-	glGetFloatv(GL_MODELVIEW_MATRIX, lspace_view_matrix);
+	glGetFloatv(GL_MODELVIEW_MATRIX, lspace_matrix);
 
 	glMatrixMode(GL_PROJECTION);
 	glPopMatrix();

@@ -103,7 +103,7 @@ void render_all ()
 
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-	glMatrixMode(GL_MODELVIEW);
+	glMatrixMode(MTX_MODEL);
 	glPushMatrix();
 	draw_sky();
 	for (const oct_node* node: visible_leaves) {
@@ -117,7 +117,7 @@ void render_all ()
 	vis_debug_renders();
 
 	// HUD
-	glMatrixMode(GL_PROJECTION);
+	glMatrixMode(MTX_VIEWPROJ);
 	glLoadIdentity();
 	glScalef(1.0, -1.0, 1.0);
 	glDisable(GL_CULL_FACE);
@@ -183,9 +183,9 @@ void init_render ()
 		SDL_GL_SetSwapInterval(1);
 	}
 
-	glMatrixMode(GL_PROJECTION);
+	glMatrixMode(MTX_VIEWPROJ);
 	glLoadIdentity();
-	glMatrixMode(GL_MODELVIEW);
+	glMatrixMode(MTX_MODEL);
 	glLoadIdentity();
 
 	init_materials();
@@ -234,14 +234,14 @@ void t_camera::apply ()
 {
 	float aspect = (float) sdlcont.res_x / sdlcont.res_y;
 
-	glMatrixMode(GL_PROJECTION);
+	glMatrixMode(MTX_VIEWPROJ);
 	glLoadIdentity();
 	gluPerspective(fov, aspect, z_near, z_far);
 	glRotatef(-90.0, 1.0, 0.0, 0.0);
 	rotate_gl_matrix(ang);
 	translate_gl_matrix(-pos);
 
-	glMatrixMode(GL_MODELVIEW);
+	glMatrixMode(MTX_MODEL);
 	glLoadIdentity();
 }
 

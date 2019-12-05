@@ -22,4 +22,14 @@
 	#error "Unsupported system or building the wrong way"
 #endif
 
+/*
+ * We decompose the matrix like
+ *   (projection * view), (model)
+ * but abuse the existing OpenGL matrices for this
+ */
+constexpr GLenum MTX_VIEWPROJ = GL_PROJECTION;
+constexpr GLenum MTX_MODEL = GL_MODELVIEW;
+constexpr GLenum MTX_VIEWPROJ_MATRIX = GL_PROJECTION_MATRIX;
+constexpr GLenum MTX_MODEL_MATRIX = GL_MODELVIEW_MATRIX;
+
 #endif // INC_GL_H

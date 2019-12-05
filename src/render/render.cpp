@@ -102,9 +102,15 @@ void render_all ()
 	glDepthMask(GL_TRUE);
 
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
 	draw_sky();
-	for (const oct_node* node: visible_leaves)
+	for (const oct_node* node: visible_leaves) {
+		glLoadIdentity();
 		node->render_tris();
+	}
+	glPopMatrix();
 	for (const e_base* e: ents.vec)
 		e->render();
 
@@ -112,8 +118,6 @@ void render_all ()
 
 	// HUD
 	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glScalef(1.0, -1.0, 1.0);
 	glDisable(GL_CULL_FACE);
@@ -234,11 +238,11 @@ void t_camera::apply ()
 	glLoadIdentity();
 	gluPerspective(fov, aspect, z_near, z_far);
 	glRotatef(-90.0, 1.0, 0.0, 0.0);
+	rotate_gl_matrix(ang);
+	translate_gl_matrix(-pos);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	rotate_gl_matrix(ang);
-	translate_gl_matrix(-pos);
 }
 
 

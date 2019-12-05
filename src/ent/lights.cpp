@@ -13,9 +13,7 @@ e_light::e_light ()
 	lights.push_back(this);
 }
 
-void e_light::think ()
-{
-}
+void e_light::think () { }
 
 void e_light::apply_keyvals (const t_ent_keyvals& kv)
 {
@@ -122,9 +120,6 @@ void fill_depth_map (const e_light* l)
 
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
-	glLoadIdentity();
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
 
 	glLoadIdentity();
 	gluPerspective(l->cone_angle * 2.0, 1.0, LIGHT_Z_NEAR, l->reach);
@@ -133,14 +128,18 @@ void fill_depth_map (const e_light* l)
 	translate_gl_matrix(-l->pos);
 
 	glUseProgram(lspace_program);
-	for (const e_base* e: ents.vec)
+
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	for (const e_base* e: ents.vec) {
+		glLoadIdentity();
 		e->cast_shadow();
+	}
+	glPopMatrix();
 
 	glGetFloatv(GL_MODELVIEW_MATRIX, lspace_view_matrix);
 
 	glMatrixMode(GL_PROJECTION);
-	glPopMatrix();
-	glMatrixMode(GL_MODELVIEW);
 	glPopMatrix();
 }
 
@@ -155,8 +154,13 @@ void compose_add_depth_map ()
 	glDepthMask(GL_TRUE);
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-	for (const e_base* e: ents.vec)
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	for (const e_base* e: ents.vec) {
+		glLoadIdentity();
 		e->receive_light();
+	}
+	glPopMatrix();
 }
 
 void compute_lighting ()

@@ -52,14 +52,12 @@ t_bound_box octant_bound (t_bound_box parent, uint8_t octant_id)
 
 void oct_node::build (t_bound_box bounds, int level)
 {
-	// build the bounds
-	actual_bounds = bounds;
+	// bounds must include the triangles entirely
 	for (int d: bucket) {
-		for (int i = 0; i < 3; i++) {
-			vec3& v = world_tris[d].v[i].pos;
-			actual_bounds.update(v);
-		}
+		for (int i = 0; i < 3; i++)
+			bounds.update(world_tris[d].v[i].pos);
 	}
+	actual_bounds = bounds;
 
 	if (level > oct_max_depth || bucket.size() <= oct_leaf_capacity) {
 		make_leaf();

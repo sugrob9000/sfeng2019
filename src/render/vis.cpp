@@ -64,7 +64,7 @@ void oct_node::build (t_bound_box bounds, int level)
 		return;
 	}
 
-	leaf = false;
+	is_leaf = false;
 	for (int i = 0; i < 8; i++)
 		children[i] = new oct_node;
 
@@ -95,11 +95,12 @@ void oct_node::make_leaf ()
 		}
 	}
 
-	// the bucket is in union with material buckets,
+	// the bucket is in union with leaf data
 	// so we have to destroy and construct them manually
 	bucket.~vector();
-	new (&material_buckets) std::vector<mat_group>;
-	material_buckets.reserve(m.size());
+	new (&leaf) leaf_data;
+
+	leaf.mat_buckets.reserve(m.size());
 
 	for (std::pair<t_material* const, std::vector<t_vertex>>& p: m) {
 		t_material* mat = p.first;
@@ -116,14 +117,14 @@ void oct_node::make_leaf ()
 		glEnd();
 		glEndList();
 
-		material_buckets.push_back({ mat, dlist });
+		leaf.mat_buckets.push_back({ mat, dlist });
 	}
 }
 
 void vis_render_bbox (const t_bound_box&);
 void oct_node::render_tris () const
 {
-	for (const mat_group& gr: material_buckets) {
+	for (const mat_group& gr: leaf.mat_buckets) {
 		gr.mat->apply();
 		glCallList(gr.display_list);
 	}
@@ -131,14 +132,14 @@ void oct_node::render_tris () const
 
 oct_node::oct_node ()
 {
-	leaf = true;
+	is_leaf = true;
 	new (&bucket) std::vector<int>;
 }
 
 oct_node::~oct_node ()
 {
-	if (leaf) {
-		material_buckets.~vector();
+	if (is_leaf) {
+		leaf.~leaf_data();
 	} else {
 		bucket.~vector();
 		for (int i = 0; i < 8; i++)
@@ -151,9 +152,9 @@ oct_node::~oct_node ()
 std::vector<const oct_node*> visible_leaves;
 
 void vis_render_bbox (const t_bound_box& box);
-void oct_node::walk_for_vis (const vec3& cam) const
+void oct_node::check_visibility (const vec3& cam) const
 {
-	if (leaf) {
+	if (is_leaf) {
 		visible_leaves.push_back(this);
 		return;
 	}
@@ -176,7 +177,7 @@ void oct_node::walk_for_vis (const vec3& cam) const
 		// which is not otherwise guaranteed
 		if (child_pixels[i] > 0
 		|| children[i]->actual_bounds.point_in(cam))
-			children[i]->walk_for_vis(cam);
+			children[i]->check_visibility(cam);
 	}
 }
 
@@ -197,8 +198,10 @@ void vis_fill_visible (const vec3& cam)
 
 	// walk the tree nodes which pass the z-test (and are on screen)
 	visible_leaves.clear();
-	root->walk_for_vis(cam);
+	root->check_visibility(cam);
 }
+
+
 
 void read_world_vis_data (std::string path)
 {
@@ -222,6 +225,24 @@ void read_world_vis_data (std::string path)
 	}
 }
 
+void read_world_obj (const std::string& path);
+void vis_initialize_world (const std::string& path)
+{
+	read_world_obj(path + "/geo.obj");
+	read_world_vis_data(path + "/vis");
+
+	if (world_bounds_override.volume() <= 0.0) {
+		fatal("Map %s does not specify valid world bounds",
+				path.c_str());
+	}
+
+	root = new oct_node;
+
+	for (int i = 0; i < world_tris.size(); i++)
+		root->bucket.push_back({ i });
+
+	root->build(world_bounds_override, 0);
+}
 
 /*
  * Read world in a different way than what t_model_mem does
@@ -233,7 +254,7 @@ void read_world_vis_data (std::string path)
  *   code duplication - the only things that are different
  *   are usemtl and face handling
  */
-void read_world_obj (std::string path)
+void read_world_obj (const std::string& path)
 {
 	std::ifstream f(path);
 	if (!f)
@@ -342,23 +363,6 @@ void read_world_obj (std::string path)
 	glEndList();
 }
 
-void vis_initialize_world (std::string path)
-{
-	read_world_obj(path + "/geo.obj");
-	read_world_vis_data(path + "/vis");
-
-	if (world_bounds_override.volume() <= 0.0) {
-		fatal("Map %s does not specify valid world bounds",
-				path.c_str());
-	}
-
-	root = new oct_node;
-
-	for (int i = 0; i < world_tris.size(); i++)
-		root->bucket.push_back({ i });
-
-	root->build(world_bounds_override, 0);
-}
 
 void vis_render_bbox (const t_bound_box& box)
 {
@@ -440,7 +444,7 @@ void vis_debug_renders ()
 		glDisable(GL_DEPTH_TEST);
 		glColor4f(0.0, 0.0, 0.0, 0.5);
 		for (const oct_node* node: visible_leaves) {
-			for (const auto& gr: node->material_buckets)
+			for (const auto& gr: node->leaf.mat_buckets)
 				glCallList(gr.display_list);
 		}
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

@@ -40,11 +40,13 @@ struct t_bound_box
 	vec3 end;
 
 	/* Expand to include the argument */
-	void update (vec3 pt);
+	void update (const vec3& pt);
 	void update (const t_bound_box& other);
 
-	bool point_in (vec3 pt) const;
+	bool point_in (const vec3& pt) const;
 	float volume () const;
+
+	bool intersects (t_bound_box b) const;
 };
 
 #endif // CORE_H

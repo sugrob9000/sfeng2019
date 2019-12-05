@@ -3,12 +3,13 @@
 
 #include "inc_general.h"
 #include "core/core.h"
+#include "core/entity.h"
 #include "render.h"
 #include "material.h"
 #include "model.h"
 
 void init_vis ();
-void vis_initialize_world (std::string path);
+void vis_initialize_world (const std::string& path);
 
 /*
  * An octree is used to store the world polygons, then walked to
@@ -34,28 +35,36 @@ struct oct_node
 	/* Triangles within this node with the same material */
 	struct mat_group {
 		t_material* mat;
-		unsigned int display_list;
+		GLuint display_list;
 	};
 
-	/*
-	 * Invariant, after build() has been called:
-	 * for leaves, the vector material_buckets is in a valid state;
-	 * otherwise, the vector bucket is in a valid state and empty
-	 */
+	struct leaf_data {
+		std::vector<mat_group> mat_buckets;
+		std::vector<e_base*> entities;
+	};
+
 	union {
-		/* First vertex of triangle in world_tris, eg 0, 3, 6 */
+		/*
+		 * Indices into the internal world triangle array.
+		 * In non-leaves, after tree has been built,
+		 *   is in a valid state and empty
+		 */
 		std::vector<int> bucket;
-		std::vector<mat_group> material_buckets;
+
+		/* In leaves, this is in a valid state */
+		leaf_data leaf;
 	};
 
-	bool leaf;
+	bool is_leaf;
 	oct_node* children[8];
 	t_bound_box actual_bounds;
 
 	void build (t_bound_box bounds, int level);
 	void make_leaf ();
 
-	void walk_for_vis (const vec3& cam) const;
+	void check_visibility (const vec3& cam) const;
+	void query_entity (const e_base* e);
+
 	void render_tris () const;
 
 	oct_node ();
@@ -63,6 +72,7 @@ struct oct_node
 };
 
 extern std::vector<const oct_node*> visible_leaves;
+extern std::vector<const e_base*> visible_entities;
 
 void vis_render_bbox (const t_bound_box& b);
 void vis_fill_visible (const vec3& cam);

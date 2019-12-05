@@ -156,7 +156,7 @@ float t_bound_box::volume () const
 	     * (end.z - start.z);
 }
 
-void t_bound_box::update (vec3 pt)
+void t_bound_box::update (const vec3& pt)
 {
 	start = min(start, pt);
 	end = max(end, pt);
@@ -168,9 +168,18 @@ void t_bound_box::update (const t_bound_box& other)
 	end = max(end, other.end);
 }
 
-bool t_bound_box::point_in (vec3 pt) const
+bool t_bound_box::point_in (const vec3& pt) const
 {
 	return (pt.x >= start.x) && (pt.y >= start.y) && (pt.z >= start.z)
 		&& (pt.x <= end.x) && (pt.y <= end.y) && (pt.z <= end.z);
+}
+
+bool t_bound_box::intersects (t_bound_box b) const
+{
+	b.start = max(b.start, start);
+	b.end = min(b.end, end);
+	return b.end.x >= b.start.x
+	    && b.end.y >= b.start.y
+	    && b.end.z >= b.start.z;
 }
 

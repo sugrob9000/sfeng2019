@@ -11,5 +11,6 @@ bind Left_Shift cam_accelerate
 
 bind Z vis_occluders
 bind X vis_worldwireframe
+bind C vis_leaves
 
 map map1

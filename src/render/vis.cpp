@@ -434,6 +434,12 @@ COMMAND_ROUTINE (vis_occluders)
 	debug_draw_occ_planes = (ev == PRESS);
 }
 
+bool debug_draw_leaves = false;
+COMMAND_ROUTINE (vis_leaves)
+{
+	debug_draw_leaves = (ev == PRESS);
+}
+
 void vis_debug_renders ()
 {
 	glUseProgram(0);
@@ -450,11 +456,28 @@ void vis_debug_renders ()
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
 	}
+
 	if (debug_draw_occ_planes) {
 		glDisable(GL_CULL_FACE);
 		glDisable(GL_DEPTH_TEST);
 		glColor4f(0.8, 0.2, 0.2, 0.5);
 		glCallList(occ_planes_display_list);
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
+	}
+
+	if (debug_draw_leaves) {
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glDisable(GL_DEPTH_TEST);
+		glDisable(GL_CULL_FACE);
+		glLineWidth(1.5);
+		glColor4f(1.0, 0.0, 0.0, 0.3);
+
+		for (const oct_node* leaf: visible_leaves)
+			vis_render_bbox(leaf->actual_bounds);
+
+		glLineWidth(1.0);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
 	}

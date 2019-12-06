@@ -13,6 +13,12 @@
 		           [[maybe_unused]] int abx, \
 		           [[maybe_unused]] int aby)
 
+#define COMMAND_SET_BOOL(name, bool_to_set)  \
+	COMMAND_ROUTINE (name)               \
+	{                                    \
+		bool_to_set = (ev == PRESS); \
+	}
+
 #define COMMAND(name) \
 	COMMAND_ROUTINE (name);
 #include "cmds.inc"

@@ -20,31 +20,22 @@ class e_base
 	vec3 ang;
 	std::string name;
 
-	e_base () { };
+	e_base () { }
 	virtual void think () = 0;
-	virtual void apply_keyvals (const t_ent_keyvals& kv) = 0;
 
+	virtual void apply_keyvals (const t_ent_keyvals& kv) = 0;
 	/* Read pos, ang, and name. Your entity should probably do this. */
 	void apply_basic_keyvals (const t_ent_keyvals& kv);
-
-	/*
-	 * Signals & events
-	 */
 
 	t_eventmap events;
 	/*
 	 * We have to be able to get the sigmap knowing only the pointer
 	 * to the entity, while in runtime - templates won't help with this
-	 * This is "implemented" by the preprocessor
+	 * The implementation is inserted by the preprocessor
 	 */
 	virtual const t_sigmap& get_sigmap () const = 0;
-
 	void on_event (const std::string& event) const;
 	void set_name (const std::string& name);
-
-	/*
-	 * Rendering & vis
-	 */
 
 	virtual void render (t_render_stage s = SHADE_FINAL) const = 0;
 
@@ -54,6 +45,15 @@ class e_base
 	 *   may express this by returning a box with volume 0
 	 */
 	virtual t_bound_box get_bbox () const = 0;
+
+	/*
+	 * Updates the engine's idea of where the entity is, for
+	 * purposes such as vis
+	 */
+	void moved ();
+
+	/* Used in vis to avoid redundant rendering */
+	uint64_t render_last_guard_key;
 };
 
 /*

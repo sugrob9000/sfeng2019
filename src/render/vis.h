@@ -7,6 +7,7 @@
 #include "render.h"
 #include "material.h"
 #include "model.h"
+#include <set>
 
 void init_vis ();
 void vis_initialize_world (const std::string& path);
@@ -63,19 +64,23 @@ struct oct_node
 	void make_leaf ();
 
 	void check_visibility (const vec3& cam) const;
-	void query_entity (const e_base* e);
-
 	void render_tris (t_render_stage s = SHADE_FINAL) const;
+
+	std::set<e_base*> entities_inside;
+	void requery_entity (e_base* e, const t_bound_box& b);
 
 	oct_node ();
 	~oct_node ();
 };
 
 extern std::vector<const oct_node*> visible_leaves;
-extern std::vector<const e_base*> visible_entities;
 
 void vis_render_bbox (const t_bound_box& b);
+
 void vis_fill_visible (const vec3& cam);
+void vis_requery_entity (e_base* e);
+void draw_visible_entities (t_render_stage s);
+
 void vis_debug_renders ();
 
 #endif // VIS_H

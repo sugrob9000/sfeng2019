@@ -68,3 +68,5 @@ COMMAND (map)
 COMMAND (vis_worldwireframe)
 COMMAND (vis_occluders)
 COMMAND (vis_leaves)
+COMMAND (vis_leaves_nodepth)
+

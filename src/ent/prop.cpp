@@ -5,6 +5,7 @@
 SIG_HANDLER (prop, setpos)
 {
 	atovec3(arg, ent->pos);
+	ent->moved();
 }
 
 FILL_IO_DATA (prop)
@@ -41,5 +42,8 @@ void e_prop::render (t_render_stage s) const
 
 t_bound_box e_prop::get_bbox () const
 {
-	return model->bbox;
+	t_bound_box r = model->bbox;
+	r.start += pos;
+	r.end += pos;
+	return r;
 }

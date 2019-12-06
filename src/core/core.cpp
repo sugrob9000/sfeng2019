@@ -9,7 +9,7 @@
 
 bool must_quit;
 int exit_code;
-long long tick;
+unsigned long long tick;
 
 void init_core ()
 {
@@ -122,6 +122,7 @@ e_base* read_single_entity (std::istream& is)
 			break;
 	}
 	ent->apply_keyvals(kv);
+	ent->moved();
 
 	return ent;
 }

@@ -113,8 +113,7 @@ void render_all ()
 		node->render_tris(SHADE_FINAL);
 	}
 	glPopMatrix();
-	for (const e_base* e: ents.vec)
-		e->render(SHADE_FINAL);
+	draw_visible_entities(SHADE_FINAL);
 
 	vis_debug_renders();
 

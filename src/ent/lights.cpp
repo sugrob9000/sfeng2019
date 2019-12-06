@@ -147,12 +147,8 @@ void compose_add_depth_map ()
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
 	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	for (const e_base* e: ents.vec) {
-		glLoadIdentity();
-		e->render(LIGHTING_SSPACE);
-	}
-	glPopMatrix();
+	glLoadIdentity();
+	draw_visible_entities(LIGHTING_SSPACE);
 }
 
 void compute_lighting ()

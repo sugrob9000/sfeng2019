@@ -26,6 +26,9 @@ constexpr int occ_fbo_size = 256;
 std::vector<t_world_triangle> world_tris;
 t_bound_box world_bounds_override;
 
+
+std::vector<const oct_node*> visible_leaves;
+
 /*
  * The ID of the octant in which point is
  * if the midpoint of the bbox is origin
@@ -131,6 +134,8 @@ void oct_node::render_tris (t_render_stage s) const
 
 oct_node::oct_node ()
 {
+	// violate the invariant for now
+	// - it will only be kept after building
 	is_leaf = true;
 	new (&bucket) std::vector<int>;
 }
@@ -147,10 +152,6 @@ oct_node::~oct_node ()
 }
 
 
-
-std::vector<const oct_node*> visible_leaves;
-
-void vis_render_bbox (const t_bound_box& box);
 void oct_node::check_visibility (const vec3& cam) const
 {
 	if (is_leaf) {
@@ -200,6 +201,68 @@ void vis_fill_visible (const vec3& cam)
 	root->check_visibility(cam);
 }
 
+
+
+
+void oct_node::requery_entity (e_base* e, const t_bound_box& b)
+{
+	auto iter = entities_inside.find(e);
+	uint8_t before = (iter != entities_inside.end());
+	uint8_t now = b.intersects(actual_bounds);
+
+	switch ((before >> 1) | now) {
+	case 0:
+		// was not in before, did not enter.
+		// absolutely nothing to do
+		return;
+	case 1:
+		// entered
+		entities_inside.insert(e);
+		break;
+	case 2:
+		// exited
+		entities_inside.erase(iter);
+		break;
+	case 3:
+		// was in before and did not exit,
+		// but might have exited or entered a child
+		break;
+	}
+	if (!is_leaf) {
+		for (int i = 0; i < 8; i++)
+			children[i]->requery_entity(e, b);
+	}
+}
+
+void vis_requery_entity (e_base* e)
+{
+	t_bound_box b = e->get_bbox();
+	if (b.volume() == 0.0)
+		return;
+	root->requery_entity(e, e->get_bbox());
+}
+
+/*
+ * When we walk through each leaf's entities like this,
+ *   there is redundancy (multiple leaves that all touch
+ *   the same entities and that we see).
+ * So, define a guard key that is (very close to) unique
+ *   for each invocation, and use it to detect redundancy
+ */
+void draw_visible_entities (t_render_stage s)
+{
+	static uint64_t guard_key = 0;
+	guard_key++;
+
+	for (const oct_node* l: visible_leaves) {
+		for (e_base* e: l->entities_inside) {
+			if (e->render_last_guard_key == guard_key)
+				continue;
+			e->render_last_guard_key = guard_key;
+			e->render(s);
+		}
+	}
+}
 
 
 void read_world_vis_data (std::string path)
@@ -423,22 +486,13 @@ void init_vis ()
 }
 
 bool debug_draw_wireframe = false;
-COMMAND_ROUTINE (vis_worldwireframe)
-{
-	debug_draw_wireframe = (ev == PRESS);
-}
-
 bool debug_draw_occ_planes = false;
-COMMAND_ROUTINE (vis_occluders)
-{
-	debug_draw_occ_planes = (ev == PRESS);
-}
-
 bool debug_draw_leaves = false;
-COMMAND_ROUTINE (vis_leaves)
-{
-	debug_draw_leaves = (ev == PRESS);
-}
+bool debug_draw_leaves_nodepth = false;
+COMMAND_SET_BOOL(vis_worldwireframe, debug_draw_wireframe)
+COMMAND_SET_BOOL(vis_occluders, debug_draw_occ_planes)
+COMMAND_SET_BOOL(vis_leaves, debug_draw_leaves);
+COMMAND_SET_BOOL(vis_leaves_nodepth, debug_draw_leaves_nodepth);
 
 void vis_debug_renders ()
 {
@@ -468,7 +522,10 @@ void vis_debug_renders ()
 
 	if (debug_draw_leaves) {
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		glDisable(GL_DEPTH_TEST);
+
+		if (debug_draw_leaves_nodepth)
+			glDisable(GL_DEPTH_TEST);
+
 		glDisable(GL_CULL_FACE);
 		glLineWidth(1.5);
 		glColor4f(1.0, 0.0, 0.0, 0.3);

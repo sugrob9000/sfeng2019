@@ -1,5 +1,6 @@
 #include "entity.h"
 #include "error.h"
+#include "render/vis.h"
 
 t_ent_registry ent_reg;
 
@@ -21,6 +22,11 @@ void e_base::on_event (const std::string& event) const
 		return;
 	for (const t_signal& s: i->second)
 		add_signal(s);
+}
+
+void e_base::moved ()
+{
+	vis_requery_entity(this);
 }
 
 void e_base::apply_basic_keyvals (const t_ent_keyvals& kv)
@@ -59,14 +65,10 @@ t_entities ents;
 e_base* t_entities::spawn (std::string type)
 {
 	f_ent_spawner spawner = ent_reg[type];
-
 	if (spawner == nullptr)
 		return nullptr;
-
 	e_base* ent = spawner();
-
 	vec.push_back(ent);
-
 	return ent;
 }
 

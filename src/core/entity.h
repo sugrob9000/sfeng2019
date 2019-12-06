@@ -48,7 +48,8 @@ class e_base
 
 	/*
 	 * Updates the engine's idea of where the entity is, for
-	 * purposes such as vis
+	 * purposes such as vis. Call this on an entity whenever its
+	 * output of get_bbox() changes
 	 */
 	void moved ();
 

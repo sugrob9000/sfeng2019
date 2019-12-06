@@ -106,13 +106,9 @@ void render_all ()
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
 	glMatrixMode(MTX_MODEL);
-	glPushMatrix();
 	draw_sky();
-	for (const oct_node* node: visible_leaves) {
-		glLoadIdentity();
+	for (const oct_node* node: visible_leaves)
 		node->render_tris(SHADE_FINAL);
-	}
-	glPopMatrix();
 	draw_visible_entities(SHADE_FINAL);
 
 	vis_debug_renders();

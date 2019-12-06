@@ -66,7 +66,7 @@ struct oct_node
 	void check_visibility (const vec3& cam) const;
 	void render_tris (t_render_stage s = SHADE_FINAL) const;
 
-	std::set<e_base*> entities_inside;
+	std::vector<e_base*> entities_inside;
 	void requery_entity (e_base* e, const t_bound_box& b);
 
 	oct_node ();

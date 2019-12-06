@@ -206,24 +206,25 @@ void vis_fill_visible (const vec3& cam)
 
 void oct_node::requery_entity (e_base* e, const t_bound_box& b)
 {
-	auto iter = entities_inside.find(e);
-	uint8_t before = (iter != entities_inside.end());
+	auto p = std::find(entities_inside.begin(), entities_inside.end(), e);
+	uint8_t before = (p != entities_inside.end());
 	uint8_t now = b.intersects(actual_bounds);
 
-	switch ((before >> 1) | now) {
-	case 0:
+	switch (before * 2 + now) {
+	case 0b00:
 		// was not in before, did not enter.
 		// absolutely nothing to do
 		return;
-	case 1:
+	case 0b01:
 		// entered
-		entities_inside.insert(e);
+		entities_inside.push_back(e);
 		break;
-	case 2:
+	case 0b10:
 		// exited
-		entities_inside.erase(iter);
+		*p = entities_inside.back();
+		entities_inside.pop_back();
 		break;
-	case 3:
+	case 0b11:
 		// was in before and did not exit,
 		// but might have exited or entered a child
 		break;
@@ -243,11 +244,13 @@ void vis_requery_entity (e_base* e)
 }
 
 /*
- * When we walk through each leaf's entities like this,
- *   there is redundancy (multiple leaves that all touch
- *   the same entities and that we see).
- * So, define a guard key that is (very close to) unique
- *   for each invocation, and use it to detect redundancy
+ * When we walk the entities in the leaves like this, there
+ *   is redundancy (multiple leaves that we see will touch
+ *   the same entity), so we need to ensure each entity is
+ *   drawn once.
+ * So, define a guard key that is unique for each invocation
+ *   of the function and use it to determine if we have already
+ *   seen any particular entity
  */
 void draw_visible_entities (t_render_stage s)
 {
@@ -489,8 +492,8 @@ bool debug_draw_wireframe = false;
 bool debug_draw_occ_planes = false;
 bool debug_draw_leaves = false;
 bool debug_draw_leaves_nodepth = false;
-COMMAND_SET_BOOL(vis_worldwireframe, debug_draw_wireframe)
-COMMAND_SET_BOOL(vis_occluders, debug_draw_occ_planes)
+COMMAND_SET_BOOL(vis_worldwireframe, debug_draw_wireframe);
+COMMAND_SET_BOOL(vis_occluders, debug_draw_occ_planes);
 COMMAND_SET_BOOL(vis_leaves, debug_draw_leaves);
 COMMAND_SET_BOOL(vis_leaves_nodepth, debug_draw_leaves_nodepth);
 
@@ -528,10 +531,13 @@ void vis_debug_renders ()
 
 		glDisable(GL_CULL_FACE);
 		glLineWidth(1.5);
-		glColor4f(1.0, 0.0, 0.0, 0.3);
 
-		for (const oct_node* leaf: visible_leaves)
+		for (const oct_node* leaf: visible_leaves) {
+			float intensity = leaf->entities_inside.size() * 0.01;
+			intensity = std::min(intensity, 1.0f);
+			glColor4f(intensity, 0.0, 0.0, 0.3);
 			vis_render_bbox(leaf->actual_bounds);
+		}
 
 		glLineWidth(1.0);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

@@ -27,20 +27,25 @@ void t_model::load (const t_model_mem& verts)
 
 void t_model_mem::calc_bbox ()
 {
-	// just in case, make sure 0 is in
-	bbox = { { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } };
+	if (verts.empty())
+		return;
+
+	float inf = 10e9;
+	bbox = { vec3(-inf), vec3(inf) };
+
 	for (const t_vertex& v: verts)
 		bbox.update(v.pos);
+
 	// just in case, extend slightly
 	bbox.start -= { 0.5, 0.5, 0.5 };
 	bbox.end += { 0.5, 0.5, 0.5 };
 }
 
-bool t_model_mem::load_obj (std::string path)
+void t_model_mem::load_obj (std::string path)
 {
 	std::ifstream f(path);
 	if (!f)
-		return false;
+		fatal("Could not open OBJ %s", path.c_str());
 
 	std::vector<vec3> points;
 	std::vector<vec3> normals;
@@ -107,10 +112,8 @@ bool t_model_mem::load_obj (std::string path)
 		}
 	}
 
-	calc_bbox();
 	assert(verts.size() % 3 == 0);
-
-	return true;
+	calc_bbox();
 }
 
 void t_model_mem::dump_rvd (std::string path) const
@@ -123,13 +126,13 @@ void t_model_mem::dump_rvd (std::string path) const
 	f.write((char*) verts.data(), vertnum * sizeof(t_vertex));
 }
 
-bool t_model_mem::load_rvd (std::string path)
+void t_model_mem::load_rvd (std::string path)
 {
 	std::ifstream f(path, std::ios::binary);
 	verts.clear();
 
 	if (!f)
-		return false;
+		fatal("Could not open RVD %s", path.c_str());
 
 	int32_t vertnum = -1;
 
@@ -140,17 +143,13 @@ bool t_model_mem::load_rvd (std::string path)
 
 	f.read((char*) &vertnum, sizeof(vertnum));
 
-	if (filesize != vertnum * sizeof(t_vertex) + sizeof(vertnum))
-		return false;
-
 	assert(vertnum % 3 == 0);
+	assert(filesize == sizeof(vertnum) + vertnum * sizeof(t_vertex));
 
 	verts.resize(vertnum);
 	f.read((char*) verts.data(), vertnum * sizeof(t_vertex));
 
 	calc_bbox();
-
-	return true;
 }
 
 COMMAND_ROUTINE (obj2rvd)

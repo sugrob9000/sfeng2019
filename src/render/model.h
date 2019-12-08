@@ -30,12 +30,12 @@ struct t_model_mem
 	t_bound_box bbox;
 
 	void calc_bbox ();
-	bool load_obj (std::string path);
+	void load_obj (std::string path);
 	/*
 	 * Binary file format that stores the number of vertices,
 	 * then vertices themselves
 	 */
-	bool load_rvd (std::string path);
+	void load_rvd (std::string path);
 	void dump_rvd (std::string path) const;
 };
 

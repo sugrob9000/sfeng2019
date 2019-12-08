@@ -47,9 +47,8 @@ t_bound_box octant_bound (t_bound_box parent, uint8_t octant_id)
 {
 	vec3 mid = (parent.start + parent.end) * 0.5;
 	t_bound_box r = parent;
-	(octant_id & 1 ? r.start : r.end).x = mid.x;
-	(octant_id & 2 ? r.start : r.end).y = mid.y;
-	(octant_id & 4 ? r.start : r.end).z = mid.z;
+	for (int i = 0; i < 3; i++)
+		(octant_id & (1 << i) ? r.start : r.end)[i] = mid[i];
 	return r;
 }
 
@@ -209,7 +208,7 @@ void oct_node::requery_entity (e_base* e, const t_bound_box& b)
 	uint8_t before = (p != entities_inside.end());
 	uint8_t now = b.intersects(actual_bounds);
 
-	switch (before * 2 + now) {
+	switch (now | (before << 1)) {
 	case 0b00:
 		// was not in before, did not enter.
 		// absolutely nothing to do
@@ -237,8 +236,6 @@ void oct_node::requery_entity (e_base* e, const t_bound_box& b)
 void vis_requery_entity (e_base* e)
 {
 	t_bound_box b = e->get_bbox();
-	if (b.volume() == 0.0)
-		return;
 	root->requery_entity(e, e->get_bbox());
 }
 

@@ -15,7 +15,7 @@ void t_model::load (const t_model_mem& verts)
 	glNewList(display_list_id, GL_COMPILE);
 	glBegin(GL_TRIANGLES);
 	for (const t_vertex& v: verts.verts) {
-		glNormal3f(v.norm.x, v.norm.y, v.norm.z);
+		glNormal3f(v.norm.x, -v.norm.y, v.norm.z);
 		glTexCoord2f(v.tex.u, v.tex.v);
 		glVertex3f(v.pos.x, v.pos.y, v.pos.z);
 	}

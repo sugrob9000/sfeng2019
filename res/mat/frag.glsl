@@ -1,6 +1,7 @@
 #version 130
 
 uniform sampler2D map_diffuse;
+uniform sampler2D map_normal;
 
 in vec2 tex_crd;
 in vec3 world_normal;
@@ -12,5 +13,5 @@ vec4 final_shade ()
 
 vec3 surface_normal ()
 {
-	return vec3(0.0, 0.0, 1.0);
+	return normalize(texture(map_normal, tex_crd).rgb * 2 - 1);
 }

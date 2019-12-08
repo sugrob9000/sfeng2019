@@ -528,10 +528,13 @@ void vis_debug_renders ()
 		glDisable(GL_CULL_FACE);
 		glLineWidth(1.5);
 
+		glColor3f(1, 0, 0);
 		for (const oct_node* leaf: visible_leaves) {
-			float intensity = leaf->entities_inside.size() * 0.01;
-			intensity = std::min(intensity, 1.0f);
-			glColor4f(intensity, 0.0, 0.0, 0.3);
+			DEBUG_EXPR(leaf->entities_inside[0]->name);
+			if (leaf->entities_inside.empty())
+				glColor4f(1.0, 0.0, 0.0, 1.0);
+			else
+				glColor4f(0.8, 0.0, 0.0, 1.0);
 			vis_render_bbox(leaf->actual_bounds);
 		}
 

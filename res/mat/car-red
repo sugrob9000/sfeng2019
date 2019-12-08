@@ -1,3 +1,4 @@
 FRAG frag
 VERT common/vert_identity
 diffuse red.tga
+normal car-normal.tga

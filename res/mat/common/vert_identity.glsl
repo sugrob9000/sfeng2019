@@ -13,7 +13,7 @@ void main ()
 	gl_Position = gl_ProjectionMatrix * gl_ModelViewMatrix * gl_Vertex;
 
 	tex_crd = gl_MultiTexCoord0.st;
-	world_normal = gl_Normal.xyz;
-	world_pos = gl_Vertex.xyz;
+	world_normal = (gl_ModelViewMatrix * vec4(gl_Normal.xyz, 0.0)).xyz;
+	world_pos = (gl_ModelViewMatrix * gl_Vertex).xyz;
 }
 

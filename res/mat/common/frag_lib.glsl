@@ -25,8 +25,23 @@ void main ()
 	case LIGHTING_SSPACE:
 		// get the surface normal specified by
 		// user shader and (TODO) calculate lighting
-		vec3 norm = surface_normal();
-		gl_FragColor = vec4(norm, 1.0);
+		vec3 z = vec3(0.0, 0.0, 1.0);
+		float c = dot(z, world_normal);
+		float c1 = 1 - c;
+		float ang = acos(c);
+		vec3 axis = cross(z, world_normal);
+		axis *= vec3(1.0, -1.0, 1.0);
+		float s = sin(ang);
+		float x2 = axis.x * axis.x;
+		float y2 = axis.y * axis.y;
+		float z2 = axis.z * axis.z;
+		mat3 TBN = mat3(
+				vec3(c + x2 * c1, axis.x * axis.y * c1 - axis.z * s, axis.x * axis.z * c1 + axis.y * s),
+				vec3(axis.y * axis.x * c1 + axis.z * s, c + y2 * c1, axis.y * axis.z * c1 - axis.z * s),
+				vec3(axis.z * axis.x * c1 - axis.y * s, axis.z * axis.y * c1 + axis.x * s, c + z2 * c1)
+			);
+		vec3 norm = TBN * surface_normal();
+		gl_FragColor = vec4((norm + vec3(1))*0.5, 1.0);
 		break;
 
 	case SHADE_FINAL:

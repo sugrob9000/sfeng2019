@@ -127,8 +127,8 @@ void render_all ()
 	sprintf(str, "%i fps", (int) round(1.0 / last_frame_sec));
 	draw_text(str, -1, -1 + 0.06, 0.025, 0.05);
 
-	// debug_texture_onscreen(sspace_fbo_texture, 0.0, 0.0);
-	// debug_texture_onscreen(lspace_fbo_texture, -1.0, 0.0);
+	debug_texture_onscreen(sspace_fbo_texture, 0.0, 0.0);
+	debug_texture_onscreen(lspace_fbo_texture, -1.0, 0.0);
 
 	if (console_active)
 		console_render();

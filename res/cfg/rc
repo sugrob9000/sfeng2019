@@ -7,7 +7,9 @@ bind W cam_move f
 bind A cam_move l
 bind S cam_move b
 bind D cam_move r
+
 bind Left_Shift cam_accelerate
+bind Left_Ctrl cam_decelerate
 
 bind Z vis_occluders
 bind X vis_worldwireframe

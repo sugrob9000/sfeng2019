@@ -105,9 +105,9 @@ void oct_node::make_leaf ()
 
 	leaf.mat_buckets.reserve(m.size());
 
-	for (std::pair<t_material* const, std::vector<t_vertex>>& p: m) {
+	for (const auto& p: m) {
 		t_material* mat = p.first;
-		std::vector<t_vertex>& vertices = p.second;
+		const std::vector<t_vertex>& vertices = p.second;
 
 		unsigned int dlist = glGenLists(1);
 		glNewList(dlist, GL_COMPILE);
@@ -203,7 +203,6 @@ void vis_fill_visible (const vec3& cam)
 
 
 
-
 void oct_node::requery_entity (e_base* e, const t_bound_box& b)
 {
 	auto p = std::find(entities_inside.begin(), entities_inside.end(), e);
@@ -250,7 +249,7 @@ void vis_requery_entity (e_base* e)
  *   drawn once.
  * So, define a guard key that is unique for each invocation
  *   of the function and use it to determine if we have already
- *   seen any particular entity
+ *   seen any particular entity in this invocation
  */
 void draw_visible_entities (t_render_stage s)
 {
@@ -491,7 +490,7 @@ void init_vis ()
 bool debug_draw_wireframe = false;
 bool debug_draw_occ_planes = false;
 bool debug_draw_leaves = false;
-bool debug_draw_leaves_nodepth = false;
+bool debug_draw_leaves_nodepth = true;
 COMMAND_SET_BOOL(vis_worldwireframe, debug_draw_wireframe);
 COMMAND_SET_BOOL(vis_occluders, debug_draw_occ_planes);
 COMMAND_SET_BOOL(vis_leaves, debug_draw_leaves);

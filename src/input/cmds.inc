@@ -39,6 +39,7 @@ COMMAND (exec)
  */
 COMMAND (cam_move)
 COMMAND (cam_accelerate)
+COMMAND (cam_decelerate)
 
 /*
  * Set app window size

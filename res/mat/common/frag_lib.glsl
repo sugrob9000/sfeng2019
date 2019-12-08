@@ -15,6 +15,8 @@ uniform uint stage;
 in vec3 world_normal;
 in vec3 world_pos;
 
+in vec3 lspace_pos;
+
 void main ()
 {
 	switch (stage) {

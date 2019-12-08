@@ -18,13 +18,22 @@ constexpr short cam_move_f = 0;
 constexpr short cam_move_b = 1;
 constexpr short cam_move_l = 2;
 constexpr short cam_move_r = 3;
-bool cam_speedup = false;
 bool cam_move_flags[4];
 t_camera camera;
 
+bool cam_speedup = false;
+bool cam_slowdown = false;
+COMMAND_SET_BOOL (cam_accelerate, cam_speedup);
+COMMAND_SET_BOOL (cam_decelerate, cam_slowdown);
+
 void upd_camera_pos ()
 {
-	float speed = cam_speedup ? 10.0 : 4.0;
+	float speed = 4.0;
+	if (cam_speedup)
+		speed *= 2.5;
+	if (cam_slowdown)
+		speed *= 0.4;
+
 	vec3 delta;
 	auto& flags = cam_move_flags;
 	t_camera& cam = camera;
@@ -73,11 +82,6 @@ COMMAND_ROUTINE (cam_move)
 		flags[cam_move_r] = f;
 		break;
 	}
-}
-
-COMMAND_ROUTINE (cam_accelerate)
-{
-	cam_speedup = (ev == PRESS);
 }
 
 void draw_sky ();
@@ -181,6 +185,7 @@ void init_render ()
 		warning("Failed to set adaptive vsync, setting regular");
 		SDL_GL_SetSwapInterval(1);
 	}
+	glClearColor(1.0, 1.0, 1.0, 1.0);
 
 	gl_limits_sanity_check();
 
@@ -360,13 +365,12 @@ void draw_sky ()
 void debug_texture_onscreen (GLuint texture, float cx, float cy)
 {
 	glUseProgram(0);
-	glEnable(GL_TEXTURE_2D);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture);
+	glEnable(GL_TEXTURE_2D);
 
 	glPushMatrix();
 	glTranslatef(cx, cy, 0.0);
-
 	glColor4f(1.0, 1.0, 1.0, 1.0);
 	glBegin(GL_QUADS);
 	glTexCoord2i(0, 0);
@@ -395,7 +399,7 @@ COMMAND_ROUTINE (windowsize)
 		return;
 	int w = std::atoi(args[0].c_str());
 	int h = std::atoi(args[1].c_str());
-	if (w == 0 || h == 0)
+	if (w <= 0 || h <= 0)
 		return;
 
 	resize_window(w, h);

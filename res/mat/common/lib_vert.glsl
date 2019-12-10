@@ -1,6 +1,6 @@
 #version 130
 
-/* The user shade which links against the lib should implement this */
+/* The user shader which links against the lib should implement this */
 vec4 vertex_transform (vec4 input);
 
 out vec2 tex_crd;

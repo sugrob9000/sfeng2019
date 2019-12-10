@@ -301,7 +301,7 @@ void vis_initialize_world (const std::string& path)
 	glEnd();
 	glEndList();
 
-	root->build(world_bounds_override, 0);
+	root->build(world.bbox, 0);
 }
 
 
@@ -377,6 +377,7 @@ COMMAND_SET_BOOL(vis_leaves_nodepth, debug_draw_leaves_nodepth);
 void vis_debug_renders ()
 {
 	glUseProgram(0);
+
 	if (debug_draw_wireframe) {
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		glDisable(GL_CULL_FACE);
@@ -408,9 +409,11 @@ void vis_debug_renders ()
 
 		glDisable(GL_CULL_FACE);
 		glLineWidth(1.5);
-		glColor4f(0.0, 0.0, 0.0, 0.3);
-		for (const oct_node* leaf: visible_leaves)
+		for (const oct_node* leaf: visible_leaves) {
+			float r = leaf->entities_inside.empty() ? 0.0 : 1.0;
+			glColor4f(r, 0.0, 0.0, 0.3);
 			vis_render_bbox(leaf->actual_bounds);
+		}
 
 		glLineWidth(1.0);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

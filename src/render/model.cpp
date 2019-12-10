@@ -2,20 +2,27 @@
 #include "model.h"
 #include "render.h"
 #include "material.h"
+#include "resource.h"
 #include "input/cmds.h"
 #include <cassert>
 #include <map>
 
-void send_triangles (const std::vector<t_vertex> verts)
+void t_model_mem::gl_send_triangle (int tri_id) const
 {
-	int n = verts.size();
-	for (int i = 0; i < n; i += 3) {
-		for (int j = 0; j < 3; j++) {
-			const t_vertex& v = verts[i + j];
-			glNormal3f(v.norm.x, v.norm.y, v.norm.z);
-			glTexCoord2f(v.tex.u, v.tex.v);
-			glVertex3f(v.pos.x, v.pos.y, v.pos.z);
-		}
+	for (int i = 0; i < 3; i++) {
+		int idx = triangles[tri_id].index[i];
+
+		const vec3& p = vertices[idx].v.pos;
+		const vec3& n = vertices[idx].v.norm;
+		const t_texcrd& t = vertices[idx].v.tex;
+		const vec3& tg = vertices[idx].tangent;
+		const vec3& b = vertices[idx].bitangent;
+
+		glNormal3f(n.x, n.y, n.z);
+		glVertexAttrib3f(attrib_loc_tangent, tg.x, tg.y, tg.z);
+		glVertexAttrib3f(attrib_loc_bitangent, b.x, b.y, b.z);
+		glTexCoord2f(t.u, 1.0 - t.v);
+		glVertex3f(p.x, p.y, p.z);
 	}
 }
 
@@ -29,23 +36,16 @@ void t_model::load (const t_model_mem& src)
 	display_list_id = glGenLists(1);
 	glNewList(display_list_id, GL_COMPILE);
 	glBegin(GL_TRIANGLES);
-	for (int idx: src.indices) {
-		const vec3& p = src.vertices[idx].v.pos;
-		const vec3& n = src.vertices[idx].v.norm;
-		const t_texcrd& t = src.vertices[idx].v.tex;
-		const vec3& tg = src.vertices[idx].tangent;
-		const vec3& bitg = src.vertices[idx].bitangent;
-		glNormal3f(n.x, n.y, n.z);
-		glVertexAttrib3f(attrib_loc_tangent, tg.x, tg.y, tg.z);
-		glVertexAttrib3f(attrib_loc_bitangent, bitg.x, bitg.y, bitg.z);
-		glTexCoord2f(t.u, 1.0 - t.v);
-		glVertex3f(p.x, p.y, p.z);
-	}
+	int n = src.triangles.size();
+	for (int i = 0; i < n; i++)
+		src.gl_send_triangle(i);
 	glEnd();
 	glEndList();
 
 	bbox = src.bbox;
 }
+
+
 
 void t_model_mem::calc_bbox ()
 {
@@ -73,6 +73,8 @@ void t_model_mem::load_obj (std::string path)
 
 	std::map<t_vertex, int> vert_indices;
 
+	t_material* current_material = mat_none;
+
 	auto add_face = [&] (int* v, int* n, int* t)
 	-> void {
 		const vec3& v0 = points[v[0]];
@@ -81,35 +83,31 @@ void t_model_mem::load_obj (std::string path)
 		const t_texcrd& uv0 = texcrds[t[0]];
 		const t_texcrd& uv1 = texcrds[t[1]];
 		const t_texcrd& uv2 = texcrds[t[2]];
-
 		vec3 d_pos1 = v1 - v0;
 		vec3 d_pos2 = v2 - v0;
 		t_texcrd d_uv1 = { uv1.u - uv0.u, uv1.v - uv0.v };
 		t_texcrd d_uv2 = { uv2.u - uv0.u, uv2.v - uv0.v };
-
 		vec3 tangent = d_pos1*d_uv1.v - d_pos2*d_uv1.v;
 		vec3 bitangent = d_pos2*d_uv1.u - d_pos1*d_uv2.u;
 
+		t_triangle tri = { { }, current_material };
 		for (int i = 0; i < 3; i++) {
 			t_vertex key = { points[v[i]],
 			                 normals[n[i]],
 					 texcrds[t[i]] };
 			auto iter = vert_indices.find(key);
-			int idx;
-
 			if (iter == vert_indices.end()) {
-				idx = vertices.size();
+				tri.index[i] = vertices.size();
 				vertices.push_back(
 					{ key, tangent, bitangent });
-				vert_indices[key] = idx;
+				vert_indices[key] = tri.index[i];
 			} else {
-				idx = iter->second;
-				vertices[idx].tangent += tangent;
-				vertices[idx].bitangent += bitangent;
+				tri.index[i] = iter->second;
+				vertices[tri.index[i]].tangent += tangent;
+				vertices[tri.index[i]].bitangent += bitangent;
 			}
-
-			indices.push_back(idx);
 		}
+		triangles.push_back(tri);
 	};
 
 	auto pack =
@@ -125,9 +123,7 @@ void t_model_mem::load_obj (std::string path)
 		if (line.size() < 2)
 			continue;
 
-		uint16_t p = pack(line[0], line[1]);
-
-		switch (p) {
+		switch (pack(line[0], line[1])) {
 		case pack('v', ' '): {
 			// vertex
 			float x, y, z;
@@ -166,6 +162,12 @@ void t_model_mem::load_obj (std::string path)
 			add_face(v, n, t);
 			break;
 		}
+		case pack('u', 's'): {
+			// usemtl - update current material
+			char buf[line.length()];
+			sscanf(line.c_str(), "%*s %s", buf);
+			current_material = get_material(buf);
+		}
 		default: {
 			// something in the format we are unaware of
 			continue;
@@ -179,17 +181,7 @@ void t_model_mem::load_obj (std::string path)
 	}
 
 	calc_bbox();
-
 }
-
-void t_model_mem::dump_rvd (std::string path) const
-{
-}
-
-void t_model_mem::load_rvd (std::string path)
-{
-}
-
 
 bool operator< (const t_texcrd& a, const t_texcrd& b)
 {
@@ -232,5 +224,6 @@ COMMAND_ROUTINE (obj2rvd)
 
 	t_model_mem model;
 	model.load_obj(in);
-	model.dump_rvd(out);
+	fatal("RVD not reimplemented");
+	// model.dump_rvd(out);
 }

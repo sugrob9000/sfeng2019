@@ -25,36 +25,23 @@ void vis_initialize_world (const std::string& path);
  *   into a single display list)
  */
 
-struct t_world_triangle
-{
-	t_vertex v[3];
-	t_material* mat;
-};
-
 struct oct_node
 {
-	/* Triangles within this node with the same material */
+	/*
+	 * Triangles within this node with the same material.
+	 * The vector is empty in non-leaves!
+	 */
 	struct mat_group {
 		t_material* mat;
 		GLuint display_list;
 	};
+	std::vector<mat_group> mat_buckets;
 
-	struct leaf_data {
-		std::vector<mat_group> mat_buckets;
-		std::vector<e_base*> entities;
-	};
-
-	union {
-		/*
-		 * Indices into the internal world triangle array.
-		 * In non-leaves, after tree has been built,
-		 *   is in a valid state and empty
-		 */
-		std::vector<int> bucket;
-
-		/* In leaves, this is in a valid state */
-		leaf_data leaf;
-	};
+	/*
+	 * Indices into the triangle array of internal world model.
+	 * Empty after tree has been built!
+	 */
+	std::vector<int> bucket;
 
 	bool is_leaf;
 	oct_node* children[8];

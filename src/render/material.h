@@ -60,10 +60,11 @@ t_texture_id load_texture (std::string path);
 
 int get_surface_gl_format (SDL_Surface* s);
 
-/*
- * Material that draws nothing, for various edge cases
- */
-extern t_material mat_none;
+/* Material that draws nothing, for various edge cases */
+extern t_material* mat_none;
+
+/* Not an actual material, used in vis for occlusion planes */
+extern t_material* mat_occlude;
 
 /*
  * Discard previous material info to assure that the next

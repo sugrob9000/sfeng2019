@@ -2,7 +2,7 @@
 #define MODEL_H
 
 #include "inc_general.h"
-#include "inc_gl.h"
+#include "material.h"
 #include "core/core.h"
 #include <vector>
 
@@ -23,8 +23,15 @@ struct t_vertex
 bool operator< (const t_texcrd& a, const t_texcrd& b);
 bool operator< (const t_vertex& a, const t_vertex& b);
 
+struct t_triangle
+{
+	int index[3];
+	t_material* material;
+};
+
 /*
- * An in-memory representation of a model
+ * An in-memory representation of a model for loading,
+ * conversion, etc. but not for actual rendering.
  */
 struct t_model_mem
 {
@@ -34,20 +41,21 @@ struct t_model_mem
 		vec3 bitangent;
 	};
 	std::vector<vert_internal> vertices;
-
-	std::vector<int> indices;
+	std::vector<t_triangle> triangles;
 
 	t_bound_box bbox;
 
 	void calc_bbox ();
 	void load_obj (std::string path);
 
-	void load_rvd (std::string path);
-	void dump_rvd (std::string path) const;
+	const t_vertex& get_vertex (int tri, int vert) const
+	{ return vertices[triangles[tri].index[vert]].v; }
+
+	void gl_send_triangle (int tri_id) const;
 };
 
 /*
- * A representation of a model which is suitable for rendering
+ * The representation of a model which is efficient to render
  */
 struct t_model
 {
@@ -56,9 +64,7 @@ struct t_model
 	t_bound_box bbox;
 
 	void render () const;
-	void load (const t_model_mem& verts);
+	void load (const t_model_mem& src);
 };
-
-void send_triangles (const std::vector<t_vertex> verts);
 
 #endif // MODEL_H

@@ -52,11 +52,16 @@ t_shader_id compile_glsl (std::string path, GLenum type)
 	return 0;
 }
 
-t_material mat_none;
+t_material mat_none_instance;
+t_material* mat_none = &mat_none_instance;
+
+t_material mat_occlude_instance;
+t_material* mat_occlude = &mat_occlude_instance;
+
 void init_materials ()
 {
-	mat_none.program = 0;
-	cache_mat[""] = &mat_none;
+	cache_mat[""] = mat_none;
+	cache_mat["OCCLUDE"] = mat_occlude;
 }
 
 void t_material::load (std::string path)

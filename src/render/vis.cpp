@@ -23,9 +23,8 @@ GLuint occ_queries[8];
  */
 constexpr int occ_fbo_size = 256;
 
-std::vector<t_world_triangle> world_tris;
 t_bound_box world_bounds_override;
-
+t_model_mem world;
 
 std::vector<const oct_node*> visible_leaves;
 
@@ -57,7 +56,7 @@ void oct_node::build (t_bound_box bounds, int level)
 	// bounds must include the triangles entirely
 	for (int d: bucket) {
 		for (int i = 0; i < 3; i++)
-			bounds.update(world_tris[d].v[i].pos);
+			bounds.update(world.get_vertex(d, i).pos);
 	}
 	actual_bounds = bounds;
 
@@ -75,7 +74,7 @@ void oct_node::build (t_bound_box bounds, int level)
 	for (int d: bucket) {
 		vec3 tri_mid(0.0);
 		for (int i = 0; i < 3; i++)
-			tri_mid += world_tris[d].v[i].pos;
+			tri_mid += world.get_vertex(d, i).pos;
 		tri_mid /= 3.0;
 		children[which_octant(bb_mid, tri_mid)]->bucket.push_back(d);
 	}
@@ -88,40 +87,35 @@ void oct_node::build (t_bound_box bounds, int level)
 
 void oct_node::make_leaf ()
 {
-	std::map<t_material*, std::vector<t_vertex>> m;
+	std::map<t_material*, std::vector<int>> m;
 
-	for (const int& d: bucket) {
-		for (int i = 0; i < 3; i++) {
-			m[world_tris[d].mat].push_back(
-				world_tris[d].v[i]);
-		}
-	}
+	for (const int& d: bucket)
+		m[world.triangles[d].material].push_back(d);
 
 	// the bucket is in union with leaf data
 	// so we have to destroy and construct them manually
-	bucket.~vector();
-	new (&leaf) leaf_data;
 
-	leaf.mat_buckets.reserve(m.size());
+	mat_buckets.reserve(m.size());
 
 	for (const auto& p: m) {
 		t_material* mat = p.first;
-		const std::vector<t_vertex>& vertices = p.second;
+		const std::vector<int>& tri_ids = p.second;
 
 		unsigned int dlist = glGenLists(1);
 		glNewList(dlist, GL_COMPILE);
 		glBegin(GL_TRIANGLES);
-		send_triangles(vertices);
+		for (int i: tri_ids)
+			world.gl_send_triangle(i);
 		glEnd();
 		glEndList();
 
-		leaf.mat_buckets.push_back({ mat, dlist });
+		mat_buckets.push_back({ mat, dlist });
 	}
 }
 
 void oct_node::render_tris (t_render_stage s) const
 {
-	for (const mat_group& gr: leaf.mat_buckets) {
+	for (const mat_group& gr: mat_buckets) {
 		gr.mat->apply(s);
 		glCallList(gr.display_list);
 	}
@@ -129,18 +123,12 @@ void oct_node::render_tris (t_render_stage s) const
 
 oct_node::oct_node ()
 {
-	// violate the invariant for now
-	// - it will only be kept after building
 	is_leaf = true;
-	new (&bucket) std::vector<int>;
 }
 
 oct_node::~oct_node ()
 {
-	if (is_leaf) {
-		leaf.~leaf_data();
-	} else {
-		bucket.~vector();
+	if (!is_leaf) {
 		for (int i = 0; i < 8; i++)
 			delete children[i];
 	}
@@ -282,143 +270,40 @@ void read_world_vis_data (std::string path)
 	}
 }
 
-void read_world_obj (const std::string& path);
 void vis_initialize_world (const std::string& path)
 {
-	read_world_obj(path + "/geo.obj");
 	read_world_vis_data(path + "/vis");
 
-	if (world_bounds_override.volume() <= 0.0) {
-		fatal("Map %s does not specify valid world bounds",
-				path.c_str());
-	}
+	world.load_obj(path + "/geo.obj");
+
+	if (world_bounds_override.volume() > 0.0)
+		world.bbox = world_bounds_override;
 
 	root = new oct_node;
 
-	for (int i = 0; i < world_tris.size(); i++)
-		root->bucket.push_back({ i });
+	// Prepare the occlusion planes right away
+	occ_planes_display_list = glGenLists(1);
+	glNewList(occ_planes_display_list, GL_COMPILE);
+	glBegin(GL_TRIANGLES);
+	int n = world.triangles.size();
+
+	for (int i = 0; i < n; i++) {
+		const t_triangle& tri = world.triangles[i];
+		if (tri.material == mat_occlude) {
+			for (int j = 0; j < 3; j++) {
+				const vec3& ps = world.get_vertex(i, j).pos;
+				glVertex3f(ps.x, ps.y, ps.z);
+			}
+		} else {
+			root->bucket.push_back(i);
+		}
+	}
+	glEnd();
+	glEndList();
 
 	root->build(world_bounds_override, 0);
 }
 
-/*
- * Read world in a different way than what t_model_mem does
- * because we're better off working with faces rather than vertices,
- * and we need to handle materials specified in the obj in
- * a very special way (ie OCCLUDE means it's an occlusion plane
- *                     and goes to a different vector)
- * TODO: maybe redesign OBJ reading to reduce the blatant
- *   code duplication - the only things that are different
- *   are usemtl and face handling
- */
-void read_world_obj (const std::string& path)
-{
-	std::ifstream f(path);
-	if (!f)
-		fatal("world obj not found: %s", path.c_str());
-
-	std::vector<vec3> points;
-	std::vector<vec3> normals;
-	std::vector<t_texcrd> texcoords;
-
-	// we will draw them into a display list right away
-	std::vector<vec3> occ_plane_verts;
-
-	auto pack =
-		[] (char a, char b) constexpr -> uint16_t
-		{ return ((a << 8) | b); };
-
-	t_material* cur_material = get_material("worldmat");
-	bool occlusion_plane_mode = false;
-
-	for (std::string line; std::getline(f, line); ) {
-
-		int comment = line.find('#');
-		if (comment != std::string::npos)
-			line.erase(comment);
-
-		if (line.size() < 2)
-			continue;
-
-		uint16_t p = pack(line[0], line[1]);
-
-		switch (p) {
-		case pack('v', ' '): {
-			// vertex
-			float x, y, z;
-			sscanf(line.c_str(), "%*s %f %f %f", &x, &y, &z);
-			points.push_back({ x, y, z });
-			break;
-		}
-		case pack('v', 'n'): {
-			// vertex normal
-			float x, y, z;
-			sscanf(line.c_str(), "%*s %f %f %f", &x, &y, &z);
-			normals.push_back({ x, y, z });
-			break;
-		}
-		case pack('v', 't'): {
-			// tex coord
-			float u, v;
-			sscanf(line.c_str(), "%*s %f %f", &u, &v);
-			texcoords.push_back({ u, 1.0f - v });
-			break;
-		}
-		case pack('f', ' '): {
-			// face
-			int v[3];
-			int n[3];
-			int t[3];
-			sscanf(line.c_str(), "%*s %i/%i/%i %i/%i/%i %i/%i/%i",
-					&v[0], &t[0], &n[0],
-					&v[1], &t[1], &n[1],
-					&v[2], &t[2], &n[2]);
-
-			if (occlusion_plane_mode) {
-				for (int i = 0; i < 3; i++) {
-					occ_plane_verts.push_back(
-						points[v[i]-1]);
-				}
-			} else {
-				t_world_triangle tri;
-				for (int i = 0; i < 3; i++) {
-					tri.v[i] = { points[v[i]-1],
-					             normals[n[i]-1],
-					             texcoords[t[i]-1] };
-				}
-				tri.mat = cur_material;
-				world_tris.push_back(tri);
-			}
-
-			break;
-		}
-		case pack('u', 's'): {
-			// usemtl - update current material
-			char buf[line.length()];
-			sscanf(line.c_str(), "%*s %s", buf);
-			if (strncmp(buf, "OCCLUDE", 7) == 0) {
-				occlusion_plane_mode = true;
-			} else {
-				occlusion_plane_mode = false;
-				cur_material = get_material(buf);
-			}
-			break;
-		}
-		default: {
-			// something in the format we are unaware of
-			continue;
-		}
-		}
-	}
-
-	occ_planes_display_list = glGenLists(1);
-	glNewList(occ_planes_display_list, GL_COMPILE);
-	glBegin(GL_TRIANGLES);
-	for (const vec3& v: occ_plane_verts)
-		glVertex3f(v.x, v.y, v.z);
-	glEnd();
-	glEndList();
-}
 
 
 void vis_render_bbox (const t_bound_box& box)
@@ -498,7 +383,7 @@ void vis_debug_renders ()
 		glDisable(GL_DEPTH_TEST);
 		glColor4f(0.0, 0.0, 0.0, 0.5);
 		for (const oct_node* node: visible_leaves) {
-			for (const auto& gr: node->leaf.mat_buckets)
+			for (const auto& gr: node->mat_buckets)
 				glCallList(gr.display_list);
 		}
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

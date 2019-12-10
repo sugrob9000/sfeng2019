@@ -13,5 +13,7 @@ vec4 final_shade ()
 
 vec3 surface_normal ()
 {
-	return normalize(texture(map_normal, tex_crd).rgb * 2 - 1);
+	vec3 f = vec3(0.5, 0.5, 1.0);
+	f = texture(map_normal, tex_crd).rgb;
+	return f * 2.0 - 1.0;
 }

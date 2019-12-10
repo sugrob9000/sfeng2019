@@ -1,44 +1,64 @@
 #include "inc_general.h"
 #include "model.h"
 #include "render.h"
+#include "material.h"
 #include "input/cmds.h"
 #include <cassert>
+#include <map>
+
+void send_triangles (const std::vector<t_vertex> verts)
+{
+	int n = verts.size();
+	for (int i = 0; i < n; i += 3) {
+		for (int j = 0; j < 3; j++) {
+			const t_vertex& v = verts[i + j];
+			glNormal3f(v.norm.x, v.norm.y, v.norm.z);
+			glTexCoord2f(v.tex.u, v.tex.v);
+			glVertex3f(v.pos.x, v.pos.y, v.pos.z);
+		}
+	}
+}
 
 void t_model::render () const
 {
 	glCallList(display_list_id);
 }
 
-void t_model::load (const t_model_mem& verts)
+void t_model::load (const t_model_mem& src)
 {
 	display_list_id = glGenLists(1);
 	glNewList(display_list_id, GL_COMPILE);
 	glBegin(GL_TRIANGLES);
-	for (const t_vertex& v: verts.verts) {
-		glNormal3f(v.norm.x, -v.norm.y, v.norm.z);
-		glTexCoord2f(v.tex.u, v.tex.v);
-		glVertex3f(v.pos.x, v.pos.y, v.pos.z);
+	for (int idx: src.indices) {
+		const vec3& p = src.vertices[idx].v.pos;
+		const vec3& n = src.vertices[idx].v.norm;
+		const t_texcrd& t = src.vertices[idx].v.tex;
+		const vec3& tg = src.vertices[idx].tangent;
+		const vec3& bitg = src.vertices[idx].bitangent;
+		glNormal3f(n.x, n.y, n.z);
+		glVertexAttrib3f(attrib_loc_tangent, tg.x, tg.y, tg.z);
+		glVertexAttrib3f(attrib_loc_bitangent, bitg.x, bitg.y, bitg.z);
+		glTexCoord2f(t.u, 1.0 - t.v);
+		glVertex3f(p.x, p.y, p.z);
 	}
 	glEnd();
 	glEndList();
 
-	bbox = verts.bbox;
+	bbox = src.bbox;
 }
 
 void t_model_mem::calc_bbox ()
 {
-	if (verts.empty())
+	if (vertices.empty())
 		return;
 
-	float inf = 10e9;
-	bbox = { vec3(-inf), vec3(inf) };
-
-	for (const t_vertex& v: verts)
-		bbox.update(v.pos);
+	bbox = { vec3(INFINITY), vec3(-INFINITY) };
+	for (const vert_internal& v: vertices)
+		bbox.update(v.v.pos);
 
 	// just in case, extend slightly
-	bbox.start -= { 0.5, 0.5, 0.5 };
-	bbox.end += { 0.5, 0.5, 0.5 };
+	bbox.start -= vec3(0.5);
+	bbox.end += vec3(0.5);
 }
 
 void t_model_mem::load_obj (std::string path)
@@ -49,7 +69,48 @@ void t_model_mem::load_obj (std::string path)
 
 	std::vector<vec3> points;
 	std::vector<vec3> normals;
-	std::vector<t_texcrd> texcoords;
+	std::vector<t_texcrd> texcrds;
+
+	std::map<t_vertex, int> vert_indices;
+
+	auto add_face = [&] (int* v, int* n, int* t)
+	-> void {
+		const vec3& v0 = points[v[0]];
+		const vec3& v1 = points[v[1]];
+		const vec3& v2 = points[v[2]];
+		const t_texcrd& uv0 = texcrds[t[0]];
+		const t_texcrd& uv1 = texcrds[t[1]];
+		const t_texcrd& uv2 = texcrds[t[2]];
+
+		vec3 d_pos1 = v1 - v0;
+		vec3 d_pos2 = v2 - v0;
+		t_texcrd d_uv1 = { uv1.u - uv0.u, uv1.v - uv0.v };
+		t_texcrd d_uv2 = { uv2.u - uv0.u, uv2.v - uv0.v };
+
+		vec3 tangent = d_pos1*d_uv1.v - d_pos2*d_uv1.v;
+		vec3 bitangent = d_pos2*d_uv1.u - d_pos1*d_uv2.u;
+
+		for (int i = 0; i < 3; i++) {
+			t_vertex key = { points[v[i]],
+			                 normals[n[i]],
+					 texcrds[t[i]] };
+			auto iter = vert_indices.find(key);
+			int idx;
+
+			if (iter == vert_indices.end()) {
+				idx = vertices.size();
+				vertices.push_back(
+					{ key, tangent, bitangent });
+				vert_indices[key] = idx;
+			} else {
+				idx = iter->second;
+				vertices[idx].tangent += tangent;
+				vertices[idx].bitangent += bitangent;
+			}
+
+			indices.push_back(idx);
+		}
+	};
 
 	auto pack =
 		[] (char a, char b) constexpr -> uint16_t
@@ -85,7 +146,7 @@ void t_model_mem::load_obj (std::string path)
 			// tex coord
 			float u, v;
 			sscanf(line.c_str(), "%*s %f %f", &u, &v);
-			texcoords.push_back({ u, 1.0f - v });
+			texcrds.push_back({ u, v });
 			break;
 		}
 		case pack('f', ' '): {
@@ -98,11 +159,11 @@ void t_model_mem::load_obj (std::string path)
 					&v[1], &t[1], &n[1],
 					&v[2], &t[2], &n[2]);
 			for (int i = 0; i < 3; i++) {
-				verts.push_back(
-					{ points[v[i]-1],
-					  normals[n[i]-1],
-					  texcoords[t[i]-1] });
+				v[i]--;
+				n[i]--;
+				t[i]--;
 			}
+			add_face(v, n, t);
 			break;
 		}
 		default: {
@@ -112,45 +173,41 @@ void t_model_mem::load_obj (std::string path)
 		}
 	}
 
-	assert(verts.size() % 3 == 0);
+	for (vert_internal& v: vertices) {
+		v.tangent.norm();
+		v.bitangent.norm();
+	}
+
 	calc_bbox();
+
 }
 
 void t_model_mem::dump_rvd (std::string path) const
 {
-	std::ofstream f(path, std::ios::binary);
-	if (!f)
-		return;
-	int32_t vertnum = verts.size();
-	f.write((char*) &vertnum, sizeof(vertnum));
-	f.write((char*) verts.data(), vertnum * sizeof(t_vertex));
 }
 
 void t_model_mem::load_rvd (std::string path)
 {
-	std::ifstream f(path, std::ios::binary);
-	verts.clear();
-
-	if (!f)
-		fatal("Could not open RVD %s", path.c_str());
-
-	int32_t vertnum = -1;
-
-	int filesize;
-	f.seekg(0, f.end);
-	filesize = f.tellg();
-	f.seekg(0, f.beg);
-
-	f.read((char*) &vertnum, sizeof(vertnum));
-
-	assert(vertnum % 3 == 0);
-	assert(filesize == sizeof(vertnum) + vertnum * sizeof(t_vertex));
-
-	verts.resize(vertnum);
-	f.read((char*) verts.data(), vertnum * sizeof(t_vertex));
-
-	calc_bbox();
 }
+
+
+bool operator< (const t_texcrd& a, const t_texcrd& b)
+{
+	if (a.u == b.u)
+		return a.v < b.v;
+	return a.u < b.u;
+}
+
+bool operator< (const t_vertex& a, const t_vertex& b)
+{
+	if (a.pos == b.pos) {
+		if (a.norm == b.norm)
+			return a.tex < b.tex;
+		return a.norm < b.norm;
+	}
+	return a.pos < b.pos;
+}
+
 
 COMMAND_ROUTINE (obj2rvd)
 {

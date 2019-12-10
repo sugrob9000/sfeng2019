@@ -9,6 +9,9 @@
 typedef GLuint t_texture_id;
 typedef GLuint t_shader_id;
 
+constexpr GLuint attrib_loc_tangent = 1;
+constexpr GLuint attrib_loc_bitangent = 3;
+
 struct t_material
 {
 	GLuint program;

@@ -100,10 +100,11 @@ void t_material::load (std::string path)
 	frag = get_shader(frag_name, GL_FRAGMENT_SHADER);
 	vert = get_shader(vert_name, GL_VERTEX_SHADER);
 
-	GLuint frag_lib = get_shader("common/frag_lib", GL_FRAGMENT_SHADER);
-
 	program = glCreateProgram();
-	glAttachShader(program, frag_lib);
+	glAttachShader(program,
+		get_shader("common/lib_frag", GL_FRAGMENT_SHADER));
+	glAttachShader(program,
+		get_shader("common/lib_vert", GL_VERTEX_SHADER));
 	glAttachShader(program, frag);
 	glAttachShader(program, vert);
 	glLinkProgram(program);
@@ -134,6 +135,9 @@ void t_material::load (std::string path)
 				frag_name.c_str(), vert_name.c_str());
 		}
 	}
+
+	glBindAttribLocation(program, attrib_loc_tangent, "world_tangent");
+	glBindAttribLocation(program, attrib_loc_bitangent, "world_bitangent");
 }
 
 /*

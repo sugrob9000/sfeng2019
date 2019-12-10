@@ -8,15 +8,18 @@ SIG_HANDLER (prop, setpos)
 	ent->moved();
 }
 
+SIG_HANDLER (prop, setang)
+{
+	atovec3(arg, ent->ang);
+}
+
 FILL_IO_DATA (prop)
 {
 	SET_SIG_HANDLER(prop, setpos);
+	SET_SIG_HANDLER(prop, setang);
 }
 
-void e_prop::think () 
-{
-	// ang.z += 1;
-}
+void e_prop::think () { }
 
 void e_prop::apply_keyvals (const t_ent_keyvals& kv)
 {

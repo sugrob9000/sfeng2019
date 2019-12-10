@@ -192,3 +192,23 @@ void atovec3 (const std::string& s, vec3& v)
 {
 	sscanf(s.c_str(), "%f %f %f", &v.x, &v.y, &v.z);
 }
+
+
+bool operator== (const vec3& a, const vec3& b)
+{
+	for (int i = 0; i < 3; i++) {
+		if (a[i] != b[i])
+			return false;
+	}
+	return true;
+}
+
+bool operator< (const vec3& a, const vec3& b)
+{
+	for (int i = 0; i < 3; i++) {
+		if (a[i] != b[i])
+			return a[i] < b[i];
+	}
+	return false;
+}
+

@@ -166,7 +166,8 @@ void init_render ()
 	sdlcont.window = SDL_CreateWindow("Engine",
 			SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
 			sdlcont.res_x, sdlcont.res_y,
-			SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
+			SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN
+				| SDL_WINDOW_RESIZABLE);
 	if (sdlcont.window == nullptr)
 		fatal("SDL window creation failed: %s", SDL_GetError());
 
@@ -274,9 +275,9 @@ void init_text ()
 
 	text_program = glCreateProgram();
 	glAttachShader(text_program,
-			get_shader("common/vert_identity", GL_VERTEX_SHADER));
+		get_shader("common/vert_text", GL_VERTEX_SHADER));
 	glAttachShader(text_program,
-			get_shader("common/frag_text", GL_FRAGMENT_SHADER));
+		get_shader("common/frag_text", GL_FRAGMENT_SHADER));
 	glLinkProgram(text_program);
 
 	text_prg_glyph_loc = glGetUniformLocation(text_program, "glyphs");

@@ -20,9 +20,9 @@ t_model* get_model (std::string path)
 
 	ret = new t_model;
 
-	path = PATH_MODEL + path + ".rvd";
+	path = PATH_MODEL + path + ".obj";
 	t_model_mem verts;
-	verts.load_rvd(path);
+	verts.load_obj(path);
 	ret->load(verts);
 	return ret;
 }

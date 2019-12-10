@@ -16,6 +16,7 @@ struct vec3
 	vec3 ();
 
 	inline float& operator[] (int i) { return _d[i]; }
+	inline const float& operator[] (int i) const { return _d[i]; }
 
 	vec3& operator+= (vec3 v);
 	vec3& operator-= (vec3 v);
@@ -60,6 +61,9 @@ void atovec3 (const char* s, vec3& v);
 
 vec3 atovec3 (const std::string& s);
 void atovec3 (const std::string& s, vec3& v);
+
+bool operator< (const vec3& a, const vec3& b);
+bool operator== (const vec3& a, const vec3& b);
 
 #endif // VEC3_H
 

@@ -111,11 +111,7 @@ void oct_node::make_leaf ()
 		unsigned int dlist = glGenLists(1);
 		glNewList(dlist, GL_COMPILE);
 		glBegin(GL_TRIANGLES);
-		for (const t_vertex& v: vertices) {
-			glNormal3f(v.norm.x, v.norm.y, v.norm.z);
-			glTexCoord2f(v.tex.u, v.tex.v);
-			glVertex3f(v.pos.x, v.pos.y, v.pos.z);
-		}
+		send_triangles(vertices);
 		glEnd();
 		glEndList();
 
@@ -527,16 +523,9 @@ void vis_debug_renders ()
 
 		glDisable(GL_CULL_FACE);
 		glLineWidth(1.5);
-
-		glColor3f(1, 0, 0);
-		for (const oct_node* leaf: visible_leaves) {
-			DEBUG_EXPR(leaf->entities_inside[0]->name);
-			if (leaf->entities_inside.empty())
-				glColor4f(1.0, 0.0, 0.0, 1.0);
-			else
-				glColor4f(0.8, 0.0, 0.0, 1.0);
+		glColor4f(0.0, 0.0, 0.0, 0.3);
+		for (const oct_node* leaf: visible_leaves)
 			vis_render_bbox(leaf->actual_bounds);
-		}
 
 		glLineWidth(1.0);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

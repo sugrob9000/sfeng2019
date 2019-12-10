@@ -9,3 +9,4 @@ prop
 	ang 0 0 30
 	model muscle_car
 	mat car-red
+	name car

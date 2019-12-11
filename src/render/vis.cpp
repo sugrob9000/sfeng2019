@@ -337,7 +337,7 @@ void init_vis ()
 	// but write to the z-buffer
 	occ_shader_prog = glCreateProgram();
 	glAttachShader(occ_shader_prog,
-		get_shader("common/vert_identity", GL_VERTEX_SHADER));
+		get_shader("common/vert_occlude", GL_VERTEX_SHADER));
 	glAttachShader(occ_shader_prog,
 		get_shader("common/frag_null", GL_FRAGMENT_SHADER));
 	glLinkProgram(occ_shader_prog);

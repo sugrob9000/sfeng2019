@@ -129,7 +129,7 @@ void render_all ()
 	char str[128];
 	sprintf(str, "%i leaves", (int) visible_leaves.size());
 	draw_text(str, -1, -1, 0.025, 0.05);
-	sprintf(str, "%i fps", (int) round(1.0 / last_frame_sec));
+	sprintf(str, "%f ms", last_frame_sec * 1000.0);
 	draw_text(str, -1, -1 + 0.06, 0.025, 0.05);
 
 	if (console_active)
@@ -361,7 +361,7 @@ void draw_sky ()
 }
 
 
-void debug_texture_onscreen (GLuint texture, float cx, float cy)
+void debug_texture_onscreen (GLuint texture)
 {
 	glUseProgram(0);
 	glActiveTexture(GL_TEXTURE0);
@@ -369,7 +369,6 @@ void debug_texture_onscreen (GLuint texture, float cx, float cy)
 	glEnable(GL_TEXTURE_2D);
 
 	glPushMatrix();
-	glTranslatef(cx, cy, 0.0);
 	glColor4f(1.0, 1.0, 1.0, 1.0);
 	glBegin(GL_QUADS);
 	glTexCoord2i(0, 0);

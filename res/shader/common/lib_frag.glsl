@@ -27,7 +27,6 @@ void main ()
 	case LIGHTING_SSPACE:
 		vec3 sn = normalize(surface_normal());
 		vec3 final_norm = TBN * sn;
-
 		gl_FragColor = vec4((final_norm + 1.0) / 2, 1.0);
 		break;
 

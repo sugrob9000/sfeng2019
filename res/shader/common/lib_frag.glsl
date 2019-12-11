@@ -15,7 +15,7 @@ in vec3 world_normal;
 in vec3 world_pos;
 
 in vec3 lspace_pos;
-smooth in mat3 TBN;
+in mat3 TBN;
 
 void main ()
 {

@@ -61,6 +61,7 @@ struct oct_node
 };
 
 extern std::vector<const oct_node*> visible_leaves;
+extern GLuint occ_fbo;
 
 void vis_render_bbox (const t_bound_box& b);
 

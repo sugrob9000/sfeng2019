@@ -1,7 +1,7 @@
 #version 130
 
 /* The user shader which links against the lib should implement this */
-vec4 vertex_transform (vec4 input);
+vec4 vertex_transform (vec4 modelspace_pos);
 
 out vec2 tex_crd;
 out vec3 world_normal;
@@ -24,12 +24,12 @@ void main ()
 		vertex_transform(gl_Vertex);
 
 	tex_crd = gl_MultiTexCoord0.st;
-	world_normal = (gl_ModelViewMatrix * vec4(gl_Normal, 0.0)).xyz;
 	world_pos = (gl_ModelViewMatrix * gl_Vertex).xyz;
 
-	vec3 tangent = (gl_ModelViewMatrix * vec4(world_tangent, 0.0)).xyz;
-	world_normal = normalize(world_normal);
-	tangent = normalize(tangent);
+	world_normal = normalize(
+		gl_ModelViewMatrix * vec4(gl_Normal, 0.0)).xyz;
+	vec3 tangent = normalize(
+		gl_ModelViewMatrix * vec4(world_tangent, 0.0)).xyz;
 	vec3 bitangent = normalize(cross(world_normal, tangent));
 
 	TBN = mat3(tangent, bitangent, world_normal);

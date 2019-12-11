@@ -172,6 +172,7 @@ void vis_fill_visible (const vec3& cam)
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glUseProgram(occ_shader_prog);
 	glEnable(GL_DEPTH_TEST);
+	glDisable(GL_CULL_FACE);
 	glDepthFunc(GL_LESS);
 
 	// fill z-buffer with data from occlusion planes
@@ -310,7 +311,9 @@ void vis_render_bbox (const t_bound_box& box)
 {
 	const vec3& s = box.start;
 	const vec3& e = box.end;
-	auto quad = [] (vec3 a, vec3 b, vec3 c, vec3 d) -> void {
+
+	auto quad = [] (vec3 a, vec3 b, vec3 c, vec3 d)
+	-> void {
 		glVertex3f(a.x, a.y, a.z);
 		glVertex3f(b.x, b.y, b.z);
 		glVertex3f(c.x, c.y, c.z);

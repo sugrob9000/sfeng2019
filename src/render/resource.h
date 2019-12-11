@@ -13,7 +13,7 @@ typedef std::map<std::string, t_shader_id> t_cache_shader;
 const char* const PATH_MODEL = "res/models/";
 const char* const PATH_TEXTURE = "res/mat/";
 const char* const PATH_MATERIAL = "res/mat/";
-const char* const PATH_SHADER = "res/mat/";
+const char* const PATH_SHADER = "res/shader/";
 
 t_model* get_model (std::string path);
 t_texture_id get_texture (std::string path);

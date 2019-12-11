@@ -110,6 +110,7 @@ void render_all ()
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
 	glMatrixMode(MTX_MODEL);
+
 	draw_sky();
 	for (const oct_node* node: visible_leaves)
 		node->render_tris(SHADE_FINAL);
@@ -130,8 +131,6 @@ void render_all ()
 	draw_text(str, -1, -1, 0.025, 0.05);
 	sprintf(str, "%i fps", (int) round(1.0 / last_frame_sec));
 	draw_text(str, -1, -1 + 0.06, 0.025, 0.05);
-
-	debug_texture_onscreen(sspace_fbo_texture, 0.0, 0.0);
 
 	if (console_active)
 		console_render();

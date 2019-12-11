@@ -58,8 +58,7 @@ COMMAND (obj2rvd)
 COMMAND (signal)
 
 /*
- * !!! DOES NOT CLEAR THE CURRENTLY EXISTING WORLD !!!
- * Load a map. Fatal on fail.
+ * Load a map
  */
 COMMAND (map)
 

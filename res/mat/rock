@@ -1,3 +1,4 @@
 VERT common/vert_identity
-FRAG frag
+FRAG frag_sand
 diffuse rock.tga
+ao common/white.png

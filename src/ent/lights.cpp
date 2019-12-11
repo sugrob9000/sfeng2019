@@ -148,6 +148,9 @@ void compose_add_depth_map ()
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+
+	for (const oct_node* node: visible_leaves)
+		node->render_tris(LIGHTING_SSPACE);
 	draw_visible_entities(LIGHTING_SSPACE);
 }
 

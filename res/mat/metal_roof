@@ -1,0 +1,7 @@
+FRAG frag_building
+VERT common/vert_identity
+
+ao common/white.png
+diffuse checkers_diffuse.png
+normal checkers_normal.png
+

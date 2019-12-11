@@ -6,7 +6,7 @@ light
 	cone 30
 prop
 	pos 20 140 180
-	ang 0 0 30
+	ang 0 0 0
 	model muscle_car
 	mat car-red
 	name car

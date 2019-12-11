@@ -16,11 +16,9 @@ void t_model_mem::gl_send_triangle (int tri_id) const
 		const vec3& n = vertices[idx].v.norm;
 		const t_texcrd& t = vertices[idx].v.tex;
 		const vec3& tg = vertices[idx].tangent;
-		const vec3& b = vertices[idx].bitangent;
 
 		glNormal3f(n.x, n.y, n.z);
 		glVertexAttrib3f(attrib_loc_tangent, tg.x, tg.y, tg.z);
-		glVertexAttrib3f(attrib_loc_bitangent, b.x, b.y, b.z);
 		glTexCoord2f(t.u, 1.0 - t.v);
 		glVertex3f(p.x, p.y, p.z);
 	}
@@ -87,8 +85,8 @@ void t_model_mem::load_obj (std::string path)
 		vec3 d_pos2 = v2 - v0;
 		t_texcrd d_uv1 = { uv1.u - uv0.u, uv1.v - uv0.v };
 		t_texcrd d_uv2 = { uv2.u - uv0.u, uv2.v - uv0.v };
-		vec3 tangent = d_pos1*d_uv1.v - d_pos2*d_uv1.v;
-		vec3 bitangent = d_pos2*d_uv1.u - d_pos1*d_uv2.u;
+
+		vec3 tangent = d_uv2.v * d_pos1 - d_uv1.v * d_pos2;
 
 		t_triangle tri = { { }, current_material };
 		for (int i = 0; i < 3; i++) {
@@ -98,13 +96,11 @@ void t_model_mem::load_obj (std::string path)
 			auto iter = vert_indices.find(key);
 			if (iter == vert_indices.end()) {
 				tri.index[i] = vertices.size();
-				vertices.push_back(
-					{ key, tangent, bitangent });
+				vertices.push_back( { key, tangent });
 				vert_indices[key] = tri.index[i];
 			} else {
 				tri.index[i] = iter->second;
 				vertices[tri.index[i]].tangent += tangent;
-				vertices[tri.index[i]].bitangent += bitangent;
 			}
 		}
 		triangles.push_back(tri);
@@ -175,10 +171,8 @@ void t_model_mem::load_obj (std::string path)
 		}
 	}
 
-	for (vert_internal& v: vertices) {
+	for (vert_internal& v: vertices)
 		v.tangent.norm();
-		v.bitangent.norm();
-	}
 
 	calc_bbox();
 }

@@ -38,7 +38,6 @@ struct t_model_mem
 	struct vert_internal {
 		t_vertex v;
 		vec3 tangent;
-		vec3 bitangent;
 	};
 	std::vector<vert_internal> vertices;
 	std::vector<t_triangle> triangles;

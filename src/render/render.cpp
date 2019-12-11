@@ -132,7 +132,6 @@ void render_all ()
 	draw_text(str, -1, -1 + 0.06, 0.025, 0.05);
 
 	debug_texture_onscreen(sspace_fbo_texture, 0.0, 0.0);
-	// debug_texture_onscreen(lspace_fbo_texture, -1.0, 0.0);
 
 	if (console_active)
 		console_render();
@@ -375,11 +374,11 @@ void debug_texture_onscreen (GLuint texture, float cx, float cy)
 	glColor4f(1.0, 1.0, 1.0, 1.0);
 	glBegin(GL_QUADS);
 	glTexCoord2i(0, 0);
-	glVertex2i(0, 1);
+	glVertex2i(-1, 1);
 	glTexCoord2i(0, 1);
-	glVertex2i(0, 0);
+	glVertex2i(-1, -1);
 	glTexCoord2i(1, 1);
-	glVertex2i(1, 0);
+	glVertex2i(1, -1);
 	glTexCoord2i(1, 0);
 	glVertex2i(1, 1);
 	glEnd();

@@ -14,7 +14,6 @@ typedef GLuint t_shader_id;
  * (important) built-in attributes
  */
 constexpr GLuint attrib_loc_tangent = 1;
-constexpr GLuint attrib_loc_bitangent = 6;
 
 struct t_material
 {

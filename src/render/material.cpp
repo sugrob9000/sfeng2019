@@ -142,7 +142,6 @@ void t_material::load (std::string path)
 	}
 
 	glBindAttribLocation(program, attrib_loc_tangent, "world_tangent");
-	glBindAttribLocation(program, attrib_loc_bitangent, "world_bitangent");
 }
 
 /*

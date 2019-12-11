@@ -9,7 +9,6 @@ out vec3 world_pos;
 out vec3 lspace_pos;
 
 attribute vec3 world_tangent;
-attribute vec3 world_bitangent;
 out mat3 TBN;
 
 const uint LIGHTING_LSPACE = 0u;
@@ -29,7 +28,9 @@ void main ()
 	world_pos = (gl_ModelViewMatrix * gl_Vertex).xyz;
 
 	vec3 tangent = (gl_ModelViewMatrix * vec4(world_tangent, 0.0)).xyz;
-	vec3 bitangent = (gl_ModelViewMatrix * vec4(world_bitangent, 0.0)).xyz;
+	world_normal = normalize(world_normal);
+	tangent = normalize(tangent);
+	vec3 bitangent = normalize(cross(world_normal, tangent));
 
 	TBN = mat3(tangent, bitangent, world_normal);
 

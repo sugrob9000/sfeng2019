@@ -221,7 +221,6 @@ void oct_node::requery_entity (e_base* e, const t_bound_box& b)
 
 void vis_requery_entity (e_base* e)
 {
-	t_bound_box b = e->get_bbox();
 	root->requery_entity(e, e->get_bbox());
 }
 

@@ -6,6 +6,8 @@
 #include "input/bind.h"
 #include "input/console.h"
 
+#include <chrono>
+
 int main (int argc, char** argv)
 {
 	init_input();

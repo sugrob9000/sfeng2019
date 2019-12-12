@@ -60,7 +60,7 @@ void oct_node::build (t_bound_box bounds, int level)
 	}
 	actual_bounds = bounds;
 
-	if (level > oct_max_depth || bucket.size() <= oct_leaf_capacity) {
+	if (level >= oct_max_depth || bucket.size() <= oct_leaf_capacity) {
 		make_leaf();
 		return;
 	}
@@ -146,7 +146,7 @@ void oct_node::check_visibility (const vec3& cam) const
 
 	for (int i = 0; i < 8; i++) {
 		glBeginQuery(GL_SAMPLES_PASSED, occ_queries[i]);
-		vis_render_bbox(children[i]->actual_bounds);
+		draw_cuboid(children[i]->actual_bounds);
 		glEndQuery(GL_SAMPLES_PASSED);
 	}
 
@@ -172,15 +172,16 @@ void vis_fill_visible (const vec3& cam)
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glUseProgram(occ_shader_prog);
 	glEnable(GL_DEPTH_TEST);
-	glDisable(GL_CULL_FACE);
-	glDepthFunc(GL_LESS);
 
 	// fill z-buffer with data from occlusion planes
+	glDepthFunc(GL_LESS);
+	glDisable(GL_CULL_FACE);
 	glDepthMask(GL_TRUE);
 	glCallList(occ_planes_display_list);
-	glDepthMask(GL_FALSE);
 
 	// walk the tree nodes which pass the z-test (and are on screen)
+	glDepthMask(GL_FALSE);
+	glEnable(GL_CULL_FACE);
 	visible_leaves.clear();
 	root->check_visibility(cam);
 }
@@ -305,31 +306,6 @@ void vis_initialize_world (const std::string& path)
 	root->build(world.bbox, 0);
 }
 
-
-
-void vis_render_bbox (const t_bound_box& box)
-{
-	const vec3& s = box.start;
-	const vec3& e = box.end;
-
-	auto quad = [] (vec3 a, vec3 b, vec3 c, vec3 d)
-	-> void {
-		glVertex3f(a.x, a.y, a.z);
-		glVertex3f(b.x, b.y, b.z);
-		glVertex3f(c.x, c.y, c.z);
-		glVertex3f(d.x, d.y, d.z);
-	};
-
-	glBegin(GL_QUADS);
-	quad(s, { s.x, e.y, s.z }, { s.x, e.y, e.z }, { s.x, s.y, e.z });
-	quad(s, { e.x, s.y, s.z }, { e.x, e.y, s.z }, { s.x, e.y, s.z });
-	quad(s, { s.x, s.y, e.z }, { e.x, s.y, e.z }, { e.x, s.y, s.z });
-	quad(e, { e.x, e.y, s.z }, { e.x, s.y, s.z }, { e.x, s.y, e.z });
-	quad(e, { e.x, s.y, e.z }, { s.x, s.y, e.z }, { s.x, e.y, e.z });
-	quad(e, { s.x, e.y, e.z }, { s.x, e.y, s.z }, { e.x, e.y, s.z });
-	glEnd();
-}
-
 void init_vis ()
 {
 	// setup the framebuffer in which to test for occlusion
@@ -415,7 +391,7 @@ void vis_debug_renders ()
 		for (const oct_node* leaf: visible_leaves) {
 			float r = leaf->entities_inside.empty() ? 0.0 : 1.0;
 			glColor4f(r, 0.0, 0.0, 0.3);
-			vis_render_bbox(leaf->actual_bounds);
+			draw_cuboid(leaf->actual_bounds);
 		}
 
 		glLineWidth(1.0);

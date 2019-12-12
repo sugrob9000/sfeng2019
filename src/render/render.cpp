@@ -143,6 +143,7 @@ void render_all ()
 
 void init_text ();
 void init_sky ();
+void init_cuboid ();
 void gl_limits_sanity_check ();
 void init_render ()
 {
@@ -192,6 +193,8 @@ void init_render ()
 	glLoadIdentity();
 	glMatrixMode(MTX_MODEL);
 	glLoadIdentity();
+
+	init_cuboid();
 
 	init_materials();
 	init_text();
@@ -347,6 +350,7 @@ void draw_sky ()
 	glUseProgram(sky_shader_program);
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glDisable(GL_DEPTH_TEST);
+	glFrontFace(GL_CW);
 
 	constexpr float radius = 1.0;
 	const t_bound_box skybox = { { -radius, -radius, -radius },
@@ -354,12 +358,56 @@ void draw_sky ()
 	glPushMatrix();
 	translate_gl_matrix(camera.pos);
 
-	vis_render_bbox(skybox);
+	draw_cuboid(skybox);
 
 	glPopMatrix();
 	glEnable(GL_DEPTH_TEST);
+	glFrontFace(GL_CCW);
 }
 
+GLuint cuboid_dlist;
+void init_cuboid ()
+{
+	vec3 p[8];
+	for (int i = 0; i < 8; i++) {
+		p[i] = { i & 1 ? 1.0f : -1.0f,
+		         i & 2 ? 1.0f : -1.0f,
+		         i & 4 ? 1.0f : -1.0f };
+	}
+	auto quad = [&p] (int a, int b, int c, int d)
+	-> void {
+		glVertex3f(p[a].x, p[a].y, p[a].z);
+		glVertex3f(p[b].x, p[b].y, p[b].z);
+		glVertex3f(p[c].x, p[c].y, p[c].z);
+		glVertex3f(p[d].x, p[d].y, p[d].z);
+	};
+
+	cuboid_dlist = glGenLists(1);
+	glNewList(cuboid_dlist, GL_COMPILE);
+	glBegin(GL_QUADS);
+
+	quad(0, 2, 3, 1);
+	quad(0, 1, 5, 4);
+	quad(0, 4, 6, 2);
+	quad(7, 5, 1, 3);
+	quad(7, 3, 2, 6);
+	quad(7, 6, 4, 5);
+
+	glEnd();
+	glEndList();
+}
+
+void draw_cuboid (const t_bound_box& b)
+{
+	vec3 scale = (b.end - b.start) * 0.5;
+	vec3 center = (b.end + b.start) * 0.5;
+
+	glPushMatrix();
+	translate_gl_matrix(center);
+	glScalef(scale.x, scale.y, scale.z);
+	glCallList(cuboid_dlist);
+	glPopMatrix();
+}
 
 void debug_texture_onscreen (GLuint texture)
 {

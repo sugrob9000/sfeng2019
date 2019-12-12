@@ -62,8 +62,6 @@ struct oct_node
 
 extern std::vector<const oct_node*> visible_leaves;
 
-void vis_render_bbox (const t_bound_box& b);
-
 void vis_fill_visible (const vec3& cam);
 void vis_requery_entity (e_base* e);
 void draw_visible_entities (t_render_stage s);

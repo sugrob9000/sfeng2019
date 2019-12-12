@@ -3,6 +3,16 @@
 
 #include "inc_gl.h"
 #include "inc_general.h"
+#include "core/core.h"
+
+enum t_render_stage: uint32_t
+{
+	LIGHTING_LSPACE = 0,
+	LIGHTING_SSPACE = 1,
+	SHADE_FINAL = 2,
+
+	NUM_RENDER_STAGES
+};
 
 struct t_camera
 {
@@ -50,6 +60,9 @@ extern t_sdlcontext sdlcont;
 extern t_camera camera;
 void upd_camera_pos ();
 
+void rotate_gl_matrix (vec3 angs);
+void translate_gl_matrix (vec3 pos);
+
 void init_render ();
 void render_all ();
 void resize_window (int w, int h);
@@ -57,17 +70,10 @@ void resize_window (int w, int h);
 const SDL_Color text_color = { 200, 200, 200, 255 };
 void draw_text (const char* text, float x, float y, float charw, float charh);
 
-void rotate_gl_matrix (vec3 angs);
-void translate_gl_matrix (vec3 pos);
+void draw_cuboid (const t_bound_box& b);
 
 void debug_texture_onscreen (GLuint texture);
 
-enum t_render_stage: uint32_t
-{
-	LIGHTING_LSPACE = 0,
-	LIGHTING_SSPACE = 1,
-	SHADE_FINAL = 2,
-};
 
 #endif // RENDER_H
 

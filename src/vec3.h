@@ -15,8 +15,11 @@ struct vec3
 	vec3 (float c);
 	vec3 ();
 
-	inline float& operator[] (int i) { return _d[i]; }
-	inline const float& operator[] (int i) const { return _d[i]; }
+	float& operator[] (int i) { return _d[i]; }
+	const float& operator[] (int i) const { return _d[i]; }
+
+	float* data () { return _d; }
+	const float* data () const { return _d; }
 
 	vec3& operator+= (vec3 v);
 	vec3& operator-= (vec3 v);

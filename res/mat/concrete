@@ -3,5 +3,4 @@ VERT common/vert_identity
 
 ao building_ao.png
 diffuse checkers_diffuse.png
-normal checkers_normal.png
-
+normal brick_normal.png

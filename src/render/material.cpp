@@ -48,7 +48,6 @@ t_shader_id compile_glsl (std::string path, GLenum type)
 
 	warning("Failed to compile shader %s:\n%s\n",
 			path.c_str(), log);
-
 	return 0;
 }
 
@@ -126,7 +125,7 @@ void t_material::load (std::string path)
 				"failed to link:\n%s", path.c_str(), log);
 	}
 
-	render_stage_loc = glGetUniformLocation(program, "stage");
+	loc_renderstage = glGetUniformLocation(program, "stage");
 
 	for (const bitmap_desc_interm& d: bitmaps_interm) {
 		int location = glGetUniformLocation(program,
@@ -169,7 +168,7 @@ void t_material::apply (t_render_stage s) const
 		glBindTexture(GL_TEXTURE_2D, bitmaps[i].texid);
 		glUniform1i(bitmaps[i].location, i);
 	}
-	glUniform1ui(render_stage_loc, s);
+	glUniform1ui(loc_renderstage, s);
 }
 
 int get_surface_gl_format (SDL_Surface* s)

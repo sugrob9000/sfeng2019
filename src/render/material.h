@@ -24,7 +24,7 @@ struct t_material
 	/*
 	 * Tell the shader which stage of rendering we are at
 	 */
-	int render_stage_loc;
+	int loc_renderstage;
 
 	struct bitmap_desc {
 		int location;

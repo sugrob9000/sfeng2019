@@ -13,18 +13,13 @@ typedef GLuint t_shader_id;
  * Take attribute locations that are not taken by
  * (important) built-in attributes
  */
-constexpr GLuint attrib_loc_tangent = 1;
+constexpr GLuint ATTRIB_LOC_TANGENT = 1;
 
 struct t_material
 {
 	GLuint program;
 	GLuint frag;
 	GLuint vert;
-
-	/*
-	 * Tell the shader which stage of rendering we are at
-	 */
-	int loc_renderstage;
 
 	struct bitmap_desc {
 		int location;

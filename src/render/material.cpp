@@ -1,9 +1,11 @@
-#include "render.h"
-#include "material.h"
+#include "ent/lights.h"
 #include "inc_general.h"
 #include "inc_gl.h"
-#include "resource.h"
 #include "input/cmds.h"
+#include "material.h"
+#include "render.h"
+#include "resource.h"
+#include <cassert>
 
 t_shader_id compile_glsl (std::string path, GLenum type)
 {
@@ -125,8 +127,6 @@ void t_material::load (std::string path)
 				"failed to link:\n%s", path.c_str(), log);
 	}
 
-	loc_renderstage = glGetUniformLocation(program, "stage");
-
 	for (const bitmap_desc_interm& d: bitmaps_interm) {
 		int location = glGetUniformLocation(program,
 				d.loc_name.c_str());
@@ -140,7 +140,7 @@ void t_material::load (std::string path)
 		}
 	}
 
-	glBindAttribLocation(program, attrib_loc_tangent, "world_tangent");
+	glBindAttribLocation(program, ATTRIB_LOC_TANGENT, "world_tangent");
 }
 
 /*
@@ -163,12 +163,15 @@ void t_material::apply (t_render_stage s) const
 	latest_render_stage = s;
 
 	glUseProgram(program);
-	for (int i = 0; i < bitmaps.size(); i++) {
-		glActiveTexture(GL_TEXTURE0 + i);
+	for (int i = 2; i < bitmaps.size(); i++) {
+		glActiveTexture(GL_TEXTURE2 + i);
 		glBindTexture(GL_TEXTURE_2D, bitmaps[i].texid);
-		glUniform1i(bitmaps[i].location, i);
+		glUniform1i(bitmaps[i].location, i + 2);
 	}
-	glUniform1ui(loc_renderstage, s);
+
+	glUniform1ui(UNIFORM_LOC_RENDER_STAGE, s);
+
+	e_light::apply_uniforms();
 }
 
 int get_surface_gl_format (SDL_Surface* s)

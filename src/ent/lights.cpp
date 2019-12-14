@@ -6,6 +6,7 @@
 
 std::vector<e_light*> lights;
 
+/* ============= e_light code ============= */
 
 FILL_IO_DATA (light) { }
 
@@ -14,7 +15,9 @@ e_light::e_light ()
 	lights.push_back(this);
 }
 
-void e_light::think () { }
+void e_light::think ()
+{
+}
 
 void e_light::apply_keyvals (const t_ent_keyvals& kv)
 {
@@ -26,11 +29,39 @@ void e_light::apply_keyvals (const t_ent_keyvals& kv)
 	KV_TRY_GET(kv["reach"],
 		reach = atof(val.c_str());,
 		reach = 500.0; );
+	KV_TRY_GET(kv["rgb"],
+		atovec3(val, rgb);,
+		rgb = vec3(0.5); );
 }
 
 void e_light::render (t_render_stage s) const { }
 
 t_bound_box e_light::get_bbox () const { return { }; }
+
+/* ======================================== */
+
+float e_light::uniform_viewmat[16];
+vec3 e_light::uniform_rgb;
+vec3 e_light::uniform_pos;
+
+void e_light::apply_uniforms ()
+{
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, lspace_fbo_texture);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D,
+			sspace_fbo_texture[current_sspace_fbo ^ 1]);
+
+	glUniform1i(UNIFORM_LOC_DEPTH_MAP, 0);
+	glUniform1i(UNIFORM_LOC_PREV_SHADOWMAP, 1);
+
+	glUniformMatrix4fv(UNIFORM_LOC_LIGHT_VIEWMAT, 1, false,
+			uniform_viewmat);
+
+	glUniform3fv(UNIFORM_LOC_LIGHT_POS, 1, uniform_pos.data());
+
+	glUniform3fv(UNIFORM_LOC_LIGHT_RGB, 1, uniform_rgb.data());
+}
 
 /*
  * Light space framebuffer
@@ -42,8 +73,9 @@ constexpr int lspace_fbo_size = 1024;
 /*
  * Screen space framebuffer
  */
-GLuint sspace_fbo;
-GLuint sspace_fbo_texture;
+GLuint sspace_fbo[2];
+GLuint sspace_fbo_texture[2];
+int current_sspace_fbo = 0;
 int sspace_fbo_width;
 int sspace_fbo_height;
 
@@ -75,31 +107,31 @@ void init_lighting ()
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
 			GL_TEXTURE_2D, lspace_fbo_texture, 0);
 
-	// screen space framebuffer
-	glGenFramebuffers(1, &sspace_fbo);
-	glBindFramebuffer(GL_FRAMEBUFFER, sspace_fbo);
+	// screen space framebuffers
 
-	glGenTextures(1, &sspace_fbo_texture);
-	glBindTexture(GL_TEXTURE_2D, sspace_fbo_texture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
-			sspace_fbo_width, sspace_fbo_height,
-			0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
-	set_fb_tex_params();
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-			GL_TEXTURE_2D, sspace_fbo_texture, 0);
+	glGenFramebuffers(2, sspace_fbo);
+	glGenTextures(2, sspace_fbo_texture);
+	GLuint depth_rbo[2];
+	glGenRenderbuffers(2, depth_rbo);
 
-	GLuint depth_rbo;
-	glGenRenderbuffers(1, &depth_rbo);
-	glBindRenderbuffer(GL_RENDERBUFFER, depth_rbo);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT,
-			sspace_fbo_width, sspace_fbo_height);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-			GL_RENDERBUFFER, depth_rbo);
+	for (int i: { 0, 1 }) {
+		glBindFramebuffer(GL_FRAMEBUFFER, sspace_fbo[i]);
+		glBindTexture(GL_TEXTURE_2D, sspace_fbo_texture[i]);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
+				sspace_fbo_width, sspace_fbo_height,
+				0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+		set_fb_tex_params();
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+				GL_TEXTURE_2D, sspace_fbo_texture[i], 0);
+		glBindRenderbuffer(GL_RENDERBUFFER, depth_rbo[i]);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT,
+				sspace_fbo_width, sspace_fbo_height);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+				GL_RENDERBUFFER, depth_rbo[i]);
+	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
-
-float lspace_matrix[16];
 
 void fill_depth_map (const e_light* l)
 {
@@ -127,8 +159,12 @@ void fill_depth_map (const e_light* l)
 
 	for (const e_base* e: ents.vec)
 		e->render(LIGHTING_LSPACE);
+	for (const oct_node* node: visible_leaves)
+		node->render_tris(LIGHTING_LSPACE);
 
-	glGetFloatv(GL_MODELVIEW_MATRIX, lspace_matrix);
+	glGetFloatv(GL_MODELVIEW_MATRIX, e_light::uniform_viewmat);
+	e_light::uniform_rgb = l->rgb;
+	e_light::uniform_pos = l->pos;
 
 	glPopMatrix();
 	glMatrixMode(GL_PROJECTION);
@@ -137,7 +173,9 @@ void fill_depth_map (const e_light* l)
 
 void compose_add_depth_map ()
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, sspace_fbo);
+	current_sspace_fbo ^= 1;
+
+	glBindFramebuffer(GL_FRAMEBUFFER, sspace_fbo[current_sspace_fbo]);
 	glViewport(0, 0, sspace_fbo_width, sspace_fbo_height);
 
 	glEnable(GL_CULL_FACE);
@@ -156,6 +194,12 @@ void compose_add_depth_map ()
 
 void compute_lighting ()
 {
+	glClearColor(0.0, 0.0, 0.0, 0.0);
+	for (int i: { 0, 1 }) {
+		glBindFramebuffer(GL_FRAMEBUFFER, sspace_fbo[i]);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	}
+
 	for (const e_light* l: lights) {
 		fill_depth_map(l);
 		compose_add_depth_map();

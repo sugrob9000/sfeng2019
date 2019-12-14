@@ -1,14 +1,27 @@
 #version 130
+#extension GL_ARB_explicit_uniform_location : require
+#extension GL_ARB_explicit_attrib_location : require
 
 /* The user shader which links against the lib should implement these */
 lowp vec4 final_shade ();
 vec3 surface_normal ();
 
-/* Branch on stage in main - shouldn't be that slow */
+/*
+ * The locations must match the constants UNIFORM_LOC_@
+ * specified in the source!
+ */
 #define LIGHTING_LSPACE 0u
 #define LIGHTING_SSPACE 1u
 #define SHADE_FINAL 2u
-uniform uint stage;
+layout (location = 0) uniform uint stage;
+
+layout (location = 1) uniform sampler2D depth_map;
+layout (location = 2) uniform sampler2D prev_shadow_map;
+
+layout (location = 3) uniform vec3 light_pos;
+layout (location = 6) uniform vec3 light_rgb;
+layout (location = 9) uniform mat4 light_view;
+
 
 in vec3 world_normal;
 in vec3 world_pos;
@@ -33,20 +46,12 @@ void main ()
 	}
 }
 
-uniform mat4 lspace;
-uniform sampler2D depth_map;
-uniform sampler2D prev_shadow_map;
-uniform vec3 light_pos;
-uniform vec3 light_color;
-
 in vec4 lspace_pos;
 in vec4 sspace_pos;
 
 vec3 sspace_light ()
 {
-	vec3 sn = normalize(surface_normal());
-	vec3 norm = TBN * sn;
-
+	vec3 norm = TBN * normalize(surface_normal());
 	vec3 lcoord = lspace_pos.xyz / lspace_pos.w;
 
 	float bright = clamp(1.0 - length(lcoord.xy), 0.0, 1.0);
@@ -69,5 +74,5 @@ vec3 sspace_light ()
 	scoord *= 0.5;
 	scoord += 0.5;
 
-	return light_color * illum + texture(prev_shadow_map, scoord.xy).rgb;
+	return light_rgb * illum + texture(prev_shadow_map, scoord.xy).rgb;
 }

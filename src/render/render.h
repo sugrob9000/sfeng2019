@@ -13,6 +13,7 @@ enum t_render_stage: uint32_t
 
 	NUM_RENDER_STAGES
 };
+constexpr int UNIFORM_LOC_RENDER_STAGE = 0;
 
 struct t_camera
 {

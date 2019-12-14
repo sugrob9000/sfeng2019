@@ -11,15 +11,14 @@ out vec4 lspace_pos;
 out vec4 sspace_pos;
 
 attribute vec3 world_tangent;
-attribute vec3 world_bitangent;
 out mat3 TBN;
 
-const uint LIGHTING_LSPACE = 0u;
-const uint LIGHTING_SSPACE = 1u;
-const uint SHADE_FINAL = 2u;
+#define LIGHTING_LSPACE 0u
+#define LIGHTING_SSPACE 1u
+#define SHADE_FINAL 2u
 uniform uint stage;
 
-uniform mat4 lspace_model;
+uniform mat4 light_view;
 
 void main ()
 {
@@ -31,11 +30,11 @@ void main ()
 	world_pos = (gl_ModelViewMatrix * gl_Vertex).xyz;
 
 	if (stage == LIGHTING_SSPACE) {
+		vec3 bitangent = cross(world_normal, world_tangent);
 		TBN = mat3(
 			(gl_ModelViewMatrix * vec4(world_tangent, 0.0)).xyz,
-			(gl_ModelViewMatrix * vec4(world_bitangent, 0.0)).xyz,
-			world_normal);
+			bitangent, world_normal);
 		sspace_pos = gl_Position;
-		lspace_pos = lspace_model * gl_Vertex;
+		lspace_pos = light_view * gl_Vertex;
 	}
 }

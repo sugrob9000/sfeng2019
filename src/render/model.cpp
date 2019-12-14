@@ -18,7 +18,7 @@ void t_model_mem::gl_send_triangle (int tri_id) const
 		const vec3& tg = vertices[idx].tangent;
 
 		glNormal3f(n.x, n.y, n.z);
-		glVertexAttrib3f(attrib_loc_tangent, tg.x, tg.y, tg.z);
+		glVertexAttrib3f(ATTRIB_LOC_TANGENT, tg.x, tg.y, tg.z);
 		glTexCoord2f(t.u, 1.0 - t.v);
 		glVertex3f(p.x, p.y, p.z);
 	}

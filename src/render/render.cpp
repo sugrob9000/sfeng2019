@@ -132,11 +132,13 @@ void render_all ()
 	sprintf(str, "%f ms", last_frame_sec * 1000.0);
 	draw_text(str, -1, -1 + 0.06, 0.025, 0.05);
 
+	debug_texture_onscreen(sspace_fbo_texture[current_sspace_fbo]);
+	// debug_texture_onscreen(lspace_fbo_texture);
+
 	if (console_active)
 		console_render();
 
 	last_frame_sec = cr::duration<float>(sc::now() - frame_start).count();
-
 	SDL_GL_SwapWindow(sdlcont.window);
 }
 

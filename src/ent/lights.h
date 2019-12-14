@@ -13,18 +13,42 @@ class e_light: public e_base
 
 	float cone_angle;
 	float reach;
+	vec3 rgb;
 
 	SDL_Color color;
 
 	e_light ();
 
 	ENT_MEMBERS (light)
+
+	/*
+	 * These get sent to the shader as one uniform.
+	 * Note that we don't need cone_angle or ang in here
+	 */
+	static float uniform_viewmat[16];
+	static vec3 uniform_rgb;
+	static vec3 uniform_pos;
+
+	static void apply_uniforms ();
 };
 
 constexpr float LIGHT_Z_NEAR = 10.0;
 
+/*
+ * !!! These must match what is found in lib shaders !!!
+ */
+constexpr float UNIFORM_LOC_DEPTH_MAP = 1;
+constexpr float UNIFORM_LOC_PREV_SHADOWMAP = 2;
+
+constexpr float UNIFORM_LOC_LIGHT_POS = 3;
+constexpr float UNIFORM_LOC_LIGHT_RGB = 6;
+constexpr float UNIFORM_LOC_LIGHT_VIEWMAT = 9;
+
+
+
 extern GLuint lspace_fbo_texture;
-extern GLuint sspace_fbo_texture;
+extern GLuint sspace_fbo_texture[2];
+extern int current_sspace_fbo;
 
 extern std::vector<e_light*> lights;
 

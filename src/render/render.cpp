@@ -126,14 +126,13 @@ void render_all ()
 	glDisable(GL_DEPTH_TEST);
 	glUseProgram(0);
 
+	// debug_texture_onscreen(sspace_fbo_texture[current_sspace_fbo]);
+
 	char str[128];
 	sprintf(str, "%i leaves", (int) visible_leaves.size());
 	draw_text(str, -1, -1, 0.025, 0.05);
 	sprintf(str, "%f ms", last_frame_sec * 1000.0);
 	draw_text(str, -1, -1 + 0.06, 0.025, 0.05);
-
-	debug_texture_onscreen(sspace_fbo_texture[current_sspace_fbo]);
-	// debug_texture_onscreen(lspace_fbo_texture);
 
 	if (console_active)
 		console_render();
@@ -419,6 +418,9 @@ void debug_texture_onscreen (GLuint texture)
 	glEnable(GL_TEXTURE_2D);
 
 	glPushMatrix();
+
+	glScalef(0.5, 0.5, 1.0);
+
 	glColor4f(1.0, 1.0, 1.0, 1.0);
 	glBegin(GL_QUADS);
 	glTexCoord2i(0, 0);

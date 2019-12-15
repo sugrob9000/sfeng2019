@@ -6,6 +6,8 @@ uniform sampler2D map_ao;
 
 in vec2 tex_crd;
 
+vec3 get_illum ();
+
 vec3 surface_normal ()
 {
 	vec3 f = texture(map_normal, tex_crd * 10).rgb;
@@ -18,7 +20,8 @@ vec4 final_shade ()
 	vec2 t = tex_crd * 10;
 	t += surface_normal().xy;
 	vec4 clr = texture(map_diffuse, t);
-	clr.rgb *= ao;
+
+	clr.rgb *= ao * get_illum();
 	return clr;
 }
 

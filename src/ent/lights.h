@@ -28,8 +28,6 @@ class e_light: public e_base
 	static float uniform_viewmat[16];
 	static vec3 uniform_rgb;
 	static vec3 uniform_pos;
-
-	static void apply_uniforms ();
 };
 
 constexpr float LIGHT_Z_NEAR = 10.0;
@@ -37,14 +35,16 @@ constexpr float LIGHT_Z_NEAR = 10.0;
 /*
  * !!! These must match what is found in lib shaders !!!
  */
-constexpr float UNIFORM_LOC_DEPTH_MAP = 1;
-constexpr float UNIFORM_LOC_PREV_SHADOWMAP = 2;
+constexpr float UNIFORM_LOC_PREV_SHADOWMAP = 1;
 
+constexpr float UNIFORM_LOC_DEPTH_MAP = 2;
 constexpr float UNIFORM_LOC_LIGHT_POS = 3;
 constexpr float UNIFORM_LOC_LIGHT_RGB = 6;
 constexpr float UNIFORM_LOC_LIGHT_VIEWMAT = 9;
 
+const vec3 ambient = { 0.4, 0.4, 0.4 };
 
+void light_apply_uniforms (t_render_stage s);
 
 extern GLuint lspace_fbo_texture;
 extern GLuint sspace_fbo_texture[2];

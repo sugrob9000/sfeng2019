@@ -140,7 +140,7 @@ void t_material::load (std::string path)
 		}
 	}
 
-	glBindAttribLocation(program, ATTRIB_LOC_TANGENT, "world_tangent");
+	glBindAttribLocation(program, ATTRIB_LOC_TANGENT, "tangent");
 }
 
 /*
@@ -158,20 +158,19 @@ void t_material::apply (t_render_stage s) const
 {
 	if (latest_material == this && s == latest_render_stage)
 		return;
-
 	latest_material = this;
 	latest_render_stage = s;
 
 	glUseProgram(program);
-	for (int i = 2; i < bitmaps.size(); i++) {
-		glActiveTexture(GL_TEXTURE2 + i);
+	for (int i = 0; i < bitmaps.size(); i++) {
+		glActiveTexture(GL_TEXTURE0 + i + 2);
 		glBindTexture(GL_TEXTURE_2D, bitmaps[i].texid);
 		glUniform1i(bitmaps[i].location, i + 2);
 	}
 
 	glUniform1ui(UNIFORM_LOC_RENDER_STAGE, s);
 
-	e_light::apply_uniforms();
+	light_apply_uniforms(s);
 }
 
 int get_surface_gl_format (SDL_Surface* s)

@@ -1,5 +1,5 @@
-bind Q exit
 bind Escape exit
+bind Q exit
 
 bind R console_open
 
@@ -14,5 +14,6 @@ bind Left_Ctrl cam_decelerate
 bind Z vis_occluders
 bind X vis_worldwireframe
 bind C vis_leaves
+bind V vis_disable
 
 map map1

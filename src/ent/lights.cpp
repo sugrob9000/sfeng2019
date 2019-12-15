@@ -3,6 +3,7 @@
 #include "render/render.h"
 #include "render/vis.h"
 #include "render/resource.h"
+#include "input/cmds.h"
 
 std::vector<e_light*> lights;
 
@@ -15,9 +16,7 @@ e_light::e_light ()
 	lights.push_back(this);
 }
 
-void e_light::think ()
-{
-}
+void e_light::think () { }
 
 void e_light::apply_keyvals (const t_ent_keyvals& kv)
 {
@@ -43,25 +42,6 @@ t_bound_box e_light::get_bbox () const { return { }; }
 float e_light::uniform_viewmat[16];
 vec3 e_light::uniform_rgb;
 vec3 e_light::uniform_pos;
-
-void e_light::apply_uniforms ()
-{
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, lspace_fbo_texture);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D,
-			sspace_fbo_texture[current_sspace_fbo ^ 1]);
-
-	glUniform1i(UNIFORM_LOC_DEPTH_MAP, 0);
-	glUniform1i(UNIFORM_LOC_PREV_SHADOWMAP, 1);
-
-	glUniformMatrix4fv(UNIFORM_LOC_LIGHT_VIEWMAT, 1, false,
-			uniform_viewmat);
-
-	glUniform3fv(UNIFORM_LOC_LIGHT_POS, 1, uniform_pos.data());
-
-	glUniform3fv(UNIFORM_LOC_LIGHT_RGB, 1, uniform_rgb.data());
-}
 
 /*
  * Light space framebuffer
@@ -90,8 +70,10 @@ void init_lighting ()
 				GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D,
 				GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
+				GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
+				GL_CLAMP_TO_EDGE);
 	};
 
 	// light space framebuffer
@@ -108,7 +90,6 @@ void init_lighting ()
 			GL_TEXTURE_2D, lspace_fbo_texture, 0);
 
 	// screen space framebuffers
-
 	glGenFramebuffers(2, sspace_fbo);
 	glGenTextures(2, sspace_fbo_texture);
 	GLuint depth_rbo[2];
@@ -137,12 +118,8 @@ void fill_depth_map (const e_light* l)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, lspace_fbo);
 	glViewport(0, 0, lspace_fbo_size, lspace_fbo_size);
-	glClear(GL_DEPTH_BUFFER_BIT);
 	glDepthMask(GL_TRUE);
 	glDepthFunc(GL_LESS);
-
-	// GL_PROJECTION and GL_MODELVIEW in this function are
-	// as meaningless as MTX_* - we only send one matrix
 
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
@@ -157,14 +134,15 @@ void fill_depth_map (const e_light* l)
 	rotate_gl_matrix(l->ang);
 	translate_gl_matrix(-l->pos);
 
-	for (const e_base* e: ents.vec)
-		e->render(LIGHTING_LSPACE);
+	glClear(GL_DEPTH_BUFFER_BIT);
+
 	for (const oct_node* node: visible_leaves)
 		node->render_tris(LIGHTING_LSPACE);
+	draw_visible_entities(LIGHTING_LSPACE);
 
 	glGetFloatv(GL_MODELVIEW_MATRIX, e_light::uniform_viewmat);
-	e_light::uniform_rgb = l->rgb;
 	e_light::uniform_pos = l->pos;
+	e_light::uniform_rgb = l->rgb;
 
 	glPopMatrix();
 	glMatrixMode(GL_PROJECTION);
@@ -182,6 +160,7 @@ void compose_add_depth_map ()
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	glDepthMask(GL_TRUE);
+
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
 	glMatrixMode(GL_MODELVIEW);
@@ -192,13 +171,40 @@ void compose_add_depth_map ()
 	draw_visible_entities(LIGHTING_SSPACE);
 }
 
+void light_apply_uniforms (t_render_stage s)
+{
+	if (s == LIGHTING_LSPACE)
+		return;
+
+	int shadowmap;
+
+	if (s == LIGHTING_SSPACE) {
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, lspace_fbo_texture);
+		glUniform1i(UNIFORM_LOC_DEPTH_MAP, 1);
+
+		glUniformMatrix4fv(UNIFORM_LOC_LIGHT_VIEWMAT, 1, false,
+				e_light::uniform_viewmat);
+		glUniform3fv(UNIFORM_LOC_LIGHT_POS, 1, e_light::uniform_pos.data());
+		glUniform3fv(UNIFORM_LOC_LIGHT_RGB, 1, e_light::uniform_rgb.data());
+
+		shadowmap = sspace_fbo_texture[current_sspace_fbo ^ 1];
+	} else {
+		shadowmap = sspace_fbo_texture[current_sspace_fbo];
+	}
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, shadowmap);
+	glUniform1i(UNIFORM_LOC_PREV_SHADOWMAP, 0);
+}
+
 void compute_lighting ()
 {
-	glClearColor(0.0, 0.0, 0.0, 0.0);
-	for (int i: { 0, 1 }) {
-		glBindFramebuffer(GL_FRAMEBUFFER, sspace_fbo[i]);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	}
+	glClearColor(ambient.x, ambient.y, ambient.z, 1.0);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, sspace_fbo[0]);
+	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+	current_sspace_fbo = 0;
 
 	for (const e_light* l: lights) {
 		fill_depth_map(l);

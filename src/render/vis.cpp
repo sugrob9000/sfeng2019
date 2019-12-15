@@ -17,6 +17,9 @@ GLuint occ_planes_display_list;
 /* To query OpenGL as to whether the bounding box is visible */
 GLuint occ_queries[8];
 
+bool pass_all_nodes;
+COMMAND_SET_BOOL (vis_disable, pass_all_nodes);
+
 /*
  * Rather than being screen-sized, the occlusion framebuffer
  * is a smallish square
@@ -97,10 +100,7 @@ void oct_node::make_leaf ()
 
 	mat_buckets.reserve(m.size());
 
-	for (const auto& p: m) {
-		t_material* mat = p.first;
-		const std::vector<int>& tri_ids = p.second;
-
+	for (const auto& [mat, tri_ids]: m) {
 		unsigned int dlist = glGenLists(1);
 		glNewList(dlist, GL_COMPILE);
 		glBegin(GL_TRIANGLES);
@@ -142,6 +142,12 @@ void oct_node::check_visibility (const vec3& cam) const
 		return;
 	}
 
+	if (pass_all_nodes) {
+		for (int i = 0; i < 8; i++)
+			children[i]->check_visibility(cam);
+		return;
+	}
+
 	unsigned int child_pixels[8];
 
 	for (int i = 0; i < 8; i++) {
@@ -156,8 +162,8 @@ void oct_node::check_visibility (const vec3& cam) const
 	}
 
 	for (int i = 0; i < 8; i++) {
-		// we always want to render the node we are in, but its
-		// polygons may be culled, so pass it specially
+		// we always want to render the node we are in,
+		// but its quads may be culled, so pass it specially
 		if (child_pixels[i] > 0
 		|| children[i]->actual_bounds.point_in(cam))
 			children[i]->check_visibility(cam);
@@ -347,10 +353,10 @@ bool debug_draw_wireframe = false;
 bool debug_draw_occ_planes = false;
 bool debug_draw_leaves = false;
 bool debug_draw_leaves_nodepth = true;
-COMMAND_SET_BOOL(vis_worldwireframe, debug_draw_wireframe);
-COMMAND_SET_BOOL(vis_occluders, debug_draw_occ_planes);
-COMMAND_SET_BOOL(vis_leaves, debug_draw_leaves);
-COMMAND_SET_BOOL(vis_leaves_nodepth, debug_draw_leaves_nodepth);
+COMMAND_SET_BOOL (vis_worldwireframe, debug_draw_wireframe);
+COMMAND_SET_BOOL (vis_occluders, debug_draw_occ_planes);
+COMMAND_SET_BOOL (vis_leaves, debug_draw_leaves);
+COMMAND_SET_BOOL (vis_leaves_nodepth, debug_draw_leaves_nodepth);
 
 void vis_debug_renders ()
 {

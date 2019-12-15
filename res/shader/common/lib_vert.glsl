@@ -4,13 +4,13 @@
 vec4 vertex_transform (vec4 v);
 
 out vec2 tex_crd;
+out vec4 screen_crd;
 out vec3 world_normal;
 out vec3 world_pos;
 
 out vec4 lspace_pos;
-out vec4 sspace_pos;
 
-attribute vec3 world_tangent;
+attribute vec3 tangent;
 out mat3 TBN;
 
 #define LIGHTING_LSPACE 0u
@@ -29,12 +29,14 @@ void main ()
 	world_normal = (gl_ModelViewMatrix * vec4(gl_Normal, 0.0)).xyz;
 	world_pos = (gl_ModelViewMatrix * gl_Vertex).xyz;
 
+	screen_crd = gl_Position;
+
 	if (stage == LIGHTING_SSPACE) {
-		vec3 bitangent = cross(world_normal, world_tangent);
-		TBN = mat3(
-			(gl_ModelViewMatrix * vec4(world_tangent, 0.0)).xyz,
-			bitangent, world_normal);
-		sspace_pos = gl_Position;
-		lspace_pos = light_view * gl_Vertex;
+		vec3 w_tangent =
+			(gl_ModelViewMatrix * vec4(tangent, 0.0)).xyz;
+		vec3 w_bitangent = cross(world_normal, w_tangent);
+		TBN = mat3(w_tangent, w_bitangent, world_normal);
+
+		lspace_pos = light_view * gl_ModelViewMatrix * gl_Vertex;
 	}
 }

@@ -27,6 +27,8 @@ struct vec3
 	vec3& operator/= (float c);
 
 	vec3& norm ();
+
+	std::string to_string () const;
 };
 
 static_assert(offsetof(vec3, x) == offsetof(vec3, _d[0])
@@ -38,9 +40,7 @@ vec3 operator* (vec3 v, float c);
 vec3 operator* (float c, vec3 v);
 vec3 operator/ (vec3 v, float c);
 
-/*
- * Component-wise
- */
+/* Component-wise */
 vec3 operator+ (vec3 a, vec3 b);
 vec3 operator- (vec3 a, vec3 b);
 vec3 operator* (vec3 a, vec3 b);
@@ -48,9 +48,7 @@ vec3 operator/ (vec3 a, vec3 b);
 vec3 min (vec3 a, vec3 b);
 vec3 max (vec3 a, vec3 b);
 
-/*
- * Unary
- */
+/* Unary */
 vec3 operator- (vec3 v);
 vec3 operator+ (vec3 v);
 
@@ -61,9 +59,10 @@ std::istream& operator>> (std::istream& s, vec3& v);
 
 vec3 atovec3 (const char* s);
 void atovec3 (const char* s, vec3& v);
-
 vec3 atovec3 (const std::string& s);
 void atovec3 (const std::string& s, vec3& v);
+
+std::string to_string (const vec3& v);
 
 bool operator< (const vec3& a, const vec3& b);
 bool operator== (const vec3& a, const vec3& b);

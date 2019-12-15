@@ -46,6 +46,7 @@ extern std::priority_queue<t_signal> signals;
  */
 void add_signal (t_signal s);
 
+
 /*
  * With these the entity can set up its own signal handlers.
  *
@@ -59,17 +60,31 @@ void add_signal (t_signal s);
  *   and the entity implementation is only specializing it.
  */
 
+/* Internal! Below are wrappers to it that should actually be used */
+#define _SIGH_INTERNAL(entclass, name, proc) \
+	sigmap<e_##entclass>[#name] = (f_sig_handler) proc;
+
+
 #define FILL_IO_DATA(entclass) \
 	template <> void fill_io_data<e_##entclass> ()
 
 #define SIG_HANDLER(entclass, name) \
 	void sig_##entclass##_##name (e_##entclass* ent, std::string arg)
 
-#define SET_SIG_HANDLER(entclass, name)                       \
-	do {                                                  \
-		sigmap<e_##entclass>[#name] = (f_sig_handler) \
-				&sig_##entclass##_##name;     \
-	} while (false)
+#define SET_SIG_HANDLER(entclass, name) \
+	_SIGH_INTERNAL(entclass, name, sig_##entclass##_##name)
+
+/* Basic useful signal handlers. You entity should probably have them. */
+#define BASIC_SIG_HANDLERS(entclass)                                 \
+	do {                                                         \
+		_SIGH_INTERNAL(entclass, setpos, sig_base_setpos);   \
+		_SIGH_INTERNAL(entclass, setang, sig_base_setang);   \
+		_SIGH_INTERNAL(entclass, setname, sig_base_setname); \
+	} while (0)
+
+SIG_HANDLER (base, setpos);
+SIG_HANDLER (base, setang);
+SIG_HANDLER (base, setname);
 
 typedef void (*f_sig_handler) (e_base* ent, std::string arg);
 typedef std::map<std::string, f_sig_handler> t_sigmap;
@@ -83,7 +98,6 @@ typedef std::map<std::string, f_sig_handler> t_sigmap;
  */
 
 typedef std::map<std::string, std::vector<t_signal>> t_eventmap;
-
 
 template <class entclass> void fill_io_data ();
 template <class entclass> t_sigmap sigmap;

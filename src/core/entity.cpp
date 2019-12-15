@@ -42,19 +42,11 @@ void e_base::apply_basic_keyvals (const t_ent_keyvals& kv)
 		name = "");
 }
 
-
-template <class e_derived>
-e_base* ent_factory ()
-{
-	return new e_derived();
-}
-
 void fill_ent_registry ()
 {
-	#define ENTITY(name) {                           \
+	#define ENTITY(name)                             \
 		ent_reg[#name] = &ent_factory<e_##name>; \
-		fill_io_data<e_##name>();                \
-	}
+		fill_io_data<e_##name>();
 	#include "ent/ent_list.inc"
 	#undef ENTITY
 }

@@ -55,3 +55,20 @@ COMMAND_ROUTINE (signal)
 	t_signal s = { recipient, delay, signame, sigarg };
 	add_signal(s);
 }
+
+SIG_HANDLER (base, setpos)
+{
+	atovec3(arg, ent->pos);
+	ent->moved();
+}
+
+SIG_HANDLER (base, setang)
+{
+	atovec3(arg, ent->ang);
+	ent->moved();
+}
+
+SIG_HANDLER (base, setname)
+{
+	ent->set_name(arg);
+}

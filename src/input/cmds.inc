@@ -70,3 +70,9 @@ COMMAND (vis_occluders)
 COMMAND (vis_leaves)
 COMMAND (vis_leaves_nodepth)
 COMMAND (vis_disable)
+
+/*
+ * (Demo) Tell the entity called sun 
+ * to have the same pos and ang as camera
+ */
+COMMAND (sun_at_view)

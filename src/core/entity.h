@@ -74,11 +74,17 @@ class e_base
  * Mapping entity class names (such as prop)
  * to C++ classes
  */
-template <class e_derived> e_base* ent_factory ();
 typedef e_base* (*f_ent_spawner) ();
 typedef std::map<std::string, f_ent_spawner> t_ent_registry;
 extern t_ent_registry ent_reg;
 void fill_ent_registry ();
+
+template <class e_derived>
+e_base* ent_factory ()
+{
+	return new e_derived;
+}
+
 
 /*
  * A world's currently existing entities

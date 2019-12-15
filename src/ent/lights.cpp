@@ -9,7 +9,10 @@ std::vector<e_light*> lights;
 
 /* ============= e_light code ============= */
 
-FILL_IO_DATA (light) { }
+FILL_IO_DATA (light)
+{
+	BASIC_SIG_HANDLERS(light);
+}
 
 e_light::e_light ()
 {
@@ -183,10 +186,12 @@ void light_apply_uniforms (t_render_stage s)
 		glBindTexture(GL_TEXTURE_2D, lspace_fbo_texture);
 		glUniform1i(UNIFORM_LOC_DEPTH_MAP, 1);
 
-		glUniformMatrix4fv(UNIFORM_LOC_LIGHT_VIEWMAT, 1, false,
-				e_light::uniform_viewmat);
-		glUniform3fv(UNIFORM_LOC_LIGHT_POS, 1, e_light::uniform_pos.data());
-		glUniform3fv(UNIFORM_LOC_LIGHT_RGB, 1, e_light::uniform_rgb.data());
+		const float* pos = e_light::uniform_pos.data();
+		const float* rgb = e_light::uniform_rgb.data();
+		const float* mat = e_light::uniform_viewmat;
+		glUniformMatrix4fv(UNIFORM_LOC_LIGHT_VIEWMAT, 1, false, mat);
+		glUniform3fv(UNIFORM_LOC_LIGHT_POS, 1, pos);
+		glUniform3fv(UNIFORM_LOC_LIGHT_RGB, 1, rgb);
 
 		shadowmap = sspace_fbo_texture[current_sspace_fbo ^ 1];
 	} else {

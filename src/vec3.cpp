@@ -193,6 +193,17 @@ void atovec3 (const std::string& s, vec3& v)
 	sscanf(s.c_str(), "%f %f %f", &v.x, &v.y, &v.z);
 }
 
+std::string to_string (const vec3& v)
+{
+	return std::move(v.to_string());
+}
+
+std::string vec3::to_string () const
+{
+	using std::to_string;
+	return to_string(x) + ' ' + to_string(y) + ' ' + to_string(z);
+}
+
 
 bool operator== (const vec3& a, const vec3& b)
 {

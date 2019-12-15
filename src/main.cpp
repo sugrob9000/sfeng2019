@@ -5,8 +5,16 @@
 #include "input/input.h"
 #include "input/bind.h"
 #include "input/console.h"
+#include "input/cmds.h"
 
-#include <chrono>
+COMMAND_ROUTINE (sun_at_view)
+{
+	if (ev != PRESS)
+		return;
+
+	run_cmd_ext("signal 0 sun setpos " + camera.pos.to_string());
+	run_cmd_ext("signal 0 sun setang " + camera.ang.to_string());
+}
 
 int main (int argc, char** argv)
 {

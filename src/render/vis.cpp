@@ -187,9 +187,10 @@ void vis_fill_visible (const vec3& cam)
 
 	// walk the tree nodes which pass the z-test (and are on screen)
 	glDepthMask(GL_FALSE);
-	glEnable(GL_CULL_FACE);
 	visible_leaves.clear();
 	root->check_visibility(cam);
+
+	glEnable(GL_CULL_FACE);
 }
 
 
@@ -393,12 +394,9 @@ void vis_debug_renders ()
 
 		glDisable(GL_CULL_FACE);
 		glLineWidth(1.5);
-		for (const oct_node* leaf: visible_leaves) {
-			float r = leaf->entities_inside.empty() ? 0.0 : 1.0;
-			glColor4f(r, 0.0, 0.0, 0.3);
+		glColor4f(0.0, 0.0, 0.0, 0.3);
+		for (const oct_node* leaf: visible_leaves)
 			draw_cuboid(leaf->actual_bounds);
-		}
-
 		glLineWidth(1.0);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		glEnable(GL_DEPTH_TEST);

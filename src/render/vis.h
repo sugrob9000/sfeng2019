@@ -25,6 +25,7 @@ void vis_initialize_world (const std::string& path);
  *   into a single display list)
  */
 
+struct t_visible_set;
 struct oct_node
 {
 	/*
@@ -50,8 +51,7 @@ struct oct_node
 	void build (t_bound_box bounds, int level);
 	void make_leaf ();
 
-	void check_visibility (const vec3& cam) const;
-	void render_tris (t_render_stage s = SHADE_FINAL) const;
+	void check_visibility (const vec3& cam, t_visible_set& s) const;
 
 	std::vector<e_base*> entities_inside;
 	void requery_entity (e_base* e, const t_bound_box& b);
@@ -60,12 +60,16 @@ struct oct_node
 	~oct_node ();
 };
 
-extern std::vector<const oct_node*> visible_leaves;
+struct t_visible_set
+{
+	std::vector<const oct_node*> leaves;
 
-void vis_fill_visible (const vec3& cam);
+	void fill (const vec3& cam);
+	void render (t_render_stage s = SHADE_FINAL) const;
+	void render_debug () const;
+};
+extern t_visible_set visible_set;
+
 void vis_requery_entity (e_base* e);
-void draw_visible_entities (t_render_stage s);
-
-void vis_debug_renders ();
 
 #endif // VIS_H

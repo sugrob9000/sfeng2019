@@ -9,9 +9,10 @@ int oct_leaf_capacity = 0;
 int oct_max_depth = 0;
 
 oct_node* root;
+t_visible_set visible_set;
 
+/* Occlusion rendering for walking the tree */
 t_fbo occ_fbo;
-
 GLuint occ_shader_prog;
 GLuint occ_planes_display_list;
 /* To query OpenGL as to whether the bounding box is visible */
@@ -29,8 +30,6 @@ constexpr int occ_fbo_size = 256;
 
 t_bound_box world_bounds_override;
 t_model_mem world;
-
-std::vector<const oct_node*> visible_leaves;
 
 /*
  * The ID of the octant in which point is
@@ -114,14 +113,6 @@ void oct_node::make_leaf ()
 	}
 }
 
-void oct_node::render_tris (t_render_stage s) const
-{
-	for (const mat_group& gr: mat_buckets) {
-		gr.mat->apply(s);
-		glCallList(gr.display_list);
-	}
-}
-
 oct_node::oct_node ()
 {
 	is_leaf = true;
@@ -136,16 +127,16 @@ oct_node::~oct_node ()
 }
 
 
-void oct_node::check_visibility (const vec3& cam) const
+void oct_node::check_visibility (const vec3& cam, t_visible_set& s) const
 {
 	if (is_leaf) {
-		visible_leaves.push_back(this);
+		s.leaves.push_back(this);
 		return;
 	}
 
 	if (pass_all_nodes) {
 		for (int i = 0; i < 8; i++)
-			children[i]->check_visibility(cam);
+			children[i]->check_visibility(cam, s);
 		return;
 	}
 
@@ -167,11 +158,11 @@ void oct_node::check_visibility (const vec3& cam) const
 		// but its quads may be culled, so pass it specially
 		if (child_pixels[i] > 0
 		|| children[i]->actual_bounds.point_in(cam))
-			children[i]->check_visibility(cam);
+			children[i]->check_visibility(cam, s);
 	}
 }
 
-void vis_fill_visible (const vec3& cam)
+void t_visible_set::fill (const vec3& cam)
 {
 	// setup occlusion rendering
 	occ_fbo.apply();
@@ -187,8 +178,9 @@ void vis_fill_visible (const vec3& cam)
 
 	// walk the tree nodes which pass the z-test (and are on screen)
 	glDepthMask(GL_FALSE);
-	visible_leaves.clear();
-	root->check_visibility(cam);
+
+	leaves.clear();
+	root->check_visibility(cam, *this);
 
 	glEnable(GL_CULL_FACE);
 }
@@ -231,29 +223,36 @@ void vis_requery_entity (e_base* e)
 	root->requery_entity(e, e->get_bbox());
 }
 
-/*
- * When we walk the entities in the leaves like this, there
- *   is redundancy (multiple leaves that we see will touch
- *   the same entity), so we need to ensure each entity is
- *   drawn once.
- * So, define a guard key that is unique for each invocation
- *   of the function and use it to determine if we have already
- *   seen any particular entity in this invocation
- */
-void draw_visible_entities (t_render_stage s)
+
+void t_visible_set::render (t_render_stage s) const
 {
+	/*
+	 * When we walk the entities in the leaves like this, there
+	 *   is redundancy (multiple leaves that we see will touch
+	 *   the same entity), so we need to ensure each entity is
+	 *   drawn once.
+	 * So, define a guard key that is unique for each invocation
+	 *   and use it to determine if we have already
+	 *   seen any particular entity in this invocation
+	 */
 	static uint64_t guard_key = 0;
 	guard_key++;
 
-	for (const oct_node* l: visible_leaves) {
+	for (const oct_node* l: leaves) {
 		for (e_base* e: l->entities_inside) {
 			if (e->render_last_guard_key == guard_key)
 				continue;
 			e->render_last_guard_key = guard_key;
 			e->render(s);
 		}
+
+		for (const auto& gr: l->mat_buckets) {
+			gr.mat->apply(s);
+			glCallList(gr.display_list);
+		}
 	}
 }
+
 
 
 void read_world_vis_data (std::string path)
@@ -340,7 +339,7 @@ COMMAND_SET_BOOL (vis_occluders, debug_draw_occ_planes);
 COMMAND_SET_BOOL (vis_leaves, debug_draw_leaves);
 COMMAND_SET_BOOL (vis_leaves_nodepth, debug_draw_leaves_nodepth);
 
-void vis_debug_renders ()
+void t_visible_set::render_debug () const
 {
 	glUseProgram(0);
 
@@ -349,7 +348,7 @@ void vis_debug_renders ()
 		glDisable(GL_CULL_FACE);
 		glDisable(GL_DEPTH_TEST);
 		glColor4f(0.0, 0.0, 0.0, 0.5);
-		for (const oct_node* node: visible_leaves) {
+		for (const oct_node* node: leaves) {
 			for (const auto& gr: node->mat_buckets)
 				glCallList(gr.display_list);
 		}
@@ -376,7 +375,7 @@ void vis_debug_renders ()
 		glDisable(GL_CULL_FACE);
 		glLineWidth(1.5);
 		glColor4f(0.0, 0.0, 0.0, 0.3);
-		for (const oct_node* leaf: visible_leaves)
+		for (const oct_node* leaf: leaves)
 			draw_cuboid(leaf->actual_bounds);
 		glLineWidth(1.0);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

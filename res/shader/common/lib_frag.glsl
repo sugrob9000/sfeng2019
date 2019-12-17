@@ -26,6 +26,7 @@ in vec3 world_pos;
 in mat3 TBN;
 in vec4 screen_crd;
 
+vec3 get_illum ();
 vec3 sspace_light ();
 void main ()
 {
@@ -39,6 +40,7 @@ void main ()
 	case SHADE_FINAL:
 		// call the actual user shader
 		gl_FragColor = final_shade();
+		gl_FragColor.rgb *= get_illum();
 		break;
 	default:
 		gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
@@ -47,7 +49,6 @@ void main ()
 
 in vec4 lspace_pos;
 
-vec3 get_illum ();
 vec3 sspace_light ()
 {
 	vec3 norm = TBN * normalize(surface_normal());

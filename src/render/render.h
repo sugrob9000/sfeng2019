@@ -61,6 +61,8 @@ void upd_camera_pos ();
 
 void rotate_gl_matrix (vec3 angs);
 void translate_gl_matrix (vec3 pos);
+void push_reset_matrices ();
+void pop_matrices ();
 
 void init_render ();
 void render_all ();

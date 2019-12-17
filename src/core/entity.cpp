@@ -1,6 +1,7 @@
 #include "entity.h"
 #include "error.h"
 #include "render/vis.h"
+#include "ent/ent_headers.inc"
 
 t_ent_registry ent_reg;
 

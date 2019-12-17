@@ -51,7 +51,7 @@ class e_base
 	 * purposes such as vis. Call this on an entity whenever its
 	 * output of get_bbox() changes
 	 */
-	void moved ();
+	virtual void moved ();
 
 	/* Used in vis to avoid redundant rendering */
 	uint64_t render_last_guard_key;
@@ -97,7 +97,5 @@ struct t_entities
 	e_base* find_by_name (std::string name);
 };
 extern t_entities ents;
-
-#include "ent/ent_headers.inc"
 
 #endif // ENTITY_H

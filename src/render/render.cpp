@@ -1,94 +1,13 @@
-#include "core/core.h"
-#include "core/entity.h"
-#include "inc_general.h"
-#include "inc_gl.h"
+#include "ent/lights.h"
 #include "input/cmds.h"
 #include "input/console.h"
-#include "input/input.h"
-#include "render/material.h"
-#include "render/render.h"
-#include "render/resource.h"
-#include "render/vis.h"
-#include <chrono>
+#include "render.h"
+#include "resource.h"
+#include "vis.h"
 #include <cassert>
+#include <chrono>
 
 t_sdlcontext sdlcont;
-
-constexpr short cam_move_f = 0;
-constexpr short cam_move_b = 1;
-constexpr short cam_move_l = 2;
-constexpr short cam_move_r = 3;
-bool cam_move_flags[4];
-t_camera camera;
-
-bool cam_speedup = false;
-bool cam_slowdown = false;
-COMMAND_SET_BOOL (cam_accelerate, cam_speedup);
-COMMAND_SET_BOOL (cam_decelerate, cam_slowdown);
-
-void upd_camera_pos ()
-{
-	float speed = 4.0;
-	if (cam_speedup)
-		speed *= 2.5;
-	if (cam_slowdown)
-		speed *= 0.4;
-
-	vec3 delta;
-	auto& flags = cam_move_flags;
-	t_camera& cam = camera;
-
-	if (cam.ang.x < -90.0)
-		cam.ang.x = -90.0;
-	if (cam.ang.x > 90.0)
-		cam.ang.x = 90.0;
-
-	float sz = sinf(cam.ang.z * DEG_TO_RAD);
-	float sx = sinf(cam.ang.x * DEG_TO_RAD);
-	float cz = cosf(cam.ang.z * DEG_TO_RAD);
-
-	if (flags[cam_move_f])
-		delta += vec3(sz, cz, -sx);
-	if (flags[cam_move_b])
-		delta -= vec3(sz, cz, -sx);
-	if (flags[cam_move_l])
-		delta -= vec3(cz, -sz, 0.0);
-	if (flags[cam_move_r])
-		delta += vec3(cz, -sz, 0.0);
-
-	delta.norm();
-	cam.pos += delta * speed;
-}
-
-MOUSEMOVE_ROUTINE (mousemove_camera)
-{
-	camera.ang.x += dy;
-	camera.ang.z += dx;
-}
-
-COMMAND_ROUTINE (cam_move)
-{
-	if (args.empty())
-		return;
-
-	auto& flags = cam_move_flags;
-	bool f = (ev == PRESS);
-
-	switch (tolower(args[0][0])) {
-	case 'f':
-		flags[cam_move_f] = f;
-		break;
-	case 'b':
-		flags[cam_move_b] = f;
-		break;
-	case 'l':
-		flags[cam_move_l] = f;
-		break;
-	case 'r':
-		flags[cam_move_r] = f;
-		break;
-	}
-}
 
 void draw_sky ();
 void render_all ()
@@ -101,7 +20,7 @@ void render_all ()
 	material_barrier();
 
 	camera.apply();
-	vis_fill_visible(camera.pos);
+	visible_set.fill(camera.pos);
 
 	compute_lighting();
 
@@ -118,11 +37,8 @@ void render_all ()
 	glMatrixMode(MTX_MODEL);
 
 	draw_sky();
-	for (const oct_node* node: visible_leaves)
-		node->render_tris(SHADE_FINAL);
-	draw_visible_entities(SHADE_FINAL);
-
-	vis_debug_renders();
+	visible_set.render(SHADE_FINAL);
+	visible_set.render_debug();
 
 	// HUD
 	glMatrixMode(MTX_VIEWPROJ);
@@ -133,7 +49,7 @@ void render_all ()
 	glUseProgram(0);
 
 	char str[128];
-	sprintf(str, "%i leaves", (int) visible_leaves.size());
+	sprintf(str, "%i leaves", (int) visible_set.leaves.size());
 	draw_text(str, -1, -1, 0.025, 0.05);
 	sprintf(str, "%f ms", last_frame_sec * 1000.0);
 	draw_text(str, -1, -1 + 0.06, 0.025, 0.05);
@@ -239,6 +155,24 @@ void rotate_gl_matrix (vec3 angs)
 void translate_gl_matrix (vec3 pos)
 {
 	glTranslatef(pos.x, pos.y, pos.z);
+}
+
+void push_reset_matrices ()
+{
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	glLoadIdentity();
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glLoadIdentity();
+}
+
+void pop_matrices ()
+{
+	glMatrixMode(GL_MODELVIEW);
+	glPopMatrix();
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
 }
 
 
@@ -505,3 +439,80 @@ void t_fbo::apply () const
 	glViewport(0, 0, width, height);
 }
 
+
+
+constexpr short cam_move_f = 0;
+constexpr short cam_move_b = 1;
+constexpr short cam_move_l = 2;
+constexpr short cam_move_r = 3;
+bool cam_move_flags[4];
+t_camera camera;
+
+bool cam_speedup = false;
+bool cam_slowdown = false;
+COMMAND_SET_BOOL (cam_accelerate, cam_speedup);
+COMMAND_SET_BOOL (cam_decelerate, cam_slowdown);
+
+void upd_camera_pos ()
+{
+	float speed = 4.0;
+	if (cam_speedup)
+		speed *= 2.5;
+	if (cam_slowdown)
+		speed *= 0.4;
+
+	vec3 delta;
+	auto& flags = cam_move_flags;
+	t_camera& cam = camera;
+
+	if (cam.ang.x < -90.0)
+		cam.ang.x = -90.0;
+	if (cam.ang.x > 90.0)
+		cam.ang.x = 90.0;
+
+	float sz = sinf(cam.ang.z * DEG_TO_RAD);
+	float sx = sinf(cam.ang.x * DEG_TO_RAD);
+	float cz = cosf(cam.ang.z * DEG_TO_RAD);
+
+	if (flags[cam_move_f])
+		delta += vec3(sz, cz, -sx);
+	if (flags[cam_move_b])
+		delta -= vec3(sz, cz, -sx);
+	if (flags[cam_move_l])
+		delta -= vec3(cz, -sz, 0.0);
+	if (flags[cam_move_r])
+		delta += vec3(cz, -sz, 0.0);
+
+	delta.norm();
+	cam.pos += delta * speed;
+}
+
+MOUSEMOVE_ROUTINE (mousemove_camera)
+{
+	camera.ang.x += dy;
+	camera.ang.z += dx;
+}
+
+COMMAND_ROUTINE (cam_move)
+{
+	if (args.empty())
+		return;
+
+	auto& flags = cam_move_flags;
+	bool f = (ev == PRESS);
+
+	switch (tolower(args[0][0])) {
+	case 'f':
+		flags[cam_move_f] = f;
+		break;
+	case 'b':
+		flags[cam_move_b] = f;
+		break;
+	case 'l':
+		flags[cam_move_l] = f;
+		break;
+	case 'r':
+		flags[cam_move_r] = f;
+		break;
+	}
+}

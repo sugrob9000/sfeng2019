@@ -3,6 +3,7 @@
 
 #include "core/entity.h"
 #include "render/render.h"
+#include "render/vis.h"
 
 /*
  * Directional light
@@ -15,11 +16,14 @@ class e_light: public e_base
 	float reach;
 	vec3 rgb;
 
-	SDL_Color color;
+	t_visible_set vis;
 
 	e_light ();
 
-	ENT_MEMBERS (light)
+	ENT_MEMBERS (light);
+	virtual void moved ();
+
+	void view () const;
 
 	/*
 	 * These get sent to the shader as one uniform.

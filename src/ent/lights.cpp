@@ -19,6 +19,17 @@ e_light::e_light ()
 	lights.push_back(this);
 }
 
+void e_light::moved ()
+{
+	e_base::moved();
+
+	// update visible set
+	push_reset_matrices();
+	view();
+	vis.fill(pos);
+	pop_matrices();
+}
+
 void e_light::think () { }
 
 void e_light::apply_keyvals (const t_ent_keyvals& kv)
@@ -64,38 +75,31 @@ void init_lighting ()
 	}
 }
 
+void e_light::view () const
+{
+	gluPerspective(cone_angle * 2.0, 1.0, LIGHT_Z_NEAR, reach);
+	glRotatef(-90.0, 1.0, 0.0, 0.0);
+	rotate_gl_matrix(ang);
+	translate_gl_matrix(-pos);
+}
+
 void fill_depth_map (const e_light* l)
 {
 	lspace_fbo.apply();
 	glDepthMask(GL_TRUE);
 	glDepthFunc(GL_LESS);
 
-	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-	glLoadIdentity();
-
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-
-	glLoadIdentity();
-	gluPerspective(l->cone_angle * 2.0, 1.0, LIGHT_Z_NEAR, l->reach);
-	glRotatef(-90.0, 1.0, 0.0, 0.0);
-	rotate_gl_matrix(l->ang);
-	translate_gl_matrix(-l->pos);
+	push_reset_matrices();
+	l->view();
 
 	glClear(GL_DEPTH_BUFFER_BIT);
-
-	for (const oct_node* node: visible_leaves)
-		node->render_tris(LIGHTING_LSPACE);
-	draw_visible_entities(LIGHTING_LSPACE);
+	l->vis.render(LIGHTING_LSPACE);
 
 	glGetFloatv(GL_MODELVIEW_MATRIX, e_light::uniform_viewmat);
 	e_light::uniform_pos = l->pos;
 	e_light::uniform_rgb = l->rgb;
 
-	glPopMatrix();
-	glMatrixMode(GL_PROJECTION);
-	glPopMatrix();
+	pop_matrices();
 }
 
 void compose_add_depth_map ()
@@ -114,9 +118,7 @@ void compose_add_depth_map ()
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-	for (const oct_node* node: visible_leaves)
-		node->render_tris(LIGHTING_SSPACE);
-	draw_visible_entities(LIGHTING_SSPACE);
+	visible_set.render(LIGHTING_SSPACE);
 }
 
 void light_apply_uniforms (t_render_stage s)

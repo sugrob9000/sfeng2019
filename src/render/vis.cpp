@@ -10,13 +10,14 @@ int oct_max_depth = 0;
 
 oct_node* root;
 
-GLuint occ_fbo;
-GLuint occ_fbo_texture;
+t_fbo occ_fbo;
+
 GLuint occ_shader_prog;
 GLuint occ_planes_display_list;
 /* To query OpenGL as to whether the bounding box is visible */
 GLuint occ_queries[8];
 
+/* Effectively disable visibility checking */
 bool pass_all_nodes;
 COMMAND_SET_BOOL (vis_disable, pass_all_nodes);
 
@@ -173,8 +174,7 @@ void oct_node::check_visibility (const vec3& cam) const
 void vis_fill_visible (const vec3& cam)
 {
 	// setup occlusion rendering
-	glBindFramebuffer(GL_FRAMEBUFFER, occ_fbo);
-	glViewport(0, 0, occ_fbo_size, occ_fbo_size);
+	occ_fbo.apply();
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glUseProgram(occ_shader_prog);
 	glEnable(GL_DEPTH_TEST);
@@ -324,26 +324,7 @@ void init_vis ()
 		get_shader("common/frag_null", GL_FRAGMENT_SHADER));
 	glLinkProgram(occ_shader_prog);
 
-	glGenFramebuffers(1, &occ_fbo);
-	glBindFramebuffer(GL_FRAMEBUFFER, occ_fbo);
-
-	glGenTextures(1, &occ_fbo_texture);
-	glBindTexture(GL_TEXTURE_2D, occ_fbo_texture);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_FALSE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
-			occ_fbo_size, occ_fbo_size,
-			0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-			GL_TEXTURE_2D, occ_fbo_texture, 0);
-	glDrawBuffer(GL_NONE);
-	glReadBuffer(GL_NONE);
+	occ_fbo.make(occ_fbo_size, occ_fbo_size, FBO_BIT_DEPTH);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 

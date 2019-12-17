@@ -47,10 +47,8 @@ struct t_sdlcontext
 	SDL_Window* window;
 	SDL_GLContext glcont;
 	SDL_Renderer* renderer;
-
 	int res_x;
 	int res_y;
-
 	const char* const font_path = "res/FreeMono.ttf";
 	TTF_Font* font;
 	static constexpr int font_h = 16;
@@ -75,6 +73,21 @@ void draw_cuboid (const t_bound_box& b);
 
 void debug_texture_onscreen (GLuint texture);
 
+
+struct t_fbo
+{
+	GLuint id;
+	GLuint tex_color;
+	GLuint tex_depth;
+	int width;
+	int height;
+
+	void make (int w, int h, uint8_t bits);
+	void apply () const;
+};
+constexpr uint8_t FBO_BIT_COLOR = 0x1;
+constexpr uint8_t FBO_BIT_ALPHA = 0x2;
+constexpr uint8_t FBO_BIT_DEPTH = 0x4;
 
 #endif // RENDER_H
 

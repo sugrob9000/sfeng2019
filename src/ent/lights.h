@@ -46,8 +46,6 @@ const vec3 ambient = { 0.4, 0.4, 0.4 };
 
 void light_apply_uniforms (t_render_stage s);
 
-extern GLuint lspace_fbo_texture;
-extern GLuint sspace_fbo_texture[2];
 extern int current_sspace_fbo;
 
 extern std::vector<e_light*> lights;

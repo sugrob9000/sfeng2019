@@ -60,6 +60,12 @@ void upd_camera_pos ()
 	cam.pos += delta * speed;
 }
 
+MOUSEMOVE_ROUTINE (mousemove_camera)
+{
+	camera.ang.x += dy;
+	camera.ang.z += dx;
+}
+
 COMMAND_ROUTINE (cam_move)
 {
 	if (args.empty())
@@ -126,8 +132,6 @@ void render_all ()
 	glDisable(GL_DEPTH_TEST);
 	glUseProgram(0);
 
-	// debug_texture_onscreen(sspace_fbo_texture[current_sspace_fbo]);
-
 	char str[128];
 	sprintf(str, "%i leaves", (int) visible_leaves.size());
 	draw_text(str, -1, -1, 0.025, 0.05);
@@ -188,8 +192,6 @@ void init_render ()
 	}
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 
-	gl_limits_sanity_check();
-
 	glMatrixMode(MTX_VIEWPROJ);
 	glLoadIdentity();
 	glMatrixMode(MTX_MODEL);
@@ -212,6 +214,20 @@ void resize_window (int w, int h)
 	SDL_SetWindowSize(sdlcont.window, w, h);
 	glViewport(0, 0, w, h);
 }
+
+COMMAND_ROUTINE (windowsize)
+{
+	if (ev != PRESS)
+		return;
+	if (args.size() != 2)
+		return;
+	int w = std::atoi(args[0].c_str());
+	int h = std::atoi(args[1].c_str());
+	if (w <= 0 || h <= 0)
+		return;
+	resize_window(w, h);
+}
+
 
 void rotate_gl_matrix (vec3 angs)
 {
@@ -435,33 +451,57 @@ void debug_texture_onscreen (GLuint texture)
 	glPopMatrix();
 }
 
-MOUSEMOVE_ROUTINE (mousemove_camera)
+void t_fbo::make (int w, int h, uint8_t bits)
 {
-	camera.ang.x += dy;
-	camera.ang.z += dx;
-}
+	id = -1;
+	tex_color = -1;
+	tex_depth = -1;
 
-COMMAND_ROUTINE (windowsize)
-{
-	if (ev != PRESS)
-		return;
-	if (args.size() != 2)
-		return;
-	int w = std::atoi(args[0].c_str());
-	int h = std::atoi(args[1].c_str());
 	if (w <= 0 || h <= 0)
 		return;
+	if (!IS_PO2(w) || !IS_PO2(h))
+		return;
 
-	resize_window(w, h);
+	width = w;
+	height = h;
+
+	glGenFramebuffers(1, &id);
+	glBindFramebuffer(GL_FRAMEBUFFER, id);
+
+	auto fb_tex_params = [] () -> void {
+		constexpr GLenum t = GL_TEXTURE_2D;
+		glTexParameteri(t, GL_GENERATE_MIPMAP, GL_FALSE);
+		glTexParameteri(t, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(t, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(t, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(t, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	};
+
+	if (bits & FBO_BIT_COLOR) {
+		GLenum storage = (bits & FBO_BIT_ALPHA) ? GL_RGBA : GL_RGB;
+		glGenTextures(1, &tex_color);
+		glBindTexture(GL_TEXTURE_2D, tex_color);
+		glTexImage2D(GL_TEXTURE_2D, 0, storage, w, h, 0,
+				storage, GL_UNSIGNED_BYTE, nullptr);
+		fb_tex_params();
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+				GL_TEXTURE_2D, tex_color, 0);
+	}
+
+	if (bits & FBO_BIT_DEPTH) {
+		glGenTextures(1, &tex_depth);
+		glBindTexture(GL_TEXTURE_2D, tex_depth);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, w, h, 0,
+				GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+		fb_tex_params();
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+				GL_TEXTURE_2D, tex_depth, 0);
+	}
 }
 
-void gl_limits_sanity_check ()
+void t_fbo::apply () const
 {
-	int modelview_depth;
-	int projection_depth;
-	glGetIntegerv(GL_MAX_MODELVIEW_STACK_DEPTH, &modelview_depth);
-	glGetIntegerv(GL_MAX_PROJECTION_STACK_DEPTH, &projection_depth);
-
-	assert(modelview_depth >= 32);
-	assert(projection_depth >= 4);
+	glBindFramebuffer(GL_FRAMEBUFFER, id);
+	glViewport(0, 0, width, height);
 }
+

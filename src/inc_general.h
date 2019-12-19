@@ -4,7 +4,6 @@
 #include <cmath>
 #include <iostream>
 #include <fstream>
-
 #include "vec3.h"
 #include "error.h"
 

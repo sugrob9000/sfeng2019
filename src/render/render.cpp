@@ -32,8 +32,6 @@ void render_all ()
 	glDepthFunc(GL_LESS);
 	glDepthMask(GL_TRUE);
 
-	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-
 	glMatrixMode(MTX_MODEL);
 
 	draw_sky();
@@ -431,6 +429,8 @@ void t_fbo::make (int w, int h, uint8_t bits)
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
 				GL_TEXTURE_2D, tex_depth, 0);
 	}
+
+	glReadBuffer(GL_NONE);
 }
 
 void t_fbo::apply () const

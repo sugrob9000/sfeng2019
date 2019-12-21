@@ -13,8 +13,10 @@ t_visible_set visible_set;
 
 /* Occlusion rendering for walking the tree */
 t_fbo occ_fbo;
+
 GLuint occ_shader_prog;
 GLuint occ_planes_display_list;
+
 /* To query OpenGL as to whether the bounding box is visible */
 GLuint occ_queries[8];
 
@@ -323,9 +325,7 @@ void init_vis ()
 		get_shader("common/frag_null", GL_FRAGMENT_SHADER));
 	glLinkProgram(occ_shader_prog);
 
-	occ_fbo.make(occ_fbo_size, occ_fbo_size, FBO_BIT_DEPTH);
-
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	occ_fbo.make(occ_fbo_size, occ_fbo_size, t_fbo::BIT_DEPTH);
 
 	glGenQueries(8, occ_queries);
 }

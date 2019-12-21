@@ -46,11 +46,13 @@ constexpr float UNIFORM_LOC_LIGHT_POS = 3;
 constexpr float UNIFORM_LOC_LIGHT_RGB = 6;
 constexpr float UNIFORM_LOC_LIGHT_VIEWMAT = 9;
 
-const vec3 ambient = { 0.4, 0.4, 0.4 };
+const vec3 ambient = vec3(0.15);
 
 void light_apply_uniforms (t_render_stage s);
 
 extern int current_sspace_fbo;
+extern t_fbo sspace_fbo[2];
+extern t_fbo lspace_fbo;
 
 extern std::vector<e_light*> lights;
 

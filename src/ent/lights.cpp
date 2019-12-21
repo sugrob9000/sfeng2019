@@ -59,6 +59,8 @@ vec3 e_light::uniform_pos;
 
 /* Depth maps from lights' perspective */
 t_fbo lspace_fbo;
+constexpr int lspace_resolution = 256;
+static_assert(IS_PO2(lspace_resolution));
 
 /* Screen space lighting */
 t_fbo sspace_fbo[2];
@@ -66,13 +68,33 @@ int current_sspace_fbo = 0;
 
 void init_lighting ()
 {
-	lspace_fbo.make(1024, 1024, FBO_BIT_DEPTH);
-
 	for (int i: { 0, 1 }) {
 		sspace_fbo[i].make(CEIL_PO2(sdlcont.res_x),
 		                   CEIL_PO2(sdlcont.res_y),
-		                   FBO_BIT_COLOR | FBO_BIT_DEPTH);
+		                   t_fbo::BIT_DEPTH | t_fbo::BIT_COLOR);
 	}
+
+	lspace_fbo.make(lspace_resolution, lspace_resolution,
+			t_fbo::BIT_DEPTH);
+
+	// make custom color target texture for VSM
+	// with two 32-bit float channels
+
+	GLuint lspace_color;
+	glGenTextures(1, &lspace_color);
+	glBindTexture(GL_TEXTURE_2D, lspace_color);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_FALSE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32F,
+			lspace_resolution, lspace_resolution, 0,
+			GL_RG, GL_FLOAT, nullptr);
+
+	lspace_fbo.attach_color(lspace_color);
 }
 
 void e_light::view () const
@@ -86,13 +108,16 @@ void e_light::view () const
 void fill_depth_map (const e_light* l)
 {
 	lspace_fbo.apply();
+
 	glDepthMask(GL_TRUE);
 	glDepthFunc(GL_LESS);
 
 	push_reset_matrices();
 	l->view();
 
-	glClear(GL_DEPTH_BUFFER_BIT);
+	glClearColor(1.0, 1.0, 0.0, 0.0);
+	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
 	l->vis.render(LIGHTING_LSPACE);
 
 	glGetFloatv(GL_MODELVIEW_MATRIX, e_light::uniform_viewmat);
@@ -113,10 +138,8 @@ void compose_add_depth_map ()
 	glDepthFunc(GL_LESS);
 	glDepthMask(GL_TRUE);
 
+	glClearColor(ambient.x, ambient.y, ambient.z, 1.0);
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
 
 	visible_set.render(LIGHTING_SSPACE);
 }
@@ -130,7 +153,7 @@ void light_apply_uniforms (t_render_stage s)
 
 	if (s == LIGHTING_SSPACE) {
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, lspace_fbo.tex_depth);
+		glBindTexture(GL_TEXTURE_2D, lspace_fbo.tex_color);
 		glUniform1i(UNIFORM_LOC_DEPTH_MAP, 1);
 
 		const float* pos = e_light::uniform_pos.data();
@@ -152,9 +175,8 @@ void light_apply_uniforms (t_render_stage s)
 
 void compute_lighting ()
 {
-	glClearColor(ambient.x, ambient.y, ambient.z, 1.0);
-
 	glBindFramebuffer(GL_FRAMEBUFFER, sspace_fbo[0].id);
+	glClearColor(ambient.x, ambient.y, ambient.z, 1.0);
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 	current_sspace_fbo = 0;
 

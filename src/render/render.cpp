@@ -241,8 +241,8 @@ void init_text ()
 	SDL_Surface* surf = TTF_RenderText_Blended(sdlcont.font,
 			all_chars, text_color);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
@@ -389,10 +389,11 @@ void t_fbo::make (int w, int h, uint8_t bits)
 	tex_color = -1;
 	tex_depth = -1;
 
-	if (w <= 0 || h <= 0)
-		return;
-	if (!IS_PO2(w) || !IS_PO2(h))
-		return;
+	if (w <= 0 || h <= 0 || !IS_PO2(w) || !IS_PO2(h)) {
+		fatal("Requested FBO with invalid dimenstions %i, %i "
+		      "(must be powers of 2 and positive). bits = %i",
+		      w, h, bits);
+	}
 
 	width = w;
 	height = h;
@@ -403,35 +404,48 @@ void t_fbo::make (int w, int h, uint8_t bits)
 	auto fb_tex_params = [] () -> void {
 		constexpr GLenum t = GL_TEXTURE_2D;
 		glTexParameteri(t, GL_GENERATE_MIPMAP, GL_FALSE);
-		glTexParameteri(t, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(t, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(t, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(t, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(t, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(t, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	};
 
-	if (bits & FBO_BIT_COLOR) {
-		GLenum storage = (bits & FBO_BIT_ALPHA) ? GL_RGBA : GL_RGB;
+	if (bits & BIT_COLOR) {
+		GLenum storage = (bits & BIT_ALPHA) ? GL_RGBA : GL_RGB;
 		glGenTextures(1, &tex_color);
 		glBindTexture(GL_TEXTURE_2D, tex_color);
 		glTexImage2D(GL_TEXTURE_2D, 0, storage, w, h, 0,
 				storage, GL_UNSIGNED_BYTE, nullptr);
 		fb_tex_params();
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-				GL_TEXTURE_2D, tex_color, 0);
+		attach_color(tex_color);
 	}
 
-	if (bits & FBO_BIT_DEPTH) {
+	if (bits & BIT_DEPTH) {
 		glGenTextures(1, &tex_depth);
 		glBindTexture(GL_TEXTURE_2D, tex_depth);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, w, h, 0,
 				GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
 		fb_tex_params();
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-				GL_TEXTURE_2D, tex_depth, 0);
+		attach_depth(tex_depth);
 	}
-
-	glReadBuffer(GL_NONE);
 }
+
+void t_fbo::attach_color (GLuint texture)
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, id);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+			GL_TEXTURE_2D, texture, 0);
+	tex_color = texture;
+}
+
+void t_fbo::attach_depth (GLuint texture)
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, id);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+			GL_TEXTURE_2D, texture, 0);
+	tex_depth = texture;
+}
+
 
 void t_fbo::apply () const
 {

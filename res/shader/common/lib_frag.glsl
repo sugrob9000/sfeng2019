@@ -32,18 +32,26 @@ void main ()
 {
 	switch (stage) {
 	case LIGHTING_LSPACE:
-		// do nothing except fill z-buffer
+
+		// fill VSM moments
+		float s = (screen_crd.xyz / screen_crd.w).z;
+		s *= 0.5;
+		s += 0.5;
+		gl_FragColor = vec4(s, s*s, 0.0, 1.0);
 		break;
+
 	case LIGHTING_SSPACE:
+
+		// calculate screenspace lighting
 		gl_FragColor = vec4(sspace_light(), 1.0);
 		break;
+
 	case SHADE_FINAL:
+
 		// call the actual user shader
 		gl_FragColor = final_shade();
 		gl_FragColor.rgb *= get_illum();
 		break;
-	default:
-		gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
 	}
 }
 
@@ -52,29 +60,36 @@ in vec4 lspace_pos;
 vec3 sspace_light ()
 {
 	vec3 norm = TBN * normalize(surface_normal());
+
 	vec3 lcoord = lspace_pos.xyz / lspace_pos.w;
 
-	float bright = clamp(1.0 - length(lcoord.xy), 0.0, 1.0);
+	float bright = max(1.0 - length(lcoord.xy), 0.0);
 	lcoord *= 0.5;
 	lcoord += 0.5;
 
 	float cosine = dot(norm, normalize(light_pos - world_pos));
 
 	float bias = max(3e-4, cosine * 3e-4);
-	float d_current = lcoord.z - bias;
-	float d_closest = texture(depth_map, lcoord.xy).x;
+	float depth = lcoord.z - bias;
 
-	float illum = (d_current > d_closest)
-		? 0.0
-		: bright * clamp(cosine, 0.0, 1.0);
+	vec2 moments = texture(depth_map, lcoord.st).xy;
+
+	float sigma2 = moments.y - moments.x*moments.x;
+
+	float d = depth - moments.x;
+	float p = depth > moments.x ? 0.0 : 1.0;
+	float p_max = sigma2 / (sigma2 + d*d);
+
+	float illum = max(p, p_max);
+	illum *= bright * clamp(cosine, 0.0, 1.0);
 
 	return light_rgb * illum + get_illum();
 }
 
 vec3 get_illum ()
 {
-	vec2 ss = (screen_crd.xyz / screen_crd.w).xy;
-	ss *= 0.5;
-	ss += 0.5;
-	return texture(prev_shadow_map, ss).rgb;
+	vec2 s = (screen_crd.xyz / screen_crd.w).xy;
+	s *= 0.5;
+	s += 0.5;
+	return texture(prev_shadow_map, s).rgb;
 }

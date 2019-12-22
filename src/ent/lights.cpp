@@ -59,8 +59,7 @@ vec3 e_light::uniform_pos;
 
 /* Depth maps from lights' perspective */
 t_fbo lspace_fbo;
-constexpr int lspace_resolution = 256;
-static_assert(IS_PO2(lspace_resolution));
+constexpr int lspace_resolution = 1024;
 
 /* Screen space lighting */
 t_fbo sspace_fbo[2];
@@ -113,6 +112,8 @@ void fill_depth_map (const e_light* l)
 	glDepthFunc(GL_LESS);
 
 	push_reset_matrices();
+	glMatrixMode(GL_MODELVIEW);
+
 	l->view();
 
 	glClearColor(1.0, 1.0, 0.0, 0.0);
@@ -140,6 +141,8 @@ void compose_add_depth_map ()
 
 	glClearColor(ambient.x, ambient.y, ambient.z, 1.0);
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
+	glMatrixMode(MTX_MODEL);
 
 	visible_set.render(LIGHTING_SSPACE);
 }

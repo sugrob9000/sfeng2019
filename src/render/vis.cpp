@@ -13,6 +13,8 @@ t_visible_set visible_set;
 
 /* Occlusion rendering for walking the tree */
 t_fbo occ_fbo;
+/* Is screenspace, but does not need full resolution */
+constexpr int occ_fbo_size = 256;
 
 GLuint occ_shader_prog;
 GLuint occ_planes_display_list;
@@ -24,11 +26,23 @@ GLuint occ_queries[8];
 bool pass_all_nodes;
 COMMAND_SET_BOOL (vis_disable, pass_all_nodes);
 
-/*
- * Rather than being screen-sized, the occlusion framebuffer
- * is a smallish square
- */
-constexpr int occ_fbo_size = 256;
+void init_vis ()
+{
+	// setup the framebuffer in which to test for occlusion
+	// the shader for occlusion rendering just does nothing
+	// but write to the z-buffer
+	occ_shader_prog = glCreateProgram();
+	glAttachShader(occ_shader_prog,
+		get_shader("common/vert_occlude", GL_VERTEX_SHADER));
+	glAttachShader(occ_shader_prog,
+		get_shader("common/frag_null", GL_FRAGMENT_SHADER));
+	glLinkProgram(occ_shader_prog);
+
+	glGenQueries(8, occ_queries);
+
+	occ_fbo.make(occ_fbo_size, occ_fbo_size, t_fbo::BIT_DEPTH);
+}
+
 
 t_bound_box world_bounds_override;
 t_model_mem world;
@@ -311,23 +325,6 @@ void vis_initialize_world (const std::string& path)
 	glEndList();
 
 	root->build(world.bbox, 0);
-}
-
-void init_vis ()
-{
-	// setup the framebuffer in which to test for occlusion
-	// the shader for occlusion rendering just does nothing
-	// but write to the z-buffer
-	occ_shader_prog = glCreateProgram();
-	glAttachShader(occ_shader_prog,
-		get_shader("common/vert_occlude", GL_VERTEX_SHADER));
-	glAttachShader(occ_shader_prog,
-		get_shader("common/frag_null", GL_FRAGMENT_SHADER));
-	glLinkProgram(occ_shader_prog);
-
-	occ_fbo.make(occ_fbo_size, occ_fbo_size, t_fbo::BIT_DEPTH);
-
-	glGenQueries(8, occ_queries);
 }
 
 bool debug_draw_wireframe = false;

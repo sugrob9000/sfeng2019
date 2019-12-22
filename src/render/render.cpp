@@ -49,7 +49,8 @@ void render_all ()
 	char str[128];
 	sprintf(str, "%i leaves", (int) visible_set.leaves.size());
 	draw_text(str, -1, -1, 0.025, 0.05);
-	sprintf(str, "%f ms", last_frame_sec * 1000.0);
+	sprintf(str, "%.2f ms (%.2f fps)",
+			last_frame_sec * 1000.0, 1.0 / last_frame_sec);
 	draw_text(str, -1, -1 + 0.06, 0.025, 0.05);
 
 	if (console_active)

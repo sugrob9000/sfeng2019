@@ -109,7 +109,7 @@ void oct_node::make_leaf ()
 	all_leaves.push_back(this);
 
 	std::map<t_material*, std::vector<int>> m;
-	for (const int& d: bucket)
+	for (int d: bucket)
 		m[world.triangles[d].material].push_back(d);
 
 	mat_buckets.reserve(m.size());
@@ -192,7 +192,6 @@ void t_visible_set::fill (const vec3& cam)
 	// fill z-buffer with data from occlusion planes
 	glDepthFunc(GL_LESS);
 	glDisable(GL_CULL_FACE);
-	glDepthMask(GL_TRUE);
 	glCallList(occ_planes_display_list);
 
 	// walk the tree nodes which pass the z-test (and are on screen)
@@ -315,7 +314,7 @@ void vis_initialize_world (const std::string& path)
 	int n = world.triangles.size();
 
 	for (int i = 0; i < n; i++) {
-		const t_triangle& tri = world.triangles[i];
+		const auto& tri = world.triangles[i];
 		if (tri.material == mat_occlude) {
 			for (int j = 0; j < 3; j++) {
 				const vec3& ps = world.get_vertex(i, j).pos;

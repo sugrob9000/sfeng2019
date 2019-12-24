@@ -27,6 +27,7 @@ struct t_material
 	};
 
 	std::vector<bitmap_desc> bitmaps;
+	std::string name;
 
 	/*
 	 * A material is described by a text file,
@@ -49,7 +50,7 @@ struct t_material
 	 *   uniform sampler2D in the fragment shaders:
 	 *   diffuse -> uniform sampler2D map_diffuse; etc.
 	 */
-	void load (std::string path);
+	void load (const std::string& path);
 	void apply (t_render_stage stage = SHADE_FINAL) const;
 };
 

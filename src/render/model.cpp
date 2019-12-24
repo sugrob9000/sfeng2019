@@ -51,7 +51,7 @@ void t_model_mem::calc_bbox ()
 		return;
 
 	bbox = { vec3(INFINITY), vec3(-INFINITY) };
-	for (const vert_internal& v: vertices)
+	for (const vertex& v: vertices)
 		bbox.update(v.v.pos);
 
 	// just in case, extend slightly
@@ -59,7 +59,7 @@ void t_model_mem::calc_bbox ()
 	bbox.end += vec3(0.5);
 }
 
-void t_model_mem::load_obj (std::string path)
+void t_model_mem::load_obj (const std::string& path)
 {
 	std::ifstream f(path);
 	if (!f)
@@ -88,7 +88,7 @@ void t_model_mem::load_obj (std::string path)
 
 		vec3 tangent = d_uv2.v * d_pos1 - d_uv1.v * d_pos2;
 
-		t_triangle tri = { { }, current_material };
+		triangle tri = { { }, current_material };
 		for (int i = 0; i < 3; i++) {
 			t_vertex key = { points[v[i]],
 			                 normals[n[i]],
@@ -171,27 +171,84 @@ void t_model_mem::load_obj (std::string path)
 		}
 	}
 
-	for (vert_internal& v: vertices)
+	for (vertex& v: vertices)
 		v.tangent.norm();
 
 	calc_bbox();
 }
 
-bool operator< (const t_texcrd& a, const t_texcrd& b)
+
+void t_model_mem::load_rvd (const std::string& path)
 {
-	if (a.u == b.u)
-		return a.v < b.v;
-	return a.u < b.u;
+	std::ifstream f(path, std::ios::binary);
+	if (!f)
+		fatal("Model RVD %s: could not open file", path.c_str());
+
+	uint32_t num_vertices = 0;
+	f.read((char*) &num_vertices, sizeof(num_vertices));
+
+	vertices.resize(num_vertices);
+	f.read((char*) vertices.data(), sizeof(vertex) * num_vertices);
+
+	uint32_t num_buckets = 0;
+	f.read((char*) &num_buckets, sizeof(num_buckets));
+
+	for (int i = 0; i < num_buckets; i++) {
+		uint32_t name_len = 0;
+		f.read((char*) &name_len, sizeof(name_len));
+
+		std::string mat_name(name_len, '\0');
+		f.read(mat_name.data(), name_len);
+
+		t_material* mat = get_material(mat_name);
+
+		uint32_t num_verts = 0;
+		f.read((char*) &num_verts, sizeof(num_verts));
+		assert(num_verts % 3 == 0);
+
+		triangles.reserve(triangles.size() + num_verts);
+		for (int j = 0; j < num_verts; j += 3) {
+			triangles.push_back({ { }, mat });
+			triangle& tri = triangles.back();
+			f.read((char*) tri.index, 3 * sizeof(tri.index[0]));
+		}
+	}
+
+	calc_bbox();
 }
 
-bool operator< (const t_vertex& a, const t_vertex& b)
+void t_model_mem::dump_rvd (const std::string& path) const
 {
-	if (a.pos == b.pos) {
-		if (a.norm == b.norm)
-			return a.tex < b.tex;
-		return a.norm < b.norm;
+	std::ofstream f(path, std::ios::binary);
+	if (!f) {
+		fatal("Model RVD dump: could not open file %s for writing",
+				path.c_str());
 	}
-	return a.pos < b.pos;
+
+	uint32_t num_vertices = vertices.size();
+	f.write((const char*) &num_vertices, sizeof(num_vertices));
+	f.write((const char*) vertices.data(), sizeof(vertex) * num_vertices);
+
+	std::map<t_material*, std::vector<int>> m;
+	for (const triangle& t: triangles) {
+		std::vector<int>& v = m[t.material];
+		for (int i = 0; i < 3; i++)
+			v.push_back(t.index[i]);
+	}
+
+	uint32_t num_buckets = m.size();
+	f.write((const char*) &num_buckets, sizeof(num_buckets));
+
+	for (const auto& [mat, indices]: m) {
+		uint32_t name_len = mat->name.length();
+		f.write((const char*) &name_len, sizeof(name_len));
+		f.write(mat->name.data(), name_len);
+
+		uint32_t num_verts = indices.size();
+		f.write((const char*) &num_verts, sizeof(num_verts));
+		f.write((const char*) indices.data(),
+				sizeof(indices[0]) * num_verts);
+	}
 }
 
 
@@ -218,6 +275,23 @@ COMMAND_ROUTINE (obj2rvd)
 
 	t_model_mem model;
 	model.load_obj(in);
-	fatal("RVD not reimplemented");
-	// model.dump_rvd(out);
+	model.dump_rvd(out);
+}
+
+
+bool operator< (const t_texcrd& a, const t_texcrd& b)
+{
+	if (a.u == b.u)
+		return a.v < b.v;
+	return a.u < b.u;
+}
+
+bool operator< (const t_vertex& a, const t_vertex& b)
+{
+	if (a.pos == b.pos) {
+		if (a.norm == b.norm)
+			return a.tex < b.tex;
+		return a.norm < b.norm;
+	}
+	return a.pos < b.pos;
 }

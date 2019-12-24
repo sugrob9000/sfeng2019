@@ -23,34 +23,50 @@ struct t_vertex
 bool operator< (const t_texcrd& a, const t_texcrd& b);
 bool operator< (const t_vertex& a, const t_vertex& b);
 
-struct t_triangle
-{
-	int index[3];
-	t_material* material;
-};
-
 /*
  * An in-memory representation of a model for loading,
  * conversion, etc. but not for actual rendering.
  */
 struct t_model_mem
 {
-	struct vert_internal {
+	struct vertex {
 		t_vertex v;
 		vec3 tangent;
 	};
-	std::vector<vert_internal> vertices;
-	std::vector<t_triangle> triangles;
+	struct triangle {
+		int index[3];
+		t_material* material;
+	};
+
+	std::vector<vertex> vertices;
+	std::vector<triangle> triangles;
 
 	t_bound_box bbox;
 
 	void calc_bbox ();
-	void load_obj (std::string path);
 
 	const t_vertex& get_vertex (int tri, int vert) const
 	{ return vertices[triangles[tri].index[vert]].v; }
 
 	void gl_send_triangle (int tri_id) const;
+
+	void load_obj (const std::string& path);
+
+	/*
+	 * RVD (raw vertex data) - a binary file format
+	 * that should be faster to load than OBJ.
+	 * Format:
+	 *   number of vertices
+	 *   each vertex, as raw float data
+	 *   number of material buckets
+	 *   each material bucket, as:
+	 *     length of name
+	 *     name, NOT null terminated
+	 *     number of vertices (should divide by 3)
+	 *     triangles, as triplets of indices into vertices
+	 */
+	void load_rvd (const std::string& path);
+	void dump_rvd (const std::string& path) const;
 };
 
 /*

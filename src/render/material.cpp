@@ -65,12 +65,14 @@ void init_materials ()
 	cache_mat["OCCLUDE"] = mat_occlude;
 }
 
-void t_material::load (std::string path)
+void t_material::load (const std::string& path)
 {
 	std::ifstream f(path);
 
 	if (!f)
 		fatal("Material %s: cannot open file", path.c_str());
+
+	name = path;
 
 	std::string key;
 	std::string value;

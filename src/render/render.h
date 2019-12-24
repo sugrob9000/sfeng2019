@@ -59,6 +59,9 @@ extern t_sdlcontext sdlcont;
 extern t_camera camera;
 void upd_camera_pos ();
 
+struct t_visible_set;
+extern t_visible_set visible_set;
+
 void rotate_gl_matrix (vec3 angs);
 void translate_gl_matrix (vec3 pos);
 void push_reset_matrices ();

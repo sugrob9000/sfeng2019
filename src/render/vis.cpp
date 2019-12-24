@@ -9,7 +9,7 @@ int oct_leaf_capacity = 0;
 int oct_max_depth = 0;
 
 oct_node* root;
-t_visible_set visible_set;
+std::vector<const oct_node*> all_leaves;
 
 /* Occlusion rendering for walking the tree */
 t_fbo occ_fbo;
@@ -106,13 +106,11 @@ void oct_node::build (t_bound_box bounds, int level)
 
 void oct_node::make_leaf ()
 {
-	std::map<t_material*, std::vector<int>> m;
+	all_leaves.push_back(this);
 
+	std::map<t_material*, std::vector<int>> m;
 	for (const int& d: bucket)
 		m[world.triangles[d].material].push_back(d);
-
-	// the bucket is in union with leaf data
-	// so we have to destroy and construct them manually
 
 	mat_buckets.reserve(m.size());
 
@@ -180,6 +178,10 @@ void oct_node::check_visibility (const vec3& cam, t_visible_set& s) const
 
 void t_visible_set::fill (const vec3& cam)
 {
+	if (pass_all_nodes) {
+		leaves = all_leaves;
+		return;
+	}
 	// setup occlusion rendering
 	occ_fbo.apply();
 	glClear(GL_DEPTH_BUFFER_BIT);

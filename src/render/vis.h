@@ -68,7 +68,6 @@ struct t_visible_set
 	void render (t_render_stage s = SHADE_FINAL) const;
 	void render_debug () const;
 };
-extern t_visible_set visible_set;
 
 void vis_requery_entity (e_base* e);
 

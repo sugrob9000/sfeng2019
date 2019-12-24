@@ -9,6 +9,8 @@
 
 t_sdlcontext sdlcont;
 
+t_visible_set visible_set;
+
 void draw_sky ();
 void render_all ()
 {
@@ -35,6 +37,7 @@ void render_all ()
 	glMatrixMode(MTX_MODEL);
 
 	draw_sky();
+
 	visible_set.render(SHADE_FINAL);
 	visible_set.render_debug();
 

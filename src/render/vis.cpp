@@ -182,11 +182,12 @@ void t_visible_set::fill (const vec3& cam)
 		leaves = all_leaves;
 		return;
 	}
+
 	// setup occlusion rendering
 	occ_fbo.apply();
-	glClear(GL_DEPTH_BUFFER_BIT);
 	glUseProgram(occ_shader_prog);
 	glEnable(GL_DEPTH_TEST);
+	glClear(GL_DEPTH_BUFFER_BIT);
 
 	// fill z-buffer with data from occlusion planes
 	glDepthFunc(GL_LESS);
@@ -196,10 +197,10 @@ void t_visible_set::fill (const vec3& cam)
 
 	// walk the tree nodes which pass the z-test (and are on screen)
 	glDepthMask(GL_FALSE);
-
 	leaves.clear();
 	root->check_visibility(cam, *this);
 
+	glDepthMask(GL_TRUE);
 	glEnable(GL_CULL_FACE);
 }
 
@@ -257,13 +258,14 @@ void t_visible_set::render (t_render_stage s) const
 	guard_key++;
 
 	for (const oct_node* l: leaves) {
+		// draw entities
 		for (e_base* e: l->entities_inside) {
 			if (e->render_last_guard_key == guard_key)
 				continue;
 			e->render_last_guard_key = guard_key;
 			e->render(s);
 		}
-
+		// draw world
 		for (const auto& gr: l->mat_buckets) {
 			gr.mat->apply(s);
 			glCallList(gr.display_list);

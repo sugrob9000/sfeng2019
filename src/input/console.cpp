@@ -140,49 +140,49 @@ void console_render ()
 	float text_width = char_width * cmd.length();
 	float text_x = char_width + 0.01;
 
+	auto rect = [] (float x1, float y1, float x2, float y2)
+	-> void {
+		glBegin(GL_QUADS);
+		glVertex2f(x1, y1);
+		glVertex2f(x2, y1);
+		glVertex2f(x2, y2);
+		glVertex2f(x1, y2);
+		glEnd();
+	};
+
 	glUseProgram(0);
-	glBegin(GL_QUADS);
 	glColor4ubv((GLubyte*) &bg_clr);
-	glVertex2f(-1.0, -1.0);
-	glVertex2f(1.0, -1.0);
-	glVertex2f(1.0, -1.0 + height);
-	glVertex2f(-1.0, -1.0 + height);
-	glEnd();
+	rect(-1.0, 1.0, 1.0, 1.0 - height);
 
-	glBegin(GL_LINES);
 	glColor4ubv((GLubyte*) &cursor_clr);
-	glVertex2f(-1.0 + text_x + text_width, -1.0 + text_y);
+	glBegin(GL_LINES);
+	glVertex2f(-1.0 + text_x + text_width, 1.0 - text_y);
 	glVertex2f(-1.0 + text_x + text_width,
-	           -1.0 + text_y + text_height);
+	            1.0 - text_y - text_height);
 	glEnd();
-
-	if (!cmd.empty()) {
-		draw_text(cmd.c_str(), -1.0 + text_x,
-			-1.0 + text_y, char_width, text_height);
-	}
-	draw_text(">", -1.0, -1.0 + text_y, char_width, text_height);
 
 	if (!matches.empty()) {
 		float single_match_h = text_height + 0.015;
 		float matches_h = single_match_h * matches.size();
 
-		glUseProgram(0);
-		glBegin(GL_QUADS);
 		glColor4ubv((GLubyte*) &bg_match_clr);
-		glVertex2f(-1.0, -1.0 + height);
-		glVertex2f(1.0, -1.0 + height);
-		glVertex2f(1.0, -1.0 + height + matches_h);
-		glVertex2f(-1.0, -1.0 + height + matches_h);
-		glEnd();
+		rect(-1.0, 1.0 - height, 1.0, 1.0 - height - matches_h);
 
 		float matches_x = text_x + cmd_prefix.length() * char_width;
 
 		for (int i = 0; i < matches.size(); i++) {
-			draw_text(matches[i]->c_str(), -1.0 + matches_x,
-					-1.0 + height + single_match_h * i,
+			draw_text(matches[i]->c_str(),
+					-1.0 + matches_x,
+					1.0 - height - i * single_match_h,
 					char_width, text_height);
 		}
 	}
+
+	if (!cmd.empty()) {
+		draw_text(cmd.c_str(), -1.0 + text_x,
+			1.0 - text_y, char_width, text_height);
+	}
+	draw_text(">", -1.0, 1.0 - text_y, char_width, text_height);
 }
 
 COMMAND_ROUTINE (console_open)

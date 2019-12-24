@@ -24,10 +24,9 @@ void e_light::moved ()
 	e_base::moved();
 
 	// update visible set
-	push_reset_matrices();
+	reset_matrices();
 	view();
 	vis.fill(pos);
-	pop_matrices();
 }
 
 void e_light::think () { }
@@ -41,7 +40,7 @@ void e_light::apply_keyvals (const t_ent_keyvals& kv)
 		cone_angle = 60.0; );
 	KV_TRY_GET(kv["reach"],
 		reach = atof(val.c_str());,
-		reach = 500.0; );
+		reach = 2000.0; );
 	KV_TRY_GET(kv["rgb"],
 		atovec3(val, rgb);,
 		rgb = vec3(0.5); );

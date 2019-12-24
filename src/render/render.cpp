@@ -17,7 +17,7 @@ void render_all ()
 	namespace cr = std::chrono;
 	using sc = cr::steady_clock;
 	sc::time_point frame_start = sc::now();
-	static float last_frame_sec;
+	static float last_frame_time = 0.0;
 
 	material_barrier();
 
@@ -34,32 +34,29 @@ void render_all ()
 	glDepthFunc(GL_LESS);
 	glDepthMask(GL_TRUE);
 
-	glMatrixMode(MTX_MODEL);
-
 	draw_sky();
-
 	visible_set.render(SHADE_FINAL);
 	visible_set.render_debug();
 
 	// HUD
-	glMatrixMode(MTX_VIEWPROJ);
-	glLoadIdentity();
-	glScalef(1.0, -1.0, 1.0);
+	reset_matrices();
 	glDisable(GL_CULL_FACE);
 	glDisable(GL_DEPTH_TEST);
 	glUseProgram(0);
 
-	char str[128];
-	sprintf(str, "%i leaves", (int) visible_set.leaves.size());
-	draw_text(str, -1, -1, 0.025, 0.05);
-	sprintf(str, "%.2f ms (%.2f fps)",
-			last_frame_sec * 1000.0, 1.0 / last_frame_sec);
-	draw_text(str, -1, -1 + 0.06, 0.025, 0.05);
+	constexpr int bufsize = 128;
+	char str[bufsize];
+	snprintf(str, bufsize, "%.2f ms (%.2f fps)",
+			last_frame_time * 1000.0,
+			1.0 / last_frame_time);
+	draw_text(str, -1.0, 1.0, 0.025, 0.05);
+	snprintf(str, bufsize, "%i leaves", (int) visible_set.leaves.size());
+	draw_text(str, -1.0, 1.0 - 0.06, 0.025, 0.05);
 
 	if (console_active)
 		console_render();
 
-	last_frame_sec = cr::duration<float>(sc::now() - frame_start).count();
+	last_frame_time = cr::duration<float>(sc::now() - frame_start).count();
 	SDL_GL_SwapWindow(sdlcont.window);
 }
 
@@ -157,6 +154,14 @@ void rotate_gl_matrix (vec3 angs)
 void translate_gl_matrix (vec3 pos)
 {
 	glTranslatef(pos.x, pos.y, pos.z);
+}
+
+void reset_matrices ()
+{
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
 }
 
 void push_reset_matrices ()
@@ -277,9 +282,9 @@ void draw_text (const char* str, float x, float y, float charw, float charh)
 		glTexCoord2i(w * c, 0);
 		glVertex2f(x, y);
 		glTexCoord2i(w * c, h);
-		glVertex2f(x, y + charh);
+		glVertex2f(x, y - charh);
 		glTexCoord2i(w * (c + 1), h);
-		glVertex2f(x + charw, y + charh);
+		glVertex2f(x + charw, y - charh);
 		glTexCoord2i(w * (c + 1), 0);
 		glVertex2f(x + charw, y);
 		x += charw;
@@ -371,18 +376,17 @@ void debug_texture_onscreen (GLuint texture)
 
 	glPushMatrix();
 
-	glScalef(0.5, 0.5, 1.0);
-
 	glColor4f(1.0, 1.0, 1.0, 1.0);
 	glBegin(GL_QUADS);
-	glTexCoord2i(0, 0);
-	glVertex2i(-1, 1);
-	glTexCoord2i(0, 1);
-	glVertex2i(-1, -1);
-	glTexCoord2i(1, 1);
-	glVertex2i(1, -1);
-	glTexCoord2i(1, 0);
-	glVertex2i(1, 1);
+
+	const int x[4] = { 0, 1, 1, 0 };
+	const int y[4] = { 0, 0, 1, 1 };
+
+	for (int i = 0; i < 4; i++) {
+		glTexCoord2i(x[i], y[i]);
+		glVertex2i(x[i], y[i]);
+	}
+
 	glEnd();
 	glPopMatrix();
 }

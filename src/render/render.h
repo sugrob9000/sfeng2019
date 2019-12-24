@@ -64,6 +64,8 @@ extern t_visible_set visible_set;
 
 void rotate_gl_matrix (vec3 angs);
 void translate_gl_matrix (vec3 pos);
+
+void reset_matrices ();
 void push_reset_matrices ();
 void pop_matrices ();
 

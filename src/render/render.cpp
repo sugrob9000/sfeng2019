@@ -409,7 +409,7 @@ void t_fbo::make (int w, int h, uint8_t bits)
 	glGenFramebuffers(1, &id);
 	glBindFramebuffer(GL_FRAMEBUFFER, id);
 
-	auto tex_params = [] () -> void {
+	auto fb_tex_params = [] () -> void {
 		constexpr GLenum t = GL_TEXTURE_2D;
 		glTexParameteri(t, GL_GENERATE_MIPMAP, GL_FALSE);
 		glTexParameteri(t, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -424,24 +424,18 @@ void t_fbo::make (int w, int h, uint8_t bits)
 		glBindTexture(GL_TEXTURE_2D, tex_color);
 		glTexImage2D(GL_TEXTURE_2D, 0, storage, w, h, 0,
 				storage, GL_UNSIGNED_BYTE, nullptr);
-		tex_params();
+		fb_tex_params();
 		attach_color(tex_color);
 	}
 
 	if (bits & BIT_DEPTH) {
 		glGenTextures(1, &tex_depth);
 		glBindTexture(GL_TEXTURE_2D, tex_depth);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
-			w, h, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-		tex_params();
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, w, h, 0,
+				GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+		fb_tex_params();
 		attach_depth(tex_depth);
 	}
-
-	/* ?????????? */
-	#ifdef WINDOWS
-	glDrawBuffer(GL_NONE);
-	glReadBuffer(GL_NONE);
-	#endif
 }
 
 void t_fbo::attach_color (GLuint texture)

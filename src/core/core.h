@@ -44,16 +44,9 @@ struct t_bound_box
 	void update (const t_bound_box& other);
 
 	bool point_in (const vec3& pt) const;
-
 	float volume () const;
-	float volume_clamped () const;
 
-	/*
-	 * Strict intersection only counts inner common points
-	 * (as opposed to common points on edges, faces etc.)
-	 */
 	bool intersects (t_bound_box b) const;
-	bool intersects_strict (t_bound_box b) const;
 };
 
 #endif // CORE_H

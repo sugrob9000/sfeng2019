@@ -1,12 +1,6 @@
 #version 130
-
-#define NOLIGHT 1
-#if NOLIGHT
-	#define layout(x)
-#else
-	#extension GL_ARB_explicit_uniform_location: require
-	#extension GL_ARB_explicit_attrib_location: require
-#endif
+#extension GL_ARB_explicit_uniform_location : require
+#extension GL_ARB_explicit_attrib_location : require
 
 /* The user shader which links against the lib should implement these */
 lowp vec4 final_shade ();
@@ -19,7 +13,6 @@ vec3 surface_normal ();
 #define LIGHTING_LSPACE 0u
 #define LIGHTING_SSPACE 1u
 #define SHADE_FINAL 2u
-
 layout (location = 0) uniform uint stage;
 layout (location = 1) uniform sampler2D prev_shadow_map;
 
@@ -37,14 +30,11 @@ vec3 get_illum ();
 vec3 sspace_light ();
 void main ()
 {
-#ifdef NOLIGHT
-	gl_FragColor = final_shade();
-#else
 	switch (stage) {
 	case LIGHTING_LSPACE:
 
 		// fill VSM moments
-		float s = screen_crd.z / screen_crd.w;
+		float s = (screen_crd.xyz / screen_crd.w).z;
 		s *= 0.5;
 		s += 0.5;
 		gl_FragColor = vec4(s, s*s, 0.0, 1.0);
@@ -63,7 +53,6 @@ void main ()
 		gl_FragColor.rgb *= get_illum();
 		break;
 	}
-#endif
 }
 
 in vec4 lspace_pos;
@@ -80,7 +69,7 @@ vec3 sspace_light ()
 
 	float cosine = dot(norm, normalize(light_pos - world_pos));
 
-	float bias = 3e-4;
+	float bias = max(3e-4, cosine * 3e-4);
 	float depth = lcoord.z - bias;
 
 	vec2 moments = texture(depth_map, lcoord.st).xy;
@@ -99,7 +88,7 @@ vec3 sspace_light ()
 
 vec3 get_illum ()
 {
-	vec2 s = (screen_crd.xy / screen_crd.w);
+	vec2 s = (screen_crd.xyz / screen_crd.w).xy;
 	s *= 0.5;
 	s += 0.5;
 	return texture(prev_shadow_map, s).rgb;

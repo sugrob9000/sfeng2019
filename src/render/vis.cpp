@@ -148,6 +148,12 @@ void oct_node::check_visibility (const vec3& cam, t_visible_set& s) const
 		return;
 	}
 
+	if (pass_all_nodes) {
+		for (int i = 0; i < 8; i++)
+			children[i]->check_visibility(cam, s);
+		return;
+	}
+
 	unsigned int child_pixels[8];
 
 	for (int i = 0; i < 8; i++) {
@@ -201,10 +207,9 @@ void t_visible_set::fill (const vec3& cam)
 
 void oct_node::requery_entity (e_base* e, const t_bound_box& b)
 {
-	auto p = std::find(entities_inside.begin(),
-	                   entities_inside.end(), e);
+	auto p = std::find(entities_inside.begin(), entities_inside.end(), e);
 	uint8_t before = (p != entities_inside.end());
-	uint8_t now = b.intersects_strict(actual_bounds);
+	uint8_t now = b.intersects(actual_bounds);
 
 	switch (now | (before << 1)) {
 	case 0b00:

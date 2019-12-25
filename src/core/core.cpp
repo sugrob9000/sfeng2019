@@ -117,8 +117,8 @@ e_base* read_single_entity (std::istream& is)
 		}
 
 		out_loop:
-		int nextchar = is.peek();
-		if (nextchar == EOF || !isspace(nextchar))
+		int next = is.peek();
+		if (next == EOF || !isspace(next))
 			break;
 	}
 	ent->apply_keyvals(kv);
@@ -157,6 +157,15 @@ float t_bound_box::volume () const
 	     * (end.z - start.z);
 }
 
+float t_bound_box::volume_clamped () const
+{
+	if (end.x <= start.x
+	 || end.y <= start.y
+	 || end.z <= start.z)
+		return 0.0;
+	return volume();
+}
+
 void t_bound_box::update (const vec3& pt)
 {
 	start = min(start, pt);
@@ -184,3 +193,9 @@ bool t_bound_box::intersects (t_bound_box b) const
 	    && b.end.z >= b.start.z;
 }
 
+bool t_bound_box::intersects_strict (t_bound_box b) const
+{
+	b.start = max(b.start, start);
+	b.end = min(b.end, end);
+	return (b.volume_clamped() > 0.0);
+}

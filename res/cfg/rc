@@ -18,4 +18,7 @@ bind V vis_disable
 
 bind E sun_at_view
 
-map map1
+loadmap map1
+
+windowsize 1024 768
+light_refit_buffers

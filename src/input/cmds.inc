@@ -60,10 +60,10 @@ COMMAND (signal)
 /*
  * Load a map
  */
-COMMAND (map)
+COMMAND (loadmap)
 
 /*
- * Render & visibility debugging commands
+ * Visibility debugging commands
  */
 COMMAND (vis_worldwireframe)
 COMMAND (vis_occluders)
@@ -72,7 +72,12 @@ COMMAND (vis_leaves_nodepth)
 COMMAND (vis_disable)
 
 /*
- * (Demo) Tell the entity called sun 
+ * Recreate lighting framebuffers to be of sufficient resolution
+ */
+COMMAND (light_refit_buffers)
+
+/*
+ * (Demo) Tell the entity named "sun"
  * to have the same pos and ang as camera
  */
 COMMAND (sun_at_view)

@@ -50,6 +50,14 @@ void e_light::render (t_render_stage s) const { }
 
 t_bound_box e_light::get_bbox () const { return { }; }
 
+void e_light::view () const
+{
+	gluPerspective(cone_angle * 2.0, 1.0, LIGHT_Z_NEAR, reach);
+	glRotatef(-90.0, 1.0, 0.0, 0.0);
+	rotate_gl_matrix(ang);
+	translate_gl_matrix(-pos);
+}
+
 /* ======================================== */
 
 float e_light::uniform_viewmat[16];
@@ -95,12 +103,19 @@ void init_lighting ()
 	lspace_fbo.attach_color(lspace_color);
 }
 
-void e_light::view () const
+COMMAND_ROUTINE (light_refit_buffers)
 {
-	gluPerspective(cone_angle * 2.0, 1.0, LIGHT_Z_NEAR, reach);
-	glRotatef(-90.0, 1.0, 0.0, 0.0);
-	rotate_gl_matrix(ang);
-	translate_gl_matrix(-pos);
+	if (ev != PRESS)
+		return;
+	for (int i: { 0, 1 }) {
+		glDeleteFramebuffers(1, &sspace_fbo[i].id);
+		const unsigned int tex[2] = { sspace_fbo[i].tex_depth,
+		                              sspace_fbo[i].tex_color };
+		glDeleteTextures(2, tex);
+		sspace_fbo[i].make(CEIL_PO2(sdlcont.res_x),
+		                   CEIL_PO2(sdlcont.res_y),
+				   t_fbo::BIT_DEPTH | t_fbo::BIT_COLOR);
+	}
 }
 
 void fill_depth_map (const e_light* l)

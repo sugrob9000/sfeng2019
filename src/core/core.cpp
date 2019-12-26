@@ -138,7 +138,7 @@ void load_map (std::string path)
 		read_single_entity(f);
 }
 
-COMMAND_ROUTINE (map)
+COMMAND_ROUTINE (loadmap)
 {
 	if (ev != PRESS)
 		return;

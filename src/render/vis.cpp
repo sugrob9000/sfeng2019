@@ -8,7 +8,7 @@
 int oct_leaf_capacity = 0;
 int oct_max_depth = 0;
 
-oct_node* root;
+oct_node* root = nullptr;
 std::vector<const oct_node*> all_leaves;
 
 /* Occlusion rendering for walking the tree */
@@ -327,6 +327,15 @@ void vis_initialize_world (const std::string& path)
 
 	root->build(world.bbox, 0);
 }
+
+void vis_destroy_world ()
+{
+	if (root != nullptr) {
+		delete root;
+		root = nullptr;
+	}
+}
+
 
 bool debug_draw_wireframe = false;
 bool debug_draw_occ_planes = false;

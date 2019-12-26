@@ -88,9 +88,9 @@ void init_lighting ()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32F,
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F,
 			lspace_resolution, lspace_resolution, 0,
-			GL_RG, GL_FLOAT, nullptr);
+			GL_RGBA, GL_FLOAT, nullptr);
 
 	lspace_fbo.attach_color(lspace_color);
 }
@@ -109,15 +109,14 @@ void fill_depth_map (const e_light* l)
 
 	glDepthMask(GL_TRUE);
 	glDepthFunc(GL_LESS);
+	glDisable(GL_BLEND);
+	glClearColor(1.0, 1.0, 1.0, 1.0);
+	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
 	push_reset_matrices();
 	glMatrixMode(GL_MODELVIEW);
 
 	l->view();
-
-	glClearColor(1.0, 1.0, 0.0, 0.0);
-	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-
 	l->vis.render(LIGHTING_LSPACE);
 
 	glGetFloatv(GL_MODELVIEW_MATRIX, e_light::uniform_viewmat);

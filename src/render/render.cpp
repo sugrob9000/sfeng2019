@@ -230,8 +230,6 @@ void init_text ()
 	TTF_GlyphMetrics(sdlcont.font, '~', nullptr, nullptr,
 			nullptr, nullptr, &sdlcont.font_w);
 
-	glEnable(GL_BLEND);
-
 	text_program = glCreateProgram();
 	glAttachShader(text_program,
 		get_shader("common/vert_text", GL_VERTEX_SHADER));
@@ -268,6 +266,7 @@ void draw_text (const char* str, float x, float y, float charw, float charh)
 	glUseProgram(text_program);
 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_BLEND);
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_RECTANGLE_ARB, text_texture);

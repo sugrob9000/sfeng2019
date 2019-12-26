@@ -135,10 +135,8 @@ void t_material::load (const std::string& path)
 		if (location != -1) {
 			bitmaps.push_back({ location, d.texid });
 		} else {
-			warning("Material %s: %s is not a valid "
-				"uniform in shaders %s, %s",
-				path.c_str(), d.loc_name.c_str(),
-				frag_name.c_str(), vert_name.c_str());
+			warning("%s is not a valid uniform in material %s",
+				d.loc_name.c_str(), path.c_str());
 		}
 	}
 

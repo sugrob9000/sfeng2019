@@ -1,5 +1,5 @@
-FRAG frag_building
-VERT common/vert_identity
+FRAG building
+VERT common/identity
 
 ao building_ao.png
 diffuse checkers_diffuse.png

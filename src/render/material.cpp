@@ -105,14 +105,12 @@ void t_material::load (const std::string& path)
 		bitmaps_interm.push_back({ key, get_texture(value) });
 	}
 
-	frag = get_shader(frag_name, GL_FRAGMENT_SHADER);
-	vert = get_shader(vert_name, GL_VERTEX_SHADER);
+	frag = get_frag_shader(frag_name);
+	vert = get_vert_shader(vert_name);
 
 	program = glCreateProgram();
-	glAttachShader(program,
-		get_shader("common/lib_frag", GL_FRAGMENT_SHADER));
-	glAttachShader(program,
-		get_shader("common/lib_vert", GL_VERTEX_SHADER));
+	glAttachShader(program, get_frag_shader("common/lib"));
+	glAttachShader(program, get_vert_shader("common/lib"));
 	glAttachShader(program, frag);
 	glAttachShader(program, vert);
 	glLinkProgram(program);

@@ -41,11 +41,12 @@ t_texture_id get_texture (std::string path)
 	return ret;
 }
 
-t_shader_id get_shader (std::string path, GLenum type)
+t_shader_id get_shader (const std::string& path, GLenum type)
 {
 	t_shader_id& ret = cache_shader[path];
 
 	if (ret != 0) {
+		// shader exists. verify that it is of the right type
 		int actual_shader_type;
 		glGetShaderiv(ret, GL_SHADER_TYPE, &actual_shader_type);
 		if (type != actual_shader_type) {
@@ -56,11 +57,21 @@ t_shader_id get_shader (std::string path, GLenum type)
 		return ret;
 	}
 
-	path = PATH_SHADER + path + ".glsl";
 	ret = compile_glsl(path, type);
+
 	if (!ret)
 		fatal("Cannot load shader %s", path.c_str());
 	return ret;
+}
+
+t_shader_id get_vert_shader (const std::string& name)
+{
+	return get_shader(PATH_SHADER + name + ".vert", GL_VERTEX_SHADER);
+}
+
+t_shader_id get_frag_shader (const std::string& name)
+{
+	return get_shader(PATH_SHADER + name + ".frag", GL_FRAGMENT_SHADER);
 }
 
 t_material* get_material (std::string path)

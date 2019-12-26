@@ -32,10 +32,8 @@ void init_vis ()
 	// the shader for occlusion rendering just does nothing
 	// but write to the z-buffer
 	occ_shader_prog = glCreateProgram();
-	glAttachShader(occ_shader_prog,
-		get_shader("common/vert_occlude", GL_VERTEX_SHADER));
-	glAttachShader(occ_shader_prog,
-		get_shader("common/frag_null", GL_FRAGMENT_SHADER));
+	glAttachShader(occ_shader_prog, get_vert_shader("common/occlude"));
+	glAttachShader(occ_shader_prog, get_frag_shader("common/null"));
 	glLinkProgram(occ_shader_prog);
 
 	glGenQueries(8, occ_queries);

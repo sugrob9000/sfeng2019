@@ -1,2 +1,2 @@
-VERT common/vert_identity
-FRAG frag_world
+VERT common/identity
+FRAG world

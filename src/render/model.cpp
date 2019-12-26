@@ -96,7 +96,7 @@ void t_model_mem::load_obj (const std::string& path)
 			auto iter = vert_indices.find(key);
 			if (iter == vert_indices.end()) {
 				tri.index[i] = vertices.size();
-				vertices.push_back( { key, tangent });
+				vertices.push_back({ key, tangent });
 				vert_indices[key] = tri.index[i];
 			} else {
 				tri.index[i] = iter->second;

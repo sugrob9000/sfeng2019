@@ -1,5 +1,5 @@
-VERT common/vert_identity
-FRAG frag_sand
+VERT common/identity
+FRAG sand
 diffuse sand.tga
 ao common/white.png
 

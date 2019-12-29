@@ -1,7 +1,7 @@
 #include "entity.h"
 #include "error.h"
 #include "render/vis.h"
-#include "ent/ent_headers.inc"
+#include "ent/_headers.inc"
 
 t_ent_registry ent_reg;
 
@@ -12,6 +12,7 @@ void e_base::set_name (const std::string& new_name)
 	if (another != nullptr) {
 		warning("Entity at %p stole name %s from entity at %p",
 				this, name.c_str(), another);
+		another->set_name("");
 	}
 	ents.name_index[name] = this;
 }
@@ -48,7 +49,7 @@ void fill_ent_registry ()
 	#define ENTITY(name)                             \
 		ent_reg[#name] = &ent_factory<e_##name>; \
 		fill_io_data<e_##name>();
-	#include "ent/ent_list.inc"
+	#include "ent/_list.inc"
 	#undef ENTITY
 }
 

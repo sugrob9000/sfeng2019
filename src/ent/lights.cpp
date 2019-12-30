@@ -2,6 +2,7 @@
 #include "error.h"
 #include "render/render.h"
 #include "render/vis.h"
+#include "render/shaderlib.h"
 #include "render/resource.h"
 #include "input/cmds.h"
 

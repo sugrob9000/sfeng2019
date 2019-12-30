@@ -44,15 +44,6 @@ void render_all ()
 	glDisable(GL_DEPTH_TEST);
 	glUseProgram(0);
 
-	constexpr int bufsize = 128;
-	char str[bufsize];
-	snprintf(str, bufsize, "%.2f ms (%.2f fps)",
-			last_frame_time * 1000.0,
-			1.0 / last_frame_time);
-	draw_text(str, -1.0, 1.0, 0.025, 0.05);
-	snprintf(str, bufsize, "%i leaves", (int) visible_set.leaves.size());
-	draw_text(str, -1.0, 1.0 - 0.06, 0.025, 0.05);
-
 	if (console_active)
 		console_render();
 

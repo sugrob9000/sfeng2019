@@ -35,17 +35,6 @@ class e_light: public e_base
 };
 
 constexpr float LIGHT_Z_NEAR = 10.0;
-
-/*
- * !!! These must match what is found in lib shaders !!!
- */
-constexpr float UNIFORM_LOC_PREV_SHADOWMAP = 1;
-
-constexpr float UNIFORM_LOC_DEPTH_MAP = 2;
-constexpr float UNIFORM_LOC_LIGHT_POS = 3;
-constexpr float UNIFORM_LOC_LIGHT_RGB = 6;
-constexpr float UNIFORM_LOC_LIGHT_VIEWMAT = 9;
-
 const vec3 ambient = vec3(0.15);
 
 void light_apply_uniforms (t_render_stage s);

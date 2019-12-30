@@ -1,6 +1,4 @@
 VERT common/identity
-FRAG sand
+FRAG diff-norm
 diffuse nature/sand.tga
-ao common/white.png
-
-
+normal nature/sand_normal.png

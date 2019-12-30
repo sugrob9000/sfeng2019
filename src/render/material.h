@@ -9,12 +9,6 @@
 typedef GLuint t_texture_id;
 typedef GLuint t_shader_id;
 
-/*
- * Take attribute locations that are not taken by
- * (important) built-in attributes
- */
-constexpr GLuint ATTRIB_LOC_TANGENT = 1;
-
 struct t_material
 {
 	GLuint program;

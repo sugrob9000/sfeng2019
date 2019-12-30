@@ -2,14 +2,12 @@
 #extension GL_ARB_explicit_uniform_location : require
 #extension GL_ARB_explicit_attrib_location : require
 
+
 /* The user shader which links against the lib should implement these */
-lowp vec4 final_shade ();
+vec4 final_shade ();
 vec3 surface_normal ();
 
-/*
- * The locations must match the constants UNIFORM_LOC_*
- * specified in the source!
- */
+
 #define LIGHTING_LSPACE 0u
 #define LIGHTING_SSPACE 1u
 #define SHADE_FINAL 2u
@@ -34,7 +32,7 @@ const float NOBLEED_FACTOR = 0.4;
 const float DEPTH_BIAS = 3e-4;
 
 const float FOG_HEIGHT_MAX = -200.0;
-const float FOG_HEIGHT_MIN = 100.0;
+const float FOG_HEIGHT_MIN = 75.0;
 const vec3 FOG_COLOR = vec3(0.28, 0.28, 0.42);
 
 float linstep (float, float, float);

@@ -5,6 +5,7 @@
 #include "material.h"
 #include "render.h"
 #include "resource.h"
+#include "shaderlib.h"
 #include <cassert>
 
 t_shader_id compile_glsl (std::string path, GLenum type)

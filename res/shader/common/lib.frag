@@ -33,6 +33,12 @@ const float EXP_FACTOR = 40.0;
 const float NOBLEED_FACTOR = 0.4;
 const float DEPTH_BIAS = 3e-4;
 
+const float FOG_HEIGHT_MAX = -200.0;
+const float FOG_HEIGHT_MIN = 100.0;
+const vec3 FOG_COLOR = vec3(0.28, 0.28, 0.42);
+
+float linstep (float, float, float);
+
 void main ()
 {
 	switch (stage) {
@@ -56,6 +62,11 @@ void main ()
 		// call the actual user shader
 		gl_FragColor = final_shade();
 		gl_FragColor.rgb *= get_illum();
+
+		gl_FragColor.rgb = mix(gl_FragColor.rgb,
+			FOG_COLOR, linstep(FOG_HEIGHT_MIN,
+				FOG_HEIGHT_MAX, world_pos.z));
+
 		break;
 	}
 }

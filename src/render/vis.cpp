@@ -146,12 +146,6 @@ void oct_node::check_visibility (const vec3& cam, t_visible_set& s) const
 		return;
 	}
 
-	if (pass_all_nodes) {
-		for (int i = 0; i < 8; i++)
-			children[i]->check_visibility(cam, s);
-		return;
-	}
-
 	unsigned int child_pixels[8];
 
 	for (int i = 0; i < 8; i++) {

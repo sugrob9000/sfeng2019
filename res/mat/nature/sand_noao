@@ -1,4 +1,6 @@
 VERT common/identity
 FRAG sand
-diffuse rock.tga
+diffuse nature/sand.tga
 ao common/white.png
+
+

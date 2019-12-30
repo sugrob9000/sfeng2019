@@ -1,0 +1,7 @@
+FRAG building
+VERT common/identity
+
+diffuse common/white.png
+normal concrete/floor-norm.png
+ao common/white.png
+

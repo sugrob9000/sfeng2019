@@ -1,0 +1,5 @@
+FRAG diff-norm
+VERT common/identity
+diffuse concrete/wall-clr.png
+normal concrete/wall-norm.png
+

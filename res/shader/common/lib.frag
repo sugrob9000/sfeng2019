@@ -63,10 +63,10 @@ void main ()
 		gl_FragColor = final_shade();
 		gl_FragColor.rgb *= get_illum();
 
+		// dumb fog
 		gl_FragColor.rgb = mix(gl_FragColor.rgb,
 			FOG_COLOR, linstep(FOG_HEIGHT_MIN,
 				FOG_HEIGHT_MAX, world_pos.z));
-
 		break;
 	}
 }

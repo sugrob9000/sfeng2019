@@ -1,5 +1,5 @@
 VERT common/identity
 FRAG sand
-diffuse sand.tga
+diffuse nature/sand.tga
 ao ground_ao.png
 

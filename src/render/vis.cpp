@@ -63,8 +63,9 @@ t_bound_box octant_bound (t_bound_box parent, uint8_t octant_id)
 {
 	vec3 mid = (parent.start + parent.end) * 0.5;
 	t_bound_box r = parent;
-	for (int i = 0; i < 3; i++)
-		(octant_id & (1 << i) ? r.start : r.end)[i] = mid[i];
+	(octant_id & 1 ? r.start : r.end).x = mid.x;
+	(octant_id & 2 ? r.start : r.end).y = mid.y;
+	(octant_id & 4 ? r.start : r.end).z = mid.z;
 	return r;
 }
 

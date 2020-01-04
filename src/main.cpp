@@ -16,7 +16,7 @@ COMMAND_ROUTINE (sun_at_view)
 	run_cmd_ext("signal 0 sun setang " + camera.ang.to_string());
 }
 
-int main (int argc, char** argv)
+int main (int argc, const char* const* argv)
 {
 	init_input();
 	init_core();

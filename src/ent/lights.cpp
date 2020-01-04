@@ -110,8 +110,8 @@ COMMAND_ROUTINE (light_refit_buffers)
 		return;
 	for (int i: { 0, 1 }) {
 		glDeleteFramebuffers(1, &sspace_fbo[i].id);
-		const unsigned int tex[2] = { sspace_fbo[i].tex_depth,
-		                              sspace_fbo[i].tex_color };
+		const GLuint tex[2] = { sspace_fbo[i].tex_depth,
+		                        sspace_fbo[i].tex_color };
 		glDeleteTextures(2, tex);
 		sspace_fbo[i].make(CEIL_PO2(sdlcont.res_x),
 		                   CEIL_PO2(sdlcont.res_y),

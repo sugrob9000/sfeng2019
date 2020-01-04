@@ -14,10 +14,10 @@ vec3 surface_normal ();
 layout (location = 0) uniform uint stage;
 layout (location = 1) uniform sampler2D prev_shadow_map;
 
-layout (location = 2) uniform sampler2D depth_map;
-layout (location = 3) uniform vec3 light_pos;
-layout (location = 6) uniform vec3 light_rgb;
-layout (location = 9) uniform mat4 light_view;
+layout (location = 10) uniform sampler2D depth_map;
+layout (location = 11) uniform vec3 light_pos;
+layout (location = 14) uniform vec3 light_rgb;
+layout (location = 17) uniform mat4 light_view;
 
 in vec3 world_normal;
 in vec3 world_pos;
@@ -31,7 +31,7 @@ const float EXP_FACTOR = 40.0;
 const float NOBLEED_FACTOR = 0.4;
 const float DEPTH_BIAS = 3e-4;
 
-const float FOG_HEIGHT_MAX = -200.0;
+const float FOG_HEIGHT_MAX = -300.0;
 const float FOG_HEIGHT_MIN = 75.0;
 const vec3 FOG_COLOR = vec3(0.28, 0.28, 0.42);
 

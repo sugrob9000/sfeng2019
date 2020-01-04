@@ -379,13 +379,13 @@ void debug_texture_onscreen (GLuint texture)
 
 void t_fbo::make (int w, int h, uint8_t bits)
 {
-	id = -1;
-	tex_color = -1;
-	tex_depth = -1;
+	id = 0;
+	tex_color = 0;
+	tex_depth = 0;
 
-	if (w <= 0 || h <= 0 || !IS_PO2(w) || !IS_PO2(h)) {
+	if (w <= 0 || h <= 0) {
 		fatal("Requested FBO with invalid dimenstions %i, %i "
-		      "(must be powers of 2 and positive). bits = %i",
+		      "(must be and positive). bits = %i",
 		      w, h, bits);
 	}
 

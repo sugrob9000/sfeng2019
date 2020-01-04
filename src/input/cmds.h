@@ -24,6 +24,6 @@
 #include "cmds.inc"
 #undef COMMAND
 
-MOUSEMOVE_ROUTINE (mousemove_camera);
+MOUSEMOVE_ROUTINE (camera);
 
 #endif // CMDS_H

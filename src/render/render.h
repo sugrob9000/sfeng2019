@@ -77,7 +77,7 @@ void draw_text (const char* text, float x, float y, float charw, float charh);
 
 void draw_cuboid (const t_bound_box& b);
 
-void debug_texture_onscreen (GLuint texture);
+void debug_texture_onscreen (GLuint texture, float x, float y, float scale);
 
 
 /*

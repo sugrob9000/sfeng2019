@@ -11,13 +11,8 @@ bind D cam_move r
 bind Left_Shift cam_accelerate
 bind Left_Ctrl cam_decelerate
 
-bind Z vis_occluders
-bind X vis_worldwireframe
-bind C vis_leaves
-
 bind E sun_at_view
-
-loadmap map1
 
 windowsize 1024 768
 light_refit_buffers
+loadmap map1

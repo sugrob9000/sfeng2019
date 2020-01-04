@@ -15,7 +15,7 @@ void init_input ()
 	#include "cmds.inc"
 	#undef COMMAND
 
-	mousemove_proc = &mouse_mousemove_camera;
+	mousemove_proc = &mouse_camera;
 }
 
 void run_argv_commands (int argc, const char* const* argv)

@@ -45,6 +45,8 @@ extern t_fbo lspace_fbo;
 
 extern std::vector<e_light*> lights;
 
+extern int debug_light;
+
 void init_lighting ();
 void compute_lighting ();
 

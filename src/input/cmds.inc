@@ -40,6 +40,7 @@ COMMAND (exec)
 COMMAND (cam_move)
 COMMAND (cam_accelerate)
 COMMAND (cam_decelerate)
+COMMAND (cam_dump_pos)
 
 /*
  * Set app window size
@@ -71,10 +72,17 @@ COMMAND (vis_leaves)
 COMMAND (vis_leaves_nodepth)
 COMMAND (vis_disable)
 
-/*
- * Recreate lighting framebuffers to be of sufficient resolution
- */
+/* Recreate lighting framebuffers to be of sufficient resolution */
 COMMAND (light_refit_buffers)
+
+/*
+ * Single integer value
+ * 0     => do not debug anything
+ * -1    => draw the depth buffer of the last light processed
+ * N > 0 => debug the screenspace lighting buffer
+ *          as after processing the first N lights
+ */
+COMMAND (light_debug_level)
 
 /*
  * (Demo) Tell the entity named "sun"

@@ -6,17 +6,9 @@ prop
 	name car
 
 light
-	pos 250 -350 350
-	ang 30 0 -35
-	name sun
-	reach 1500
-	cone 40
-	rgb 0.7 0.85 0.95
-
-light
        pos -923.823669 -462.896851 398.892090
        ang 23 0 43
-       name light2
+       name light1
        reach 1500
        cone 40
        rgb 0.7 0.85 0.95
@@ -24,7 +16,7 @@ light
 light
        pos -52.702381 -950.114807 748.310547
        ang 33 0 -4
-       name light3
+       name light2
        reach 1500
        cone 40
        rgb 0.91 0.89 0.53
@@ -32,7 +24,7 @@ light
 light
        pos 38.226044 132.618378 272.463165
        ang 14 0 -96
-       name light5
-       reach 1500
+       name sun
+       reach 800
        cone 40
        rgb 0.5 0.55 0.95

@@ -1,7 +1,7 @@
+#include "render.h"
 #include "ent/lights.h"
 #include "input/cmds.h"
 #include "input/console.h"
-#include "render.h"
 #include "resource.h"
 #include "vis.h"
 #include <cassert>
@@ -42,7 +42,17 @@ void render_all ()
 	reset_matrices();
 	glDisable(GL_CULL_FACE);
 	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
 	glUseProgram(0);
+
+	if (debug_light > 0) {
+		debug_texture_onscreen(
+			sspace_fbo[current_sspace_fbo].tex_color,
+			-1.0, -1.0, 2.0);
+	} else if (debug_light == -1) {
+		debug_texture_onscreen(lspace_fbo.tex_depth,
+			-1.0, -1.0, 2.0);
+	}
 
 	if (console_active)
 		console_render();
@@ -68,10 +78,19 @@ void init_render ()
 	if (SDL_Init(SDL_INIT_VIDEO) < 0)
 		fatal("SDL_Init failed: %s", SDL_GetError());
 
+	int img_flags = IMG_INIT_JPG | IMG_INIT_PNG | IMG_INIT_TIF;
+	int img_success;
+	if ((img_success = IMG_Init(img_flags)) != img_flags) {
+		fatal("IMG init failed! attempted %x, successful %x",
+			img_flags, img_success);
+	}
+
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,
 	                    SDL_GL_CONTEXT_PROFILE_CORE);
+	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
 
 	sdlcont.window = SDL_CreateWindow("Engine",
 			SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
@@ -97,6 +116,8 @@ void init_render ()
 		SDL_GL_SetSwapInterval(1);
 	}
 	glClearColor(1.0, 1.0, 1.0, 1.0);
+
+	glEnable(GL_MULTISAMPLE);
 
 	glMatrixMode(MTX_VIEWPROJ);
 	glLoadIdentity();
@@ -353,7 +374,7 @@ void draw_cuboid (const t_bound_box& b)
 	glPopMatrix();
 }
 
-void debug_texture_onscreen (GLuint texture)
+void debug_texture_onscreen (GLuint texture, float x, float y, float scale)
 {
 	glUseProgram(0);
 	glActiveTexture(GL_TEXTURE0);
@@ -361,16 +382,18 @@ void debug_texture_onscreen (GLuint texture)
 	glEnable(GL_TEXTURE_2D);
 
 	glPushMatrix();
+	glTranslatef(x, y, 0.0);
+	glScalef(scale, scale, 1.0);
 
 	glColor4f(1.0, 1.0, 1.0, 1.0);
 	glBegin(GL_QUADS);
 
-	const int x[4] = { 0, 1, 1, 0 };
-	const int y[4] = { 0, 0, 1, 1 };
+	const int vx[4] = { 0, 1, 1, 0 };
+	const int vy[4] = { 0, 0, 1, 1 };
 
 	for (int i = 0; i < 4; i++) {
-		glTexCoord2i(x[i], y[i]);
-		glVertex2i(x[i], y[i]);
+		glTexCoord2i(vx[i], vy[i]);
+		glVertex2i(vx[i], vy[i]);
 	}
 
 	glEnd();
@@ -495,7 +518,7 @@ void upd_camera_pos ()
 	cam.pos += delta * speed;
 }
 
-MOUSEMOVE_ROUTINE (mousemove_camera)
+MOUSEMOVE_ROUTINE (camera)
 {
 	camera.ang.x += dy;
 	camera.ang.z += dx;
@@ -523,4 +546,12 @@ COMMAND_ROUTINE (cam_move)
 		flags[cam_move_r] = f;
 		break;
 	}
+}
+
+COMMAND_ROUTINE (cam_dump_pos)
+{
+	if (ev != PRESS)
+		return;
+	std::cout << "pos " << camera.pos
+		<< "\nang " << camera.ang << std::endl;
 }

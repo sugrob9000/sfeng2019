@@ -125,7 +125,6 @@ void fill_depth_map (const e_light* l)
 
 	glDepthMask(GL_TRUE);
 	glDepthFunc(GL_LESS);
-	glDisable(GL_BLEND);
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
@@ -197,8 +196,27 @@ void compute_lighting ()
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 	current_sspace_fbo = 0;
 
+	glDisable(GL_BLEND);
+
+	int threshold = (debug_light > 0) ? debug_light : lights.size();
+	int i = 0;
 	for (const e_light* l: lights) {
 		fill_depth_map(l);
 		compose_add_depth_map();
+		if (++i >= threshold)
+			break;
 	}
+}
+
+int debug_light;
+COMMAND_ROUTINE (light_debug_level)
+{
+	if (ev != PRESS || args.size() != 1)
+		return;
+	int level = atoi(args[0].c_str());
+
+	if (level < -1)
+		level = 0;
+
+	debug_light = level;
 }

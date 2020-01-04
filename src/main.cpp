@@ -24,8 +24,9 @@ int main (int argc, const char* const* argv)
 
 	console_close();
 
-	camera = t_camera({ 0.0, 0.0, 200.0 }, { 0.0, 0.0, 0.0 },
-			5000.0f, 0.5f, 60.0f);
+	camera = t_camera({ -817.401, -762.854, 346.387 },
+	                  { 20.0, 0.0, 11.0 },
+	                  5000.0f, 0.5f, 60.0f);
 
 	run_script("res/cfg/rc");
 	run_argv_commands(argc, argv);

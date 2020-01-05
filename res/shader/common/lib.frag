@@ -80,7 +80,16 @@ vec3 sspace_light ()
 	lcoord.z -= DEPTH_BIAS;
 	float bright = max(1.0 - length(lcoord.xy), 0.0);
 
-	vec4 moments = texture(depth_map, lcoord.st * 0.5 + 0.5);
+	// vec4 moments = texture(depth_map, lcoord.st * 0.5 + 0.5);
+	vec4 moments;
+	float samples = 4.0;
+	float offset = 0.00195;
+	for (float y = -offset; y <= offset; y += 0.000976) {
+		for (float x = -offset; x <= offset; x += 0.000976)
+			moments += texture(depth_map, (lcoord.st*0.5+0.5) + vec2(x, y));
+	}
+	moments /= samples*samples;
+
 	float val_pos = exp(EXP_FACTOR * lcoord.z);
 	float val_neg = -exp(-EXP_FACTOR * lcoord.z);
 

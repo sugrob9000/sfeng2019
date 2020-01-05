@@ -4,7 +4,7 @@
 
 FILL_IO_DATA (prop)
 {
-	BASIC_SIG_HANDLERS (prop);
+	BASIC_SIG_HANDLERS(prop);
 }
 
 void e_prop::think () { }

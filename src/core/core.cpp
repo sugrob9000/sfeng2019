@@ -106,8 +106,10 @@ e_base* read_single_entity (std::istream& is)
 
 			std::string event_name;
 			t_signal s;
-			iss >> event_name >> s.tick_due >> s.target
-				>> s.signal_name >> s.argument;
+			iss >> event_name >> s.tick_due
+				>> s.target >> s.signal_name;
+			// get the whole rest of the line
+			getline(iss, s.argument);
 			ent->events[event_name].push_back(s);
 
 		} else {

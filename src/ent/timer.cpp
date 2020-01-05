@@ -17,6 +17,7 @@ SIG_HANDLER (timer, set)
 
 FILL_IO_DATA (timer)
 {
+	BASIC_SIG_HANDLERS(timer);
 	SET_SIG_HANDLER(timer, start);
 	SET_SIG_HANDLER(timer, stop);
 	SET_SIG_HANDLER(timer, set);
@@ -48,8 +49,4 @@ void e_timer::apply_keyvals (const t_ent_keyvals& kv)
 }
 
 void e_timer::render (t_render_stage s) const { }
-
-t_bound_box e_timer::get_bbox () const
-{
-	return { };
-}
+t_bound_box e_timer::get_bbox () const { return { }; }

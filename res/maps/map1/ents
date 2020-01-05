@@ -5,6 +5,13 @@ prop
 	mat car-red
 	name car
 
+trigger_sphere
+	pos 472 128 152
+	radius 120
+	name trig
+	! enter 0 car setang 0 -1.5 257
+	! exit 0 car setang 0 -1.5 77
+
 light
 	pos 524.884094 -30.328123 228.739716
 	ang 25 0 -15

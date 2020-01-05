@@ -4,5 +4,6 @@
 #include "prop.h"
 #include "timer.h"
 #include "lights.h"
+#include "trigger_sphere.h"
 
 #endif // ALL_ENT_HEADERS_INC

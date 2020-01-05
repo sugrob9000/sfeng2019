@@ -2,4 +2,3 @@ FRAG car
 VERT common/identity
 diffuse red.tga
 normal car-normal.tga
-diffuse_shift wavy-norm.png

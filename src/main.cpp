@@ -11,9 +11,10 @@ COMMAND_ROUTINE (sun_at_view)
 {
 	if (ev != PRESS)
 		return;
-
-	run_cmd_ext("signal 0 sun setpos " + camera.pos.to_string());
-	run_cmd_ext("signal 0 sun setang " + camera.ang.to_string());
+	std::string pos_str = camera.pos.to_string();
+	std::string ang_str = camera.ang.to_string();
+	run_cmd_ext("signal 0 sun setpos " + pos_str);
+	run_cmd_ext("signal 0 sun setang " + ang_str);
 }
 
 int main (int argc, const char* const* argv)
@@ -24,8 +25,8 @@ int main (int argc, const char* const* argv)
 
 	console_close();
 
-	camera = t_camera({ -817.401, -762.854, 346.387 },
-	                  { 20.0, 0.0, 11.0 },
+	camera = t_camera({ 537.984, 72.1997, 188.145 },
+	                  { 18, 0, -45 },
 	                  5000.0f, 0.5f, 60.0f);
 
 	run_script("res/cfg/rc");

@@ -7,6 +7,7 @@
 vec4 final_shade ();
 vec3 surface_normal ();
 
+#define LIGHT_BOX_BLUR
 
 #define LIGHTING_LSPACE 0u
 #define LIGHTING_SSPACE 1u
@@ -59,8 +60,6 @@ void main ()
 
 		// call the actual user shader
 		gl_FragColor = final_shade();
-		gl_FragColor.rgb *= get_illum();
-
 		// dumb fog
 		gl_FragColor.rgb = mix(gl_FragColor.rgb,
 			FOG_COLOR, linstep(FOG_HEIGHT_MIN,
@@ -80,15 +79,20 @@ vec3 sspace_light ()
 	lcoord.z -= DEPTH_BIAS;
 	float bright = max(1.0 - length(lcoord.xy), 0.0);
 
-	// vec4 moments = texture(depth_map, lcoord.st * 0.5 + 0.5);
+#ifdef LIGHT_BOX_BLUR
 	vec4 moments;
 	float samples = 4.0;
 	float offset = 0.00195;
 	for (float y = -offset; y <= offset; y += 0.000976) {
-		for (float x = -offset; x <= offset; x += 0.000976)
-			moments += texture(depth_map, (lcoord.st*0.5+0.5) + vec2(x, y));
+		for (float x = -offset; x <= offset; x += 0.000976) {
+			vec2 crd = lcoord.st * 0.5 + 0.5 + vec2(x, y);
+			moments += texture(depth_map, crd);
+		}
 	}
 	moments /= samples*samples;
+#else
+	vec4 moments = texture(depth_map, lcoord.st * 0.5 + 0.5);
+#endif
 
 	float val_pos = exp(EXP_FACTOR * lcoord.z);
 	float val_neg = -exp(-EXP_FACTOR * lcoord.z);

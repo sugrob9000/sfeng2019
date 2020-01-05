@@ -21,7 +21,7 @@ vec4 final_shade ()
 	t += surface_normal().xy;
 	vec4 clr = texture(map_diffuse, t);
 
-	clr.rgb *= ao;
+	clr.rgb *= ao * get_illum();
 	return clr;
 }
 

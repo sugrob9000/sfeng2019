@@ -15,5 +15,5 @@ vec3 surface_normal ()
 
 vec4 final_shade ()
 {
-	return texture(map_diffuse, tex_crd);
+	return texture(map_diffuse, tex_crd) * vec4(get_illum(), 1.0);
 }

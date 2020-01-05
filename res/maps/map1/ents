@@ -16,7 +16,7 @@ light
 	pos 524.884094 -30.328123 228.739716
 	ang 25 0 -15
 	name sun
-	reach 800
+	reach 1500
 	cone 40
 	rgb 0.5 0.55 0.95
 

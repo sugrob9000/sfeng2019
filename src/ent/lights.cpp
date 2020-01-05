@@ -65,37 +65,63 @@ float e_light::uniform_viewmat[16];
 vec3 e_light::uniform_rgb;
 vec3 e_light::uniform_pos;
 
-/* Depth maps from lights' perspective */
-t_fbo lspace_fbo;
+/*
+ * Depth maps from lights' perspective
+ */
+constexpr int lspace_samples = 4;
 constexpr int lspace_resolution = 1024;
+/* Multisampled framebuffer in which to do the rendering */
+t_fbo lspace_fbo_ms;
+/* Regular framebuffer into which to blit from the _ms one */
+t_fbo lspace_fbo;
 
-/* Screen space lighting */
+/*
+ * Screen space shadow maps
+ */
 t_fbo sspace_fbo[2];
 int current_sspace_fbo = 0;
 
+
+void init_sspace ();
+void init_lspace ();
+void init_lspace_ms ();
 void init_lighting ()
+{
+	init_sspace();
+	init_lspace();
+	init_lspace_ms();
+}
+
+void init_sspace ()
 {
 	for (int i: { 0, 1 }) {
 		sspace_fbo[i].make(CEIL_PO2(sdlcont.res_x),
 		                   CEIL_PO2(sdlcont.res_y),
 		                   t_fbo::BIT_DEPTH | t_fbo::BIT_COLOR);
 	}
+}
 
-	lspace_fbo.make(lspace_resolution, lspace_resolution,
-			t_fbo::BIT_DEPTH);
-
-	// make custom color target texture for VSM
-	// with two 32-bit float channels
-
-	GLuint lspace_color;
-	glGenTextures(1, &lspace_color);
-	glBindTexture(GL_TEXTURE_2D, lspace_color);
-
+void lspace_tex_params ()
+{
 	glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_FALSE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+}
+
+void init_lspace ()
+{
+	// no need for even a depth buffer
+	// because we will just blit into this
+	lspace_fbo.make(lspace_resolution, lspace_resolution, 0);
+
+	// make custom color target texture for EVSM
+	// with two 32-bit float channels
+	GLuint lspace_color;
+	glGenTextures(1, &lspace_color);
+	glBindTexture(GL_TEXTURE_2D, lspace_color);
+	lspace_tex_params();
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F,
 			lspace_resolution, lspace_resolution, 0,
@@ -103,6 +129,34 @@ void init_lighting ()
 
 	lspace_fbo.attach_color(lspace_color);
 }
+
+void init_lspace_ms ()
+{
+	// make another lightspace framebuffer, with MSAA
+	// into which we will actually render
+	lspace_fbo_ms.make(lspace_resolution, lspace_resolution, 0);
+
+	glGenTextures(1, &lspace_fbo_ms.tex_color);
+	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, lspace_fbo_ms.tex_color);
+
+	lspace_tex_params();
+
+	glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, lspace_samples,
+		GL_RGBA32F, lspace_resolution, lspace_resolution, GL_TRUE);
+
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+		GL_TEXTURE_2D_MULTISAMPLE, lspace_fbo_ms.tex_color, 0);
+
+	GLuint rbo;
+	glGenRenderbuffers(1, &rbo);
+	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+	glRenderbufferStorageMultisample(GL_RENDERBUFFER, lspace_samples,
+		GL_DEPTH_COMPONENT, lspace_resolution, lspace_resolution);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+		GL_RENDERBUFFER, rbo);
+}
+
+
 
 COMMAND_ROUTINE (light_refit_buffers)
 {
@@ -121,7 +175,7 @@ COMMAND_ROUTINE (light_refit_buffers)
 
 void fill_depth_map (const e_light* l)
 {
-	lspace_fbo.apply();
+	lspace_fbo_ms.apply();
 
 	glDepthMask(GL_TRUE);
 	glDepthFunc(GL_LESS);
@@ -139,6 +193,12 @@ void fill_depth_map (const e_light* l)
 	e_light::uniform_rgb = l->rgb;
 
 	pop_matrices();
+
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, lspace_fbo_ms.id);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, lspace_fbo.id);
+	glBlitFramebuffer(0, 0, lspace_resolution, lspace_resolution,
+	                  0, 0, lspace_resolution, lspace_resolution,
+	                  GL_COLOR_BUFFER_BIT, GL_NEAREST);
 }
 
 void compose_add_depth_map ()
@@ -198,25 +258,8 @@ void compute_lighting ()
 
 	glDisable(GL_BLEND);
 
-	int threshold = (debug_light > 0) ? debug_light : lights.size();
-	int i = 0;
 	for (const e_light* l: lights) {
 		fill_depth_map(l);
 		compose_add_depth_map();
-		if (++i >= threshold)
-			break;
 	}
-}
-
-int debug_light;
-COMMAND_ROUTINE (light_debug_level)
-{
-	if (ev != PRESS || args.size() != 1)
-		return;
-	int level = atoi(args[0].c_str());
-
-	if (level < -1)
-		level = 0;
-
-	debug_light = level;
 }

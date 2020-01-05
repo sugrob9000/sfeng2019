@@ -76,15 +76,6 @@ COMMAND (vis_disable)
 COMMAND (light_refit_buffers)
 
 /*
- * Single integer value
- * 0     => do not debug anything
- * -1    => draw the depth buffer of the last light processed
- * N > 0 => debug the screenspace lighting buffer
- *          as after processing the first N lights
- */
-COMMAND (light_debug_level)
-
-/*
  * (Demo) Tell the entity named "sun"
  * to have the same pos and ang as camera
  */

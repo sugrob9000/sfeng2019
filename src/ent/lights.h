@@ -35,7 +35,7 @@ class e_light: public e_base
 };
 
 constexpr float LIGHT_Z_NEAR = 10.0;
-const vec3 ambient = vec3(0.15);
+const vec3 ambient = vec3(0.05);
 
 void light_apply_uniforms (t_render_stage s);
 

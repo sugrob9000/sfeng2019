@@ -45,15 +45,6 @@ void render_all ()
 	glEnable(GL_BLEND);
 	glUseProgram(0);
 
-	if (debug_light > 0) {
-		debug_texture_onscreen(
-			sspace_fbo[current_sspace_fbo].tex_color,
-			-1.0, -1.0, 2.0);
-	} else if (debug_light == -1) {
-		debug_texture_onscreen(lspace_fbo.tex_depth,
-			-1.0, -1.0, 2.0);
-	}
-
 	if (console_active)
 		console_render();
 

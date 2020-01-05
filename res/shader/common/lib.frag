@@ -89,8 +89,9 @@ vec3 sspace_light ()
 	vec4 moments;
 	float samples = 4.0;
 	float offset = 0.00195;
-	for (float y = -offset; y <= offset; y += 0.000976) {
-		for (float x = -offset; x <= offset; x += 0.000976) {
+	float texel_size = 1.0 / 1024.0;
+	for (float y = -offset; y <= offset; y += texel_size) {
+		for (float x = -offset; x <= offset; x += texel_size) {
 			vec2 crd = lcoord.st * 0.5 + 0.5 + vec2(x, y);
 			moments += texture(depth_map, crd);
 		}

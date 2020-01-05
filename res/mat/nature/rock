@@ -1,4 +1,4 @@
 VERT common/identity
-FRAG sand
+FRAG diff-norm
 diffuse nature/rock.tga
-ao common/white.png
+normal nature/rock_normal.png

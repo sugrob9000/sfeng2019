@@ -9,8 +9,10 @@ vec3 get_illum ();
 
 vec3 surface_normal ()
 {
-	vec3 f = texture(map_normal, tex_crd).rgb;
-	return f * 2.0 - 1.0;
+	vec3 f = texture(map_normal, tex_crd).rgb * 2.0 - 1.0;
+	// ease the normal a bit
+	f.z *= 1.4;
+	return f;
 }
 
 vec4 final_shade ()

@@ -25,7 +25,7 @@ int main (int argc, const char* const* argv)
 
 	console_close();
 
-	camera = t_camera({ 537.984, 72.1997, 188.145 },
+	camera = t_camera({ 605.542, 4.64112, 217.669 },
 	                  { 18, 0, -45 },
 	                  5000.0f, 0.5f, 60.0f);
 

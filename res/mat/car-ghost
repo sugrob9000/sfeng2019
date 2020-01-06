@@ -1,0 +1,4 @@
+FRAG car-ghost
+VERT car-ghost
+diffuse red.tga
+normal car-normal.tga

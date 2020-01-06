@@ -5,6 +5,13 @@ prop
 	mat car-red
 	name car
 
+prop
+	pos 472 200 152
+	ang 0 0 110
+	model muscle_car
+	mat car-ghost
+	name ghost
+
 trigger_sphere
 	pos 472 128 152
 	radius 120

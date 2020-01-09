@@ -28,20 +28,9 @@ struct t_command
 	t_cmd_args args;
 };
 
-/*
- * Instances of this class are not supposed to be created much
- * in runtime either. They are created on engine start, when the
- * commands get registered. Thus, the only thing that can shall
- * get rapidly created is a scancode structure.
- */
-struct t_action
-{
-	f_cmd_routine routine;
-};
-
 struct t_command_registry
 {
-	std::unordered_map<std::string, t_action> m;
+	std::unordered_map<std::string, f_cmd_routine> m;
 
 	void register_command (
 			std::string name,

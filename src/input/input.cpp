@@ -106,7 +106,7 @@ t_command parse_command (const char* cmd)
 void t_command_registry::register_command (
 		std::string name, f_cmd_routine routine)
 {
-	m[name].routine = routine;
+	m[name] = routine;
 }
 
 void t_command_registry::run (const t_command& cmd, uint8_t ev)
@@ -115,8 +115,7 @@ void t_command_registry::run (const t_command& cmd, uint8_t ev)
 	if (i == m.end())
 		return;
 
-	t_action& action = i->second;
-	f_cmd_routine& routine = action.routine;
+	f_cmd_routine routine = i->second;
 
 	if (routine != nullptr)
 		routine(cmd.args, ev);

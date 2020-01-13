@@ -18,10 +18,18 @@
  *
  *   fbo.apply();
  *   // do the drawing, etc.
+ *
+ * Note that OpenGL requires all attachments in a FBO to be of
+ * the same dimensions; this requirement, while checked for,
+ * is not properly reflected - TODO?
  */
 
 
-/* The kinds of attachments possible */
+/*
+ * The kinds of attachments possible. These do not biject into
+ * OpenGL target enums (there is not a GL_FRAMEBUFFER_MULTISAMPLE,
+ * for instance). This list may be extended as more options are implemented
+ */
 enum att_target_enum {
 	tex2d,
 	tex2d_msaa,
@@ -29,6 +37,7 @@ enum att_target_enum {
 	rbo_msaa
 };
 
+/* A particular attachment */
 template <att_target_enum T>
 struct t_attachment
 {
@@ -37,6 +46,11 @@ struct t_attachment
 	int height;
 };
 
+/*
+ * Functions to make an attachment. Different attachments require different
+ * parameters with which to be made - the number of samples,
+ * 1/2/3 dimensions (TODO for 1D and 3D textures), etc.
+ */
 t_attachment<tex2d> make_tex2d (int w, int h, GLenum internal_type);
 t_attachment<tex2d_msaa> make_tex2d_msaa (int w, int h,
 		GLenum internal_type, int samples);
@@ -45,6 +59,7 @@ t_attachment<rbo_msaa> make_rbo_msaa (int w, int h,
 		GLenum internal_type, int samples);
 
 
+/* Actual framebuffer */
 struct t_fbo
 {
 	GLuint id;
@@ -58,6 +73,7 @@ struct t_fbo
 
 	template <att_target_enum T>
 	t_fbo& attach_color (const t_attachment<T>& att, int idx = 0);
+
 	template <att_target_enum T>
 	t_fbo& attach_depth (const t_attachment<T>& att);
 

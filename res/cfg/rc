@@ -13,4 +13,7 @@ bind Left_Ctrl cam_decelerate
 
 bind E sun_at_view
 
+windowsize 1024 768
+light_refit_buffers
+
 loadmap map1

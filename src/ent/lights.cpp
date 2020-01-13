@@ -85,26 +85,19 @@ int current_sspace_fbo = 0;
 
 void init_lighting ()
 {
-	extern void init_sspace ();
-	extern void init_lspace ();
-	init_sspace();
-	init_lspace();
-}
-
-void init_sspace ()
-{
+	// screenspace FBO
 	int w = CEIL_PO2(sdlcont.res_x);
 	int h = CEIL_PO2(sdlcont.res_y);
+
+	auto depth_rbo = make_rbo(w, h, GL_DEPTH_COMPONENT);
 	for (int i: { 0, 1 }) {
 		sspace_fbo[i].make()
 			.attach_color(make_tex2d(w, h, GL_RGB))
-			.attach_depth(make_rbo(w, h, GL_DEPTH_COMPONENT))
+			.attach_depth(depth_rbo)
 			.assert_complete();
 	}
-}
 
-void init_lspace ()
-{
+	// lightspace FBO
 	int s = lspace_resolution;
 
 	lspace_fbo_ms.make()
@@ -123,7 +116,24 @@ COMMAND_ROUTINE (light_refit_buffers)
 {
 	if (ev != PRESS)
 		return;
-	fatal("Not implemented");
+
+	int w = CEIL_PO2(sdlcont.res_x);
+	int h = CEIL_PO2(sdlcont.res_y);
+
+	glDeleteRenderbuffers(1, &sspace_fbo[0].depth);
+	auto depth_rbo = make_rbo(w, h, GL_DEPTH_COMPONENT);
+
+	for (int i: { 0, 1 }) {
+		sspace_fbo[i].width = 0;
+		sspace_fbo[i].height = 0;
+
+		glDeleteTextures(1, &sspace_fbo[i].color[0]);
+
+		sspace_fbo[i]
+			.attach_color(make_tex2d(w, h, GL_RGB))
+			.attach_depth(depth_rbo)
+			.assert_complete();
+	}
 }
 
 

@@ -79,32 +79,5 @@ void draw_cuboid (const t_bound_box& b);
 
 void debug_texture_onscreen (GLuint texture, float x, float y, float scale);
 
-
-/*
- * A framebuffer object for general (but limited) purposes.
- * Does not support much customisation, but one can make()
- * one without any bits and set custom target textures
- */
-struct t_fbo
-{
-	GLuint id;
-	GLuint tex_color;
-	GLuint tex_depth;
-
-	int width;
-	int height;
-
-	static constexpr uint8_t BIT_COLOR = 0x1;
-	static constexpr uint8_t BIT_ALPHA = 0x2;
-	static constexpr uint8_t BIT_DEPTH = 0x4;
-	void make (int w, int h, uint8_t bits);
-	void make (int w, int h) { make(w, h, 0); }
-
-	void attach_color (GLuint texture);
-	void attach_depth (GLuint texture);
-
-	void apply () const;
-};
-
 #endif // RENDER_H
 

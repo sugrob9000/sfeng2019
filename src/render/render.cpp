@@ -53,10 +53,6 @@ void render_all ()
 }
 
 
-void init_text ();
-void init_sky ();
-void init_cuboid ();
-void gl_limits_sanity_check ();
 void init_render ()
 {
 	if (sdlcont.res_x == 0 || sdlcont.res_y == 0) {
@@ -115,6 +111,10 @@ void init_render ()
 	glLoadIdentity();
 	glMatrixMode(MTX_MODEL);
 	glLoadIdentity();
+
+	extern void init_text ();
+	extern void init_sky ();
+	extern void init_cuboid ();
 
 	init_cuboid();
 
@@ -391,77 +391,6 @@ void debug_texture_onscreen (GLuint texture, float x, float y, float scale)
 	glEnd();
 	glPopMatrix();
 }
-
-void t_fbo::make (int w, int h, uint8_t bits)
-{
-	id = 0;
-	tex_color = 0;
-	tex_depth = 0;
-
-	if (w <= 0 || h <= 0) {
-		fatal("Requested FBO with invalid dimenstions %i, %i "
-		      "(must be and positive). bits = %i",
-		      w, h, bits);
-	}
-
-	width = w;
-	height = h;
-
-	glGenFramebuffers(1, &id);
-	glBindFramebuffer(GL_FRAMEBUFFER, id);
-
-	auto fb_tex_params = [] () -> void {
-		constexpr GLenum t = GL_TEXTURE_2D;
-		glTexParameteri(t, GL_GENERATE_MIPMAP, GL_FALSE);
-		glTexParameteri(t, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(t, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(t, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(t, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	};
-
-	if (bits & BIT_COLOR) {
-		GLenum storage = (bits & BIT_ALPHA) ? GL_RGBA : GL_RGB;
-		glGenTextures(1, &tex_color);
-		glBindTexture(GL_TEXTURE_2D, tex_color);
-		glTexImage2D(GL_TEXTURE_2D, 0, storage, w, h, 0,
-				storage, GL_UNSIGNED_BYTE, nullptr);
-		fb_tex_params();
-		attach_color(tex_color);
-	}
-
-	if (bits & BIT_DEPTH) {
-		glGenTextures(1, &tex_depth);
-		glBindTexture(GL_TEXTURE_2D, tex_depth);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, w, h, 0,
-				GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-		fb_tex_params();
-		attach_depth(tex_depth);
-	}
-}
-
-void t_fbo::attach_color (GLuint texture)
-{
-	glBindFramebuffer(GL_FRAMEBUFFER, id);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-			GL_TEXTURE_2D, texture, 0);
-	tex_color = texture;
-}
-
-void t_fbo::attach_depth (GLuint texture)
-{
-	glBindFramebuffer(GL_FRAMEBUFFER, id);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-			GL_TEXTURE_2D, texture, 0);
-	tex_depth = texture;
-}
-
-
-void t_fbo::apply () const
-{
-	glBindFramebuffer(GL_FRAMEBUFFER, id);
-	glViewport(0, 0, width, height);
-}
-
 
 
 constexpr short cam_move_f = 0;

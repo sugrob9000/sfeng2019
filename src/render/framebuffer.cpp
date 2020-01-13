@@ -1,25 +1,7 @@
-#include "gl.h"
 #include "inc_general.h"
+#include "framebuffer.h"
 #include <cassert>
 #include <map>
-
-
-void foo ()
-{
-	t_fbo fbo;
-	fbo.make()
-		.attach_color(make_tex2d_msaa(1024, 1024, GL_RGBA32F, 4), 0)
-		.attach_color(make_rbo_msaa(1024, 1024, GL_RGB, 4), 1)
-		.attach_depth(make_rbo(1024, 1024, GL_DEPTH_COMPONENT));
-}
-
-
-
-template <att_target_enum T>
-void fbo_attach_lower (t_fbo&, const t_attachment<T>&, GLenum);
-#define SPECIALIZE_ATTACH(type)                 \
-	template <> void fbo_attach_lower<type> \
-		(t_fbo& fbo, const t_attachment<type>& a, GLenum slot)
 
 SPECIALIZE_ATTACH(tex2d)
 {
@@ -34,45 +16,14 @@ SPECIALIZE_ATTACH(tex2d_msaa)
 
 SPECIALIZE_ATTACH(rbo)
 {
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, slot, GL_RENDERBUFFER, rbo);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, slot, GL_RENDERBUFFER, a.id);
 }
 
 SPECIALIZE_ATTACH(rbo_msaa)
 {
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, slot, GL_RENDERBUFFER, rbo);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, slot, GL_RENDERBUFFER, a.id);
 }
 
-
-template <att_target_enum T>
-inline void fbo_assert_dimensions_equal (t_fbo& fbo, const t_attachment<T>& a)
-{
-	if ((fbo.width != 0 && a.width != fbo.width)
-	|| (fbo.height != 0 && a.height != fbo.height)) {
-		fatal("Tried to attach object with dimensions %i, %i "
-			"to FBO with dimensions %i, %i",
-			a.width, a.height, fbo.width, fbo.height);
-	}
-	fbo.width = a.width;
-	fbo.height = a.height;
-}
-
-template <att_target_enum T>
-t_fbo& t_fbo::attach_color (const t_attachment<T>& att, int idx)
-{
-	fbo_assert_dimensions_equal(*this, att);
-	glBindFramebuffer(GL_FRAMEBUFFER, id);
-	fbo_attach_lower<T>(*this, att, GL_COLOR_ATTACHMENT0 + idx);
-	return *this;
-}
-
-template <att_target_enum T>
-t_fbo& t_fbo::attach_depth (const t_attachment<T>& att)
-{
-	fbo_assert_dimensions_equal(*this, att);
-	glBindFramebuffer(GL_FRAMEBUFFER, id);
-	fbo_attach_lower<T>(*this, att, GL_DEPTH_ATTACHMENT);
-	return *this;
-}
 
 t_fbo& t_fbo::make ()
 {
@@ -80,6 +31,29 @@ t_fbo& t_fbo::make ()
 	return *this;
 }
 
+t_fbo& t_fbo::assert_complete ()
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, id);
+	GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+
+	if (status != GL_FRAMEBUFFER_COMPLETE)
+		fatal("Framebuffer %i incomplete: status %x", id, status);
+
+	if (width <= 0 || height <= 0) {
+		fatal("Framebuffer %i with invalid dimensions %i, %i",
+				id, width, height);
+	}
+
+	return *this;
+}
+
+void t_fbo::apply ()
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, id);
+	glViewport(0, 0, width, height);
+}
+
+/* ================= Making different attachments ================= */
 
 
 std::pair<GLenum, GLenum> dissect_sized_type (GLenum);
@@ -122,7 +96,7 @@ t_attachment<tex2d_msaa> make_tex2d_msaa (int w, int h,
 
 	glGenTextures(1, &r.id);
 	glBindTexture(target, r.id);
-	fbo_tex_params(target);
+
 	glTexImage2DMultisample(target, samples, internal_type, w, h, GL_TRUE);
 
 	return r;
@@ -191,5 +165,3 @@ std::pair<GLenum, GLenum> dissect_sized_type (GLenum sized)
 	}
 	return iter->second;
 }
-
-

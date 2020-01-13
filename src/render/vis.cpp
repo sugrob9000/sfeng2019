@@ -1,4 +1,5 @@
 #include "vis.h"
+#include "framebuffer.h"
 #include "resource.h"
 #include "core/core.h"
 #include "input/cmds.h"
@@ -38,7 +39,10 @@ void init_vis ()
 
 	glGenQueries(8, occ_queries);
 
-	occ_fbo.make(occ_fbo_size, occ_fbo_size, t_fbo::BIT_DEPTH);
+	occ_fbo.make()
+		.attach_depth(make_rbo(
+			occ_fbo_size, occ_fbo_size, GL_DEPTH_COMPONENT))
+		.assert_complete();
 }
 
 
@@ -349,7 +353,7 @@ void t_visible_set::render_debug () const
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		glDisable(GL_CULL_FACE);
 		glDisable(GL_DEPTH_TEST);
-		glColor4f(0.0, 0.0, 0.0, 0.5);
+		glColor4f(0.5, 0.0, 0.0, 0.5);
 		for (const oct_node* node: leaves) {
 			for (const auto& gr: node->mat_buckets)
 				glCallList(gr.display_list);

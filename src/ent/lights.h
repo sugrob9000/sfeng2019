@@ -39,10 +39,6 @@ const vec3 ambient = vec3(0.05);
 
 void light_apply_uniforms (t_render_stage s);
 
-extern int current_sspace_fbo;
-extern t_fbo sspace_fbo[2];
-extern t_fbo lspace_fbo;
-
 extern std::vector<e_light*> lights;
 
 extern int debug_light;

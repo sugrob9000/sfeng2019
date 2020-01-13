@@ -73,6 +73,4 @@ struct t_visible_set
 
 void vis_requery_entity (e_base* e);
 
-extern t_fbo occ_fbo;
-
 #endif // VIS_H

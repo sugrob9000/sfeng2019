@@ -30,12 +30,14 @@
  * OpenGL target enums (there is not a GL_FRAMEBUFFER_MULTISAMPLE,
  * for instance). This list may be extended as more options are implemented
  */
-enum att_target_enum {
-	tex2d,
-	tex2d_msaa,
-	rbo,
-	rbo_msaa
+enum att_target_enum
+{
+	tex2d, tex2d_msaa,
+	tex2d_array, tex2d_array_msaa,
+	rbo, rbo_msaa,
 };
+
+#include <type_traits>
 
 /* A particular attachment */
 template <att_target_enum T>
@@ -44,6 +46,8 @@ struct t_attachment
 	GLuint id;
 	int width;
 	int height;
+	/* Only relevant in 3D targets */
+	int depth = 1;
 };
 
 /*
@@ -54,12 +58,21 @@ struct t_attachment
 t_attachment<tex2d> make_tex2d (int w, int h, GLenum internal_type);
 t_attachment<tex2d_msaa> make_tex2d_msaa (int w, int h,
 		GLenum internal_type, int samples);
+
+t_attachment<tex2d_array> make_tex2d_array (int w, int h, int d,
+		GLenum internal_type);
+t_attachment<tex2d_array_msaa> make_tex2d_array_msaa (int w, int h, int d,
+		GLenum internal_type, int samples);
+
 t_attachment<rbo> make_rbo (int w, int h, GLenum internal_type);
 t_attachment<rbo_msaa> make_rbo_msaa (int w, int h,
 		GLenum internal_type, int samples);
 
 
-/* Actual framebuffer */
+/*
+ * In all functions, slice only matters when the target is 3D
+ */
+
 struct t_fbo
 {
 	GLuint id;
@@ -72,10 +85,11 @@ struct t_fbo
 	GLuint depth;
 
 	template <att_target_enum T>
-	t_fbo& attach_color (const t_attachment<T>& att, int idx = 0);
+	t_fbo& attach_color (const t_attachment<T>& att, int idx = 0,
+	                     int slice = 0);
 
 	template <att_target_enum T>
-	t_fbo& attach_depth (const t_attachment<T>& att);
+	t_fbo& attach_depth (const t_attachment<T>& att, int slice = 0);
 
 	t_fbo& make ();
 	void apply ();
@@ -85,15 +99,19 @@ struct t_fbo
 
 
 template <att_target_enum T>
-void fbo_attach_lower (t_fbo&, const t_attachment<T>&, GLenum);
-#define SPECIALIZE_ATTACH(type)                 \
-	template <> void fbo_attach_lower<type> \
-		(t_fbo& fbo, const t_attachment<type>& a, GLenum slot)
+void fbo_attach_lower (t_fbo& fbo, const t_attachment<T>& att,
+		GLenum type, int slice);
+#define _FBO_SPECIALIZE_ATTACH(type)                      \
+	template <> void fbo_attach_lower<type>           \
+		(t_fbo& fbo, const t_attachment<type>& a, \
+		 GLenum slot, int slice)
 
-SPECIALIZE_ATTACH(tex2d);
-SPECIALIZE_ATTACH(tex2d_msaa);
-SPECIALIZE_ATTACH(rbo);
-SPECIALIZE_ATTACH(rbo_msaa);
+_FBO_SPECIALIZE_ATTACH (tex2d);
+_FBO_SPECIALIZE_ATTACH (tex2d_msaa);
+_FBO_SPECIALIZE_ATTACH (tex2d_array);
+_FBO_SPECIALIZE_ATTACH (tex2d_array_msaa);
+_FBO_SPECIALIZE_ATTACH (rbo);
+_FBO_SPECIALIZE_ATTACH (rbo_msaa);
 
 template <att_target_enum T>
 inline void fbo_assert_dimensions_equal (t_fbo& fbo, const t_attachment<T>& a)
@@ -109,23 +127,24 @@ inline void fbo_assert_dimensions_equal (t_fbo& fbo, const t_attachment<T>& a)
 }
 
 template <att_target_enum T>
-t_fbo& t_fbo::attach_color (const t_attachment<T>& att, int idx)
+t_fbo& t_fbo::attach_color (const t_attachment<T>& att, int idx, int slice)
 {
 	assert(idx >= 0 && idx < NUM_COLOR_ATTACHMENTS);
 	fbo_assert_dimensions_equal(*this, att);
 	glBindFramebuffer(GL_FRAMEBUFFER, id);
-	fbo_attach_lower<T>(*this, att, GL_COLOR_ATTACHMENT0 + idx);
+	fbo_attach_lower<T>(*this, att, GL_COLOR_ATTACHMENT0 + idx, slice);
 	color[idx] = att.id;
 	return *this;
 }
 
 template <att_target_enum T>
-t_fbo& t_fbo::attach_depth (const t_attachment<T>& att)
+t_fbo& t_fbo::attach_depth (const t_attachment<T>& att, int slice)
 {
 	fbo_assert_dimensions_equal(*this, att);
 	glBindFramebuffer(GL_FRAMEBUFFER, id);
-	fbo_attach_lower<T>(*this, att, GL_DEPTH_ATTACHMENT);
+	fbo_attach_lower<T>(*this, att, GL_DEPTH_ATTACHMENT, slice);
 	depth = att.id;
 	return *this;
 }
+
 #endif // FRAMEBUFFER_H

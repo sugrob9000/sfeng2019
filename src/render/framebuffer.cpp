@@ -3,27 +3,42 @@
 #include <cassert>
 #include <map>
 
-SPECIALIZE_ATTACH(tex2d)
+/* ============ Specializations for the attach_*() method ============ */
+
+_FBO_SPECIALIZE_ATTACH (tex2d)
 {
 	glFramebufferTexture2D(GL_FRAMEBUFFER, slot, GL_TEXTURE_2D, a.id, 0);
 }
 
-SPECIALIZE_ATTACH(tex2d_msaa)
+_FBO_SPECIALIZE_ATTACH (tex2d_msaa)
 {
 	glFramebufferTexture2D(GL_FRAMEBUFFER, slot,
 			GL_TEXTURE_2D_MULTISAMPLE, a.id, 0);
 }
 
-SPECIALIZE_ATTACH(rbo)
+_FBO_SPECIALIZE_ATTACH (tex2d_array)
+{
+	glFramebufferTexture3D(GL_FRAMEBUFFER, slot,
+			GL_TEXTURE_2D_ARRAY, a.id, 0, slice);
+}
+
+_FBO_SPECIALIZE_ATTACH (tex2d_array_msaa)
+{
+	glFramebufferTexture3D(GL_FRAMEBUFFER, slot,
+			GL_TEXTURE_2D_MULTISAMPLE_ARRAY, a.id, 0, slice);
+}
+
+_FBO_SPECIALIZE_ATTACH (rbo)
 {
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, slot, GL_RENDERBUFFER, a.id);
 }
 
-SPECIALIZE_ATTACH(rbo_msaa)
+_FBO_SPECIALIZE_ATTACH (rbo_msaa)
 {
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, slot, GL_RENDERBUFFER, a.id);
 }
 
+/* ===================== t_fbo methods ===================== */
 
 t_fbo& t_fbo::make ()
 {
@@ -55,33 +70,28 @@ void t_fbo::apply ()
 
 /* ================= Making different attachments ================= */
 
-
 std::pair<GLenum, GLenum> dissect_sized_type (GLenum);
-
-void fbo_tex_params (GLenum target)
-{
-	// TODO: generalize this
-	glTexParameteri(target, GL_GENERATE_MIPMAP, GL_FALSE);
-	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-}
 
 t_attachment<tex2d> make_tex2d (int w, int h, GLenum internal_type)
 {
 	t_attachment<tex2d> r;
 	r.width = w;
 	r.height = h;
+
 	constexpr GLenum target = GL_TEXTURE_2D;
 	auto comp_type = dissect_sized_type(internal_type);
 
 	glGenTextures(1, &r.id);
 	glBindTexture(target, r.id);
-	fbo_tex_params(target);
 
-	glTexImage2D(target, 0, internal_type,
-		w, h, 0, comp_type.first, comp_type.second, nullptr);
+	glTexParameteri(target, GL_GENERATE_MIPMAP, GL_FALSE);
+	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	glTexImage2D(target, 0, internal_type, w, h, 0,
+			comp_type.first, comp_type.second, nullptr);
 
 	return r;
 }
@@ -98,6 +108,45 @@ t_attachment<tex2d_msaa> make_tex2d_msaa (int w, int h,
 	glBindTexture(target, r.id);
 
 	glTexImage2DMultisample(target, samples, internal_type, w, h, GL_TRUE);
+
+	return r;
+}
+
+t_attachment<tex2d_array> make_tex2d_array (int w, int h, int d,
+		GLenum internal_type)
+{
+	t_attachment<tex2d_array> r;
+	r.width = w;
+	r.height = h;
+	r.depth = d;
+
+	constexpr GLenum target = GL_TEXTURE_2D_ARRAY;
+	auto comp_type = dissect_sized_type(internal_type);
+
+	glGenTextures(1, &r.id);
+	glBindTexture(target, r.id);
+
+	glTexImage3D(target, 0, internal_type, w, h, d, 0,
+			comp_type.first, comp_type.second, nullptr);
+
+	return r;
+}
+
+t_attachment<tex2d_array_msaa> make_tex2d_array_msaa (int w, int h, int d,
+		GLenum internal_type, int samples)
+{
+	t_attachment<tex2d_array_msaa> r;
+	r.width = w;
+	r.height = h;
+	r.depth = d;
+
+	constexpr GLenum target = GL_TEXTURE_2D_MULTISAMPLE_ARRAY;
+
+	glGenTextures(1, &r.id);
+	glBindTexture(target, r.id);
+
+	glTexImage3DMultisample(target, samples, internal_type,
+			w, h, d, GL_TRUE);
 
 	return r;
 }
@@ -127,6 +176,7 @@ t_attachment<rbo_msaa> make_rbo_msaa (int w, int h,
 	return r;
 }
 
+/* ========================================================= */
 
 /*
  * Map an OpenGL sized type to a component enum and type enum pair,
@@ -134,7 +184,7 @@ t_attachment<rbo_msaa> make_rbo_msaa (int w, int h,
  * GL_RGBA32F => { GL_RGBA, GL_FLOAT }
  */
 #define SIZED_TYPE(components, type, suffix) \
-	{ GL_##components##suffix, { GL_##components, GL_##type }}
+	{ GL_##components##suffix, { GL_##components, GL_##type } }
 #define ALL_TYPES_FOR(c)                     \
 	SIZED_TYPE(c, FLOAT, 32F),           \
 	SIZED_TYPE(c, HALF_FLOAT, 16F),      \
@@ -157,7 +207,6 @@ static std::map<GLenum, std::pair<GLenum, GLenum>> sized_types =
 
 std::pair<GLenum, GLenum> dissect_sized_type (GLenum sized)
 {
-
 	auto iter = sized_types.find(sized);
 	if (iter == sized_types.end()) {
 		fatal("Cannot convert sized type %x into components and type",

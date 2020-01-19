@@ -204,6 +204,9 @@ void light_apply_uniforms (t_render_stage s)
 		glUniform3fv(UNIFORM_LOC_LIGHT_POS, 1, pos);
 		glUniform3fv(UNIFORM_LOC_LIGHT_RGB, 1, rgb);
 
+		const float* eye = camera.pos.data();
+		glUniform3fv(UNIFORM_LOC_EYE_POSITION, 1, eye);
+
 		shadowmap = sspace_fbo[current_sspace_fbo ^ 1].color[0];
 	} else {
 		shadowmap = sspace_fbo[current_sspace_fbo].color[0];

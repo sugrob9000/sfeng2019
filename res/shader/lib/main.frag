@@ -10,7 +10,7 @@ vec3 surface_normal ();
 vec3 saturate_diffuse (float fac, vec3 color) { return color * fac; }
 vec3 saturate_specular (float fac, vec3 color)
 {
-	return color * pow(fac, 15.0);
+	return color * pow(fac, 5.0);
 }
 
 
@@ -18,9 +18,13 @@ vec3 saturate_specular (float fac, vec3 color)
 
 //#define LIGHT_BOX_BLUR
 
+#define MODEL gl_ModelViewMatrix
+#define VIEWPROJ gl_ProjectionMatrix
+
 #define LIGHTING_LSPACE 0u
 #define LIGHTING_SSPACE 1u
 #define SHADE_FINAL 2u
+
 layout (location = 0) uniform uint stage;
 layout (location = 1) uniform sampler2D prev_shadow_map;
 
@@ -28,6 +32,7 @@ layout (location = 10) uniform sampler2D depth_map;
 layout (location = 11) uniform vec3 light_pos;
 layout (location = 14) uniform vec3 light_rgb;
 layout (location = 17) uniform mat4 light_view;
+layout (location = 33) uniform vec3 eye_pos;
 
 in vec3 world_normal;
 in vec3 world_pos;
@@ -112,18 +117,21 @@ vec3 sspace_light ()
 
 	float val_pos = exp(EXP_FACTOR * lcoord.z);
 	float val_neg = -exp(-EXP_FACTOR * lcoord.z);
+	float shadow_factor = min(chebyshev(moments.xy, val_pos),
+	                          chebyshev(moments.zw, val_neg));
 
-	float shadow_factor = min(
-		chebyshev(moments.xy, val_pos),
-		chebyshev(moments.zw, val_neg));
+	float cos_specular = dot(reflect(normalize(world_pos - light_pos), norm),
+	                         normalize(eye_pos - world_pos));
+	cos_specular = clamp(cos_specular, 0.0, 1.0);
+	vec3 specular = saturate_specular(bright * cos_specular,
+	                                  shadow_factor * light_rgb);
 
-	float cosine = dot(norm, normalize(light_pos - world_pos));
-	cosine = clamp(cosine, 0.0, 1.0);
+	float cos_diffuse = dot(norm, normalize(light_pos - world_pos));
+	cos_diffuse = clamp(cos_diffuse, 0.0, 1.0);
+	vec3 diffuse = saturate_diffuse(bright * cos_diffuse,
+	                                shadow_factor * light_rgb);
 
-	vec3 diffuse = saturate_diffuse(bright * cosine,
-			shadow_factor * light_rgb);
-
-	return get_lighting() + diffuse;
+	return get_lighting() + diffuse + specular;
 }
 
 

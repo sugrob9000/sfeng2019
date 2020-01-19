@@ -3,7 +3,6 @@
 #include "render.h"
 #include "material.h"
 #include "resource.h"
-#include "shaderlib.h"
 #include "input/cmds.h"
 #include <cassert>
 #include <map>

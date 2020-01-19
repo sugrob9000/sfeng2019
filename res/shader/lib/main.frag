@@ -8,7 +8,10 @@ vec4 surface_color ();
 vec3 surface_normal ();
 
 vec3 saturate_diffuse (float fac, vec3 color) { return color * fac; }
-vec3 saturate_specular (float fac, vec3 color); /* TODO */
+vec3 saturate_specular (float fac, vec3 color)
+{
+	return color * pow(fac, 15.0);
+}
 
 
 /* ================================================== */
@@ -28,8 +31,9 @@ layout (location = 17) uniform mat4 light_view;
 
 in vec3 world_normal;
 in vec3 world_pos;
-in mat3 TBN;
 in vec4 screen_crd;
+
+in mat3 TBN;
 in vec4 lspace_pos;
 
 vec3 get_lighting ();

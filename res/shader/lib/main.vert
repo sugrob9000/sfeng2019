@@ -1,7 +1,11 @@
 #version 130
 
-/* The user shade which links against the lib should implement this */
-vec4 vertex_transform (vec4 v);
+/* The user shader which links against the lib should implement these */
+vec4 vertex_pos ();
+vec3 vertex_norm ();
+vec2 vertex_texcoord ();
+
+
 
 out vec2 tex_crd;
 out vec4 screen_crd;
@@ -20,23 +24,26 @@ uniform uint stage;
 
 uniform mat4 light_view;
 
+#define MODEL gl_ModelViewMatrix
+#define VIEWPROJ gl_ProjectionMatrix
+
 void main ()
 {
-	gl_Position = gl_ProjectionMatrix * gl_ModelViewMatrix *
-		vertex_transform(gl_Vertex);
+	vec4 pos = vertex_pos();
+	vec4 normal = vec4(vertex_norm(), 0.0);
+	tex_crd = vertex_texcoord();
 
-	tex_crd = gl_MultiTexCoord0.st;
-	world_normal = (gl_ModelViewMatrix * vec4(gl_Normal, 0.0)).xyz;
-	world_pos = (gl_ModelViewMatrix * gl_Vertex).xyz;
-
+	gl_Position = VIEWPROJ * MODEL * pos;
 	screen_crd = gl_Position;
 
+	world_normal = (MODEL * normal).xyz;
+	world_pos = (MODEL * pos).xyz;
+
 	if (stage == LIGHTING_SSPACE) {
-		vec3 w_tangent =
-			(gl_ModelViewMatrix * vec4(tangent, 0.0)).xyz;
+		vec3 w_tangent = (MODEL * vec4(tangent, 0.0)).xyz;
 		vec3 w_bitangent = cross(world_normal, w_tangent);
 		TBN = mat3(w_tangent, w_bitangent, world_normal);
 
-		lspace_pos = light_view * gl_ModelViewMatrix * gl_Vertex;
+		lspace_pos = light_view * MODEL * pos;
 	}
 }

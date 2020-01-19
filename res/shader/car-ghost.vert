@@ -7,9 +7,14 @@ uniform uint stage;
  * Receive lighting, but do not cast shadows
  * nor draw any actual pixels
  */
-vec4 vertex_transform (vec4 modelspace_pos)
+
+vec4 vertex_pos ()
 {
 	if (stage == LIGHTING_SSPACE)
-		return modelspace_pos;
+		return gl_Vertex;
 	return vec4(0.0);
 }
+
+vec3 vertex_norm () { return gl_Normal; }
+vec2 vertex_texcoord () { return gl_MultiTexCoord0.st; }
+

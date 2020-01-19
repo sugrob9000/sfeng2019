@@ -4,10 +4,16 @@
 
 
 /* The user shader which links against the lib should implement these */
-vec4 final_shade ();
+vec4 surface_color ();
 vec3 surface_normal ();
 
-#define LIGHT_BOX_BLUR
+vec3 saturate_diffuse (float fac, vec3 color) { return color * fac; }
+vec3 saturate_specular (float fac, vec3 color); /* TODO */
+
+
+/* ================================================== */
+
+//#define LIGHT_BOX_BLUR
 
 #define LIGHTING_LSPACE 0u
 #define LIGHTING_SSPACE 1u
@@ -24,9 +30,11 @@ in vec3 world_normal;
 in vec3 world_pos;
 in mat3 TBN;
 in vec4 screen_crd;
+in vec4 lspace_pos;
 
-vec3 get_illum ();
+vec3 get_lighting ();
 vec3 sspace_light ();
+float linstep (float low, float hi, float v);
 
 const float EXP_FACTOR = 40.0;
 const float NOBLEED_FACTOR = 0.4;
@@ -37,8 +45,6 @@ const float FOG_HEIGHT_MIN = 75.0;
 const float FOG_DEPTH_MIN = 0.999;
 const float FOG_DEPTH_MAX = 1.0;
 const vec3 FOG_COLOR = vec3(0.28, 0.28, 0.42);
-
-float linstep (float, float, float);
 
 void main ()
 {
@@ -61,7 +67,8 @@ void main ()
 	case SHADE_FINAL:
 
 		// call the actual user shader
-		gl_FragColor = final_shade();
+		gl_FragColor = surface_color();
+		gl_FragColor.rgb *= get_lighting();
 
 		// dumb fog
 		float fog = linstep(FOG_DEPTH_MIN, FOG_DEPTH_MAX,
@@ -74,8 +81,6 @@ void main ()
 	}
 }
 
-in vec4 lspace_pos;
-
 float chebyshev (vec2 moments, float depth);
 vec3 sspace_light ()
 {
@@ -85,8 +90,8 @@ vec3 sspace_light ()
 	lcoord.z -= DEPTH_BIAS;
 	float bright = max(1.0 - length(lcoord.xy), 0.0);
 
-#ifdef LIGHT_BOX_BLUR
 	vec4 moments;
+#ifdef LIGHT_BOX_BLUR
 	float samples = 4.0;
 	float offset = 0.00195;
 	float texel_size = 1.0 / 1024.0;
@@ -98,24 +103,29 @@ vec3 sspace_light ()
 	}
 	moments /= samples*samples;
 #else
-	vec4 moments = texture(depth_map, lcoord.st * 0.5 + 0.5);
+	moments = texture(depth_map, lcoord.st * 0.5 + 0.5);
 #endif
 
 	float val_pos = exp(EXP_FACTOR * lcoord.z);
 	float val_neg = -exp(-EXP_FACTOR * lcoord.z);
 
-	float illum = min(
+	float shadow_factor = min(
 		chebyshev(moments.xy, val_pos),
 		chebyshev(moments.zw, val_neg));
 
 	float cosine = dot(norm, normalize(light_pos - world_pos));
-	illum *= bright * clamp(cosine, 0.0, 1.0);
-	return light_rgb * illum + get_illum();
+	cosine = clamp(cosine, 0.0, 1.0);
+
+	vec3 diffuse = saturate_diffuse(bright * cosine,
+			shadow_factor * light_rgb);
+
+	return get_lighting() + diffuse;
 }
 
-float linstep (float mn, float mx, float v)
+
+float linstep (float low, float hi, float v)
 {
-	return clamp((v - mn) / (mx - mn), 0.0, 1.0);
+	return clamp((v - low) / (hi - low), 0.0, 1.0);
 }
 
 float chebyshev (vec2 moments, float depth)
@@ -132,7 +142,7 @@ float chebyshev (vec2 moments, float depth)
 	return linstep(NOBLEED_FACTOR, 1.0, p_max);
 }
 
-vec3 get_illum ()
+vec3 get_lighting ()
 {
 	vec2 s = (screen_crd.xyz / screen_crd.w).xy;
 	s *= 0.5;

@@ -74,6 +74,8 @@ COMMAND (vis_disable)
 
 /* Recreate lighting framebuffers to be of sufficient resolution */
 COMMAND (light_refit_buffers)
+/* Set lighting ambience color */
+COMMAND (light_ambience)
 
 /*
  * (Demo) Tell the entity named "sun"

@@ -34,14 +34,12 @@ class e_light: public e_base
 	static vec3 uniform_pos;
 };
 
-constexpr float LIGHT_Z_NEAR = 10.0;
-const vec3 ambient = vec3(0.05);
-
-void light_apply_uniforms (t_render_stage s);
-
 extern std::vector<e_light*> lights;
 
-extern int debug_light;
+constexpr float LIGHT_Z_NEAR = 10.0;
+extern vec3 ambient;
+
+void light_apply_uniforms (t_render_stage s);
 
 void init_lighting ();
 void compute_lighting ();

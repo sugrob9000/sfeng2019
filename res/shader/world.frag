@@ -5,10 +5,9 @@ in vec3 world_normal;
 
 vec3 get_illum ();
 
-vec4 final_shade ()
+vec4 surface_color ()
 {
-	vec3 clr = world_normal*0.5 + 0.5;
-	return vec4(clr * get_illum(), 1.0);
+	return vec4(world_normal * 0.5 + 0.5, 1.0);
 }
 
 vec3 surface_normal ()

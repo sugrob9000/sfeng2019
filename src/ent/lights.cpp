@@ -229,3 +229,22 @@ void compute_lighting ()
 		compose_add_depth_map();
 	}
 }
+
+vec3 ambient = { 0.15, 0.15, 0.15 };
+COMMAND_ROUTINE (light_ambience)
+{
+	if (ev != PRESS)
+		return;
+	switch (args.size()) {
+	case 1:
+		ambient = vec3(atof(args[0].c_str()));
+		break;
+	case 3:
+		ambient = vec3(atof(args[0].c_str()),
+		               atof(args[1].c_str()),
+			       atof(args[2].c_str()));
+		break;
+	default:
+		return;
+	}
+}

@@ -19,7 +19,7 @@
 	#include <GL/glu.h>
 	#include "GL/glext.h"
 #else
-	#error "Unsupported system or building the wrong way"
+	#error "Neither WINDOWS nor LINUX defined"
 #endif
 
 /*
@@ -40,18 +40,15 @@ constexpr GLenum MTX_MODEL_MATRIX = GL_MODELVIEW_MATRIX;
  */
 constexpr int UNIFORM_LOC_PREV_SHADOWMAP = 1;
 constexpr int UNIFORM_LOC_DEPTH_MAP = 10;
-constexpr int UNIFORM_LOC_LIGHT_POS = 11;
-constexpr int UNIFORM_LOC_LIGHT_RGB = 14;
-constexpr int UNIFORM_LOC_LIGHT_VIEWMAT = 17;
-constexpr int UNIFORM_LOC_EYE_POSITION = 33;
+constexpr int UNIFORM_LOC_EYE_POSITION = 11;
 
-/*
- * Uniform for the current render stage
- */
+constexpr int UNIFORM_LOC_LIGHT_POS = 12;
+constexpr int UNIFORM_LOC_LIGHT_RGB = UNIFORM_LOC_LIGHT_POS + 3 * 16;
+constexpr int UNIFORM_LOC_LIGHT_VIEW = UNIFORM_LOC_LIGHT_RGB + 3 * 16;
+
+/* Uniform for the current render stage */
 constexpr int UNIFORM_LOC_RENDER_STAGE = 0;
-/*
- * Attribute for the tangent vector (TBN matrix calculation)
- */
+/* Attribute for the tangent vector (TBN matrix calculation) */
 constexpr GLuint ATTRIB_LOC_TANGENT = 1;
 
 #endif // INC_GL_H

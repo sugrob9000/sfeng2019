@@ -5,18 +5,9 @@
 
 /* The user shader which links against the lib should implement these */
 vec4 surface_color ();
-vec3 surface_normal ();
-
-vec3 saturate_diffuse (float fac, vec3 color) { return color * fac; }
-vec3 saturate_specular (float fac, vec3 color)
-{
-	return color * pow(fac, 5.0);
-}
 
 
 /* ================================================== */
-
-//#define LIGHT_BOX_BLUR
 
 #define MODEL gl_ModelViewMatrix
 #define VIEWPROJ gl_ProjectionMatrix
@@ -26,28 +17,18 @@ vec3 saturate_specular (float fac, vec3 color)
 #define SHADE_FINAL 2u
 
 layout (location = 0) uniform uint stage;
-layout (location = 1) uniform sampler2D prev_shadow_map;
 
-layout (location = 10) uniform sampler2D depth_map;
-layout (location = 11) uniform vec3 light_pos;
-layout (location = 14) uniform vec3 light_rgb;
-layout (location = 17) uniform mat4 light_view;
-layout (location = 33) uniform vec3 eye_pos;
-
-in vec3 world_normal;
 in vec3 world_pos;
 in vec4 screen_crd;
 
-in mat3 TBN;
-in vec4 lspace_pos;
-
 vec3 get_lighting ();
-vec3 sspace_light ();
-float linstep (float low, float hi, float v);
+vec3 light_sspace ();
+vec4 light_lspace ();
 
-const float EXP_FACTOR = 40.0;
-const float NOBLEED_FACTOR = 0.4;
-const float DEPTH_BIAS = 3e-4;
+float linstep (float low, float hi, float v)
+{
+	return clamp((v - low) / (hi - low), 0.0, 1.0);
+}
 
 const float FOG_HEIGHT_MAX = -500.0;
 const float FOG_HEIGHT_MIN = 75.0;
@@ -60,17 +41,12 @@ void main ()
 	switch (stage) {
 	case LIGHTING_LSPACE:
 
-		// fill EVSM moments
-		float depth = screen_crd.z / screen_crd.w;
-		float pos = exp(EXP_FACTOR * depth);
-		float neg = -exp(-EXP_FACTOR * depth);
-		gl_FragColor = vec4(pos, pos*pos, neg, neg*neg);
+		gl_FragColor = light_lspace();
 		break;
 
 	case LIGHTING_SSPACE:
 
-		// calculate screenspace lighting
-		gl_FragColor = vec4(sspace_light(), 1.0);
+		gl_FragColor.rgb = light_sspace();
 		break;
 
 	case SHADE_FINAL:
@@ -88,76 +64,4 @@ void main ()
 
 		break;
 	}
-}
-
-float chebyshev (vec2 moments, float depth);
-vec3 sspace_light ()
-{
-	vec3 norm = TBN * normalize(surface_normal());
-
-	vec3 lcoord = lspace_pos.xyz / lspace_pos.w;
-	lcoord.z -= DEPTH_BIAS;
-	float bright = max(1.0 - length(lcoord.xy), 0.0);
-
-	vec4 moments;
-#ifdef LIGHT_BOX_BLUR
-	float samples = 4.0;
-	float offset = 0.00195;
-	float texel_size = 1.0 / 1024.0;
-	for (float y = -offset; y <= offset; y += texel_size) {
-		for (float x = -offset; x <= offset; x += texel_size) {
-			vec2 crd = lcoord.st * 0.5 + 0.5 + vec2(x, y);
-			moments += texture(depth_map, crd);
-		}
-	}
-	moments /= samples*samples;
-#else
-	moments = texture(depth_map, lcoord.st * 0.5 + 0.5);
-#endif
-
-	float val_pos = exp(EXP_FACTOR * lcoord.z);
-	float val_neg = -exp(-EXP_FACTOR * lcoord.z);
-	float shadow_factor = min(chebyshev(moments.xy, val_pos),
-	                          chebyshev(moments.zw, val_neg));
-
-	float cos_specular = dot(reflect(normalize(world_pos - light_pos), norm),
-	                         normalize(eye_pos - world_pos));
-	cos_specular = clamp(cos_specular, 0.0, 1.0);
-	vec3 specular = saturate_specular(bright * cos_specular,
-	                                  shadow_factor * light_rgb);
-
-	float cos_diffuse = dot(norm, normalize(light_pos - world_pos));
-	cos_diffuse = clamp(cos_diffuse, 0.0, 1.0);
-	vec3 diffuse = saturate_diffuse(bright * cos_diffuse,
-	                                shadow_factor * light_rgb);
-
-	return get_lighting() + diffuse + specular;
-}
-
-
-float linstep (float low, float hi, float v)
-{
-	return clamp((v - low) / (hi - low), 0.0, 1.0);
-}
-
-float chebyshev (vec2 moments, float depth)
-{
-	if (depth <= moments.x)
-		return 1.0;
-
-	float variance = moments.y - moments.x * moments.x;
-	variance = max(variance, 0.0);
-
-	float d = depth - moments.x;
-	float p_max = variance / (variance + d * d);
-
-	return linstep(NOBLEED_FACTOR, 1.0, p_max);
-}
-
-vec3 get_lighting ()
-{
-	vec2 s = (screen_crd.xyz / screen_crd.w).xy;
-	s *= 0.5;
-	s += 0.5;
-	return texture(prev_shadow_map, s).rgb;
 }

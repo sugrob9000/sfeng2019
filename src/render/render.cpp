@@ -178,6 +178,14 @@ void push_reset_matrices ()
 	glLoadIdentity();
 }
 
+void push_matrices ()
+{
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+}
+
 void pop_matrices ()
 {
 	glMatrixMode(GL_MODELVIEW);

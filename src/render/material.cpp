@@ -110,6 +110,7 @@ void t_material::load (const std::string& path)
 
 	program = glCreateProgram();
 	glAttachShader(program, get_frag_shader("lib/main"));
+	glAttachShader(program, get_frag_shader("lib/light"));
 	glAttachShader(program, get_vert_shader("lib/main"));
 	glAttachShader(program, frag);
 	glAttachShader(program, vert);

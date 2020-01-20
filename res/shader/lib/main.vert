@@ -6,13 +6,12 @@ vec3 vertex_norm ();
 vec2 vertex_texcoord ();
 
 
+/* ========================================== */
 
 out vec2 tex_crd;
 out vec4 screen_crd;
 out vec3 world_normal;
 out vec3 world_pos;
-
-out vec4 lspace_pos;
 
 attribute vec3 tangent;
 out mat3 TBN;
@@ -22,7 +21,9 @@ out mat3 TBN;
 #define SHADE_FINAL 2u
 uniform uint stage;
 
-uniform mat4 light_view;
+const int LIGHT_BATCH = 16;
+uniform mat4 light_view[LIGHT_BATCH];
+out vec4 lspace_pos[LIGHT_BATCH];
 
 #define MODEL gl_ModelViewMatrix
 #define VIEWPROJ gl_ProjectionMatrix
@@ -44,6 +45,7 @@ void main ()
 		vec3 w_bitangent = cross(world_normal, w_tangent);
 		TBN = mat3(w_tangent, w_bitangent, world_normal);
 
-		lspace_pos = light_view * MODEL * pos;
+		for (int i = 0; i < LIGHT_BATCH; i++)
+			lspace_pos[i] = light_view[i] * MODEL * pos;
 	}
 }

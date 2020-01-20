@@ -27,7 +27,7 @@
 
 /*
  * The kinds of attachments possible. These do not biject into
- * OpenGL target enums (there is not a GL_FRAMEBUFFER_MULTISAMPLE,
+ * OpenGL target enums (there is not a GL_RENDERBUFFER_MULTISAMPLE,
  * for instance). This list may be extended as more options are implemented
  */
 enum att_target_enum
@@ -80,7 +80,6 @@ struct t_fbo
 	int height = 0;
 
 	constexpr static int NUM_COLOR_ATTACHMENTS = 16;
-
 	GLuint color[NUM_COLOR_ATTACHMENTS];
 	GLuint depth;
 
@@ -92,6 +91,7 @@ struct t_fbo
 	t_fbo& attach_depth (const t_attachment<T>& att, int slice = 0);
 
 	t_fbo& make ();
+	void bind () { glBindFramebuffer(GL_FRAMEBUFFER, id); }
 	void apply ();
 
 	t_fbo& assert_complete ();

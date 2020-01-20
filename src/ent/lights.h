@@ -25,13 +25,11 @@ class e_light: public e_base
 
 	void view () const;
 
-	/*
-	 * These get sent to the shader as one uniform.
-	 * Note that we don't need cone_angle or ang in here
-	 */
-	static float uniform_viewmat[16];
-	static vec3 uniform_rgb;
-	static vec3 uniform_pos;
+	/* Sending lighting info to shader */
+	static constexpr int BATCH = 16;
+	static float uniform_view[16][BATCH];
+	static vec3 uniform_pos[BATCH];
+	static vec3 uniform_rgb[BATCH];
 };
 
 extern std::vector<e_light*> lights;

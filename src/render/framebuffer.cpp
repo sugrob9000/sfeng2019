@@ -18,8 +18,7 @@ _FBO_SPECIALIZE_ATTACH (tex2d_msaa)
 
 _FBO_SPECIALIZE_ATTACH (tex2d_array)
 {
-	glFramebufferTexture3D(GL_FRAMEBUFFER, slot,
-			GL_TEXTURE_2D_ARRAY, a.id, 0, slice);
+	glFramebufferTextureLayer(GL_FRAMEBUFFER, slot, a.id, 0, slice);
 }
 
 _FBO_SPECIALIZE_ATTACH (tex2d_array_msaa)
@@ -64,7 +63,7 @@ t_fbo& t_fbo::assert_complete ()
 
 void t_fbo::apply ()
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, id);
+	bind();
 	glViewport(0, 0, width, height);
 }
 
@@ -125,6 +124,12 @@ t_attachment<tex2d_array> make_tex2d_array (int w, int h, int d,
 
 	glGenTextures(1, &r.id);
 	glBindTexture(target, r.id);
+
+	glTexParameteri(target, GL_GENERATE_MIPMAP, GL_FALSE);
+	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 	glTexImage3D(target, 0, internal_type, w, h, d, 0,
 			comp_type.first, comp_type.second, nullptr);

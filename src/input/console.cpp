@@ -15,6 +15,7 @@ void console_handle_input_ev (const SDL_Event& e)
 {
 	switch (e.type) {
 	case SDL_KEYDOWN:
+
 		switch (e.key.keysym.scancode) {
 		case SDL_SCANCODE_BACKSPACE:
 
@@ -44,13 +45,17 @@ void console_handle_input_ev (const SDL_Event& e)
 			break;
 		}
 		break;
-		// handle esc on keyup to avoid
-		// sending the keyup event to the main game
+
 	case SDL_KEYUP:
+
+		// handle esc on keyup to avoid sending 
+		// the esc keyup event to the main game
 		if (e.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
 			console_close();
 		break;
+
 	case SDL_TEXTINPUT:
+
 		cmd += e.text.text;
 		update_matches();
 		break;

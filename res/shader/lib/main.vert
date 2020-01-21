@@ -1,4 +1,7 @@
 #version 130
+#extension GL_ARB_explicit_uniform_location: require
+#extension GL_ARB_explicit_attrib_location: require
+
 
 /* The user shader which links against the lib should implement these */
 vec4 vertex_pos ();
@@ -21,9 +24,8 @@ out mat3 TBN;
 #define SHADE_FINAL 2u
 uniform uint stage;
 
-const int LIGHT_BATCH = 16;
-uniform mat4 light_view[LIGHT_BATCH];
-out vec4 lspace_pos[LIGHT_BATCH];
+layout (location = 18) uniform mat4 light_view;
+out vec4 lspace_pos;
 
 #define MODEL gl_ModelViewMatrix
 #define VIEWPROJ gl_ProjectionMatrix
@@ -44,8 +46,6 @@ void main ()
 		vec3 w_tangent = (MODEL * vec4(tangent, 0.0)).xyz;
 		vec3 w_bitangent = cross(world_normal, w_tangent);
 		TBN = mat3(w_tangent, w_bitangent, world_normal);
-
-		for (int i = 0; i < LIGHT_BATCH; i++)
-			lspace_pos[i] = light_view[i] * MODEL * pos;
+		lspace_pos = light_view * MODEL * pos;
 	}
 }

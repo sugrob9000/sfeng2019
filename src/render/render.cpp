@@ -53,6 +53,12 @@ void render_all ()
 }
 
 
+void gl_callback (GLenum src, GLenum type, GLuint id, GLenum severity,
+		GLsizei len, const char* msg, const void* param)
+{
+	warning("%s\n", msg);
+}
+
 void init_render ()
 {
 	if (sdlcont.res_x == 0 || sdlcont.res_y == 0) {

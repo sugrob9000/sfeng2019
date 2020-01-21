@@ -63,9 +63,9 @@ void e_light::view () const
 
 /* ======================================== */
 
-float e_light::uniform_view[16][e_light::BATCH];
-vec3 e_light::uniform_pos[e_light::BATCH];
-vec3 e_light::uniform_rgb[e_light::BATCH];
+float e_light::uniform_view[16];
+vec3 e_light::uniform_pos;
+vec3 e_light::uniform_rgb;
 
 /*
  * Depth maps from lights' perspective
@@ -76,9 +76,8 @@ constexpr int lspace_resolution = 1024;
 /* Multisampled framebuffer in which to do the rendering */
 t_fbo lspace_fbo_ms;
 
-/* Regular framebuffers into which to blit from the _ms one */
-t_fbo lspace_fbo[e_light::BATCH];
-t_attachment<tex2d_array> lspace_moments;
+/* Regular framebuffer into which to blit from the _ms one */
+t_fbo lspace_fbo;
 
 /*
  * Screen space shadow maps
@@ -111,12 +110,9 @@ void init_lighting ()
 			s, s, GL_DEPTH_COMPONENT, lspace_samples))
 		.assert_complete();
 
-	lspace_moments = make_tex2d_array(s, s, e_light::BATCH, GL_RGBA32F);
-	for (int i = 0; i < e_light::BATCH; i++) {
-		lspace_fbo[i].make()
-			.attach_color(lspace_moments, 0, i)
-			.assert_complete();
-	}
+	lspace_fbo.make()
+		.attach_color(make_tex2d(s, s, GL_RGBA32F))
+		.assert_complete();
 }
 
 COMMAND_ROUTINE (light_refit_buffers)
@@ -154,17 +150,16 @@ void light_apply_uniforms (t_render_stage s)
 	if (s == LIGHTING_SSPACE) {
 
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D_ARRAY, lspace_moments.id);
+		glBindTexture(GL_TEXTURE_2D, lspace_fbo.color[0]);
 		glUniform1i(UNIFORM_LOC_DEPTH_MAP, 1);
 
-		const float* pos = e_light::uniform_pos[0].data();
-		const float* rgb = e_light::uniform_rgb[0].data();
-		const float* view = e_light::uniform_view[0];
+		const float* pos = e_light::uniform_pos.data();
+		const float* rgb = e_light::uniform_rgb.data();
+		const float* view = e_light::uniform_view;
 
-		glUniform3fv(UNIFORM_LOC_LIGHT_POS, e_light::BATCH, pos);
-		glUniform3fv(UNIFORM_LOC_LIGHT_RGB, e_light::BATCH, rgb);
-		glUniformMatrix4fv(UNIFORM_LOC_LIGHT_VIEW, e_light::BATCH,
-				false, view);
+		glUniform3fv(UNIFORM_LOC_LIGHT_POS, 1, pos);
+		glUniform3fv(UNIFORM_LOC_LIGHT_RGB, 1, rgb);
+		glUniformMatrix4fv(UNIFORM_LOC_LIGHT_VIEW, 1, false, view);
 
 		const float* eye = camera.pos.data();
 		glUniform3fv(UNIFORM_LOC_EYE_POSITION, 1, eye);
@@ -180,48 +175,35 @@ void light_apply_uniforms (t_render_stage s)
 }
 
 
-
-void fill_depth_map (int idx, int amount)
+void fill_depth_map (const e_light* l)
 {
 	lspace_fbo_ms.apply();
-
 	glDepthMask(GL_TRUE);
 	glDepthFunc(GL_LESS);
+
 	glClearColor(1.0, 1.0, 1.0, 1.0);
+
+	push_reset_matrices();
+
+	glMatrixMode(GL_MODELVIEW);
+
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+	l->view();
+	l->vis.render(LIGHTING_LSPACE);
 
-	push_matrices();
+	glGetFloatv(GL_MODELVIEW_MATRIX, e_light::uniform_view);
+	e_light::uniform_pos = l->pos;
+	e_light::uniform_rgb = l->rgb;
 
-	for (int i = 0; i < amount; i++) {
-		reset_matrices();
-		glMatrixMode(GL_MODELVIEW);
-
-		const e_light* l = lights[idx + i];
-
-		l->view();
-		l->vis.render(LIGHTING_LSPACE);
-
-		glGetFloatv(GL_MODELVIEW_MATRIX, e_light::uniform_view[i]);
-		e_light::uniform_pos[i] = l->pos;
-		e_light::uniform_rgb[i] = l->rgb;
-
-		// make the result of MSAA rendering available
-		// for 3D sampling
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, lspace_fbo_ms.id);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, lspace_fbo[i].id);
-		glBlitFramebuffer(0, 0, lspace_resolution, lspace_resolution,
-				0, 0, lspace_resolution, lspace_resolution,
-				GL_COLOR_BUFFER_BIT, GL_NEAREST);
-	}
+	// make the result of MSAA rendering available
+	// for 3D sampling
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, lspace_fbo_ms.id);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, lspace_fbo.id);
+	glBlitFramebuffer(0, 0, lspace_resolution, lspace_resolution,
+	                  0, 0, lspace_resolution, lspace_resolution,
+	                  GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
 	pop_matrices();
-
-	// zero out unused lights
-	int z = e_light::BATCH - amount;
-	if (z > 0) {
-		memset(e_light::uniform_view[amount], 0,
-				sizeof(float) * 16 * z);
-	}
 }
 
 void compose_add_depth_map ()
@@ -252,10 +234,8 @@ void compute_lighting ()
 
 	glDisable(GL_BLEND);
 
-	int n = lights.size();
-	for (int i = 0; i < n; i += e_light::BATCH) {
-		int amount = std::min(n - i, e_light::BATCH);
-		fill_depth_map(i, amount);
+	for (const e_light* l: lights) {
+		fill_depth_map(l);
 		compose_add_depth_map();
 	}
 }

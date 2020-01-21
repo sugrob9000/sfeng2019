@@ -161,6 +161,7 @@ void t_material::apply (t_render_stage s) const
 	latest_render_stage = s;
 
 	glUseProgram(program);
+
 	for (int i = 0; i < bitmaps.size(); i++) {
 		glActiveTexture(GL_TEXTURE0 + i + 2);
 		glBindTexture(GL_TEXTURE_2D, bitmaps[i].texid);

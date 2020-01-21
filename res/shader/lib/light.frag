@@ -20,14 +20,12 @@ in vec4 screen_crd;
 in mat3 TBN;
 
 layout (location = 1) uniform sampler2D prev_shadow_map;
-layout (location = 10) uniform sampler2DArray depth_map;
+layout (location = 10) uniform sampler2D depth_map;
 layout (location = 11) uniform vec3 eye_pos;
 
-const int BATCH = 16;
-layout (location = 12) uniform vec3 light_pos[BATCH];
-layout (location = 60) uniform vec3 light_rgb[BATCH];
-layout (location = 108) uniform mat4 light_view[BATCH];
-in vec4 lspace_pos[BATCH];
+layout (location = 12) uniform vec3 light_pos;
+layout (location = 15) uniform vec3 light_rgb;
+in vec4 lspace_pos;
 
 
 float linstep (float low, float hi, float v);
@@ -48,21 +46,12 @@ vec3 get_lighting ()
 /*
  * Calculate screenspace lighting (from player perspective)
  */
-vec3 light_sspace_sub (int);
-vec3 light_sspace ()
-{
-	vec3 r;
-	for (int i = 0; i < BATCH; i++)
-		r += light_sspace_sub(i);
-	return get_lighting() + r;
-}
-
 float chebyshev (vec2 moments, float depth);
-vec3 light_sspace_sub (int i)
+vec3 light_sspace ()
 {
 	vec3 norm = TBN * normalize(surface_normal());
 
-	vec3 lcoord = lspace_pos[i].xyz / lspace_pos[i].w;
+	vec3 lcoord = lspace_pos.xyz / lspace_pos.w;
 	lcoord.z -= DEPTH_BIAS;
 	float bright = max(1.0 - length(lcoord.xy), 0.0);
 
@@ -73,15 +62,13 @@ vec3 light_sspace_sub (int i)
 	float texel_size = 1.0 / 1024.0;
 	for (float y = -offset; y <= offset; y += texel_size) {
 		for (float x = -offset; x <= offset; x += texel_size) {
-			vec3 crd;
-			crd.xy = lcoord.st * 0.5 + 0.5 + vec2(x, y);
-			crd.z = i;
+			vec2 crd = lcoord.st * 0.5 + 0.5 + vec2(x, y);
 			moments += texture(depth_map, crd);
 		}
 	}
 	moments /= samples*samples;
 #else
-	moments = texture(depth_map, vec3(lcoord.st * 0.5 + 0.5, 1));
+	moments = texture(depth_map, lcoord.st * 0.5 + 0.5);
 #endif
 
 	float val_pos = exp(EXP_FACTOR * lcoord.z);
@@ -92,21 +79,21 @@ vec3 light_sspace_sub (int i)
 	vec3 diffuse, specular;
 	float cos_diffuse, cos_specular;
 
-	cos_diffuse = dot(norm, normalize(light_pos[i] - world_pos));
+	cos_diffuse = dot(norm, normalize(light_pos - world_pos));
 	cos_diffuse = clamp(cos_diffuse, 0.0, 1.0);
 
 	diffuse = saturate_diffuse(bright * cos_diffuse,
-	                           shadow_factor * light_rgb[i]);
+	                           shadow_factor * light_rgb);
 
 	if (cos_diffuse > 0.0) {
 		cos_specular = clamp(dot(
-			reflect(normalize(world_pos - light_pos[i]), norm),
+			reflect(normalize(world_pos - light_pos), norm),
 			normalize(eye_pos - world_pos)), 0.0, 1.0);
 	}
 	specular = saturate_specular(bright * cos_specular,
-	                             shadow_factor * light_rgb[i]);
+	                             shadow_factor * light_rgb);
 
-	return diffuse + specular;
+	return get_lighting() + diffuse + specular;
 }
 
 float chebyshev (vec2 moments, float depth)

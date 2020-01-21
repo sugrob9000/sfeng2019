@@ -43,8 +43,8 @@ constexpr int UNIFORM_LOC_DEPTH_MAP = 10;
 constexpr int UNIFORM_LOC_EYE_POSITION = 11;
 
 constexpr int UNIFORM_LOC_LIGHT_POS = 12;
-constexpr int UNIFORM_LOC_LIGHT_RGB = UNIFORM_LOC_LIGHT_POS + 3 * 16;
-constexpr int UNIFORM_LOC_LIGHT_VIEW = UNIFORM_LOC_LIGHT_RGB + 3 * 16;
+constexpr int UNIFORM_LOC_LIGHT_RGB = 15;
+constexpr int UNIFORM_LOC_LIGHT_VIEW = 18;
 
 /* Uniform for the current render stage */
 constexpr int UNIFORM_LOC_RENDER_STAGE = 0;

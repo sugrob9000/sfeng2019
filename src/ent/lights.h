@@ -26,10 +26,9 @@ class e_light: public e_base
 	void view () const;
 
 	/* Sending lighting info to shader */
-	static constexpr int BATCH = 16;
-	static float uniform_view[16][BATCH];
-	static vec3 uniform_pos[BATCH];
-	static vec3 uniform_rgb[BATCH];
+	static float uniform_view[16];
+	static vec3 uniform_pos;
+	static vec3 uniform_rgb;
 };
 
 extern std::vector<e_light*> lights;

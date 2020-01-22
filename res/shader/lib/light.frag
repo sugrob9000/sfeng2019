@@ -73,24 +73,21 @@ vec3 light_sspace ()
 
 	float val_pos = exp(EXP_FACTOR * lcoord.z);
 	float val_neg = -exp(-EXP_FACTOR * lcoord.z);
-	float shadow_factor = min(chebyshev(moments.xy, val_pos),
-	                          chebyshev(moments.zw, val_neg));
+	float shadow_factor = bright * min(
+			chebyshev(moments.xy, val_pos),
+			chebyshev(moments.zw, val_neg));
 
 	vec3 diffuse, specular;
 	float cos_diffuse, cos_specular;
 
 	cos_diffuse = dot(norm, normalize(light_pos - world_pos));
-	cos_diffuse = clamp(cos_diffuse, 0.0, 1.0);
 
-	diffuse = saturate_diffuse(bright * cos_diffuse,
+	diffuse = saturate_diffuse(max(cos_diffuse, 0.0),
 	                           shadow_factor * light_rgb);
 
-	if (cos_diffuse > 0.0) {
-		cos_specular = clamp(dot(
-			reflect(normalize(world_pos - light_pos), norm),
-			normalize(eye_pos - world_pos)), 0.0, 1.0);
-	}
-	specular = saturate_specular(bright * cos_specular,
+	cos_specular = dot(reflect(normalize(world_pos - light_pos), norm),
+	                           normalize(eye_pos - world_pos));
+	specular = saturate_specular(max(cos_specular, 0.0),
 	                             shadow_factor * light_rgb);
 
 	return get_lighting() + diffuse + specular;

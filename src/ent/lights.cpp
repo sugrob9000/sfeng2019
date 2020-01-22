@@ -10,9 +10,15 @@ std::vector<e_light*> lights;
 
 /* ============= e_light code ============= */
 
+SIG_HANDLER (light, setcolor)
+{
+	atovec3(arg, ent->rgb);
+}
+
 FILL_IO_DATA (light)
 {
 	BASIC_SIG_HANDLERS(light);
+	SET_SIG_HANDLER(light, setcolor);
 }
 
 e_light::e_light ()

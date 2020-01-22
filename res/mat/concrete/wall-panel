@@ -1,5 +1,8 @@
-FRAG diff-norm
 VERT common/identity
+
+FRAG common/diffuse
 diffuse concrete/wall-clr.png
+
+FRAG common/normalmap
 normal concrete/wall-norm.png
 

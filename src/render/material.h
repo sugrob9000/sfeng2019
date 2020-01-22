@@ -12,8 +12,9 @@ typedef GLuint t_shader_id;
 struct t_material
 {
 	GLuint program;
-	GLuint frag;
-	GLuint vert;
+
+	std::vector<GLuint> frag;
+	std::vector<GLuint> vert;
 
 	struct bitmap_desc {
 		int location;

@@ -1,4 +1,7 @@
-FRAG car
 VERT common/identity
+
+FRAG common/diffuse
 diffuse red.tga
+
+FRAG common/normalmap
 normal car-normal.tga

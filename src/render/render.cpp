@@ -249,8 +249,8 @@ void init_text ()
 			nullptr, nullptr, &sdlcont.font_w);
 
 	text_program = glCreateProgram();
-	glAttachShader(text_program, get_vert_shader("common/text"));
-	glAttachShader(text_program, get_frag_shader("common/text"));
+	glAttachShader(text_program, get_vert_shader("lib/text"));
+	glAttachShader(text_program, get_frag_shader("lib/text"));
 	glLinkProgram(text_program);
 
 	text_prg_glyph_loc = glGetUniformLocation(text_program, "glyphs");
@@ -311,8 +311,8 @@ GLuint sky_shader_program;
 void init_sky ()
 {
 	sky_shader_program = glCreateProgram();
-	glAttachShader(sky_shader_program, get_vert_shader("common/sky"));
-	glAttachShader(sky_shader_program, get_frag_shader("common/sky"));
+	glAttachShader(sky_shader_program, get_vert_shader("lib/sky"));
+	glAttachShader(sky_shader_program, get_frag_shader("lib/sky"));
 	glLinkProgram(sky_shader_program);
 }
 

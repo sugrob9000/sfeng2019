@@ -1,14 +1,12 @@
 #version 130
 
-uniform sampler2D map_diffuse;
 uniform sampler2D map_normal;
 
 in vec2 tex_crd;
 
 vec4 surface_color ()
 {
-	vec4 clr = texture(map_diffuse, tex_crd);
-	return clr;
+	return vec4(0.0);
 }
 
 vec3 surface_normal ()

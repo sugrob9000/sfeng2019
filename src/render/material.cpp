@@ -84,9 +84,6 @@ void t_material::load (const std::string& path)
 
 	std::vector<bitmap_desc_interm> bitmaps_interm;
 
-	std::string vert_name;
-	std::string frag_name;
-
 	while (true) {
 		f >> key >> value;
 		f.ignore(-1, '\n');
@@ -94,10 +91,10 @@ void t_material::load (const std::string& path)
 			break;
 
 		if (key == "FRAG") {
-			frag_name = value;
+			frag.push_back(get_frag_shader(value));
 			continue;
 		} else if (key == "VERT") {
-			vert_name = value;
+			vert.push_back(get_vert_shader(value));
 			continue;
 		}
 
@@ -105,15 +102,16 @@ void t_material::load (const std::string& path)
 		bitmaps_interm.push_back({ key, get_texture(value) });
 	}
 
-	frag = get_frag_shader(frag_name);
-	vert = get_vert_shader(vert_name);
-
 	program = glCreateProgram();
 	glAttachShader(program, get_frag_shader("lib/main"));
 	glAttachShader(program, get_frag_shader("lib/light"));
 	glAttachShader(program, get_vert_shader("lib/main"));
-	glAttachShader(program, frag);
-	glAttachShader(program, vert);
+
+	for (GLuint fr: frag)
+		glAttachShader(program, fr);
+	for (GLuint ve: vert)
+		glAttachShader(program, ve);
+
 	glLinkProgram(program);
 
 	int link_success = 0;

@@ -1,4 +1,7 @@
 VERT common/identity
-FRAG diff-norm
+
+FRAG common/diffuse
 diffuse nature/rock.tga
+
+FRAG common/normalmap
 normal nature/rock_normal.png

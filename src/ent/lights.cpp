@@ -101,7 +101,7 @@ void init_lighting ()
 	auto depth_rbo = make_rbo(w, h, GL_DEPTH_COMPONENT);
 	for (int i: { 0, 1 }) {
 		sspace_fbo[i].make()
-			.attach_color(make_tex2d(w, h, GL_RGB))
+			.attach_color(make_tex2d(w, h, GL_RGB16F))
 			.attach_depth(depth_rbo)
 			.assert_complete();
 	}

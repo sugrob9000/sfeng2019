@@ -113,11 +113,6 @@ void init_render ()
 
 	glEnable(GL_MULTISAMPLE);
 
-	glMatrixMode(MTX_VIEWPROJ);
-	glLoadIdentity();
-	glMatrixMode(MTX_MODEL);
-	glLoadIdentity();
-
 	extern void init_text ();
 	extern void init_sky ();
 	extern void init_cuboid ();

@@ -155,9 +155,8 @@ void light_apply_uniforms (t_render_stage s)
 
 	if (s == LIGHTING_SSPACE) {
 
-		glActiveTexture(GL_TEXTURE1);
+		glActiveTexture(GL_TEXTURE0 + TEXTURE_SLOT_DEPTH_MAP);
 		glBindTexture(GL_TEXTURE_2D, lspace_fbo.color[0]);
-		glUniform1i(UNIFORM_LOC_DEPTH_MAP, 1);
 
 		const float* pos = e_light::uniform_pos.data();
 		const float* rgb = e_light::uniform_rgb.data();
@@ -175,9 +174,8 @@ void light_apply_uniforms (t_render_stage s)
 		shadowmap = sspace_fbo[current_sspace_fbo].color[0];
 	}
 
-	glActiveTexture(GL_TEXTURE0);
+	glActiveTexture(GL_TEXTURE0 + TEXTURE_SLOT_PREV_SHADOWMAP);
 	glBindTexture(GL_TEXTURE_2D, shadowmap);
-	glUniform1i(UNIFORM_LOC_PREV_SHADOWMAP, 0);
 }
 
 

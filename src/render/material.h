@@ -13,50 +13,22 @@ struct t_material
 {
 	GLuint program;
 
-	std::vector<GLuint> frag;
-	std::vector<GLuint> vert;
-
-	struct bitmap_desc {
-		int location;
-		t_texture_id texid;
-	};
-
-	std::vector<bitmap_desc> bitmaps;
 	std::string name;
+	std::vector<GLuint> bitmap_texture_ids;
 
-	/*
-	 * A material is described by a text file,
-	 * with the following format:
-	 *
-	 * FRAG myfrag
-	 * VERT myvert
-	 * diffuse bricks.tga
-	 * normal bricks-normal.tga
-	 *
-	 * etc.
-	 *
-	 * FRAG specifies the fragment shader (resolves to res/mat/myfrag.glsl)
-	 * VERT specifies the vertex shader
-	 *
-	 * Other lines specify the names of the bitmap (texture),
-	 *   which resolve to res/mat/bricks.tga, etc.
-	 * Materials may have their own maps defined to be used by shaders.
-	 * The bitmap will be connected with the appropriate
-	 *   uniform sampler2D in the fragment shaders:
-	 *   diffuse -> uniform sampler2D map_diffuse; etc.
-	 */
 	void load (const std::string& path);
 	void apply (t_render_stage stage = SHADE_FINAL) const;
 };
+
+void init_materials ();
 
 t_shader_id compile_glsl (std::string path, GLenum shadertype);
 t_texture_id load_texture (std::string path);
 
 int get_surface_gl_format (SDL_Surface* s);
 
-/* Material that draws nothing, for various edge cases */
+/* Draws nothing, for various edge cases */
 extern t_material* mat_none;
-
 /* Not an actual material, used in vis for occlusion planes */
 extern t_material* mat_occlude;
 
@@ -66,6 +38,8 @@ extern t_material* mat_occlude;
  */
 void material_barrier ();
 
-void init_materials ();
+/* The first N texture slots are reserved for engine use
+ * (lighting buffers etc.); after Nth, the slots are used for user bitmaps */
+constexpr int MAT_TEXTURE_SLOT_OFFSET = 2;
 
 #endif // MATERIAL_H

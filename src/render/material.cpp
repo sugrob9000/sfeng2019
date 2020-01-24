@@ -62,6 +62,7 @@ t_material* mat_occlude = &mat_occlude_instance;
 void init_materials ()
 {
 	cache_mat[""] = mat_none;
+	cache_mat["None"] = mat_none;
 	cache_mat["OCCLUDE"] = mat_occlude;
 }
 
@@ -77,12 +78,12 @@ void t_material::load (const std::string& path)
 	std::string key;
 	std::string value;
 
-	struct bitmap_desc_interm {
+	struct bitmap_desc {
 		std::string loc_name;
 		t_texture_id texid;
 	};
-
-	std::vector<bitmap_desc_interm> bitmaps_interm;
+	std::vector<bitmap_desc> bitmaps;
+	std::vector<GLuint> user_shaders;
 
 	while (true) {
 		f >> key >> value;
@@ -91,15 +92,15 @@ void t_material::load (const std::string& path)
 			break;
 
 		if (key == "FRAG") {
-			frag.push_back(get_frag_shader(value));
+			user_shaders.push_back(get_frag_shader(value));
 			continue;
 		} else if (key == "VERT") {
-			vert.push_back(get_vert_shader(value));
+			user_shaders.push_back(get_vert_shader(value));
 			continue;
 		}
 
 		key = "map_" + key;
-		bitmaps_interm.push_back({ key, get_texture(value) });
+		bitmaps.push_back({ key, get_texture(value) });
 	}
 
 	program = glCreateProgram();
@@ -107,10 +108,8 @@ void t_material::load (const std::string& path)
 	glAttachShader(program, get_frag_shader("lib/light"));
 	glAttachShader(program, get_vert_shader("lib/main"));
 
-	for (GLuint fr: frag)
-		glAttachShader(program, fr);
-	for (GLuint ve: vert)
-		glAttachShader(program, ve);
+	for (GLuint s: user_shaders)
+		glAttachShader(program, s);
 
 	glLinkProgram(program);
 
@@ -126,26 +125,31 @@ void t_material::load (const std::string& path)
 				"failed to link:\n%s", path.c_str(), log);
 	}
 
-	for (const bitmap_desc_interm& d: bitmaps_interm) {
+	glUseProgram(program);
+	int i = MAT_TEXTURE_SLOT_OFFSET;
+	for (const auto& d: bitmaps) {
 		int location = glGetUniformLocation(program,
 				d.loc_name.c_str());
-		if (location != -1) {
-			bitmaps.push_back({ location, d.texid });
-		} else {
+
+		if (location == 1) {
 			warning("%s is not a valid uniform in material %s",
 				d.loc_name.c_str(), path.c_str());
+			continue;
 		}
+
+		glUniform1i(location, i++);
+		bitmap_texture_ids.push_back(d.texid);
 	}
+
+	glUniform1i(UNIFORM_LOC_DEPTH_MAP, TEXTURE_SLOT_DEPTH_MAP);
+	glUniform1i(UNIFORM_LOC_PREV_SHADOWMAP, TEXTURE_SLOT_PREV_SHADOWMAP);
 
 	glBindAttribLocation(program, ATTRIB_LOC_TANGENT, "tangent");
 }
 
-/*
- * Material application is idempotent, so we can avoid redundancy
- */
+/* Material application is idempotent, so we can avoid redundancy */
 const t_material* latest_material = nullptr;
 t_render_stage latest_render_stage;
-
 void material_barrier ()
 {
 	latest_material = nullptr;
@@ -160,10 +164,9 @@ void t_material::apply (t_render_stage s) const
 
 	glUseProgram(program);
 
-	for (int i = 0; i < bitmaps.size(); i++) {
-		glActiveTexture(GL_TEXTURE0 + i + 2);
-		glBindTexture(GL_TEXTURE_2D, bitmaps[i].texid);
-		glUniform1i(bitmaps[i].location, i + 2);
+	for (int i = 0; i < bitmap_texture_ids.size(); i++) {
+		glActiveTexture(GL_TEXTURE0 + i + MAT_TEXTURE_SLOT_OFFSET);
+		glBindTexture(GL_TEXTURE_2D, bitmap_texture_ids[i]);
 	}
 
 	glUniform1ui(UNIFORM_LOC_RENDER_STAGE, s);

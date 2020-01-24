@@ -7,52 +7,6 @@
 #include "resource.h"
 #include <cassert>
 
-t_shader_id compile_glsl (std::string path, GLenum type)
-{
-	std::ifstream f(path);
-
-	if (!f)
-		return 0;
-
-	int filesize;
-	f.seekg(0, f.end);
-	filesize = f.tellg();
-	f.seekg(0, f.beg);
-
-	std::string source;
-	source.reserve(filesize);
-
-	for (std::string line; std::getline(f, line); ) {
-		source += line;
-		source += '\n';
-	}
-
-	unsigned int id = glCreateShader(type);
-
-	const char* const source_ptr = source.c_str();
-
-	// to glShaderSource, pretend the source is just one line
-	// which does not affect the syntax because we put linebreaks
-	glShaderSource(id, 1, &source_ptr, nullptr);
-	glCompileShader(id);
-
-	int success = 0;
-	glGetShaderiv(id, GL_COMPILE_STATUS, &success);
-
-	if (success)
-		return id;
-
-	int log_length = 0;
-	glGetShaderiv(id, GL_INFO_LOG_LENGTH, &log_length);
-	char log[log_length+1];
-	log[log_length] = 0;
-	glGetShaderInfoLog(id, log_length, 0, log);
-
-	warning("Failed to compile shader %s:\n%s\n",
-			path.c_str(), log);
-	return 0;
-}
-
 t_material mat_none_instance;
 t_material* mat_none = &mat_none_instance;
 
@@ -118,8 +72,10 @@ void t_material::load (const std::string& path)
 	if (!link_success) {
 		int log_length = 0;
 		glGetProgramiv(program, GL_INFO_LOG_LENGTH, &log_length);
+
 		char log[log_length+1];
 		log[log_length] = 0;
+
 		glGetProgramInfoLog(program, log_length, &log_length, log);
 		fatal("OpenGL shader program for material %s "
 				"failed to link:\n%s", path.c_str(), log);
@@ -174,7 +130,7 @@ void t_material::apply (t_render_stage s) const
 	light_apply_uniforms(s);
 }
 
-int get_surface_gl_format (SDL_Surface* s)
+GLenum get_surface_gl_format (SDL_Surface* s)
 {
 	// checking where alpha and red channels are
 	// should be enough to understand the format
@@ -227,3 +183,47 @@ t_texture_id load_texture (std::string path)
 
 	return id;
 }
+
+
+t_shader_id compile_glsl (std::string path, GLenum type)
+{
+	std::ifstream f(path);
+
+	if (!f)
+		return 0;
+
+	int filesize;
+	f.seekg(0, f.end);
+	filesize = f.tellg();
+	f.seekg(0, f.beg);
+
+	std::string source;
+
+	for (std::string line; std::getline(f, line); ) {
+		source += line;
+		source += '\n';
+	}
+
+	GLuint id = glCreateShader(type);
+
+	const char* ptr = source.c_str();
+	glShaderSource(id, 1, &ptr, nullptr);
+	glCompileShader(id);
+
+	int success = 0;
+	glGetShaderiv(id, GL_COMPILE_STATUS, &success);
+
+	if (success)
+		return id;
+
+	int log_length = 0;
+	glGetShaderiv(id, GL_INFO_LOG_LENGTH, &log_length);
+	char log[log_length+1];
+	log[log_length] = 0;
+	glGetShaderInfoLog(id, log_length, 0, log);
+
+	warning("Failed to compile shader %s:\n%s\n",
+			path.c_str(), log);
+	return 0;
+}
+

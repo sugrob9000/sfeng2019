@@ -25,7 +25,7 @@ void init_materials ();
 t_shader_id compile_glsl (std::string path, GLenum shadertype);
 t_texture_id load_texture (std::string path);
 
-int get_surface_gl_format (SDL_Surface* s);
+GLenum get_surface_gl_format (SDL_Surface* s);
 
 /* Draws nothing, for various edge cases */
 extern t_material* mat_none;
@@ -38,8 +38,10 @@ extern t_material* mat_occlude;
  */
 void material_barrier ();
 
-/* The first N texture slots are reserved for engine use
- * (lighting buffers etc.); after Nth, the slots are used for user bitmaps */
+/*
+ * The first N texture slots are reserved for engine use
+ * (lighting buffers etc.); after Nth, the slots are used for user bitmaps
+ */
 constexpr int MAT_TEXTURE_SLOT_OFFSET = 2;
 
 #endif // MATERIAL_H

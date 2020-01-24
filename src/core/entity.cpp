@@ -73,3 +73,25 @@ e_base* t_entities::find_by_name (std::string name)
 		return nullptr;
 	return i->second;
 }
+
+/* ================= Key-value maps ================= */
+
+const std::string t_ent_keyvals::none = "";
+
+const std::string& t_ent_keyvals::operator[] (std::string s) const
+{
+	auto i = m.find(s);
+	if (i == m.end())
+		return none;
+	return i->second;
+}
+
+void t_ent_keyvals::add (std::string key, std::string value)
+{
+	m[key] = value;
+}
+
+void t_ent_keyvals::clear ()
+{
+	m.clear();
+}

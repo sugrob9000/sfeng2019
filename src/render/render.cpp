@@ -225,7 +225,7 @@ void t_camera::apply ()
 }
 
 
-t_texture_id text_texture;
+GLuint text_texture;
 unsigned int text_program;
 unsigned int text_prg_glyph_loc;
 

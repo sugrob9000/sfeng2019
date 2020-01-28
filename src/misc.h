@@ -47,8 +47,8 @@ void atovec3 (const std::string& s, vec3& v);
 std::string vec3toa (const vec3& v);
 
 /* Component-wise min & max */
-vec3 min_component (const vec3& a, const vec3& b);
-vec3 max_component (const vec3& a, const vec3& b);
+vec3 min_components (const vec3& a, const vec3& b);
+vec3 max_components (const vec3& a, const vec3& b);
 
 
 /*

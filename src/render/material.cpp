@@ -33,7 +33,7 @@ void t_material::load (const std::string& path)
 
 	struct bitmap_desc {
 		std::string loc_name;
-		t_texture_id texid;
+		GLuint texid;
 	};
 	std::vector<bitmap_desc> bitmaps;
 	std::vector<GLuint> user_shaders;
@@ -148,7 +148,7 @@ GLenum get_surface_gl_format (SDL_Surface* s)
 	}
 }
 
-t_texture_id load_texture (std::string path)
+GLuint load_texture (std::string path)
 {
 	SDL_Surface* surf = IMG_Load(path.c_str());
 
@@ -162,7 +162,7 @@ t_texture_id load_texture (std::string path)
 		return 0;
 	}
 
-	t_texture_id id;
+	GLuint id;
 
 	glGenTextures(1, &id);
 	glBindTexture(GL_TEXTURE_2D, id);
@@ -184,7 +184,7 @@ t_texture_id load_texture (std::string path)
 }
 
 
-t_shader_id compile_glsl (std::string path, GLenum type)
+GLuint compile_glsl (std::string path, GLenum type)
 {
 	std::ifstream f(path);
 

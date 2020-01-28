@@ -27,9 +27,9 @@ t_model* get_model (std::string path)
 	return ret;
 }
 
-t_texture_id get_texture (std::string path)
+GLuint get_texture (std::string path)
 {
-	t_texture_id& ret = cache_tex[path];
+	GLuint& ret = cache_tex[path];
 
 	if (ret != 0)
 		return ret;
@@ -41,9 +41,9 @@ t_texture_id get_texture (std::string path)
 	return ret;
 }
 
-t_shader_id get_shader (const std::string& path, GLenum type)
+GLuint get_shader (const std::string& path, GLenum type)
 {
-	t_shader_id& ret = cache_shader[path];
+	GLuint& ret = cache_shader[path];
 
 	if (ret != 0) {
 		// shader exists. verify that it is of the right type
@@ -64,12 +64,12 @@ t_shader_id get_shader (const std::string& path, GLenum type)
 	return ret;
 }
 
-t_shader_id get_vert_shader (const std::string& name)
+GLuint get_vert_shader (const std::string& name)
 {
 	return get_shader(PATH_SHADER + name + ".vert", GL_VERTEX_SHADER);
 }
 
-t_shader_id get_frag_shader (const std::string& name)
+GLuint get_frag_shader (const std::string& name)
 {
 	return get_shader(PATH_SHADER + name + ".frag", GL_FRAGMENT_SHADER);
 }

@@ -5,9 +5,6 @@
 #include "render.h"
 #include <vector>
 
-typedef GLuint t_texture_id;
-typedef GLuint t_shader_id;
-
 struct t_material
 {
 	GLuint program;
@@ -21,8 +18,8 @@ struct t_material
 
 void init_materials ();
 
-t_shader_id compile_glsl (std::string path, GLenum shadertype);
-t_texture_id load_texture (std::string path);
+GLuint compile_glsl (std::string path, GLenum shadertype);
+GLuint load_texture (std::string path);
 
 GLenum get_surface_gl_format (SDL_Surface* s);
 

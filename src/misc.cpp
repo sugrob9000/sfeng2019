@@ -40,13 +40,13 @@ std::string vec3toa (const vec3& v)
 	return to_string(v.x) + ' ' + to_string(v.y) + ' ' + to_string(v.z);
 }
 
-vec3 min_component (const vec3& a, const vec3& b)
+vec3 min_components (const vec3& a, const vec3& b)
 {
 	using std::min;
 	return vec3(min(a.x, b.x), min(a.y, b.y), min(a.z, b.z));
 }
 
-vec3 max_component (const vec3& a, const vec3& b)
+vec3 max_components (const vec3& a, const vec3& b)
 {
 	using std::max;
 	return vec3(max(a.x, b.x), max(a.y, b.y), max(a.z, b.z));

@@ -6,9 +6,9 @@
 #include <map>
 
 typedef std::map<std::string, t_model*> t_cache_mdl;
-typedef std::map<std::string, t_texture_id> t_cache_tex;
+typedef std::map<std::string, GLuint> t_cache_tex;
 typedef std::map<std::string, t_material*> t_cache_mat;
-typedef std::map<std::string, t_shader_id> t_cache_shader;
+typedef std::map<std::string, GLuint> t_cache_shader;
 
 const char* const PATH_MODEL = "res/models/";
 const char* const PATH_TEXTURE = "res/mat/";
@@ -16,11 +16,11 @@ const char* const PATH_MATERIAL = "res/mat/";
 const char* const PATH_SHADER = "res/shader/";
 
 t_model* get_model (std::string name);
-t_texture_id get_texture (std::string name);
+GLuint get_texture (std::string name);
 t_material* get_material (std::string name);
 
-t_shader_id get_frag_shader (const std::string& name);
-t_shader_id get_vert_shader (const std::string& name);
+GLuint get_frag_shader (const std::string& name);
+GLuint get_vert_shader (const std::string& name);
 
 /*
  * Declare these because some initializers may want to

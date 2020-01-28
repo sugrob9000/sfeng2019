@@ -161,14 +161,14 @@ float t_bound_box::volume () const
 
 void t_bound_box::update (const vec3& pt)
 {
-	start = min_component(start, pt);
-	end = max_component(end, pt);
+	start = min_components(start, pt);
+	end = max_components(end, pt);
 }
 
 void t_bound_box::update (const t_bound_box& other)
 {
-	start = min_component(start, other.start);
-	end = max_component(end, other.end);
+	start = min_components(start, other.start);
+	end = max_components(end, other.end);
 }
 
 bool t_bound_box::point_in (const vec3& pt) const

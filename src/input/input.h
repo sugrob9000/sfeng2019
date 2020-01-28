@@ -1,7 +1,7 @@
 #ifndef INPUT_H
 #define INPUT_H
 
-#include "inc_general.h"
+#include "misc.h"
 #include "inc_gl.h"
 #include "core/core.h"
 #include <sstream>

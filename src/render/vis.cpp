@@ -65,7 +65,7 @@ uint8_t which_octant (vec3 origin, vec3 point)
  */
 t_bound_box octant_bound (t_bound_box parent, uint8_t octant_id)
 {
-	vec3 mid = (parent.start + parent.end) * 0.5;
+	vec3 mid = (parent.start + parent.end) * 0.5f;
 	t_bound_box r = parent;
 	(octant_id & 1 ? r.start : r.end).x = mid.x;
 	(octant_id & 2 ? r.start : r.end).y = mid.y;
@@ -91,7 +91,7 @@ void oct_node::build (t_bound_box bounds, int level)
 	for (int i = 0; i < 8; i++)
 		children[i] = new oct_node;
 
-	vec3 bb_mid = (bounds.start + bounds.end) * 0.5;
+	vec3 bb_mid = (bounds.start + bounds.end) * 0.5f;
 
 	for (int d: bucket) {
 		vec3 tri_mid(0.0);

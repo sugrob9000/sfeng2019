@@ -2,7 +2,7 @@
 #define RENDER_H
 
 #include "inc_gl.h"
-#include "inc_general.h"
+#include "misc.h"
 #include "core/core.h"
 
 enum t_render_stage: uint32_t

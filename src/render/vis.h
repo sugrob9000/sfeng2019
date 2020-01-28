@@ -1,7 +1,6 @@
 #ifndef VIS_H
 #define VIS_H
 
-#include "inc_general.h"
 #include "core/core.h"
 #include "core/entity.h"
 #include "render.h"

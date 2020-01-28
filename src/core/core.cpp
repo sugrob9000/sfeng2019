@@ -1,6 +1,5 @@
 #include "core.h"
 #include "entity.h"
-#include "inc_general.h"
 #include "input/cmds.h"
 #include "input/input.h"
 #include "render/render.h"
@@ -162,14 +161,14 @@ float t_bound_box::volume () const
 
 void t_bound_box::update (const vec3& pt)
 {
-	start = min(start, pt);
-	end = max(end, pt);
+	start = min_component(start, pt);
+	end = max_component(end, pt);
 }
 
 void t_bound_box::update (const t_bound_box& other)
 {
-	start = min(start, other.start);
-	end = max(end, other.end);
+	start = min_component(start, other.start);
+	end = max_component(end, other.end);
 }
 
 bool t_bound_box::point_in (const vec3& pt) const

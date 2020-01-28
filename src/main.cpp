@@ -1,4 +1,4 @@
-#include "inc_general.h"
+#include "misc.h"
 #include "render/render.h"
 #include "core/core.h"
 #include "core/entity.h"
@@ -11,8 +11,8 @@ COMMAND_ROUTINE (sun_at_view)
 {
 	if (ev != PRESS)
 		return;
-	std::string pos_str = camera.pos.to_string();
-	std::string ang_str = camera.ang.to_string();
+	std::string pos_str = vec3toa(camera.pos);
+	std::string ang_str = vec3toa(camera.ang);
 	run_cmd_ext("signal 0 sun setpos " + pos_str);
 	run_cmd_ext("signal 0 sun setang " + ang_str);
 }

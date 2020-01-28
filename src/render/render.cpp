@@ -365,8 +365,8 @@ void init_cuboid ()
 
 void draw_cuboid (const t_bound_box& b)
 {
-	vec3 scale = (b.end - b.start) * 0.5;
-	vec3 center = (b.end + b.start) * 0.5;
+	vec3 scale = (b.end - b.start) * 0.5f;
+	vec3 center = (b.end + b.start) * 0.5f;
 
 	glPushMatrix();
 	translate_gl_matrix(center);
@@ -422,7 +422,6 @@ void upd_camera_pos ()
 	if (cam_slowdown)
 		speed *= 0.4;
 
-	vec3 delta;
 	auto& flags = cam_move_flags;
 	t_camera& cam = camera;
 
@@ -431,9 +430,12 @@ void upd_camera_pos ()
 	if (cam.ang.x > 90.0)
 		cam.ang.x = 90.0;
 
-	float sz = sinf(cam.ang.z * DEG_TO_RAD);
-	float sx = sinf(cam.ang.x * DEG_TO_RAD);
-	float cz = cosf(cam.ang.z * DEG_TO_RAD);
+	using glm::radians;
+	float sz = sinf(radians(cam.ang.z));
+	float sx = sinf(radians(cam.ang.x));
+	float cz = cosf(radians(cam.ang.z));
+
+	vec3 delta(0.0);
 
 	if (flags[cam_move_f])
 		delta += vec3(sz, cz, -sx);
@@ -444,8 +446,8 @@ void upd_camera_pos ()
 	if (flags[cam_move_r])
 		delta += vec3(cz, -sz, 0.0);
 
-	delta.norm();
-	cam.pos += delta * speed;
+	if (glm::length(delta) > 0.0f)
+		cam.pos += glm::normalize(delta) * speed;
 }
 
 MOUSEMOVE_ROUTINE (camera)

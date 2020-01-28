@@ -13,7 +13,7 @@ WARNINGS = \
 	-Wshadow
 
 CC = g++
-CFLAGS = -Og -g $(WARNINGS) --std=gnu++17 -Isrc
+CFLAGS = -Og -g $(WARNINGS) --std=gnu++17 -Isrc -Iinclude
 
 FILES-CPP = $(shell find src/ -name "*.cpp")
 FILES-H = $(shell find src/ -name "*.h")
@@ -24,10 +24,9 @@ LBITS = $(shell getconf LONG_BIT)
 LIBS = -lSDL2_image -lSDL2_ttf
 
 ifeq ($(OS), Windows_NT)
-
 # Windows
 
-CFLAGS += -DWINDOWS -Iinclude
+CFLAGS += -DWINDOWS
 LIBS += -Llib/$(LBITS)
 LIBS += -lSDL2 -lopengl32 -lmingw32 -lGLU32
 
@@ -35,7 +34,6 @@ EXEC := $(EXEC).exe
 FILES-O += $(BIN)/glew.o
 
 else
-
 # Linux
 
 LIBS += -lSDL2 -lGL -lGLEW -lGLU

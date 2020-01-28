@@ -1,26 +1,16 @@
 #ifndef MODEL_H
 #define MODEL_H
 
-#include "inc_general.h"
 #include "material.h"
 #include "core/core.h"
 #include <vector>
-
-struct t_texcrd
-{
-	float u;
-	float v;
-};
 
 struct t_vertex
 {
 	vec3 pos;
 	vec3 norm;
-	t_texcrd tex;
+	vec2 tex;
 };
-
-/* Trivially go through each member, nothing meaningful */
-bool operator< (const t_texcrd& a, const t_texcrd& b);
 bool operator< (const t_vertex& a, const t_vertex& b);
 
 /*

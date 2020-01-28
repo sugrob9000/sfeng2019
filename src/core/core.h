@@ -1,7 +1,7 @@
 #ifndef CORE_H
 #define CORE_H
 
-#include "inc_general.h"
+#include "misc.h"
 #include <queue>
 
 extern bool must_quit;

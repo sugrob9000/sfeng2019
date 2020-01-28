@@ -1,7 +1,7 @@
 #ifndef ENTITY_H
 #define ENTITY_H
 
-#include "inc_general.h"
+#include "misc.h"
 #include "signal.h"
 #include "core.h"
 #include "render/render.h"

@@ -1,5 +1,4 @@
 #include "ent/lights.h"
-#include "inc_general.h"
 #include "inc_gl.h"
 #include "input/cmds.h"
 #include "material.h"

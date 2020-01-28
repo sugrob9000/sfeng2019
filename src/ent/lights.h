@@ -26,7 +26,7 @@ class e_light: public e_base
 	void view () const;
 
 	/* Sending lighting info to shader */
-	static float uniform_view[16];
+	static mat4 uniform_view;
 	static vec3 uniform_pos;
 	static vec3 uniform_rgb;
 };

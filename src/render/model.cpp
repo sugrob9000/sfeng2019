@@ -1,4 +1,3 @@
-#include "inc_general.h"
 #include "model.h"
 #include "render.h"
 #include "material.h"
@@ -14,12 +13,12 @@ void t_model_mem::gl_send_triangle (int tri_id) const
 
 		const vec3& p = vertices[idx].v.pos;
 		const vec3& n = vertices[idx].v.norm;
-		const t_texcrd& t = vertices[idx].v.tex;
+		const vec2& t = vertices[idx].v.tex;
 		const vec3& tg = vertices[idx].tangent;
 
 		glNormal3f(n.x, n.y, n.z);
 		glVertexAttrib3f(ATTRIB_LOC_TANGENT, tg.x, tg.y, tg.z);
-		glTexCoord2f(t.u, 1.0 - t.v);
+		glTexCoord2f(t.x, 1.0 - t.y);
 		glVertex3f(p.x, p.y, p.z);
 	}
 }
@@ -67,7 +66,7 @@ void t_model_mem::load_obj (const std::string& path)
 
 	std::vector<vec3> points;
 	std::vector<vec3> normals;
-	std::vector<t_texcrd> texcrds;
+	std::vector<vec2> texcrds;
 
 	std::map<t_vertex, int> vert_indices;
 
@@ -78,15 +77,15 @@ void t_model_mem::load_obj (const std::string& path)
 		const vec3& v0 = points[v[0]];
 		const vec3& v1 = points[v[1]];
 		const vec3& v2 = points[v[2]];
-		const t_texcrd& uv0 = texcrds[t[0]];
-		const t_texcrd& uv1 = texcrds[t[1]];
-		const t_texcrd& uv2 = texcrds[t[2]];
+		const vec2& uv0 = texcrds[t[0]];
+		const vec2& uv1 = texcrds[t[1]];
+		const vec2& uv2 = texcrds[t[2]];
 		vec3 d_pos1 = v1 - v0;
 		vec3 d_pos2 = v2 - v0;
-		t_texcrd d_uv1 = { uv1.u - uv0.u, uv1.v - uv0.v };
-		t_texcrd d_uv2 = { uv2.u - uv0.u, uv2.v - uv0.v };
+		vec2 d_uv1 = uv1 - uv0;
+		vec2 d_uv2 = uv2 - uv0;
 
-		vec3 tangent = d_uv2.v * d_pos1 - d_uv1.v * d_pos2;
+		vec3 tangent = d_uv2.y * d_pos1 - d_uv1.y * d_pos2;
 
 		triangle tri = { { }, current_material };
 		for (int i = 0; i < 3; i++) {
@@ -172,7 +171,7 @@ void t_model_mem::load_obj (const std::string& path)
 	}
 
 	for (vertex& v: vertices)
-		v.tangent.norm();
+		v.tangent = glm::normalize(v.tangent);
 
 	calc_bbox();
 }
@@ -278,13 +277,6 @@ COMMAND_ROUTINE (obj2rvd)
 	model.dump_rvd(out);
 }
 
-
-bool operator< (const t_texcrd& a, const t_texcrd& b)
-{
-	if (a.u == b.u)
-		return a.v < b.v;
-	return a.u < b.u;
-}
 
 bool operator< (const t_vertex& a, const t_vertex& b)
 {

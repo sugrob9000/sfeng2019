@@ -69,7 +69,7 @@ void e_light::view () const
 
 /* ======================================== */
 
-float e_light::uniform_view[16];
+mat4 e_light::uniform_view;
 vec3 e_light::uniform_pos;
 vec3 e_light::uniform_rgb;
 
@@ -158,15 +158,16 @@ void light_apply_uniforms (t_render_stage s)
 		glActiveTexture(GL_TEXTURE0 + TEXTURE_SLOT_DEPTH_MAP);
 		glBindTexture(GL_TEXTURE_2D, lspace_fbo.color[0]);
 
-		const float* pos = e_light::uniform_pos.data();
-		const float* rgb = e_light::uniform_rgb.data();
-		const float* view = e_light::uniform_view;
+		using glm::value_ptr;
+		const float* pos = value_ptr(e_light::uniform_pos);
+		const float* rgb = value_ptr(e_light::uniform_rgb);
+		const float* view = value_ptr(e_light::uniform_view);
 
 		glUniform3fv(UNIFORM_LOC_LIGHT_POS, 1, pos);
 		glUniform3fv(UNIFORM_LOC_LIGHT_RGB, 1, rgb);
 		glUniformMatrix4fv(UNIFORM_LOC_LIGHT_VIEW, 1, false, view);
 
-		const float* eye = camera.pos.data();
+		const float* eye = value_ptr(camera.pos);
 		glUniform3fv(UNIFORM_LOC_EYE_POSITION, 1, eye);
 
 		shadowmap = sspace_fbo[current_sspace_fbo ^ 1].color[0];
@@ -195,7 +196,8 @@ void fill_depth_map (const e_light* l)
 	l->view();
 	l->vis.render(LIGHTING_LSPACE);
 
-	glGetFloatv(GL_MODELVIEW_MATRIX, e_light::uniform_view);
+	glGetFloatv(GL_MODELVIEW_MATRIX,
+		glm::value_ptr(e_light::uniform_view));
 	e_light::uniform_pos = l->pos;
 	e_light::uniform_rgb = l->rgb;
 
@@ -244,7 +246,7 @@ void compute_lighting ()
 	}
 }
 
-vec3 ambient = { 0.15, 0.15, 0.15 };
+vec3 ambient = vec3(0.25);
 COMMAND_ROUTINE (light_ambience)
 {
 	if (ev != PRESS)

@@ -4,7 +4,6 @@
 #include "core/entity.h"
 #include "input/input.h"
 #include "input/bind.h"
-#include "input/console.h"
 #include "input/cmds.h"
 
 COMMAND_ROUTINE (sun_at_view)

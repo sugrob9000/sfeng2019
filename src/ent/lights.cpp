@@ -1,5 +1,4 @@
 #include "lights.h"
-#include "error.h"
 #include "render/render.h"
 #include "render/framebuffer.h"
 #include "render/vis.h"

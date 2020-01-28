@@ -1,7 +1,6 @@
 #include "input.h"
 #include "bind.h"
 #include "cmds.h"
-#include "console.h"
 #include "render/render.h"
 
 t_command_registry cmd_registry;

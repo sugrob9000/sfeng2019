@@ -1,10 +1,14 @@
-#ifndef INC_GENERAL_H
-#define INC_GENERAL_H
+#ifndef MISC_H
+#define MISC_H
 
 #include <cmath>
 #include <iostream>
 #include <fstream>
-#include "error.h"
+#include <cstdarg>
+
+[[noreturn]]
+void fatal (const char* format, ...);
+void warning (const char* format, ...);
 
 
 #define DEBUG_EXPR(expr)                          \
@@ -23,7 +27,7 @@
 	(1 << (8 * sizeof((x)) - __builtin_clz((x)-1)))
 
 /* Whether x is a power of 2 */
-#define IS_PO2(x) (((x) & (x-1)) == 0)
+#define IS_PO2(x) (((x) & ((x)-1)) == 0)
 
 
 /*
@@ -76,4 +80,4 @@ bool operator== (const glm::vec<N, S, Q> a, const glm::vec<N, S, Q> b)
 }
 
 
-#endif // INC_GENERAL_H
+#endif // MISC_H

@@ -1,14 +1,13 @@
-#include "console.h"
 #include "cmds.h"
 #include "render/render.h"
 #include <algorithm>
 
 bool console_active;
 
-int cursor;
-std::string cmd;
-std::vector<const std::string*> matches;
-std::string cmd_prefix;
+static int cursor;
+static std::string cmd;
+static std::vector<const std::string*> matches;
+static std::string cmd_prefix;
 
 void update_matches ();
 void console_handle_input_ev (const SDL_Event& e)
@@ -48,7 +47,7 @@ void console_handle_input_ev (const SDL_Event& e)
 
 	case SDL_KEYUP:
 
-		// handle esc on keyup to avoid sending 
+		// handle esc on keyup to avoid sending
 		// the esc keyup event to the main game
 		if (e.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
 			console_close();
@@ -81,8 +80,7 @@ void console_close ()
 
 bool is_cmd_char (char c)
 {
-	return isalnum(c) || c == '_'
-		|| c == '+' || c == '-';
+	return isalnum(c) || c == '_' || c == '+' || c == '-';
 }
 
 
@@ -129,9 +127,9 @@ void update_matches ()
 
 void console_render ()
 {
-	const SDL_Color bg_clr = { 20, 20, 20, 255 };
-	const SDL_Color bg_match_clr = { 30, 30, 30, 240 };
-	const SDL_Color cursor_clr = { 220, 220, 40, 255 };
+	static const SDL_Color bg_clr = { 20, 20, 20, 255 };
+	static const SDL_Color bg_match_clr = { 30, 30, 30, 240 };
+	static const SDL_Color cursor_clr = { 220, 220, 40, 255 };
 
 	// try to match the actual font size in pixels,
 	// and be 4 away from the top
@@ -139,25 +137,15 @@ void console_render ()
 	float text_y = 4.0 * 2.0 / sdlcont.res_y;
 	float height = text_height + 2.0 * text_y;
 
-	float char_width = text_height
-		* ((float) sdlcont.font_w / sdlcont.font_h)
-		* ((float) sdlcont.res_y / sdlcont.res_x);
+	float char_width = text_height *
+		((float) sdlcont.font_w / sdlcont.font_h) *
+		((float) sdlcont.res_y / sdlcont.res_x);
 	float text_width = char_width * cmd.length();
 	float text_x = char_width + 0.01;
 
-	auto rect = [] (float x1, float y1, float x2, float y2)
-	-> void {
-		glBegin(GL_QUADS);
-		glVertex2f(x1, y1);
-		glVertex2f(x2, y1);
-		glVertex2f(x2, y2);
-		glVertex2f(x1, y2);
-		glEnd();
-	};
-
 	glUseProgram(0);
 	glColor4ubv((GLubyte*) &bg_clr);
-	rect(-1.0, 1.0, 1.0, 1.0 - height);
+	glRectf(-1.0, 1.0, 1.0, 1.0 - height);
 
 	glColor4ubv((GLubyte*) &cursor_clr);
 	glBegin(GL_LINES);
@@ -171,23 +159,23 @@ void console_render ()
 		float matches_h = single_match_h * matches.size();
 
 		glColor4ubv((GLubyte*) &bg_match_clr);
-		rect(-1.0, 1.0 - height, 1.0, 1.0 - height - matches_h);
+		glRectf(-1.0, 1.0 - height, 1.0, 1.0 - height - matches_h);
 
 		float matches_x = text_x + cmd_prefix.length() * char_width;
 
 		for (int i = 0; i < matches.size(); i++) {
-			draw_text(matches[i]->c_str(),
-					-1.0 + matches_x,
+			draw_text(matches[i]->c_str(), -1.0 + matches_x,
 					1.0 - height - i * single_match_h,
 					char_width, text_height);
 		}
 	}
 
+	draw_text(">", -1.0, 1.0 - text_y, char_width, text_height);
+
 	if (!cmd.empty()) {
 		draw_text(cmd.c_str(), -1.0 + text_x,
 			1.0 - text_y, char_width, text_height);
 	}
-	draw_text(">", -1.0, 1.0 - text_y, char_width, text_height);
 }
 
 COMMAND_ROUTINE (console_open)

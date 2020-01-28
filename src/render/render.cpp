@@ -1,7 +1,6 @@
 #include "render.h"
 #include "ent/lights.h"
 #include "input/cmds.h"
-#include "input/console.h"
 #include "resource.h"
 #include "vis.h"
 #include <cassert>

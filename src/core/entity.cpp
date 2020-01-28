@@ -1,5 +1,4 @@
 #include "entity.h"
-#include "error.h"
 #include "render/vis.h"
 #include "ent/_headers.inc"
 

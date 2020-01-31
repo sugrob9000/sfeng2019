@@ -86,7 +86,7 @@ void t_material::load (const std::string& path)
 		int location = glGetUniformLocation(program,
 				d.loc_name.c_str());
 
-		if (location == 1) {
+		if (location == -1) {
 			warning("%s is not a valid uniform in material %s",
 				d.loc_name.c_str(), path.c_str());
 			continue;

@@ -91,9 +91,8 @@ t_fbo sspace_fbo[2];
 int current_sspace_fbo = 0;
 
 
-void init_lighting ()
+static void init_screenspace ()
 {
-	// screenspace FBO
 	int w = CEIL_PO2(sdlcont.res_x);
 	int h = CEIL_PO2(sdlcont.res_y);
 
@@ -104,6 +103,11 @@ void init_lighting ()
 			.attach_depth(depth_rbo)
 			.assert_complete();
 	}
+}
+
+void init_lighting ()
+{
+	init_screenspace();
 
 	// lightspace FBO
 	constexpr int s = lspace_resolution;
@@ -125,23 +129,14 @@ COMMAND_ROUTINE (light_refit_buffers)
 	if (ev != PRESS)
 		return;
 
-	int w = CEIL_PO2(sdlcont.res_x);
-	int h = CEIL_PO2(sdlcont.res_y);
-
 	glDeleteRenderbuffers(1, &sspace_fbo[0].depth);
-	auto depth_rbo = make_rbo(w, h, GL_DEPTH_COMPONENT);
-
 	for (int i: { 0, 1 }) {
 		sspace_fbo[i].width = 0;
 		sspace_fbo[i].height = 0;
-
 		glDeleteTextures(1, &sspace_fbo[i].color[0]);
-
-		sspace_fbo[i]
-			.attach_color(make_tex2d(w, h, GL_RGB))
-			.attach_depth(depth_rbo)
-			.assert_complete();
 	}
+
+	init_screenspace();
 }
 
 

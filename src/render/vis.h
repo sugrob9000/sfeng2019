@@ -45,8 +45,7 @@ struct oct_node
 	 */
 	std::vector<int> bucket;
 
-	bool is_leaf;
-	oct_node* children[8];
+	oct_node* children;
 	t_bound_box actual_bounds;
 
 	void build (t_bound_box bounds, int level);

@@ -87,9 +87,7 @@ void oct_node::build (t_bound_box bounds, int level)
 		return;
 	}
 
-	is_leaf = false;
-	for (int i = 0; i < 8; i++)
-		children[i] = new oct_node;
+	children = new oct_node[8];
 
 	vec3 bb_mid = (bounds.start + bounds.end) * 0.5f;
 
@@ -98,13 +96,13 @@ void oct_node::build (t_bound_box bounds, int level)
 		for (int i = 0; i < 3; i++)
 			tri_mid += world.get_vertex(d, i).pos;
 		tri_mid /= 3.0;
-		children[which_octant(bb_mid, tri_mid)]->bucket.push_back(d);
+		children[which_octant(bb_mid, tri_mid)].bucket.push_back(d);
 	}
 
 	bucket.clear();
 
 	for (int i = 0; i < 8; i++)
-		children[i]->build(octant_bound(bounds, i), level + 1);
+		children[i].build(octant_bound(bounds, i), level + 1);
 }
 
 void oct_node::make_leaf ()
@@ -132,21 +130,19 @@ void oct_node::make_leaf ()
 
 oct_node::oct_node ()
 {
-	is_leaf = true;
+	children = nullptr;
 }
 
 oct_node::~oct_node ()
 {
-	if (!is_leaf) {
-		for (int i = 0; i < 8; i++)
-			delete children[i];
-	}
+	if (children)
+		delete[] children;
 }
 
 
 void oct_node::check_visibility (const vec3& cam, t_visible_set& s) const
 {
-	if (is_leaf) {
+	if (!children) {
 		s.leaves.push_back(this);
 		return;
 	}
@@ -155,7 +151,7 @@ void oct_node::check_visibility (const vec3& cam, t_visible_set& s) const
 
 	for (int i = 0; i < 8; i++) {
 		glBeginQuery(GL_SAMPLES_PASSED, occ_queries[i]);
-		draw_cuboid(children[i]->actual_bounds);
+		draw_cuboid(children[i].actual_bounds);
 		glEndQuery(GL_SAMPLES_PASSED);
 	}
 
@@ -168,8 +164,8 @@ void oct_node::check_visibility (const vec3& cam, t_visible_set& s) const
 		// we always want to render the node we are in,
 		// but its quads may be culled, so pass it specially
 		if (child_pixels[i] > 0
-		|| children[i]->actual_bounds.point_in(cam))
-			children[i]->check_visibility(cam, s);
+		|| children[i].actual_bounds.point_in(cam))
+			children[i].check_visibility(cam, s);
 	}
 }
 
@@ -227,9 +223,9 @@ void oct_node::requery_entity (e_base* e, const t_bound_box& b)
 		// but might have exited or entered a child
 		break;
 	}
-	if (!is_leaf) {
+	if (children) {
 		for (int i = 0; i < 8; i++)
-			children[i]->requery_entity(e, b);
+			children[i].requery_entity(e, b);
 	}
 }
 

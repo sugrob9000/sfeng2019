@@ -20,9 +20,6 @@ constexpr int occ_fbo_size = 256;
 GLuint occ_shader_prog;
 GLuint occ_planes_display_list;
 
-/* To query OpenGL as to whether the bounding box is visible */
-GLuint occ_queries[8];
-
 /* Effectively disable visibility checking */
 bool pass_all_nodes;
 COMMAND_SET_BOOL (vis_disable, pass_all_nodes);
@@ -36,8 +33,6 @@ void init_vis ()
 	glAttachShader(occ_shader_prog, get_vert_shader("lib/occlude"));
 	glAttachShader(occ_shader_prog, get_frag_shader("common/null"));
 	glLinkProgram(occ_shader_prog);
-
-	glGenQueries(8, occ_queries);
 
 	occ_fbo.make()
 		.attach_depth(make_rbo(
@@ -73,14 +68,14 @@ t_bound_box octant_bound (t_bound_box parent, uint8_t octant_id)
 	return r;
 }
 
-void oct_node::build (t_bound_box bounds, int level)
+void oct_node::build (t_bound_box b, int level)
 {
 	// bounds must include the triangles entirely
 	for (int d: bucket) {
 		for (int i = 0; i < 3; i++)
-			bounds.update(world.get_vertex(d, i).pos);
+			b.update(world.get_vertex(d, i).pos);
 	}
-	actual_bounds = bounds;
+	bounds = b;
 
 	if (level >= oct_max_depth || bucket.size() <= oct_leaf_capacity) {
 		make_leaf();
@@ -131,43 +126,16 @@ void oct_node::make_leaf ()
 oct_node::oct_node ()
 {
 	children = nullptr;
+	glGenQueries(1, &query);
 }
 
 oct_node::~oct_node ()
 {
 	if (children)
 		delete[] children;
+	glDeleteQueries(1, &query);
 }
 
-
-void oct_node::check_visibility (const vec3& cam, t_visible_set& s) const
-{
-	if (!children) {
-		s.leaves.push_back(this);
-		return;
-	}
-
-	unsigned int child_pixels[8];
-
-	for (int i = 0; i < 8; i++) {
-		glBeginQuery(GL_SAMPLES_PASSED, occ_queries[i]);
-		draw_cuboid(children[i].actual_bounds);
-		glEndQuery(GL_SAMPLES_PASSED);
-	}
-
-	for (int i = 0; i < 8; i++) {
-		glGetQueryObjectuiv(occ_queries[i],
-			GL_QUERY_RESULT, &child_pixels[i]);
-	}
-
-	for (int i = 0; i < 8; i++) {
-		// we always want to render the node we are in,
-		// but its quads may be culled, so pass it specially
-		if (child_pixels[i] > 0
-		|| children[i].actual_bounds.point_in(cam))
-			children[i].check_visibility(cam, s);
-	}
-}
 
 void t_visible_set::fill (const vec3& cam)
 {
@@ -190,7 +158,43 @@ void t_visible_set::fill (const vec3& cam)
 	// walk the tree nodes which pass the z-test (and are on screen)
 	glDepthMask(GL_FALSE);
 	leaves.clear();
-	root->check_visibility(cam, *this);
+
+	// BFS, but exploit the fact that a tree is bipartite,
+	// parts being the even and odd depths
+	std::vector<oct_node*> queues[2] = { { root }, { } };
+	int cur_queue = 0;
+
+	while (!queues[cur_queue].empty()) {
+		queues[cur_queue ^ 1].clear();
+
+		for (oct_node* node: queues[cur_queue]) {
+			oct_node* c = node->children;
+			if (!c) {
+				leaves.push_back(node);
+				continue;
+			}
+			for (int i = 0; i < 8; i++) {
+				glBeginQuery(GL_SAMPLES_PASSED, c[i].query);
+				draw_cuboid(c[i].bounds);
+				glEndQuery(GL_SAMPLES_PASSED);
+			}
+		}
+
+		for (int i = 0; i < queues[cur_queue].size(); i++) {
+			oct_node* c = queues[cur_queue][i]->children;
+			if (!c)
+				continue;
+			for (int j = 0; j < 8; j++) {
+				unsigned int pixels;
+				glGetQueryObjectuiv(c[j].query,
+					GL_QUERY_RESULT, &pixels);
+				if (pixels > 0 || c[j].bounds.point_in(cam))
+					queues[cur_queue ^ 1].push_back(&c[j]);
+			}
+		}
+
+		cur_queue ^= 1;
+	}
 
 	glDepthMask(GL_TRUE);
 	glEnable(GL_CULL_FACE);
@@ -202,7 +206,7 @@ void oct_node::requery_entity (e_base* e, const t_bound_box& b)
 {
 	auto p = std::find(entities_inside.begin(), entities_inside.end(), e);
 	uint8_t before = (p != entities_inside.end());
-	uint8_t now = b.intersects(actual_bounds);
+	uint8_t now = b.intersects(bounds);
 
 	switch (now | (before << 1)) {
 	case 0b00:
@@ -378,7 +382,7 @@ void t_visible_set::render_debug () const
 		glLineWidth(1.5);
 		glColor4f(0.0, 0.0, 0.0, 0.3);
 		for (const oct_node* leaf: leaves)
-			draw_cuboid(leaf->actual_bounds);
+			draw_cuboid(leaf->bounds);
 		glLineWidth(1.0);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		glEnable(GL_DEPTH_TEST);

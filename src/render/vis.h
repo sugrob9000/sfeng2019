@@ -45,13 +45,13 @@ struct oct_node
 	 */
 	std::vector<int> bucket;
 
+	GLuint query;
+
 	oct_node* children;
-	t_bound_box actual_bounds;
+	t_bound_box bounds;
 
 	void build (t_bound_box bounds, int level);
 	void make_leaf ();
-
-	void check_visibility (const vec3& cam, t_visible_set& s) const;
 
 	std::vector<e_base*> entities_inside;
 	void requery_entity (e_base* e, const t_bound_box& b);

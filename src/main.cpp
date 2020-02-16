@@ -1,5 +1,6 @@
 #include "misc.h"
 #include "render/render.h"
+#include "render/camera.h"
 #include "core/core.h"
 #include "core/entity.h"
 #include "input/input.h"
@@ -26,7 +27,7 @@ int main (int argc, const char* const* argv)
 
 	camera = t_camera({ 605.542, 4.64112, 217.669 },
 	                  { 18, 0, -45 },
-	                  5000.0f, 0.5f, 60.0f);
+	                  5000.0f, 0.5f, 60.0f, 1.0);
 
 	run_script("res/cfg/rc");
 	run_argv_commands(argc, argv);

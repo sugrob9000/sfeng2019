@@ -1,9 +1,10 @@
-#include "core.h"
-#include "entity.h"
+#include "core/core.h"
+#include "core/entity.h"
 #include "input/cmds.h"
 #include "input/input.h"
 #include "render/render.h"
 #include "render/vis.h"
+#include "render/camera.h"
 #include <cassert>
 
 bool must_quit;

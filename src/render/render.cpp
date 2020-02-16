@@ -1,8 +1,10 @@
-#include "render.h"
 #include "ent/lights.h"
 #include "input/cmds.h"
-#include "resource.h"
-#include "vis.h"
+#include "render/camera.h"
+#include "render/render.h"
+#include "render/resource.h"
+#include "render/sky.h"
+#include "render/vis.h"
 #include <cassert>
 #include <chrono>
 
@@ -33,7 +35,7 @@ void render_all ()
 	glDepthFunc(GL_LESS);
 	glDepthMask(GL_TRUE);
 
-	draw_sky();
+	render_sky();
 	visible_set.render(SHADE_FINAL);
 	visible_set.render_debug();
 
@@ -85,7 +87,7 @@ void init_render ()
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
 
-	sdlcont.window = SDL_CreateWindow("Engine",
+	sdlcont.window = SDL_CreateWindow("churn-engine",
 			SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
 			sdlcont.res_x, sdlcont.res_y,
 			SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN
@@ -108,12 +110,10 @@ void init_render ()
 		warning("Failed to set adaptive vsync, setting regular");
 		SDL_GL_SetSwapInterval(1);
 	}
-	glClearColor(1.0, 1.0, 1.0, 1.0);
 
 	glEnable(GL_MULTISAMPLE);
 
 	extern void init_text ();
-	extern void init_sky ();
 	extern void init_cuboid ();
 
 	init_cuboid();
@@ -131,7 +131,7 @@ void resize_window (int w, int h)
 	sdlcont.res_x = w;
 	sdlcont.res_y = h;
 	SDL_SetWindowSize(sdlcont.window, w, h);
-	glViewport(0, 0, w, h);
+	camera.aspect = (float) w / h;
 }
 
 COMMAND_ROUTINE (windowsize)
@@ -193,36 +193,6 @@ void pop_matrices ()
 	glMatrixMode(GL_PROJECTION);
 	glPopMatrix();
 }
-
-
-t_camera::t_camera () { }
-
-t_camera::t_camera (
-		vec3 apos, vec3 aang,
-		float zf, float zn, float afov)
-{
-	pos = apos;
-	ang = aang;
-	z_far = zf;
-	z_near = zn;
-	fov = afov;
-}
-
-void t_camera::apply ()
-{
-	float aspect = (float) sdlcont.res_x / sdlcont.res_y;
-
-	glMatrixMode(MTX_VIEWPROJ);
-	glLoadIdentity();
-	gluPerspective(fov, aspect, z_near, z_far);
-	glRotatef(-90.0, 1.0, 0.0, 0.0);
-	rotate_gl_matrix(ang);
-	translate_gl_matrix(-pos);
-
-	glMatrixMode(MTX_MODEL);
-	glLoadIdentity();
-}
-
 
 GLuint text_texture;
 unsigned int text_program;
@@ -301,34 +271,7 @@ void draw_text (const char* str, float x, float y, float charw, float charh)
 	glEnd();
 }
 
-GLuint sky_shader_program;
-void init_sky ()
-{
-	sky_shader_program = glCreateProgram();
-	glAttachShader(sky_shader_program, get_vert_shader("lib/sky"));
-	glAttachShader(sky_shader_program, get_frag_shader("lib/sky"));
-	glLinkProgram(sky_shader_program);
-}
 
-void draw_sky ()
-{
-	glUseProgram(sky_shader_program);
-	glClear(GL_DEPTH_BUFFER_BIT);
-	glDisable(GL_DEPTH_TEST);
-	glFrontFace(GL_CW);
-
-	constexpr float radius = 1.0;
-	const t_bound_box skybox = { { -radius, -radius, -radius },
-	                             { radius, radius, radius } };
-	glPushMatrix();
-	translate_gl_matrix(camera.pos);
-
-	draw_cuboid(skybox);
-
-	glPopMatrix();
-	glEnable(GL_DEPTH_TEST);
-	glFrontFace(GL_CCW);
-}
 
 GLuint cuboid_dlist;
 void init_cuboid ()
@@ -398,91 +341,4 @@ void debug_texture_onscreen (GLuint texture, float x, float y, float scale)
 
 	glEnd();
 	glPopMatrix();
-}
-
-
-constexpr short cam_move_f = 0;
-constexpr short cam_move_b = 1;
-constexpr short cam_move_l = 2;
-constexpr short cam_move_r = 3;
-bool cam_move_flags[4];
-t_camera camera;
-
-bool cam_speedup = false;
-bool cam_slowdown = false;
-COMMAND_SET_BOOL (cam_accelerate, cam_speedup);
-COMMAND_SET_BOOL (cam_decelerate, cam_slowdown);
-
-void upd_camera_pos ()
-{
-	float speed = 4.0;
-	if (cam_speedup)
-		speed *= 2.5;
-	if (cam_slowdown)
-		speed *= 0.4;
-
-	auto& flags = cam_move_flags;
-	t_camera& cam = camera;
-
-	if (cam.ang.x < -90.0)
-		cam.ang.x = -90.0;
-	if (cam.ang.x > 90.0)
-		cam.ang.x = 90.0;
-
-	using glm::radians;
-	float sz = sinf(radians(cam.ang.z));
-	float sx = sinf(radians(cam.ang.x));
-	float cz = cosf(radians(cam.ang.z));
-
-	vec3 delta(0.0);
-
-	if (flags[cam_move_f])
-		delta += vec3(sz, cz, -sx);
-	if (flags[cam_move_b])
-		delta -= vec3(sz, cz, -sx);
-	if (flags[cam_move_l])
-		delta -= vec3(cz, -sz, 0.0);
-	if (flags[cam_move_r])
-		delta += vec3(cz, -sz, 0.0);
-
-	if (glm::length(delta) > 0.0f)
-		cam.pos += glm::normalize(delta) * speed;
-}
-
-MOUSEMOVE_ROUTINE (camera)
-{
-	camera.ang.x += dy;
-	camera.ang.z += dx;
-}
-
-COMMAND_ROUTINE (cam_move)
-{
-	if (args.empty())
-		return;
-
-	auto& flags = cam_move_flags;
-	bool f = (ev == PRESS);
-
-	switch (tolower(args[0][0])) {
-	case 'f':
-		flags[cam_move_f] = f;
-		break;
-	case 'b':
-		flags[cam_move_b] = f;
-		break;
-	case 'l':
-		flags[cam_move_l] = f;
-		break;
-	case 'r':
-		flags[cam_move_r] = f;
-		break;
-	}
-}
-
-COMMAND_ROUTINE (cam_dump_pos)
-{
-	if (ev != PRESS)
-		return;
-	std::cout << "pos " << camera.pos
-		<< "\nang " << camera.ang << std::endl;
 }

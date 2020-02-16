@@ -1,9 +1,10 @@
-#include "lights.h"
-#include "render/render.h"
-#include "render/framebuffer.h"
-#include "render/vis.h"
-#include "render/resource.h"
+#include "ent/lights.h"
 #include "input/cmds.h"
+#include "render/camera.h"
+#include "render/framebuffer.h"
+#include "render/render.h"
+#include "render/resource.h"
+#include "render/vis.h"
 
 std::vector<e_light*> lights;
 

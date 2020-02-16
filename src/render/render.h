@@ -14,32 +14,6 @@ enum t_render_stage: uint32_t
 	NUM_RENDER_STAGES
 };
 
-struct t_camera
-{
-	vec3 pos;
-	vec3 ang;
-
-	float z_far;
-	float z_near;
-	float fov;
-
-	/*
-	 * Cannot specify the camera without
-	 * the essentials such as fov and z-planes
-	 */
-	t_camera (vec3, vec3) = delete;
-	t_camera (vec3) = delete;
-
-	t_camera ();
-	t_camera (vec3 pos, vec3 ang,
-	          float zf, float zn, float fov);
-
-	/*
-	 * Transform the current projection matrix
-	 * to correspond to the camera
-	 */
-	void apply ();
-};
 
 struct t_sdlcontext
 {
@@ -54,9 +28,6 @@ struct t_sdlcontext
 	int font_w;
 };
 extern t_sdlcontext sdlcont;
-
-extern t_camera camera;
-void upd_camera_pos ();
 
 struct t_visible_set;
 extern t_visible_set visible_set;

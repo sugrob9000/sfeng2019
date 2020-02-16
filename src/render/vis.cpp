@@ -167,27 +167,27 @@ void t_visible_set::fill (const vec3& cam)
 	while (!queues[cur_queue].empty()) {
 		queues[cur_queue ^ 1].clear();
 
-		for (oct_node* node: queues[cur_queue]) {
-			oct_node* c = node->children;
-			if (!c) {
-				leaves.push_back(node);
+		for (oct_node* n: queues[cur_queue]) {
+			if (!n->children) {
+				leaves.push_back(n);
 				continue;
 			}
 			for (int i = 0; i < 8; i++) {
-				glBeginQuery(GL_SAMPLES_PASSED, c[i].query);
-				draw_cuboid(c[i].bounds);
+				glBeginQuery(GL_SAMPLES_PASSED,
+						n->children[i].query);
+				draw_cuboid(n->children[i].bounds);
 				glEndQuery(GL_SAMPLES_PASSED);
 			}
 		}
 
-		for (int i = 0; i < queues[cur_queue].size(); i++) {
-			oct_node* c = queues[cur_queue][i]->children;
+		for (oct_node* n: queues[cur_queue]) {
+			oct_node* c = n->children;
 			if (!c)
 				continue;
 			for (int j = 0; j < 8; j++) {
 				unsigned int pixels;
 				glGetQueryObjectuiv(c[j].query,
-					GL_QUERY_RESULT, &pixels);
+						GL_QUERY_RESULT, &pixels);
 				if (pixels > 0 || c[j].bounds.point_in(cam))
 					queues[cur_queue ^ 1].push_back(&c[j]);
 			}

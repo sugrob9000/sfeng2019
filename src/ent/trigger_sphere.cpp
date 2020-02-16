@@ -1,4 +1,5 @@
-#include "trigger_sphere.h"
+#include "ent/trigger_sphere.h"
+#include "render/camera.h"
 
 SIG_HANDLER (trigger_sphere, set_radius)
 {

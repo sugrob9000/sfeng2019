@@ -5,6 +5,7 @@
 #include <iostream>
 #include <fstream>
 #include <cstdarg>
+#include <vector>
 
 [[noreturn]]
 void fatal (const char* format, ...);
@@ -54,6 +55,13 @@ std::string vec3toa (const vec3& v);
 vec3 min_components (const vec3& a, const vec3& b);
 vec3 max_components (const vec3& a, const vec3& b);
 
+
+/* Clear a std::vector with guaranteed deallocation of data */
+template <class T>
+void vector_clear_dealloc (std::vector<T>& v)
+{
+	std::vector<T>().swap(v);
+}
 
 /*
  * Be able to component-wise "compare" vectors to

@@ -94,7 +94,7 @@ void oct_node::build (t_bound_box b, int level)
 		children[which_octant(bb_mid, tri_mid)].bucket.push_back(d);
 	}
 
-	bucket.clear();
+	vector_clear_dealloc(bucket);
 
 	for (int i = 0; i < 8; i++)
 		children[i].build(octant_bound(bounds, i), level + 1);

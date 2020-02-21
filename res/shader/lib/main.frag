@@ -15,6 +15,7 @@ vec4 surface_color ();
 #define LIGHTING_LSPACE 0u
 #define LIGHTING_SSPACE 1u
 #define SHADE_FINAL 2u
+#define REF_RENDER 3u
 
 layout (location = 0) uniform uint stage;
 
@@ -61,6 +62,12 @@ void main ()
 		fog += linstep(FOG_HEIGHT_MIN, FOG_HEIGHT_MAX, world_pos.z);
 		gl_FragColor.rgb = mix(gl_FragColor.rgb, FOG_COLOR,
 				clamp(fog, 0.0, 1.0));
+
+		break;
+
+	case REF_RENDER:
+
+		gl_FragColor = surface_color();
 
 		break;
 	}

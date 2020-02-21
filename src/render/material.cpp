@@ -1,4 +1,5 @@
 #include "ent/lights.h"
+#include "ent/reflector.h"
 #include "inc_gl.h"
 #include "input/cmds.h"
 #include "material.h"
@@ -118,6 +119,12 @@ void t_material::apply (t_render_stage s) const
 	latest_render_stage = s;
 
 	glUseProgram(program);
+
+	if (glGetUniformLocation(program, "cube_map") != -1) {
+		glActiveTexture(GL_TEXTURE10);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, reflectors[0]->cubemap);
+		glUniform1i(glGetUniformLocation(program, "cube_map"), 10);
+	}
 
 	for (int i = 0; i < bitmap_texture_ids.size(); i++) {
 		glActiveTexture(GL_TEXTURE0 + i + MAT_TEXTURE_SLOT_OFFSET);

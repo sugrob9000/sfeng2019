@@ -15,6 +15,7 @@ out vec2 tex_crd;
 out vec4 screen_crd;
 out vec3 world_normal;
 out vec3 world_pos;
+out vec3 world_center;
 
 attribute vec3 tangent;
 out mat3 TBN;
@@ -22,6 +23,7 @@ out mat3 TBN;
 #define LIGHTING_LSPACE 0u
 #define LIGHTING_SSPACE 1u
 #define SHADE_FINAL 2u
+#define REF_RENDER 3u
 uniform uint stage;
 
 layout (location = 18) uniform mat4 light_view;
@@ -41,6 +43,7 @@ void main ()
 
 	world_normal = (MODEL * normal).xyz;
 	world_pos = (MODEL * pos).xyz;
+	world_center = (MODEL * vec4(vec3(0.0), 1.0)).xyz;
 
 	if (stage == LIGHTING_SSPACE) {
 		vec3 w_tangent = (MODEL * vec4(tangent, 0.0)).xyz;

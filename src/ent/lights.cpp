@@ -240,7 +240,7 @@ void compute_lighting ()
 	}
 }
 
-vec3 ambient = vec3(0.25);
+vec3 ambient = vec3(0.8);
 COMMAND_ROUTINE (light_ambience)
 {
 	if (ev != PRESS)

@@ -10,6 +10,7 @@ enum t_render_stage: uint32_t
 	LIGHTING_LSPACE = 0,
 	LIGHTING_SSPACE = 1,
 	SHADE_FINAL = 2,
+	REF_RENDER,
 
 	NUM_RENDER_STAGES
 };
@@ -70,6 +71,8 @@ void push_matrices ();
 void pop_matrices ();
 
 void init_render ();
+void draw_sky ();
+
 void render_all ();
 void resize_window (int w, int h);
 

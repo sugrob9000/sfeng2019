@@ -1,5 +1,6 @@
 #include "render.h"
 #include "ent/lights.h"
+#include "ent/reflector.h"
 #include "input/cmds.h"
 #include "resource.h"
 #include "vis.h"
@@ -22,6 +23,8 @@ void render_all ()
 
 	camera.apply();
 	visible_set.fill(camera.pos);
+
+	compute_reflections();
 
 	compute_lighting();
 
@@ -376,9 +379,15 @@ void draw_cuboid (const t_bound_box& b)
 
 void debug_texture_onscreen (GLuint texture, float x, float y, float scale)
 {
+	warning(";lfdsknfdknfdsknfsd.mnfsdzmndflm");
+	warning("%x", glGetError());
+
 	glUseProgram(0);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture);
+
+	warning("%x", glGetError());
+
 	glEnable(GL_TEXTURE_2D);
 
 	glPushMatrix();

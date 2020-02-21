@@ -1,4 +1,5 @@
 ENTITY (prop)
 ENTITY (timer)
 ENTITY (light)
+ENTITY (reflector)
 ENTITY (trigger_sphere)

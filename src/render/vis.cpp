@@ -10,7 +10,7 @@ int oct_leaf_capacity = 0;
 int oct_max_depth = 0;
 
 oct_node* root = nullptr;
-std::vector<const oct_node*> all_leaves;
+t_visible_set all_leaves;
 
 /* Occlusion rendering for walking the tree */
 t_fbo occ_fbo;
@@ -109,7 +109,7 @@ void oct_node::build (t_bound_box bounds, int level)
 
 void oct_node::make_leaf ()
 {
-	all_leaves.push_back(this);
+	all_leaves.leaves.push_back(this);
 
 	std::map<t_material*, std::vector<int>> m;
 	for (int d: bucket)
@@ -176,7 +176,7 @@ void oct_node::check_visibility (const vec3& cam, t_visible_set& s) const
 void t_visible_set::fill (const vec3& cam)
 {
 	if (pass_all_nodes) {
-		leaves = all_leaves;
+		leaves = all_leaves.leaves;
 		return;
 	}
 

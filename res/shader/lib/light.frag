@@ -8,7 +8,7 @@ vec3 surface_normal ();
 vec3 saturate_diffuse (float fac, vec3 color) { return color * fac; }
 vec3 saturate_specular (float fac, vec3 color)
 {
-	return color * pow(fac, 5.0);
+	return color * pow(fac, 90.0);
 }
 
 
@@ -34,7 +34,7 @@ const float EXP_FACTOR = 40.0;
 const float NOBLEED_FACTOR = 0.4;
 const float DEPTH_BIAS = 3e-4;
 
-//#define LIGHT_BOX_BLUR
+// #define LIGHT_BOX_BLUR
 
 vec3 get_lighting ()
 {

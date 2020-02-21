@@ -6,10 +6,10 @@ prop
 	name car
 
 prop
-	pos 472 200 152
+	pos 472 200 250
 	ang 0 0 110
 	model muscle_car
-	mat car-ghost
+	mat common/cubemap
 	name ghost
 
 light
@@ -26,4 +26,9 @@ light
 	name sun
 	reach 1500
 	cone 40
-	rgb 0.5 0.55 0.95
+	rgb 1.05 1.45 1.55
+
+reflector
+	pos 514 -31 244
+	resolution 1024
+	name reflector

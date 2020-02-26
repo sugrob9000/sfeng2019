@@ -65,7 +65,7 @@ struct t_visible_set
 	std::vector<const oct_node*> leaves;
 
 	void fill (const vec3& cam);
-	void render (t_render_stage s = SHADE_FINAL) const;
+	void render () const;
 	void render_debug () const;
 };
 

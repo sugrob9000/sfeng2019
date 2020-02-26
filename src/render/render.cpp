@@ -10,6 +10,8 @@
 
 t_sdlcontext sdlcont;
 
+t_render_ctx render_ctx;
+
 t_visible_set visible_set;
 
 void draw_sky ();
@@ -35,8 +37,9 @@ void render_all ()
 	glDepthFunc(GL_LESS);
 	glDepthMask(GL_TRUE);
 
+	render_ctx.stage = SHADE_FINAL;
 	render_sky();
-	visible_set.render(SHADE_FINAL);
+	visible_set.render();
 	visible_set.render_debug();
 
 	// HUD

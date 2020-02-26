@@ -13,7 +13,7 @@ struct t_material
 	std::vector<GLuint> bitmap_texture_ids;
 
 	void load (const std::string& path);
-	void apply (t_render_stage stage = SHADE_FINAL) const;
+	void apply () const;
 };
 
 void init_materials ();

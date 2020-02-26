@@ -46,5 +46,5 @@ void e_trigger_sphere::apply_keyvals (const t_ent_keyvals& kv)
 		radius = DEFAULT_RADIUS; );
 }
 
-void e_trigger_sphere::render (t_render_stage s) const { }
+void e_trigger_sphere::render () const { }
 t_bound_box e_trigger_sphere::get_bbox () const { return { }; }

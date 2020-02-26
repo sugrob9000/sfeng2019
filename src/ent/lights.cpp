@@ -53,7 +53,7 @@ void e_light::apply_keyvals (const t_ent_keyvals& kv)
 		rgb = vec3(0.5); );
 }
 
-void e_light::render (t_render_stage s) const { }
+void e_light::render () const { }
 
 t_bound_box e_light::get_bbox () const { return { }; }
 
@@ -141,14 +141,14 @@ COMMAND_ROUTINE (light_refit_buffers)
 }
 
 
-void light_apply_uniforms (t_render_stage s)
+void light_apply_uniforms ()
 {
-	if (s == LIGHTING_LSPACE)
+	if (render_ctx.stage == LIGHTING_LSPACE)
 		return;
 
 	int shadowmap;
 
-	if (s == LIGHTING_SSPACE) {
+	if (render_ctx.stage == LIGHTING_SSPACE) {
 
 		glActiveTexture(GL_TEXTURE0 + TEXTURE_SLOT_DEPTH_MAP);
 		glBindTexture(GL_TEXTURE_2D, lspace_fbo.color[0]);
@@ -189,7 +189,7 @@ void fill_depth_map (const e_light* l)
 
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 	l->view();
-	l->vis.render(LIGHTING_LSPACE);
+	l->vis.render();
 
 	glGetFloatv(GL_MODELVIEW_MATRIX,
 		glm::value_ptr(e_light::uniform_view));
@@ -223,7 +223,7 @@ void compose_add_depth_map ()
 
 	glMatrixMode(MTX_MODEL);
 
-	visible_set.render(LIGHTING_SSPACE);
+	visible_set.render();
 }
 
 void compute_lighting ()
@@ -236,7 +236,10 @@ void compute_lighting ()
 	glDisable(GL_BLEND);
 
 	for (const e_light* l: lights) {
+		render_ctx.stage = LIGHTING_LSPACE;
 		fill_depth_map(l);
+
+		render_ctx.stage = LIGHTING_SSPACE;
 		compose_add_depth_map();
 	}
 }

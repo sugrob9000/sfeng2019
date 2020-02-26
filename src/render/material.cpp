@@ -110,12 +110,12 @@ void material_barrier ()
 	latest_material = nullptr;
 }
 
-void t_material::apply (t_render_stage s) const
+void t_material::apply () const
 {
-	if (latest_material == this && s == latest_render_stage)
+	if (latest_material == this && render_ctx.stage == latest_render_stage)
 		return;
 	latest_material = this;
-	latest_render_stage = s;
+	latest_render_stage = render_ctx.stage;
 
 	glUseProgram(program);
 
@@ -124,9 +124,9 @@ void t_material::apply (t_render_stage s) const
 		glBindTexture(GL_TEXTURE_2D, bitmap_texture_ids[i]);
 	}
 
-	glUniform1ui(UNIFORM_LOC_RENDER_STAGE, s);
+	glUniform1ui(UNIFORM_LOC_RENDER_STAGE, render_ctx.stage);
 
-	light_apply_uniforms(s);
+	light_apply_uniforms();
 }
 
 GLenum get_surface_gl_format (SDL_Surface* s)

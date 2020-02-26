@@ -239,7 +239,7 @@ void vis_requery_entity (e_base* e)
 }
 
 
-void t_visible_set::render (t_render_stage s) const
+void t_visible_set::render () const
 {
 	/*
 	 * When we walk the entities in the leaves like this, there
@@ -259,11 +259,11 @@ void t_visible_set::render (t_render_stage s) const
 			if (e->render_last_guard_key == guard_key)
 				continue;
 			e->render_last_guard_key = guard_key;
-			e->render(s);
+			e->render();
 		}
 		// draw world
 		for (const auto& gr: l->mat_buckets) {
-			gr.mat->apply(s);
+			gr.mat->apply();
 			glCallList(gr.display_list);
 		}
 	}

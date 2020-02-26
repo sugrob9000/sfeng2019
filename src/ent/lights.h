@@ -36,7 +36,7 @@ extern std::vector<e_light*> lights;
 constexpr float LIGHT_Z_NEAR = 10.0;
 extern vec3 ambient;
 
-void light_apply_uniforms (t_render_stage s);
+void light_apply_uniforms ();
 
 void init_lighting ();
 void compute_lighting ();

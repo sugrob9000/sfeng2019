@@ -21,14 +21,14 @@ void e_prop::apply_keyvals (const t_ent_keyvals& kv)
 		material = mat_none; );
 }
 
-void e_prop::render (t_render_stage s) const
+void e_prop::render () const
 {
 	glPushMatrix();
 
 	translate_gl_matrix(pos);
 	rotate_gl_matrix(ang);
 
-	material->apply(s);
+	material->apply();
 	model->render();
 
 	glPopMatrix();

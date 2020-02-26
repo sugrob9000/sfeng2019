@@ -73,7 +73,7 @@ class e_base
 	void on_event (const std::string& event) const;
 	void set_name (const std::string& name);
 
-	virtual void render (t_render_stage s = SHADE_FINAL) const = 0;
+	virtual void render () const = 0;
 
 	/*
 	 * The entity promises that it is fully inside the box returned
@@ -101,7 +101,7 @@ class e_base
 	void think ();                       \
 	const t_sigmap& get_sigmap () const  \
 		{ return sigmap<e_##name>; } \
-	void render (t_render_stage) const;  \
+	void render () const;  \
 	t_bound_box get_bbox () const;       \
 	void apply_keyvals (const t_ent_keyvals& kv);
 

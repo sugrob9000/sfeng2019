@@ -4,15 +4,16 @@
 
 void t_camera::apply ()
 {
-	glMatrixMode(MTX_VIEWPROJ);
-	glLoadIdentity();
-	gluPerspective(fov, aspect, z_near, z_far);
-	glRotatef(-90.0, 1.0, 0.0, 0.0);
-	rotate_gl_matrix(ang);
-	translate_gl_matrix(-pos);
+	using namespace glm;
 
-	glMatrixMode(MTX_MODEL);
-	glLoadIdentity();
+	render_ctx.proj = perspective(radians(fov), aspect, z_near, z_far);
+
+	render_ctx.view = rotate(mat4(1.0f), radians(-90.0f),
+			vec3(1.0, 0.0, 0.0));
+	rotate_xyz(render_ctx.view, radians(ang));
+	render_ctx.view = translate(render_ctx.view, -pos);
+
+	render_ctx.model = mat4(1.0);
 }
 
 MOUSEMOVE_ROUTINE (camera)

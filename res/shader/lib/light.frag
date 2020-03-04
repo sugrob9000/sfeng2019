@@ -34,6 +34,7 @@ const float EXP_FACTOR = 40.0;
 const float NOBLEED_FACTOR = 0.4;
 const float DEPTH_BIAS = 3e-4;
 
+
 //#define LIGHT_BOX_BLUR
 
 vec3 get_lighting ()

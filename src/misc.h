@@ -63,6 +63,10 @@ void vector_clear_dealloc (std::vector<T>& v)
 	std::vector<T>().swap(v);
 }
 
+
+void rotate_xyz (mat4& m, const vec3& v);
+
+
 /*
  * Be able to component-wise "compare" vectors to
  * create maps of them, etc. Not very meaningful otheriwse

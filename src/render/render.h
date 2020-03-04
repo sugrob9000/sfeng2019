@@ -17,13 +17,13 @@ enum t_render_stage: uint32_t
 struct t_render_ctx
 {
 	t_render_stage stage;
-	
+
 	mat4 proj;
 	mat4 view;
 	mat4 model;
 };
-
 extern t_render_ctx render_ctx;
+
 
 struct t_sdlcontext
 {

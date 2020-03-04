@@ -27,8 +27,11 @@ uniform uint stage;
 layout (location = 18) uniform mat4 light_view;
 out vec4 lspace_pos;
 
-#define MODEL gl_ModelViewMatrix
-#define VIEWPROJ gl_ProjectionMatrix
+
+layout (location = 100) uniform mat4 proj;
+layout (location = 116) uniform mat4 view;
+layout (location = 132) uniform mat4 model;
+
 
 void main ()
 {
@@ -36,16 +39,16 @@ void main ()
 	vec4 normal = vec4(vertex_norm(), 0.0);
 	tex_crd = vertex_texcoord();
 
-	gl_Position = VIEWPROJ * MODEL * pos;
+	gl_Position = proj * view * model * pos;
 	screen_crd = gl_Position;
 
-	world_normal = (MODEL * normal).xyz;
-	world_pos = (MODEL * pos).xyz;
+	world_normal = (model * normal).xyz;
+	world_pos = (model * pos).xyz;
 
 	if (stage == LIGHTING_SSPACE) {
-		vec3 w_tangent = (MODEL * vec4(tangent, 0.0)).xyz;
+		vec3 w_tangent = (model * vec4(tangent, 0.0)).xyz;
 		vec3 w_bitangent = cross(world_normal, w_tangent);
 		TBN = mat3(w_tangent, w_bitangent, world_normal);
-		lspace_pos = light_view * MODEL * pos;
+		lspace_pos = light_view * model * pos;
 	}
 }

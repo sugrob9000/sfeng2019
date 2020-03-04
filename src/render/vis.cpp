@@ -21,7 +21,7 @@ GLuint occ_shader_prog;
 GLuint occ_planes_display_list;
 
 /* Effectively disable visibility checking */
-bool pass_all_nodes;
+bool pass_all_nodes = true;
 COMMAND_SET_BOOL (vis_disable, pass_all_nodes);
 
 void init_vis ()

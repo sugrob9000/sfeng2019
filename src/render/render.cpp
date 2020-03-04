@@ -14,7 +14,6 @@ t_render_ctx render_ctx;
 
 t_visible_set visible_set;
 
-void draw_sky ();
 void render_all ()
 {
 	namespace cr = std::chrono;
@@ -22,7 +21,7 @@ void render_all ()
 	sc::time_point frame_start = sc::now();
 	static float last_frame_time = 0.0;
 
-	material_barrier();
+	glClear(GL_DEPTH_BUFFER_BIT);
 
 	camera.apply();
 	visible_set.fill(camera.pos);

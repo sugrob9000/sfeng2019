@@ -81,3 +81,15 @@ vec3 max_components (const vec3& a, const vec3& b)
 	return vec3(max(a.x, b.x), max(a.y, b.y), max(a.z, b.z));
 }
 
+
+static vec3 euler_dir[3] =
+	{ { 1.0, 0.0, 0.0 },
+	  { 0.0, 1.0, 0.0 },
+	  { 0.0, 0.0, 1.0 } };
+
+void rotate_xyz (mat4& m, const vec3& v)
+{
+	for (int i = 0; i < 3; i++)
+		m = glm::rotate(m, v[i], euler_dir[i]);
+}
+

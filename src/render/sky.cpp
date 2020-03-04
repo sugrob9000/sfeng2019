@@ -17,7 +17,6 @@ void render_sky ()
 {
 	material_barrier();
 	glUseProgram(program);
-	glClear(GL_DEPTH_BUFFER_BIT);
 
 	glDisable(GL_DEPTH_TEST);
 	glFrontFace(GL_CW);

@@ -180,6 +180,7 @@ void fill_depth_map (const e_light* l)
 	lspace_fbo_ms.apply();
 	glDepthMask(GL_TRUE);
 	glDepthFunc(GL_LESS);
+	glEnable(GL_DEPTH_TEST);
 
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 
@@ -221,8 +222,6 @@ void compose_add_depth_map ()
 	glClearColor(ambient.x, ambient.y, ambient.z, 1.0);
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-	glMatrixMode(MTX_MODEL);
-
 	visible_set.render();
 }
 
@@ -238,7 +237,6 @@ void compute_lighting ()
 	for (const e_light* l: lights) {
 		render_ctx.stage = LIGHTING_LSPACE;
 		fill_depth_map(l);
-
 		render_ctx.stage = LIGHTING_SSPACE;
 		compose_add_depth_map();
 	}

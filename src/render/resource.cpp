@@ -57,7 +57,7 @@ GLuint get_shader (const std::string& path, GLenum type)
 		return ret;
 	}
 
-	ret = compile_glsl(path, type);
+	ret = compile_glsl(PATH_SHADER + path, type);
 
 	if (!ret)
 		fatal("Cannot load shader %s", path.c_str());
@@ -66,12 +66,12 @@ GLuint get_shader (const std::string& path, GLenum type)
 
 GLuint get_vert_shader (const std::string& name)
 {
-	return get_shader(PATH_SHADER + name + ".vert", GL_VERTEX_SHADER);
+	return get_shader(name + ".vert", GL_VERTEX_SHADER);
 }
 
 GLuint get_frag_shader (const std::string& name)
 {
-	return get_shader(PATH_SHADER + name + ".frag", GL_FRAGMENT_SHADER);
+	return get_shader(name + ".frag", GL_FRAGMENT_SHADER);
 }
 
 t_material* get_material (std::string path)

@@ -124,15 +124,7 @@ void t_material::apply () const
 		glBindTexture(GL_TEXTURE_2D, bitmap_texture_ids[i]);
 	}
 
-	auto submit_matrix = [] (GLuint loc, const mat4& m)
-	-> void {
-		glUniformMatrix4fv(loc, 1, false, glm::value_ptr(m));
-	};
-
-	submit_matrix(UNIFORM_LOC_PROJ, render_ctx.proj);
-	submit_matrix(UNIFORM_LOC_VIEW, render_ctx.view);
-	submit_matrix(UNIFORM_LOC_MODEL, render_ctx.model);
-
+	render_ctx.submit_matrices();
 	glUniform1ui(UNIFORM_LOC_RENDER_STAGE, render_ctx.stage);
 
 	light_apply_uniforms();

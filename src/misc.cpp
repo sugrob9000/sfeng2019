@@ -87,9 +87,11 @@ static vec3 euler_dir[3] =
 	  { 0.0, 1.0, 0.0 },
 	  { 0.0, 0.0, 1.0 } };
 
-void rotate_xyz (mat4& m, const vec3& v)
+mat4 rotate_xyz (const vec3& angles)
 {
+	mat4 r(1.0);
 	for (int i = 0; i < 3; i++)
-		m = glm::rotate(m, v[i], euler_dir[i]);
+		r = glm::rotate(r, angles[i], euler_dir[i]);
+	return r;
 }
 

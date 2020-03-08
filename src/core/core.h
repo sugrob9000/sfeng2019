@@ -47,6 +47,12 @@ struct t_bound_box
 	float volume () const;
 
 	bool intersects (t_bound_box b) const;
+
+	inline const float* data () const { return glm::value_ptr(start); }
 };
+static_assert(
+	offsetof(t_bound_box, end) - offsetof(t_bound_box, start)
+		== sizeof(vec3),
+	"Alignment for t_bound_box is broken");
 
 #endif // CORE_H

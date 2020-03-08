@@ -31,7 +31,6 @@ void e_light::moved ()
 	e_base::moved();
 
 	// update visible set
-	reset_matrices();
 	view();
 	vis.fill(pos);
 }
@@ -59,10 +58,13 @@ t_bound_box e_light::get_bbox () const { return { }; }
 
 void e_light::view () const
 {
-	gluPerspective(cone_angle * 2.0, 1.0, LIGHT_Z_NEAR, reach);
-	glRotatef(-90.0, 1.0, 0.0, 0.0);
-	rotate_gl_matrix(ang);
-	translate_gl_matrix(-pos);
+	using namespace glm;
+
+	render_ctx.proj = perspective(radians(2.0f * cone_angle),
+			1.0f, LIGHT_Z_NEAR, reach);
+	render_ctx.view = rotate_xyz(radians(ang - vec3(90.0, 0.0, 0.0)));
+	render_ctx.view = translate(render_ctx.view, -pos);
+	render_ctx.model = mat4(1.0);
 }
 
 
@@ -183,19 +185,23 @@ void fill_depth_map (const e_light* l)
 	glEnable(GL_DEPTH_TEST);
 
 	glClearColor(1.0, 1.0, 1.0, 1.0);
-
-	push_reset_matrices();
-
-	glMatrixMode(GL_MODELVIEW);
-
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
+	mat4 restore_proj = render_ctx.proj;
+	mat4 restore_view = render_ctx.view;
+	mat4 restore_model = render_ctx.model;
+
 	l->view();
 	l->vis.render();
 
-	glGetFloatv(GL_MODELVIEW_MATRIX,
-		glm::value_ptr(e_light::uniform_view));
+	e_light::uniform_view = render_ctx.proj *
+			render_ctx.view * render_ctx.model;
 	e_light::uniform_pos = l->pos;
 	e_light::uniform_rgb = l->rgb;
+
+	render_ctx.proj = restore_proj;
+	render_ctx.view = restore_view;
+	render_ctx.model = restore_model;
 
 	// make the result of MSAA rendering available
 	// for 3D sampling
@@ -205,7 +211,6 @@ void fill_depth_map (const e_light* l)
 	                  0, 0, lspace_resolution, lspace_resolution,
 	                  GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
-	pop_matrices();
 }
 
 void compose_add_depth_map ()

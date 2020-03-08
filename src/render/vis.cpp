@@ -17,22 +17,27 @@ t_fbo occ_fbo;
 /* Is screenspace, but does not need full resolution */
 constexpr int occ_fbo_size = 256;
 
-GLuint occ_shader_prog;
-GLuint occ_planes_display_list;
+
+static GLuint occ_planes_prog;
+static GLuint occ_planes_dlist;
+static GLuint occ_cube_prog;
+
 
 /* Effectively disable visibility checking */
-bool pass_all_nodes = true;
+bool pass_all_nodes = false;
 COMMAND_SET_BOOL (vis_disable, pass_all_nodes);
 
 void init_vis ()
 {
-	// setup the framebuffer in which to test for occlusion
-	// the shader for occlusion rendering just does nothing
-	// but write to the z-buffer
-	occ_shader_prog = glCreateProgram();
-	glAttachShader(occ_shader_prog, get_vert_shader("lib/occlude"));
-	glAttachShader(occ_shader_prog, get_frag_shader("common/null"));
-	glLinkProgram(occ_shader_prog);
+	occ_planes_prog = glCreateProgram();
+	glAttachShader(occ_planes_prog, get_vert_shader("lib/vis_plane"));
+	glAttachShader(occ_planes_prog, get_frag_shader("common/null"));
+	glLinkProgram(occ_planes_prog);
+
+	occ_cube_prog = glCreateProgram();
+	glAttachShader(occ_cube_prog, get_vert_shader("lib/vis_cuboid"));
+	glAttachShader(occ_cube_prog, get_frag_shader("common/null"));
+	glLinkProgram(occ_cube_prog);
 
 	occ_fbo.make()
 		.attach_depth(make_rbo(
@@ -143,21 +148,25 @@ void t_visible_set::fill (const vec3& cam)
 		leaves = all_leaves;
 		return;
 	}
+	leaves.clear();
 
-	// setup occlusion rendering
 	occ_fbo.apply();
-	glUseProgram(occ_shader_prog);
-	glEnable(GL_DEPTH_TEST);
 	glClear(GL_DEPTH_BUFFER_BIT);
 
-	// fill z-buffer with data from occlusion planes
+	// draw occlusion planes
+	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	glDisable(GL_CULL_FACE);
-	glCallList(occ_planes_display_list);
 
-	// walk the tree nodes which pass the z-test (and are on screen)
+	glUseProgram(occ_planes_prog);
+	render_ctx.submit_viewproj();
+	glCallList(occ_planes_dlist);
+
+	// attempt to draw the octree's cuboids
+	glUseProgram(occ_cube_prog);
+	render_ctx.submit_viewproj();
+
 	glDepthMask(GL_FALSE);
-	leaves.clear();
 
 	// BFS, but exploit the fact that a tree is bipartite,
 	// parts being the even and odd depths
@@ -175,7 +184,11 @@ void t_visible_set::fill (const vec3& cam)
 			for (int i = 0; i < 8; i++) {
 				glBeginQuery(GL_SAMPLES_PASSED,
 						n->children[i].query);
-				draw_cuboid(n->children[i].bounds);
+
+				glUniform3fv(UNIFORM_LOC_VIS_CUBE, 2,
+					n->children[i].bounds.data());
+				glCallList(cuboid_dlist_outwards);
+
 				glEndQuery(GL_SAMPLES_PASSED);
 			}
 		}
@@ -305,8 +318,8 @@ void vis_initialize_world (const std::string& path)
 	root = new oct_node;
 
 	// Prepare the occlusion planes right away
-	occ_planes_display_list = glGenLists(1);
-	glNewList(occ_planes_display_list, GL_COMPILE);
+	occ_planes_dlist = glGenLists(1);
+	glNewList(occ_planes_dlist, GL_COMPILE);
 	glBegin(GL_TRIANGLES);
 	int n = world.triangles.size();
 
@@ -347,45 +360,5 @@ COMMAND_SET_BOOL (vis_leaves_nodepth, debug_draw_leaves_nodepth);
 
 void t_visible_set::render_debug () const
 {
-	glUseProgram(0);
-
-	if (debug_draw_wireframe) {
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		glDisable(GL_CULL_FACE);
-		glDisable(GL_DEPTH_TEST);
-		glColor4f(0.5, 0.0, 0.0, 0.5);
-		for (const oct_node* node: leaves) {
-			for (const auto& gr: node->mat_buckets)
-				glCallList(gr.display_list);
-		}
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_CULL_FACE);
-	}
-
-	if (debug_draw_occ_planes) {
-		glDisable(GL_CULL_FACE);
-		glDisable(GL_DEPTH_TEST);
-		glColor4f(0.8, 0.2, 0.2, 0.5);
-		glCallList(occ_planes_display_list);
-		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_CULL_FACE);
-	}
-
-	if (debug_draw_leaves) {
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-		if (debug_draw_leaves_nodepth)
-			glDisable(GL_DEPTH_TEST);
-
-		glDisable(GL_CULL_FACE);
-		glLineWidth(1.5);
-		glColor4f(0.0, 0.0, 0.0, 0.3);
-		for (const oct_node* leaf: leaves)
-			draw_cuboid(leaf->bounds);
-		glLineWidth(1.0);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_CULL_FACE);
-	}
+	// TODO
 }

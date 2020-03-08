@@ -64,7 +64,7 @@ void vector_clear_dealloc (std::vector<T>& v)
 }
 
 
-void rotate_xyz (mat4& m, const vec3& v);
+mat4 rotate_xyz (const vec3& angles);
 
 
 /*

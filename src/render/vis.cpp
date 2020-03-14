@@ -1,8 +1,9 @@
-#include "vis.h"
-#include "framebuffer.h"
-#include "resource.h"
 #include "core/core.h"
 #include "input/cmds.h"
+#include "render/framebuffer.h"
+#include "render/material.h"
+#include "render/resource.h"
+#include "render/vis.h"
 #include <algorithm>
 #include <cstring>
 
@@ -29,16 +30,12 @@ COMMAND_SET_BOOL (vis_disable, pass_all_nodes);
 
 void init_vis ()
 {
-	occ_planes_prog = glCreateProgram();
-	glAttachShader(occ_planes_prog, get_vert_shader("lib/vis_plane"));
-	glAttachShader(occ_planes_prog, get_frag_shader("common/null"));
-	glLinkProgram(occ_planes_prog);
-
-	occ_cube_prog = glCreateProgram();
-	glAttachShader(occ_cube_prog, get_vert_shader("lib/vis_cuboid"));
-	glAttachShader(occ_cube_prog, get_frag_shader("common/null"));
-	glLinkProgram(occ_cube_prog);
-
+	occ_planes_prog = make_glsl_program(
+			{ get_vert_shader("lib/vis_plane"),
+			  get_frag_shader("common/null") });
+	occ_cube_prog = make_glsl_program(
+			{ get_vert_shader("lib/vis_cuboid"),
+			  get_frag_shader("common/null") });
 	occ_fbo.make()
 		.attach_depth(make_rbo(
 			occ_fbo_size, occ_fbo_size, GL_DEPTH_COMPONENT))

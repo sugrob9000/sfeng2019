@@ -1,16 +1,16 @@
 #include "render/sky.h"
 #include "render/render.h"
 #include "render/resource.h"
+#include "render/material.h"
 #include "camera.h"
 
 static GLuint program;
 
 void init_sky ()
 {
-	program = glCreateProgram();
-	glAttachShader(program, get_vert_shader("lib/sky"));
-	glAttachShader(program, get_frag_shader("lib/sky"));
-	glLinkProgram(program);
+	program = make_glsl_program(
+		{ get_vert_shader("lib/sky"),
+		  get_frag_shader("lib/sky") });
 }
 
 void render_sky ()

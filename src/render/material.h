@@ -18,7 +18,6 @@ struct t_material
 
 void init_materials ();
 
-GLuint compile_glsl (std::string path, GLenum shadertype);
 GLuint load_texture (std::string path);
 
 GLenum get_surface_gl_format (SDL_Surface* s);
@@ -39,5 +38,9 @@ void material_barrier ();
  * (lighting buffers etc.); after Nth, the slots are used for user bitmaps
  */
 constexpr int MAT_TEXTURE_SLOT_OFFSET = 2;
+
+
+GLuint make_glsl_program (const std::vector<GLuint>& shaders);
+GLuint compile_glsl (std::string path, GLenum shadertype);
 
 #endif // MATERIAL_H

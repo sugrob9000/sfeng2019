@@ -210,11 +210,9 @@ void init_text ()
 	TTF_GlyphMetrics(sdlcont.font, '~', nullptr, nullptr,
 			nullptr, nullptr, &sdlcont.font_w);
 
-	text_program = glCreateProgram();
-	glAttachShader(text_program, get_vert_shader("lib/text"));
-	glAttachShader(text_program, get_frag_shader("lib/text"));
-	glLinkProgram(text_program);
-
+	text_program = make_glsl_program(
+			{ get_vert_shader("lib/text"),
+			  get_frag_shader("lib/text") });
 	text_prg_glyph_loc = glGetUniformLocation(text_program, "glyphs");
 
 	char all_chars[257];

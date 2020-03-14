@@ -36,7 +36,7 @@ void t_material::load (const std::string& path)
 		GLuint texid;
 	};
 	std::vector<bitmap_desc> bitmaps;
-	std::vector<GLuint> user_shaders;
+	std::vector<GLuint> shaders;
 
 	while (true) {
 		f >> key >> value;
@@ -45,10 +45,10 @@ void t_material::load (const std::string& path)
 			break;
 
 		if (key == "FRAG") {
-			user_shaders.push_back(get_frag_shader(value));
+			shaders.push_back(get_frag_shader(value));
 			continue;
 		} else if (key == "VERT") {
-			user_shaders.push_back(get_vert_shader(value));
+			shaders.push_back(get_vert_shader(value));
 			continue;
 		}
 
@@ -56,31 +56,12 @@ void t_material::load (const std::string& path)
 		bitmaps.push_back({ key, get_texture(value) });
 	}
 
-	program = glCreateProgram();
-	glAttachShader(program, get_frag_shader("lib/main"));
-	glAttachShader(program, get_frag_shader("lib/light"));
-	glAttachShader(program, get_vert_shader("lib/main"));
-
-	for (GLuint s: user_shaders)
-		glAttachShader(program, s);
-
-	glLinkProgram(program);
-
-	int link_success = 0;
-	glGetProgramiv(program, GL_LINK_STATUS, &link_success);
-	if (!link_success) {
-		int log_length = 0;
-		glGetProgramiv(program, GL_INFO_LOG_LENGTH, &log_length);
-
-		char log[log_length+1];
-		log[log_length] = 0;
-
-		glGetProgramInfoLog(program, log_length, &log_length, log);
-		fatal("OpenGL shader program for material %s "
-				"failed to link:\n%s", path.c_str(), log);
-	}
-
+	shaders.push_back(get_frag_shader("lib/main"));
+	shaders.push_back(get_frag_shader("lib/light"));
+	shaders.push_back(get_vert_shader("lib/main"));
+	program = make_glsl_program(shaders);
 	glUseProgram(program);
+
 	int i = MAT_TEXTURE_SLOT_OFFSET;
 	for (const auto& d: bitmaps) {
 		int location = glGetUniformLocation(program,
@@ -185,6 +166,30 @@ GLuint load_texture (std::string path)
 }
 
 
+GLuint make_glsl_program (const std::vector<GLuint>& shaders)
+{
+	GLuint r = glCreateProgram();
+
+	for (GLuint s: shaders)
+		glAttachShader(r, s);
+
+	glLinkProgram(r);
+
+	int success = 0;
+	glGetProgramiv(r, GL_LINK_STATUS, &success);
+	if (success)
+		return r;
+
+	int log_length = 0;
+	glGetProgramiv(r, GL_INFO_LOG_LENGTH, &log_length);
+
+	char log[log_length+1];
+	log[log_length] = '\0';
+
+	glGetProgramInfoLog(r, log_length, &log_length, log);
+	fatal("OpenGL program %i failed to link. Log:\n%s\n", r, log);
+}
+
 GLuint compile_glsl (std::string path, GLenum type)
 {
 	std::ifstream f(path);
@@ -219,7 +224,7 @@ GLuint compile_glsl (std::string path, GLenum type)
 	int log_length = 0;
 	glGetShaderiv(id, GL_INFO_LOG_LENGTH, &log_length);
 	char log[log_length+1];
-	log[log_length] = 0;
+	log[log_length] = '\0';
 	glGetShaderInfoLog(id, log_length, 0, log);
 
 	warning("Failed to compile shader %s:\n%s\n",

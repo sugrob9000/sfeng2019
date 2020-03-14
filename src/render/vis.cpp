@@ -7,35 +7,35 @@
 #include <algorithm>
 #include <cstring>
 
-int oct_leaf_capacity = 0;
-int oct_max_depth = 0;
-
 oct_node* root = nullptr;
 std::vector<const oct_node*> all_leaves;
 
-/* Occlusion rendering for walking the tree */
-t_fbo occ_fbo;
-/* Is screenspace, but does not need full resolution */
 constexpr int occ_fbo_size = 256;
-
+t_fbo occ_fbo;
 
 static GLuint occ_planes_prog;
 static GLuint occ_planes_dlist;
 static GLuint occ_cube_prog;
 
 
-/* Effectively disable visibility checking */
+/* Disabling vis */
 bool pass_all_nodes = false;
 COMMAND_SET_BOOL (vis_disable, pass_all_nodes);
+
+int oct_leaf_capacity = 0;
+int oct_max_depth = 0;
+
 
 void init_vis ()
 {
 	occ_planes_prog = make_glsl_program(
-			{ get_vert_shader("lib/vis_plane"),
-			  get_frag_shader("common/null") });
+		{ get_vert_shader("lib/vis_plane"),
+		  get_frag_shader("common/null") });
+
 	occ_cube_prog = make_glsl_program(
-			{ get_vert_shader("lib/vis_cuboid"),
-			  get_frag_shader("common/null") });
+		{ get_vert_shader("lib/vis_cuboid"),
+		  get_frag_shader("common/null") });
+
 	occ_fbo.make()
 		.attach_depth(make_rbo(
 			occ_fbo_size, occ_fbo_size, GL_DEPTH_COMPONENT))
@@ -43,8 +43,8 @@ void init_vis ()
 }
 
 
-t_bound_box world_bounds_override;
-t_model_mem world;
+static t_bound_box world_bounds_override;
+static t_model_mem world;
 
 /*
  * The ID of the octant in which point is
@@ -72,7 +72,7 @@ t_bound_box octant_bound (t_bound_box parent, uint8_t octant_id)
 
 void oct_node::build (t_bound_box b, int level)
 {
-	// bounds must include the triangles entirely
+	// ensure that bounds include the triangles entirely
 	for (int d: bucket) {
 		for (int i = 0; i < 3; i++)
 			b.update(world.get_vertex(d, i).pos);
@@ -214,14 +214,15 @@ void t_visible_set::fill (const vec3& cam)
 
 void oct_node::requery_entity (e_base* e, const t_bound_box& b)
 {
-	auto p = std::find(entities_inside.begin(), entities_inside.end(), e);
-	uint8_t before = (p != entities_inside.end());
+	auto iter = std::find(entities_inside.begin(),
+			entities_inside.end(), e);
+
+	uint8_t before = (iter != entities_inside.end());
 	uint8_t now = b.intersects(bounds);
 
 	switch (now | (before << 1)) {
 	case 0b00:
-		// was not in before, did not enter.
-		// absolutely nothing to do
+		// stays outside; nothing to do
 		return;
 	case 0b01:
 		// entered
@@ -229,14 +230,14 @@ void oct_node::requery_entity (e_base* e, const t_bound_box& b)
 		break;
 	case 0b10:
 		// exited
-		*p = entities_inside.back();
+		*iter = entities_inside.back();
 		entities_inside.pop_back();
 		break;
 	case 0b11:
-		// was in before and did not exit,
-		// but might have exited or entered a child
+		// stays inside; still have to check children
 		break;
 	}
+
 	if (children) {
 		for (int i = 0; i < 8; i++)
 			children[i].requery_entity(e, b);

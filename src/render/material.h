@@ -19,7 +19,6 @@ struct t_material
 void init_materials ();
 
 GLuint load_texture (std::string path);
-
 GLenum get_surface_gl_format (SDL_Surface* s);
 
 /* Draws nothing, for various edge cases */

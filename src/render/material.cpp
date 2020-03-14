@@ -111,23 +111,34 @@ void t_material::apply () const
 	light_apply_uniforms();
 }
 
+
+static std::map<uint16_t, GLenum> sdl_masks_to_gl_fmt =
+	{ { 0b0001'0010'0100'0000, GL_BGR },
+	  { 0b0100'0010'0001'0000, GL_RGB },
+	  { 0b0001'0010'0100'1000, GL_BGRA },
+	  { 0b0100'0010'0001'1000, GL_RGBA },
+	  { 0b0000'0000'0001'0000, GL_RED },
+	  { 0b0000'0010'0001'0000, GL_RG } };
+
 GLenum get_surface_gl_format (SDL_Surface* s)
 {
-	// checking where alpha and red channels are
-	// should be enough to understand the format
-	switch (((uint64_t) s->format->Amask << 32)
-		| (uint64_t) s->format->Rmask) {
-	case 0x00FF0000:
-		return GL_BGR;
-	case 0x000000FF:
-		return GL_RGB;
-	case 0xFF00000000FF0000:
-		return GL_BGRA;
-	case 0xFF000000000000FF:
-		return GL_RGBA;
-	default:
+	auto compress = [] (uint32_t i) -> uint8_t {
+		// 0x00FF00FF -> 0b0101 etc.
+		i &= 0x08040201;
+		i = i | (i >> 8) | (i >> 16) | (i >> 24);
+		return i & 255;
+	};
+
+	uint16_t i = compress(s->format->Amask)
+	          | (compress(s->format->Rmask) << 4)
+	          | (compress(s->format->Gmask) << 8)
+	          | (compress(s->format->Bmask) << 12);
+
+	auto iter = sdl_masks_to_gl_fmt.find(i);
+	if (iter == sdl_masks_to_gl_fmt.end())
 		return -1;
-	}
+
+	return iter->second;
 }
 
 GLuint load_texture (std::string path)
@@ -151,13 +162,12 @@ GLuint load_texture (std::string path)
 
 	glHint(GL_TEXTURE_COMPRESSION_HINT, GL_NICEST);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-			GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-			GL_LINEAR_MIPMAP_LINEAR);
+	constexpr GLenum tgt = GL_TEXTURE_2D;
+	glTexParameteri(tgt, GL_GENERATE_MIPMAP, GL_TRUE);
+	glTexParameteri(tgt, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(tgt, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surf->w, surf->h,
+	glTexImage2D(tgt, 0, GL_RGBA, surf->w, surf->h,
 			0, format, GL_UNSIGNED_BYTE, surf->pixels);
 
 	SDL_FreeSurface(surf);

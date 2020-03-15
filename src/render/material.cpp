@@ -57,10 +57,14 @@ void t_material::load (const std::string& path)
 	}
 
 	shaders.push_back(get_frag_shader("lib/main"));
-	shaders.push_back(get_frag_shader("lib/light"));
 	shaders.push_back(get_vert_shader("lib/main"));
 	program = make_glsl_program(shaders);
 	glUseProgram(program);
+
+	glUniform1i(UNIFORM_LOC_DEPTH_MAP, TEXTURE_SLOT_DEPTH_MAP);
+	glUniform1i(UNIFORM_LOC_PREV_SHADOWMAP, TEXTURE_SLOT_PREV_SHADOWMAP);
+
+	glBindAttribLocation(program, ATTRIB_LOC_TANGENT, "tangent");
 
 	int i = MAT_TEXTURE_SLOT_OFFSET;
 	for (const auto& d: bitmaps) {
@@ -76,11 +80,6 @@ void t_material::load (const std::string& path)
 		glUniform1i(location, i++);
 		bitmap_texture_ids.push_back(d.texid);
 	}
-
-	glUniform1i(UNIFORM_LOC_DEPTH_MAP, TEXTURE_SLOT_DEPTH_MAP);
-	glUniform1i(UNIFORM_LOC_PREV_SHADOWMAP, TEXTURE_SLOT_PREV_SHADOWMAP);
-
-	glBindAttribLocation(program, ATTRIB_LOC_TANGENT, "tangent");
 }
 
 /* Material application is idempotent, so we can avoid redundancy */

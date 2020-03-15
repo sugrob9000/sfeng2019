@@ -1,6 +1,5 @@
 #include "ent/lights.h"
 #include "input/cmds.h"
-#include "render/camera.h"
 #include "render/render.h"
 #include "render/resource.h"
 #include "render/sky.h"
@@ -9,9 +8,7 @@
 #include <chrono>
 
 t_sdlcontext sdlcont;
-
 t_render_ctx render_ctx;
-
 t_visible_set visible_set;
 
 void render_all ()
@@ -19,7 +16,7 @@ void render_all ()
 	namespace cr = std::chrono;
 	using sc = cr::steady_clock;
 	sc::time_point frame_start = sc::now();
-	static float last_frame_time = 0.0;
+	static float last_frame_time = -1.0;
 
 	camera.apply();
 	visible_set.fill(camera.pos);
@@ -73,9 +70,9 @@ void init_render ()
 		fatal("SDL_Init failed: %s", SDL_GetError());
 
 	int img_flags = IMG_INIT_JPG | IMG_INIT_PNG | IMG_INIT_TIF;
-	int img_success;
-	if ((img_success = IMG_Init(img_flags)) != img_flags) {
-		fatal("IMG init failed! attempted %x, successful %x",
+	int img_success = IMG_Init(img_flags);
+	if (img_success != img_flags) {
+		fatal("IMG init failed: attempted %x, successful %x",
 			img_flags, img_success);
 	}
 
@@ -265,26 +262,6 @@ void draw_text (const char* str, float x, float y, float charw, float charh)
 		x += charw;
 	}
 	glEnd();
-}
-
-
-void t_render_ctx::submit_matrices () const
-{
-	auto f = [] (GLuint loc, const mat4& m) -> void {
-		glUniformMatrix4fv(loc, 1, false, glm::value_ptr(m));
-	};
-	f(UNIFORM_LOC_PROJ, proj);
-	f(UNIFORM_LOC_VIEW, view);
-	f(UNIFORM_LOC_MODEL, model);
-}
-
-void t_render_ctx::submit_viewproj () const
-{
-	auto f = [] (GLuint loc, const mat4& m) -> void {
-		glUniformMatrix4fv(loc, 1, false, glm::value_ptr(m));
-	};
-	f(UNIFORM_LOC_PROJ, proj);
-	f(UNIFORM_LOC_VIEW, view);
 }
 
 void debug_texture_onscreen (GLuint texture, float x, float y, float scale)

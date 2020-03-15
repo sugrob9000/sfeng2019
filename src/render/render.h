@@ -1,34 +1,10 @@
 #ifndef RENDER_H
 #define RENDER_H
 
+#include "core/core.h"
 #include "inc_gl.h"
 #include "misc.h"
-#include "core/core.h"
-
-enum t_render_stage: uint32_t
-{
-	LIGHTING_LSPACE = 0,
-	LIGHTING_SSPACE = 1,
-	SHADE_FINAL = 2,
-
-	NUM_RENDER_STAGES
-};
-
-struct t_render_ctx
-{
-	t_render_stage stage;
-
-	mat4 proj;
-	mat4 view;
-	mat4 model;
-
-	/* Set the matrices as their corresponding uniforms */
-	void submit_matrices () const;
-
-	/* Same, but without the model matrix */
-	void submit_viewproj () const;
-};
-extern t_render_ctx render_ctx;
+#include "render/ctx.h"
 
 
 struct t_sdlcontext
@@ -39,12 +15,13 @@ struct t_sdlcontext
 	int res_x;
 	int res_y;
 
-	const char* const font_path = "res/FreeMono.ttf";
+	const char* font_path = "res/FreeMono.ttf";
 	TTF_Font* font;
 	static constexpr int font_h = 16;
 	int font_w;
 };
 extern t_sdlcontext sdlcont;
+
 
 struct t_visible_set;
 extern t_visible_set visible_set;

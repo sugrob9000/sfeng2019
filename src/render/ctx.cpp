@@ -1,6 +1,27 @@
-#include "render/camera.h"
+#include "render/ctx.h"
 #include "render/render.h"
 #include "input/cmds.h"
+
+void t_render_ctx::submit_matrices () const
+{
+	auto f = [] (GLuint loc, const mat4& m) -> void {
+		glUniformMatrix4fv(loc, 1, false, glm::value_ptr(m));
+	};
+	f(UNIFORM_LOC_PROJ, proj);
+	f(UNIFORM_LOC_VIEW, view);
+	f(UNIFORM_LOC_MODEL, model);
+}
+
+void t_render_ctx::submit_viewproj () const
+{
+	auto f = [] (GLuint loc, const mat4& m) -> void {
+		glUniformMatrix4fv(loc, 1, false, glm::value_ptr(m));
+	};
+	f(UNIFORM_LOC_PROJ, proj);
+	f(UNIFORM_LOC_VIEW, view);
+}
+
+
 
 void t_camera::apply ()
 {

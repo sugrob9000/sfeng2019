@@ -30,7 +30,6 @@ in vec4 lspace_pos;
 
 float linstep (float low, float hi, float v);
 
-const float EXP_FACTOR = 40.0;
 const float NOBLEED_FACTOR = 0.4;
 const float DEPTH_BIAS = 3e-4;
 
@@ -106,18 +105,5 @@ float chebyshev (vec2 moments, float depth)
 	float p_max = variance / (variance + d * d);
 
 	return linstep(NOBLEED_FACTOR, 1.0, p_max);
-}
-
-
-
-/*
- * Calculate lightspace EVSM map (from a light's perspective)
- */
-vec4 light_lspace ()
-{
-	float depth = screen_crd.z / screen_crd.w;
-	float pos = exp(EXP_FACTOR * depth);
-	float neg = -exp(-EXP_FACTOR * depth);
-	return vec4(pos, pos*pos, neg, neg*neg);
 }
 

@@ -4,7 +4,6 @@
 #include "input/input.h"
 #include "render/render.h"
 #include "render/vis.h"
-#include "render/camera.h"
 #include <cassert>
 
 bool must_quit;
@@ -70,7 +69,7 @@ e_base* read_single_entity (std::istream& is)
 	std::getline(is, line);
 
 	if (line.empty() || isspace(line[0]))
-		fatal("Invalid entity syntax: doesn't start with nonspace");
+		fatal("Invalid entity syntax: starts with whitespace");
 
 	while (isspace(line.back()))
 		line.pop_back();

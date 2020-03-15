@@ -2,7 +2,6 @@
 #include "render/render.h"
 #include "render/resource.h"
 #include "render/material.h"
-#include "camera.h"
 
 static GLuint program;
 

@@ -1,6 +1,5 @@
 #include "ent/lights.h"
 #include "input/cmds.h"
-#include "render/camera.h"
 #include "render/framebuffer.h"
 #include "render/render.h"
 #include "render/resource.h"
@@ -145,35 +144,11 @@ COMMAND_ROUTINE (light_refit_buffers)
 
 void light_apply_uniforms ()
 {
-	if (render_ctx.stage == LIGHTING_LSPACE)
+	if (render_ctx.stage != SHADE_FINAL)
 		return;
 
-	int shadowmap;
-
-	if (render_ctx.stage == LIGHTING_SSPACE) {
-
-		glActiveTexture(GL_TEXTURE0 + TEXTURE_SLOT_DEPTH_MAP);
-		glBindTexture(GL_TEXTURE_2D, lspace_fbo.color[0]);
-
-		using glm::value_ptr;
-		const float* pos = value_ptr(e_light::uniform_pos);
-		const float* rgb = value_ptr(e_light::uniform_rgb);
-		const float* view = value_ptr(e_light::uniform_view);
-
-		glUniform3fv(UNIFORM_LOC_LIGHT_POS, 1, pos);
-		glUniform3fv(UNIFORM_LOC_LIGHT_RGB, 1, rgb);
-		glUniformMatrix4fv(UNIFORM_LOC_LIGHT_VIEW, 1, false, view);
-
-		const float* eye = value_ptr(camera.pos);
-		glUniform3fv(UNIFORM_LOC_EYE_POSITION, 1, eye);
-
-		shadowmap = sspace_fbo[current_sspace_fbo ^ 1].color[0];
-	} else {
-		shadowmap = sspace_fbo[current_sspace_fbo].color[0];
-	}
-
 	glActiveTexture(GL_TEXTURE0 + TEXTURE_SLOT_PREV_SHADOWMAP);
-	glBindTexture(GL_TEXTURE_2D, shadowmap);
+	glBindTexture(GL_TEXTURE_2D, sspace_fbo[current_sspace_fbo].color[0]);
 }
 
 
@@ -203,48 +178,15 @@ void fill_depth_map (const e_light* l)
 	render_ctx.view = restore_view;
 	render_ctx.model = restore_model;
 
-	// make the result of MSAA rendering available
-	// for 3D sampling
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, lspace_fbo_ms.id);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, lspace_fbo.id);
 	glBlitFramebuffer(0, 0, lspace_resolution, lspace_resolution,
 	                  0, 0, lspace_resolution, lspace_resolution,
 	                  GL_COLOR_BUFFER_BIT, GL_NEAREST);
-
-}
-
-void compose_add_depth_map ()
-{
-	current_sspace_fbo ^= 1;
-
-	sspace_fbo[current_sspace_fbo].apply();
-
-	glEnable(GL_CULL_FACE);
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
-	glDepthMask(GL_TRUE);
-
-	glClearColor(ambient.x, ambient.y, ambient.z, 1.0);
-	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-
-	visible_set.render();
 }
 
 void compute_lighting ()
 {
-	sspace_fbo[0].apply();
-	glClearColor(ambient.x, ambient.y, ambient.z, 1.0);
-	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-	current_sspace_fbo = 0;
-
-	glDisable(GL_BLEND);
-
-	for (const e_light* l: lights) {
-		render_ctx.stage = LIGHTING_LSPACE;
-		fill_depth_map(l);
-		render_ctx.stage = LIGHTING_SSPACE;
-		compose_add_depth_map();
-	}
 }
 
 vec3 ambient = vec3(0.25);

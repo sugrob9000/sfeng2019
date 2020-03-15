@@ -1,11 +1,11 @@
-#include "misc.h"
-#include "render/render.h"
-#include "render/camera.h"
 #include "core/core.h"
 #include "core/entity.h"
-#include "input/input.h"
 #include "input/bind.h"
 #include "input/cmds.h"
+#include "input/input.h"
+#include "misc.h"
+#include "render/ctx.h"
+#include "render/render.h"
 
 COMMAND_ROUTINE (sun_at_view)
 {

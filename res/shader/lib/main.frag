@@ -21,8 +21,6 @@ layout (location = 0) uniform uint stage;
 in vec3 world_pos;
 in vec4 screen_crd;
 
-vec3 get_lighting ();
-vec3 light_sspace ();
 vec4 light_lspace ();
 
 float linstep (float low, float hi, float v)
@@ -44,24 +42,24 @@ void main ()
 		gl_FragColor = light_lspace();
 		break;
 
-	case LIGHTING_SSPACE:
-
-		gl_FragColor.rgb = light_sspace();
-		break;
-
 	case SHADE_FINAL:
 
 		// call the actual user shader
 		gl_FragColor = surface_color();
-		gl_FragColor.rgb *= get_lighting();
-
-		// dumb fog
-		float fog = linstep(FOG_DEPTH_MIN, FOG_DEPTH_MAX,
-				screen_crd.z / screen_crd.w);
-		fog += linstep(FOG_HEIGHT_MIN, FOG_HEIGHT_MAX, world_pos.z);
-		gl_FragColor.rgb = mix(gl_FragColor.rgb, FOG_COLOR,
-				clamp(fog, 0.0, 1.0));
 
 		break;
 	}
+}
+
+
+/*
+ * Calculate lightspace EVSM map (from a light's perspective)
+ */
+const float EXP_FACTOR = 40.0;
+vec4 light_lspace ()
+{
+	float depth = screen_crd.z / screen_crd.w;
+	float pos = exp(EXP_FACTOR * depth);
+	float neg = -exp(-EXP_FACTOR * depth);
+	return vec4(pos, pos*pos, neg, neg*neg);
 }

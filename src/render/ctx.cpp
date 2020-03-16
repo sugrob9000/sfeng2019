@@ -94,7 +94,7 @@ void upd_camera_pos ()
 
 COMMAND_ROUTINE (cam_move)
 {
-	if (args.empty())
+	if (args.empty() || args[0].empty())
 		return;
 
 	bool f = (ev == PRESS);

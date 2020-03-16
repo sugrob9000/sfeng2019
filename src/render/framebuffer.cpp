@@ -3,41 +3,64 @@
 #include <cassert>
 #include <map>
 
-/* ============ Specializations for the attach_*() method ============ */
-
-_FBO_SPECIALIZE_ATTACH (tex2d)
+static void assert_dimensions_equal (t_fbo& fbo, const t_attachment& att)
 {
-	glFramebufferTexture2D(GL_FRAMEBUFFER, slot, GL_TEXTURE_2D, a.id, 0);
+	if ((fbo.width != 0 && att.width != fbo.width)
+	|| (fbo.height != 0 && att.height != fbo.height)) {
+		fatal("Tried to attach object with dimensions %i, %i "
+			"to FBO with dimensions %i, %i",
+			att.width, att.height, fbo.width, fbo.height);
+	}
+	fbo.width = att.width;
+	fbo.height = att.height;
 }
 
-_FBO_SPECIALIZE_ATTACH (tex2d_msaa)
+static void attach_low (t_fbo& fbo, const t_attachment& att,
+			GLenum slot, int slice)
 {
-	glFramebufferTexture2D(GL_FRAMEBUFFER, slot,
-			GL_TEXTURE_2D_MULTISAMPLE, a.id, 0);
+	switch (att.target) {
+	case tex2d:
+		glFramebufferTexture2D(GL_FRAMEBUFFER, slot,
+			GL_TEXTURE_2D, att.id, 0);
+		break;
+	case tex2d_msaa:
+		glFramebufferTexture2D(GL_FRAMEBUFFER, slot,
+			GL_TEXTURE_2D_MULTISAMPLE, att.id, 0);
+		break;
+	case tex2d_array:
+		glFramebufferTextureLayer(GL_FRAMEBUFFER, slot,
+			att.id, 0, slice);
+		break;
+	case tex2d_array_msaa:
+		glFramebufferTexture3D(GL_FRAMEBUFFER, slot,
+			GL_TEXTURE_2D_MULTISAMPLE_ARRAY, att.id, 0, slice);
+		break;
+	case rbo:
+	case rbo_msaa:
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, slot,
+			GL_RENDERBUFFER, att.id);
+		break;
+	}
 }
 
-_FBO_SPECIALIZE_ATTACH (tex2d_array)
+t_fbo& t_fbo::attach_color (const t_attachment& att, int idx, int slice)
 {
-	glFramebufferTextureLayer(GL_FRAMEBUFFER, slot, a.id, 0, slice);
+	assert(idx >= 0 && idx < NUM_COLOR_ATTACHMENTS);
+	assert_dimensions_equal(*this, att);
+	glBindFramebuffer(GL_FRAMEBUFFER, id);
+	color[idx] = att;
+	attach_low(*this, att, GL_COLOR_ATTACHMENT0 + idx, slice);
+	return *this;
 }
 
-_FBO_SPECIALIZE_ATTACH (tex2d_array_msaa)
+t_fbo& t_fbo::attach_depth (const t_attachment& att, int slice)
 {
-	glFramebufferTexture3D(GL_FRAMEBUFFER, slot,
-			GL_TEXTURE_2D_MULTISAMPLE_ARRAY, a.id, 0, slice);
+	assert_dimensions_equal(*this, att);
+	glBindFramebuffer(GL_FRAMEBUFFER, id);
+	attach_low(*this, att, GL_DEPTH_ATTACHMENT, slice);
+	depth = att;
+	return *this;
 }
-
-_FBO_SPECIALIZE_ATTACH (rbo)
-{
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, slot, GL_RENDERBUFFER, a.id);
-}
-
-_FBO_SPECIALIZE_ATTACH (rbo_msaa)
-{
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, slot, GL_RENDERBUFFER, a.id);
-}
-
-/* ===================== t_fbo methods ===================== */
 
 t_fbo& t_fbo::make ()
 {
@@ -61,21 +84,15 @@ t_fbo& t_fbo::assert_complete ()
 	return *this;
 }
 
-void t_fbo::apply ()
-{
-	bind();
-	glViewport(0, 0, width, height);
-}
-
-/* ================= Making different attachments ================= */
+/*
+ * ================= Making different attachments =================
+ */
 
 std::pair<GLenum, GLenum> dissect_sized_type (GLenum);
 
-t_attachment<tex2d> make_tex2d (int w, int h, GLenum internal_type)
+t_attachment make_tex2d (int w, int h, GLenum internal_type)
 {
-	t_attachment<tex2d> r;
-	r.width = w;
-	r.height = h;
+	t_attachment r(w, h, internal_type, tex2d);
 
 	constexpr GLenum target = GL_TEXTURE_2D;
 	auto comp_type = dissect_sized_type(internal_type);
@@ -95,12 +112,11 @@ t_attachment<tex2d> make_tex2d (int w, int h, GLenum internal_type)
 	return r;
 }
 
-t_attachment<tex2d_msaa> make_tex2d_msaa (int w, int h,
-		GLenum internal_type, int samples)
+t_attachment make_tex2d_msaa (int w, int h, GLenum internal_type, int samples)
 {
-	t_attachment<tex2d_msaa> r;
-	r.width = w;
-	r.height = h;
+	t_attachment r(w, h, internal_type, tex2d_msaa);
+	r.samples = samples;
+
 	constexpr GLenum target = GL_TEXTURE_2D_MULTISAMPLE;
 
 	glGenTextures(1, &r.id);
@@ -111,12 +127,9 @@ t_attachment<tex2d_msaa> make_tex2d_msaa (int w, int h,
 	return r;
 }
 
-t_attachment<tex2d_array> make_tex2d_array (int w, int h, int d,
-		GLenum internal_type)
+t_attachment make_tex2d_array (int w, int h, int d, GLenum internal_type)
 {
-	t_attachment<tex2d_array> r;
-	r.width = w;
-	r.height = h;
+	t_attachment r(w, h, internal_type, tex2d_array);
 	r.depth = d;
 
 	constexpr GLenum target = GL_TEXTURE_2D_ARRAY;
@@ -137,13 +150,12 @@ t_attachment<tex2d_array> make_tex2d_array (int w, int h, int d,
 	return r;
 }
 
-t_attachment<tex2d_array_msaa> make_tex2d_array_msaa (int w, int h, int d,
+t_attachment make_tex2d_array_msaa (int w, int h, int d,
 		GLenum internal_type, int samples)
 {
-	t_attachment<tex2d_array_msaa> r;
-	r.width = w;
-	r.height = h;
+	t_attachment r(w, h, internal_type, tex2d_array_msaa);
 	r.depth = d;
+	r.samples = samples;
 
 	constexpr GLenum target = GL_TEXTURE_2D_MULTISAMPLE_ARRAY;
 
@@ -156,11 +168,10 @@ t_attachment<tex2d_array_msaa> make_tex2d_array_msaa (int w, int h, int d,
 	return r;
 }
 
-t_attachment<rbo> make_rbo (int w, int h, GLenum internal_type)
+t_attachment make_rbo (int w, int h, GLenum internal_type)
 {
-	t_attachment<rbo> r;
-	r.width = w;
-	r.height = h;
+	t_attachment r(w, h, internal_type, rbo);
+
 	constexpr GLenum target = GL_RENDERBUFFER;
 	glGenRenderbuffers(1, &r.id);
 	glBindRenderbuffer(target, r.id);
@@ -168,12 +179,12 @@ t_attachment<rbo> make_rbo (int w, int h, GLenum internal_type)
 	return r;
 }
 
-t_attachment<rbo_msaa> make_rbo_msaa (int w, int h,
+t_attachment make_rbo_msaa (int w, int h,
 		GLenum internal_type, int samples)
 {
-	t_attachment<rbo_msaa> r;
-	r.width = w;
-	r.height = h;
+	t_attachment r(w, h, internal_type, rbo_msaa);
+	r.samples = samples;
+
 	constexpr GLenum target = GL_RENDERBUFFER;
 	glGenRenderbuffers(1, &r.id);
 	glBindRenderbuffer(target, r.id);

@@ -1,5 +1,5 @@
 #include "ent/trigger_sphere.h"
-#include "render/camera.h"
+#include "render/ctx.h"
 
 SIG_HANDLER (trigger_sphere, set_radius)
 {
@@ -16,13 +16,13 @@ FILL_IO_DATA (trigger_sphere)
 
 void e_trigger_sphere::think ()
 {
-	bool touched_before = touching;
+	uint8_t touched_before = touching;
 
 	vec3 delta = pos - camera.pos;
 	float dist2 = delta.x*delta.x + delta.y*delta.y + delta.z*delta.z;
 	touching = (dist2 <= radius * radius);
 
-	switch ((uint8_t) touching | ((uint8_t) touched_before << 1)) {
+	switch ((uint8_t) touching | (touched_before << 1)) {
 	case 0b10:
 		on_event("exit");
 		break;

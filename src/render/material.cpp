@@ -111,14 +111,6 @@ void t_material::apply () const
 }
 
 
-static std::map<uint16_t, GLenum> sdl_masks_to_gl_fmt =
-	{ { 0b0001'0010'0100'0000, GL_BGR },
-	  { 0b0100'0010'0001'0000, GL_RGB },
-	  { 0b0001'0010'0100'1000, GL_BGRA },
-	  { 0b0100'0010'0001'1000, GL_RGBA },
-	  { 0b0000'0000'0001'0000, GL_RED },
-	  { 0b0000'0010'0001'0000, GL_RG } };
-
 GLenum get_surface_gl_format (SDL_Surface* s)
 {
 	auto compress = [] (uint32_t i) -> uint8_t {
@@ -132,12 +124,22 @@ GLenum get_surface_gl_format (SDL_Surface* s)
 	          | (compress(s->format->Rmask) << 4)
 	          | (compress(s->format->Gmask) << 8)
 	          | (compress(s->format->Bmask) << 12);
-
-	auto iter = sdl_masks_to_gl_fmt.find(i);
-	if (iter == sdl_masks_to_gl_fmt.end())
+	switch (i) {
+	case 0b0001'0010'0100'0000:
+		return GL_BGR;
+	case 0b0100'0010'0001'0000:
+		return GL_RGB;
+	case 0b0001'0010'0100'1000:
+		return GL_BGRA;
+	case 0b0100'0010'0001'1000:
+		return GL_RGBA;
+	case 0b0000'0000'0001'0000:
+		return GL_RED;
+	case 0b0000'0010'0001'0000:
+		return GL_RG;
+	default:
 		return -1;
-
-	return iter->second;
+	}
 }
 
 GLuint load_texture (std::string path)

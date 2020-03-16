@@ -20,15 +20,14 @@
  *   // do the drawing, etc.
  *
  * Note that OpenGL requires all attachments in a FBO to be of
- * the same dimensions; this requirement, while checked for,
- * is not properly reflected - TODO?
+ * the same dimensions; this is only asserted at runtime
  */
 
 
 /*
- * The kinds of attachments possible. These do not biject into
- * OpenGL target enums (there is not a GL_RENDERBUFFER_MULTISAMPLE,
- * for instance). This list may be extended as more options are implemented
+ * The kinds of attachments possible.
+ * These do not biject into OpenGL target enums
+ * (there isn't a GL_RENDERBUFFER_MULTISAMPLE, for instance)
  */
 enum att_target_enum
 {
@@ -37,17 +36,31 @@ enum att_target_enum
 	rbo, rbo_msaa,
 };
 
-#include <type_traits>
-
-/* A particular attachment */
-template <att_target_enum T>
-struct t_attachment
+/*
+ * A particular attachment
+ */
+struct t_attachment_nodims
 {
+	t_attachment_nodims (int pt, att_target_enum tgt)
+		: target(tgt), pixel_type(pt) { }
+	t_attachment_nodims (): id(-1) { }
+
 	GLuint id;
-	int width;
-	int height;
-	/* Only relevant in 3D targets */
+	att_target_enum target;
+	GLenum pixel_type; /* GL_RGBA32F etc. */
+
 	int depth = 1;
+	int samples = 1;
+};
+struct t_attachment: t_attachment_nodims
+{
+	t_attachment (int w, int h, GLenum type, att_target_enum tgt)
+		: t_attachment_nodims(type, tgt),
+		  width(w), height(h) { }
+	t_attachment () { }
+
+	int width = 0;
+	int height = 0;
 };
 
 /*
@@ -55,18 +68,13 @@ struct t_attachment
  * parameters with which to be made - the number of samples,
  * 1/2/3 dimensions (TODO for 1D and 3D textures), etc.
  */
-t_attachment<tex2d> make_tex2d (int w, int h, GLenum internal_type);
-t_attachment<tex2d_msaa> make_tex2d_msaa (int w, int h,
+t_attachment make_tex2d (int w, int h, GLenum internal_type);
+t_attachment make_tex2d_msaa (int w, int h, GLenum internal_type, int samples);
+t_attachment make_tex2d_array (int w, int h, int d, GLenum internal_type);
+t_attachment make_tex2d_array_msaa (int w, int h, int d,
 		GLenum internal_type, int samples);
-
-t_attachment<tex2d_array> make_tex2d_array (int w, int h, int d,
-		GLenum internal_type);
-t_attachment<tex2d_array_msaa> make_tex2d_array_msaa (int w, int h, int d,
-		GLenum internal_type, int samples);
-
-t_attachment<rbo> make_rbo (int w, int h, GLenum internal_type);
-t_attachment<rbo_msaa> make_rbo_msaa (int w, int h,
-		GLenum internal_type, int samples);
+t_attachment make_rbo (int w, int h, GLenum internal_type);
+t_attachment make_rbo_msaa (int w, int h, GLenum internal_type, int samples);
 
 
 /*
@@ -80,71 +88,18 @@ struct t_fbo
 	int height = 0;
 
 	constexpr static int NUM_COLOR_ATTACHMENTS = 16;
-	GLuint color[NUM_COLOR_ATTACHMENTS];
-	GLuint depth;
 
-	template <att_target_enum T>
-	t_fbo& attach_color (const t_attachment<T>& att, int idx = 0,
-	                     int slice = 0);
-
-	template <att_target_enum T>
-	t_fbo& attach_depth (const t_attachment<T>& att, int slice = 0);
+	t_attachment_nodims color[NUM_COLOR_ATTACHMENTS];
+	t_attachment_nodims depth;
 
 	t_fbo& make ();
 	void bind () { glBindFramebuffer(GL_FRAMEBUFFER, id); }
-	void apply ();
-
+	void apply () { bind(); glViewport(0, 0, width, height); }
 	t_fbo& assert_complete ();
+
+	t_fbo& attach_color (const t_attachment& att, int idx = 0,
+	                     int slice = 0);
+	t_fbo& attach_depth (const t_attachment& att, int slice = 0);
 };
-
-
-template <att_target_enum T>
-void fbo_attach_lower (t_fbo& fbo, const t_attachment<T>& att,
-		GLenum type, int slice);
-#define _FBO_SPECIALIZE_ATTACH(type)                      \
-	template <> void fbo_attach_lower<type>           \
-		(t_fbo& fbo, const t_attachment<type>& a, \
-		 GLenum slot, int slice)
-
-_FBO_SPECIALIZE_ATTACH (tex2d);
-_FBO_SPECIALIZE_ATTACH (tex2d_msaa);
-_FBO_SPECIALIZE_ATTACH (tex2d_array);
-_FBO_SPECIALIZE_ATTACH (tex2d_array_msaa);
-_FBO_SPECIALIZE_ATTACH (rbo);
-_FBO_SPECIALIZE_ATTACH (rbo_msaa);
-
-template <att_target_enum T>
-inline void fbo_assert_dimensions_equal (t_fbo& fbo, const t_attachment<T>& a)
-{
-	if ((fbo.width != 0 && a.width != fbo.width)
-	|| (fbo.height != 0 && a.height != fbo.height)) {
-		fatal("Tried to attach object with dimensions %i, %i "
-			"to FBO with dimensions %i, %i",
-			a.width, a.height, fbo.width, fbo.height);
-	}
-	fbo.width = a.width;
-	fbo.height = a.height;
-}
-
-template <att_target_enum T>
-t_fbo& t_fbo::attach_color (const t_attachment<T>& att, int idx, int slice)
-{
-	assert(idx >= 0 && idx < NUM_COLOR_ATTACHMENTS);
-	fbo_assert_dimensions_equal(*this, att);
-	glBindFramebuffer(GL_FRAMEBUFFER, id);
-	fbo_attach_lower<T>(*this, att, GL_COLOR_ATTACHMENT0 + idx, slice);
-	color[idx] = att.id;
-	return *this;
-}
-
-template <att_target_enum T>
-t_fbo& t_fbo::attach_depth (const t_attachment<T>& att, int slice)
-{
-	fbo_assert_dimensions_equal(*this, att);
-	glBindFramebuffer(GL_FRAMEBUFFER, id);
-	fbo_attach_lower<T>(*this, att, GL_DEPTH_ATTACHMENT, slice);
-	depth = att.id;
-	return *this;
-}
 
 #endif // FRAMEBUFFER_H

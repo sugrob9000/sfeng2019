@@ -131,11 +131,11 @@ COMMAND_ROUTINE (light_refit_buffers)
 	if (ev != PRESS)
 		return;
 
-	glDeleteRenderbuffers(1, &sspace_fbo[0].depth);
+	glDeleteRenderbuffers(1, &sspace_fbo[0].depth.id);
 	for (int i: { 0, 1 }) {
 		sspace_fbo[i].width = 0;
 		sspace_fbo[i].height = 0;
-		glDeleteTextures(1, &sspace_fbo[i].color[0]);
+		glDeleteTextures(1, &sspace_fbo[i].color[0].id);
 	}
 
 	init_screenspace();
@@ -148,7 +148,7 @@ void light_apply_uniforms ()
 		return;
 
 	glActiveTexture(GL_TEXTURE0 + TEXTURE_SLOT_PREV_SHADOWMAP);
-	glBindTexture(GL_TEXTURE_2D, sspace_fbo[current_sspace_fbo].color[0]);
+	glBindTexture(GL_TEXTURE_2D, sspace_fbo[current_sspace_fbo].color[0].id);
 }
 
 

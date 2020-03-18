@@ -18,6 +18,7 @@ void resize_sspace_buffers (int w, int h)
 		if (already_updated.count(att.id))
 			return;
 		att.update(w, h, att.depth, att.samples);
+		already_updated.insert(att.id);
 	};
 
 	for (t_fbo* it: ssbuffers) {

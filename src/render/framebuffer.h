@@ -10,12 +10,10 @@
  *
  *   t_fbo fbo;
  *   fbo.make()
- *      .attach_color(make_tex2d(1024, 1024, GL_RGB), 1)
+ *      .attach_color(make_tex2d(1024, 1024, GL_RGB), 0)
  *      .attach_color(make_tex2d(1024, 1024, GL_RGBA), 1)
  *      .attach_depth(make_rbo(1024, 1024, GL_DEPTH_COMPONENT));
- *
  *   ...
- *
  *   fbo.apply();
  *   // do the drawing, etc.
  *
@@ -29,7 +27,7 @@
  * These do not biject into OpenGL target enums
  * (there isn't a GL_RENDERBUFFER_MULTISAMPLE, for instance)
  */
-enum att_target_enum
+enum att_target_enum: uint8_t
 {
 	tex2d, tex2d_msaa,
 	tex2d_array, tex2d_array_msaa,
@@ -47,15 +45,15 @@ struct t_attachment
 
 	GLuint id;
 	att_target_enum target;
+	uint8_t samples = 1; /* Only relevant in MSAA targets */
+	int depth = 1; /* Only relevant in 3D targets */
+
+	int width = 0;
+	int height = 0;
 
 	GLenum pixel_type_combined; /* GL_RGBA32F etc. */
 	GLenum pixel_components; /* GL_RGBA etc. */
-	GLenum pixel_type; /* GL_FLOAT32 etc. */
-
-	int depth = 1;
-	int samples = 1;
-	int width = 0;
-	int height = 0;
+	GLenum pixel_type; /* GL_FLOAT etc. */
 
 	void update (int w, int h, int depth, int samples);
 };
@@ -97,8 +95,6 @@ struct t_fbo
 	t_fbo& attach_color (const t_attachment& att, int idx = 0,
 	                     int slice = 0);
 	t_fbo& attach_depth (const t_attachment& att, int slice = 0);
-
-	t_fbo& resize (int w, int h);
 };
 
 #endif // FRAMEBUFFER_H

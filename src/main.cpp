@@ -6,7 +6,6 @@
 #include "misc.h"
 #include "render/ctx.h"
 #include "render/render.h"
-#include "render/framebuffer.h"
 
 COMMAND_ROUTINE (sun_at_view)
 {
@@ -23,8 +22,6 @@ int main (int argc, const char* const* argv)
 	init_input();
 	init_core();
 	init_render();
-
-	DEBUG_EXPR(sizeof(t_fbo));
 
 	console_close();
 

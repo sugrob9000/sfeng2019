@@ -154,7 +154,6 @@ t_attachment make_tex2d (int w, int h, GLenum internal_type)
 
 	glTexImage2D(target, 0, internal_type, w, h, 0,
 			r.pixel_components, r.pixel_type, nullptr);
-
 	return r;
 }
 

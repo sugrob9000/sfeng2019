@@ -39,28 +39,25 @@ enum att_target_enum
 /*
  * A particular attachment
  */
-struct t_attachment_nodims
+struct t_attachment
 {
-	t_attachment_nodims (int pt, att_target_enum tgt)
-		: target(tgt), pixel_type(pt) { }
-	t_attachment_nodims (): id(-1) { }
+	t_attachment (int w, int h, att_target_enum tgt)
+		: target(tgt), width(w), height(h) { }
+	t_attachment (): id(-1) { }
 
 	GLuint id;
 	att_target_enum target;
-	GLenum pixel_type; /* GL_RGBA32F etc. */
+
+	GLenum pixel_type_combined; /* GL_RGBA32F etc. */
+	GLenum pixel_components; /* GL_RGBA etc. */
+	GLenum pixel_type; /* GL_FLOAT32 etc. */
 
 	int depth = 1;
 	int samples = 1;
-};
-struct t_attachment: t_attachment_nodims
-{
-	t_attachment (int w, int h, GLenum type, att_target_enum tgt)
-		: t_attachment_nodims(type, tgt),
-		  width(w), height(h) { }
-	t_attachment () { }
-
 	int width = 0;
 	int height = 0;
+
+	void update (int w, int h, int depth, int samples);
 };
 
 /*
@@ -89,8 +86,8 @@ struct t_fbo
 
 	constexpr static int NUM_COLOR_ATTACHMENTS = 16;
 
-	t_attachment_nodims color[NUM_COLOR_ATTACHMENTS];
-	t_attachment_nodims depth;
+	t_attachment color[NUM_COLOR_ATTACHMENTS];
+	t_attachment depth;
 
 	t_fbo& make ();
 	void bind () { glBindFramebuffer(GL_FRAMEBUFFER, id); }
@@ -100,6 +97,8 @@ struct t_fbo
 	t_fbo& attach_color (const t_attachment& att, int idx = 0,
 	                     int slice = 0);
 	t_fbo& attach_depth (const t_attachment& att, int slice = 0);
+
+	t_fbo& resize (int w, int h);
 };
 
 #endif // FRAMEBUFFER_H

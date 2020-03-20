@@ -72,8 +72,6 @@ COMMAND (vis_leaves)
 COMMAND (vis_leaves_nodepth)
 COMMAND (vis_disable)
 
-/* Recreate lighting framebuffers to be of sufficient resolution */
-COMMAND (light_refit_buffers)
 /* Set lighting ambience color */
 COMMAND (light_ambience)
 

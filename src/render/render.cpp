@@ -4,6 +4,7 @@
 #include "render/resource.h"
 #include "render/sky.h"
 #include "render/vis.h"
+#include "render/framebuffer.h"
 #include <cassert>
 #include <chrono>
 
@@ -46,8 +47,15 @@ void render_all ()
 	if (console_active)
 		console_render();
 
+	int err = glGetError();
+	if (err)
+		warning("OpenGL error 0x%x (%i)", err, err);
+
 	last_frame_time = cr::duration<float>(sc::now() - frame_start).count();
 	SDL_GL_SwapWindow(sdlcont.window);
+
+
+	fatal(0);
 }
 
 
@@ -108,6 +116,11 @@ void init_render ()
 		SDL_GL_SetSwapInterval(1);
 	}
 
+#if 0
+	glEnable(GL_DEBUG_OUTPUT);
+	glDebugMessageCallback(gl_callback, nullptr);
+#endif
+
 	glEnable(GL_MULTISAMPLE);
 
 	extern void init_cuboid ();
@@ -124,10 +137,18 @@ void init_render ()
 
 void resize_window (int w, int h)
 {
+	if (w <= 0 || h <= 0) {
+		warning("Tried to set window size %i, %i", w, h);
+		return;
+	}
+
 	sdlcont.res_x = w;
 	sdlcont.res_y = h;
-	SDL_SetWindowSize(sdlcont.window, w, h);
 	camera.aspect = (float) w / h;
+
+	resize_sspace_buffers(w, h);
+
+	SDL_SetWindowSize(sdlcont.window, w, h);
 }
 
 COMMAND_ROUTINE (windowsize)
@@ -136,11 +157,9 @@ COMMAND_ROUTINE (windowsize)
 		return;
 	if (args.size() != 2)
 		return;
-	int w = std::atoi(args[0].c_str());
-	int h = std::atoi(args[1].c_str());
-	if (w <= 0 || h <= 0)
-		return;
-	resize_window(w, h);
+
+	using std::atoi;
+	resize_window(atoi(args[0].c_str()), atoi(args[1].c_str()));
 }
 
 

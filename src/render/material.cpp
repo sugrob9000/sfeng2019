@@ -40,7 +40,7 @@ void t_material::load (const std::string& path)
 
 	while (true) {
 		f >> key >> value;
-		f.ignore(-1, '\n');
+		f.ignore(-1, '\n'); // skip to next line
 		if (!f)
 			break;
 

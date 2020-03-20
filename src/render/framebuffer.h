@@ -40,20 +40,21 @@ enum att_target_enum: uint8_t
 struct t_attachment
 {
 	t_attachment (int w, int h, att_target_enum tgt)
-		: target(tgt), width(w), height(h) { }
+		: width(w), height(h), target(tgt) { }
 	t_attachment (): id(-1) { }
 
 	GLuint id;
-	att_target_enum target;
-	uint8_t samples = 1; /* Only relevant in MSAA targets */
-	int depth = 1; /* Only relevant in 3D targets */
-
-	int width = 0;
-	int height = 0;
 
 	GLenum pixel_type_combined; /* GL_RGBA32F etc. */
 	GLenum pixel_components; /* GL_RGBA etc. */
 	GLenum pixel_type; /* GL_FLOAT etc. */
+
+	int width = 0;
+	int height = 0;
+
+	int depth = 1; /* Only relevant in 3D targets */
+	uint8_t samples = 1; /* Only relevant in MSAA targets */
+	att_target_enum target;
 
 	void update (int w, int h, int depth, int samples);
 };
@@ -96,5 +97,14 @@ struct t_fbo
 	                     int slice = 0);
 	t_fbo& attach_depth (const t_attachment& att, int slice = 0);
 };
+
+
+/*
+ * Screenspace buffers: those which correspond to the screen, and must have
+ * their resolution updated accordingly, somewhat automatically
+ */
+
+void add_sspace_buffer (t_fbo& fbo);
+void resize_sspace_buffers (int w, int h);
 
 #endif // FRAMEBUFFER_H

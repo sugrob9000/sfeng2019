@@ -8,7 +8,8 @@ void fatal (const char* format, ...)
 	va_list args;
 	va_start(args, format);
 	fprintf(stderr, "Fatal: ");
-	vfprintf(stderr, format, args);
+	if (format != nullptr)
+		vfprintf(stderr, format, args);
 	fprintf(stderr, "\n");
 	va_end(args);
 
@@ -22,7 +23,8 @@ void warning (const char* format, ...)
 	va_list args;
 	va_start(args, format);
 	fprintf(stderr, "Warning: ");
-	vfprintf(stderr, format, args);
+	if (format != nullptr)
+		vfprintf(stderr, format, args);
 	fprintf(stderr, "\n");
 	fflush(stderr);
 	va_end(args);

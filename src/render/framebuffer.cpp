@@ -1,7 +1,9 @@
 #include "misc.h"
-#include "framebuffer.h"
+#include "render/framebuffer.h"
 #include <cassert>
 #include <map>
+#include <vector>
+#include <set>
 
 static void assert_dimensions_equal (t_fbo& fbo, const t_attachment& att)
 {
@@ -96,7 +98,7 @@ void t_attachment::update (int w, int h, int new_depth, int new_samples)
 	switch (target) {
 	case tex2d:
 		glTexImage2D(GL_TEXTURE_2D, 0, pixel_type_combined, w, h, 0,
-				pixel_type, pixel_components, nullptr);
+				GL_RED, GL_FLOAT, nullptr);
 		break;
 	case tex2d_msaa:
 		glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE,
@@ -280,4 +282,33 @@ std::pair<GLenum, GLenum> dissect_sized_type (GLenum sized)
 				sized);
 	}
 	return iter->second;
+}
+
+/* ========================================================= */
+
+static std::vector<t_fbo*> ssbuffers;
+
+void add_sspace_buffer (t_fbo& fbo)
+{
+	ssbuffers.push_back(&fbo);
+}
+
+void resize_sspace_buffers (int w, int h)
+{
+	std::set<GLuint> already_updated;
+
+	auto upd = [&] (t_attachment& att)
+	-> void {
+		if (att.id == -1 || already_updated.count(att.id))
+			return;
+		att.update(w, h, att.depth, att.samples);
+		already_updated.insert(att.id);
+	};
+
+	for (t_fbo* it: ssbuffers) {
+		t_fbo& fbo = *it;
+		for (int i = 0; i < t_fbo::NUM_COLOR_ATTACHMENTS; i++)
+			upd(fbo.color[i]);
+		upd(fbo.depth);
+	}
 }

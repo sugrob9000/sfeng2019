@@ -50,6 +50,12 @@ static void attach_low (t_fbo& fbo, const t_attachment& att,
 t_fbo& t_fbo::attach_color (const t_attachment& att, int idx, int slice)
 {
 	assert(idx >= 0 && idx < NUM_COLOR_ATTACHMENTS);
+
+	if (color[0].id != -1) {
+		warning("Replacing existing color attachment #%i on FBO %i",
+				idx, id);
+	}
+
 	assert_dimensions_equal(*this, att);
 	glBindFramebuffer(GL_FRAMEBUFFER, id);
 	color[idx] = att;
@@ -59,6 +65,9 @@ t_fbo& t_fbo::attach_color (const t_attachment& att, int idx, int slice)
 
 t_fbo& t_fbo::attach_depth (const t_attachment& att, int slice)
 {
+	if (depth.id != -1)
+		warning("Replacing existing depth attachment on FBO %i", id);
+
 	assert_dimensions_equal(*this, att);
 	glBindFramebuffer(GL_FRAMEBUFFER, id);
 	attach_low(*this, att, GL_DEPTH_ATTACHMENT, slice);
@@ -77,13 +86,13 @@ t_fbo& t_fbo::assert_complete ()
 	glBindFramebuffer(GL_FRAMEBUFFER, id);
 	GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 
-	if (status != GL_FRAMEBUFFER_COMPLETE)
-		fatal("Framebuffer %i incomplete: status %x", id, status);
-
 	if (width <= 0 || height <= 0) {
 		fatal("Framebuffer %i with invalid dimensions %i, %i",
 				id, width, height);
 	}
+
+	if (status != GL_FRAMEBUFFER_COMPLETE)
+		fatal("Framebuffer %i incomplete: status %x", id, status);
 
 	return *this;
 }
@@ -305,10 +314,9 @@ void resize_sspace_buffers (int w, int h)
 		already_updated.insert(att.id);
 	};
 
-	for (t_fbo* it: ssbuffers) {
-		t_fbo& fbo = *it;
+	for (t_fbo* fbo: ssbuffers) {
 		for (int i = 0; i < t_fbo::NUM_COLOR_ATTACHMENTS; i++)
-			upd(fbo.color[i]);
-		upd(fbo.depth);
+			upd(fbo->color[i]);
+		upd(fbo->depth);
 	}
 }

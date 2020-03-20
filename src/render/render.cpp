@@ -53,17 +53,8 @@ void render_all ()
 
 	last_frame_time = cr::duration<float>(sc::now() - frame_start).count();
 	SDL_GL_SwapWindow(sdlcont.window);
-
-
-	fatal(0);
 }
 
-
-void gl_callback (GLenum src, GLenum type, GLuint id, GLenum severity,
-		GLsizei len, const char* msg, const void* param)
-{
-	warning("%s\n", msg);
-}
 
 void init_render ()
 {
@@ -117,8 +108,12 @@ void init_render ()
 	}
 
 #if 0
+	auto callback = [] (GLenum src, GLenum type, GLuint id,
+			GLenum severity, GLsizei len,
+			const char* msg, const void* param)
+		-> void { warning ("%s\n", msg); };
 	glEnable(GL_DEBUG_OUTPUT);
-	glDebugMessageCallback(gl_callback, nullptr);
+	glDebugMessageCallback(callback, nullptr);
 #endif
 
 	glEnable(GL_MULTISAMPLE);

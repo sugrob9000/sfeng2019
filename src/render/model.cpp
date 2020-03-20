@@ -74,16 +74,10 @@ void t_model_mem::load_obj (const std::string& path)
 
 	auto add_face = [&] (int* v, int* n, int* t)
 	-> void {
-		const vec3& v0 = points[v[0]];
-		const vec3& v1 = points[v[1]];
-		const vec3& v2 = points[v[2]];
-		const vec2& uv0 = texcrds[t[0]];
-		const vec2& uv1 = texcrds[t[1]];
-		const vec2& uv2 = texcrds[t[2]];
-		vec3 d_pos1 = v1 - v0;
-		vec3 d_pos2 = v2 - v0;
-		vec2 d_uv1 = uv1 - uv0;
-		vec2 d_uv2 = uv2 - uv0;
+		vec3 d_pos1 = points[v[1]] - points[v[0]];
+		vec3 d_pos2 = points[v[2]] - points[v[0]];
+		vec2 d_uv1 = texcrds[t[1]] - texcrds[t[0]];
+		vec2 d_uv2 = texcrds[t[2]] - texcrds[t[0]];
 
 		vec3 tangent = d_uv2.y * d_pos1 - d_uv1.y * d_pos2;
 

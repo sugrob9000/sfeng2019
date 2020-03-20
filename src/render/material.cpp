@@ -166,7 +166,6 @@ GLuint load_texture (std::string path)
 	constexpr GLenum tgt = GL_TEXTURE_2D;
 	glTexParameteri(tgt, GL_GENERATE_MIPMAP, GL_TRUE);
 	glTexParameteri(tgt, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(tgt, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 
 	glTexImage2D(tgt, 0, GL_RGBA, surf->w, surf->h,
 			0, format, GL_UNSIGNED_BYTE, surf->pixels);

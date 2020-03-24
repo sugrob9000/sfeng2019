@@ -6,8 +6,8 @@
 
 enum t_render_stage: uint32_t
 {
-	LIGHTING_LSPACE = 0,
-	LIGHTING_SSPACE = 1,
+	G_BUFFERS = 0,
+	LIGHTING_LSPACE = 1,
 	SHADE_FINAL = 2,
 
 	NUM_RENDER_STAGES

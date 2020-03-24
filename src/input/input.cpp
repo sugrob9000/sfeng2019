@@ -110,12 +110,11 @@ void t_command_registry::register_command (
 
 void t_command_registry::run (const t_command& cmd, uint8_t ev)
 {
-	auto i = m.find(cmd.name);
-	if (i == m.end())
+	auto it = m.find(cmd.name);
+	if (it == m.end())
 		return;
 
-	f_cmd_routine routine = i->second;
-
+	f_cmd_routine routine = it->second;
 	if (routine != nullptr)
 		routine(cmd.args, ev);
 }

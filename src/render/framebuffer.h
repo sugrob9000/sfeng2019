@@ -3,6 +3,7 @@
 
 #include "inc_gl.h"
 #include <cassert>
+#include <array>
 
 /*
  * Helper / abstraction for OpenGL framebuffers and their attachments.
@@ -83,9 +84,9 @@ struct t_fbo
 	int width = 0;
 	int height = 0;
 
-	constexpr static int NUM_COLOR_ATTACHMENTS = 16;
+	constexpr static int num_clr_attachments = 16;
 
-	t_attachment color[NUM_COLOR_ATTACHMENTS];
+	std::array<t_attachment, num_clr_attachments> color;
 	t_attachment depth;
 
 	t_fbo& make ();
@@ -94,7 +95,7 @@ struct t_fbo
 	t_fbo& assert_complete ();
 
 	t_fbo& attach_color (const t_attachment& att, int idx = 0,
-	                     int slice = 0);
+			int slice = 0);
 	t_fbo& attach_depth (const t_attachment& att, int slice = 0);
 };
 
@@ -104,7 +105,7 @@ struct t_fbo
  * their resolution updated accordingly, somewhat automatically
  */
 
-void add_sspace_buffer (t_fbo& fbo);
-void resize_sspace_buffers (int w, int h);
+void sspace_add_buffer (t_fbo& fbo);
+void sspace_resize_buffers (int w, int h);
 
 #endif // FRAMEBUFFER_H

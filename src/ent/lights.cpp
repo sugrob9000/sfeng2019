@@ -80,10 +80,8 @@ vec3 e_light::uniform_rgb;
 constexpr int lspace_samples = 4;
 constexpr int lspace_resolution = 1024;
 
-/* Multisampled framebuffer in which to do the rendering */
+/* Render to multisampled, then blit into regular for sampling */
 t_fbo lspace_fbo_ms;
-
-/* Regular framebuffer into which to blit from the _ms one */
 t_fbo lspace_fbo;
 
 /*
@@ -104,7 +102,7 @@ static void init_screenspace ()
 			.attach_color(make_tex2d(w, h, GL_RGB16F))
 			.attach_depth(depth_rbo)
 			.assert_complete();
-		add_sspace_buffer(sspace_fbo[i]);
+		sspace_add_buffer(sspace_fbo[i]);
 	}
 }
 
@@ -121,22 +119,17 @@ void init_lighting ()
 		.attach_depth(make_rbo_msaa(
 			s, s, GL_DEPTH_COMPONENT, lspace_samples))
 		.assert_complete();
-	add_sspace_buffer(lspace_fbo_ms);
+	sspace_add_buffer(lspace_fbo_ms);
 
 	lspace_fbo.make()
 		.attach_color(make_tex2d(s, s, GL_RGBA32F))
 		.assert_complete();
-	add_sspace_buffer(lspace_fbo);
+	sspace_add_buffer(lspace_fbo);
 }
 
 
 void light_apply_uniforms ()
 {
-	if (render_ctx.stage != SHADE_FINAL)
-		return;
-
-	glActiveTexture(GL_TEXTURE0 + TEXTURE_SLOT_PREV_SHADOWMAP);
-	glBindTexture(GL_TEXTURE_2D, sspace_fbo[current_sspace_fbo].color[0].id);
 }
 
 
@@ -175,6 +168,10 @@ void fill_depth_map (const e_light* l)
 
 void compute_lighting ()
 {
+	for (e_light* l: lights) {
+		render_ctx.stage = LIGHTING_LSPACE;
+		fill_depth_map(l);
+	}
 }
 
 vec3 ambient = vec3(0.25);

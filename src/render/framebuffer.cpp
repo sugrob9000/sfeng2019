@@ -49,11 +49,12 @@ static void attach_low (t_fbo& fbo, const t_attachment& att,
 
 t_fbo& t_fbo::attach_color (const t_attachment& att, int idx, int slice)
 {
-	assert(idx >= 0 && idx < NUM_COLOR_ATTACHMENTS);
+	assert(idx >= 0 && idx < num_clr_attachments);
 
-	if (color[0].id != -1) {
-		warning("Replacing existing color attachment #%i on FBO %i",
-				idx, id);
+	if (color[idx].id != -1) {
+		warning("Replacing existing color attachment #%i on FBO %i "
+			"(was texture %i, now texture %i)",
+			idx, id, color[idx].id, att.id);
 	}
 
 	assert_dimensions_equal(*this, att);
@@ -120,7 +121,8 @@ void t_attachment::update (int w, int h, int new_depth, int new_samples)
 		break;
 	case tex2d_array_msaa:
 		glTexImage3DMultisample(GL_TEXTURE_2D_MULTISAMPLE_ARRAY,
-				samples, pixel_type_combined, w, h, depth, GL_TRUE);
+				samples, pixel_type_combined, w, h,
+				depth, GL_TRUE);
 		break;
 	case rbo:
 		glRenderbufferStorage(GL_RENDERBUFFER,
@@ -297,12 +299,12 @@ std::pair<GLenum, GLenum> dissect_sized_type (GLenum sized)
 
 static std::vector<t_fbo*> ssbuffers;
 
-void add_sspace_buffer (t_fbo& fbo)
+void sspace_add_buffer (t_fbo& fbo)
 {
 	ssbuffers.push_back(&fbo);
 }
 
-void resize_sspace_buffers (int w, int h)
+void sspace_resize_buffers (int w, int h)
 {
 	std::set<GLuint> already_updated;
 
@@ -315,8 +317,8 @@ void resize_sspace_buffers (int w, int h)
 	};
 
 	for (t_fbo* fbo: ssbuffers) {
-		for (int i = 0; i < t_fbo::NUM_COLOR_ATTACHMENTS; i++)
-			upd(fbo->color[i]);
+		for (t_attachment& col: fbo->color)
+			upd(col);
 		upd(fbo->depth);
 	}
 }

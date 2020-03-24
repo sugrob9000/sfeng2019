@@ -5,6 +5,7 @@
 #include "render/sky.h"
 #include "render/vis.h"
 #include "render/framebuffer.h"
+#include "render/gbuffer.h"
 #include <cassert>
 #include <chrono>
 
@@ -22,16 +23,12 @@ void render_all ()
 	camera.apply();
 	visible_set.fill(camera.pos);
 
+	fill_gbuffers();
 	compute_lighting();
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, sdlcont.res_x, sdlcont.res_y);
 	glClear(GL_DEPTH_BUFFER_BIT);
-
-	glEnable(GL_CULL_FACE);
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
-	glDepthMask(GL_TRUE);
 
 	render_ctx.stage = SHADE_FINAL;
 	render_sky();
@@ -125,7 +122,7 @@ void init_render ()
 	init_materials();
 	init_text();
 	init_vis();
-
+	init_gbuffers();
 	init_lighting();
 	init_sky();
 }
@@ -141,7 +138,7 @@ void resize_window (int w, int h)
 	sdlcont.res_y = h;
 	camera.aspect = (float) w / h;
 
-	resize_sspace_buffers(w, h);
+	sspace_resize_buffers(w, h);
 
 	SDL_SetWindowSize(sdlcont.window, w, h);
 }
@@ -276,30 +273,4 @@ void draw_text (const char* str, float x, float y, float charw, float charh)
 		x += charw;
 	}
 	glEnd();
-}
-
-void debug_texture_onscreen (GLuint texture, float x, float y, float scale)
-{
-	glUseProgram(0);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture);
-	glEnable(GL_TEXTURE_2D);
-
-	glPushMatrix();
-	glTranslatef(x, y, 0.0);
-	glScalef(scale, scale, 1.0);
-
-	glColor4f(1.0, 1.0, 1.0, 1.0);
-	glBegin(GL_QUADS);
-
-	const int vx[4] = { 0, 1, 1, 0 };
-	const int vy[4] = { 0, 0, 1, 1 };
-
-	for (int i = 0; i < 4; i++) {
-		glTexCoord2i(vx[i], vy[i]);
-		glVertex2i(vx[i], vy[i]);
-	}
-
-	glEnd();
-	glPopMatrix();
 }

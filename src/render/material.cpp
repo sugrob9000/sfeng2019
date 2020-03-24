@@ -105,8 +105,7 @@ void t_material::apply () const
 	}
 
 	render_ctx.submit_matrices();
-	glUniform1ui(UNIFORM_LOC_RENDER_STAGE, render_ctx.stage);
-
+	glUniform1i(UNIFORM_LOC_RENDER_STAGE, render_ctx.stage);
 	light_apply_uniforms();
 }
 
@@ -163,11 +162,11 @@ GLuint load_texture (std::string path)
 
 	glHint(GL_TEXTURE_COMPRESSION_HINT, GL_NICEST);
 
-	constexpr GLenum tgt = GL_TEXTURE_2D;
-	glTexParameteri(tgt, GL_GENERATE_MIPMAP, GL_TRUE);
-	glTexParameteri(tgt, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+			GL_LINEAR_MIPMAP_LINEAR);
 
-	glTexImage2D(tgt, 0, GL_RGBA, surf->w, surf->h,
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surf->w, surf->h,
 			0, format, GL_UNSIGNED_BYTE, surf->pixels);
 
 	SDL_FreeSurface(surf);

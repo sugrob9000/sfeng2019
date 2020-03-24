@@ -1,42 +1,41 @@
-#version 130
+#version 330 core
 #extension GL_ARB_explicit_uniform_location: require
 #extension GL_ARB_explicit_attrib_location: require
 
 
 /* The user shader which links against the lib should implement these */
 vec4 surface_color ();
+vec3 surface_normal ();
 
 
 /* ================================================== */
 
-#define MODEL gl_ModelViewMatrix
-#define VIEWPROJ gl_ProjectionMatrix
+#define G_BUFFERS 0
+#define LIGHTING_LSPACE 1
+#define SHADE_FINAL 2
+layout (location = 0) uniform int stage;
 
-#define LIGHTING_LSPACE 0u
-#define LIGHTING_SSPACE 1u
-#define SHADE_FINAL 2u
-
-layout (location = 0) uniform uint stage;
+#define MRT_SLOT_WORLD_POS 0
+#define MRT_SLOT_WORLD_NORM 1
 
 in vec3 world_pos;
 in vec4 screen_crd;
+in mat3 TBN;
 
 vec4 light_lspace ();
 
-float linstep (float low, float hi, float v)
-{
-	return clamp((v - low) / (hi - low), 0.0, 1.0);
-}
-
-const float FOG_HEIGHT_MAX = -500.0;
-const float FOG_HEIGHT_MIN = 75.0;
-const float FOG_DEPTH_MIN = 0.999;
-const float FOG_DEPTH_MAX = 1.0;
-const vec3 FOG_COLOR = vec3(0.28, 0.28, 0.42);
+#define gl_FragColor gl_FragData[0]
 
 void main ()
 {
 	switch (stage) {
+	case G_BUFFERS:
+
+		gl_FragData[MRT_SLOT_WORLD_POS].rgb = world_pos;
+		gl_FragData[MRT_SLOT_WORLD_NORM].rgb =
+			TBN * normalize(surface_normal());
+		break;
+
 	case LIGHTING_LSPACE:
 
 		gl_FragColor = light_lspace();
@@ -46,20 +45,11 @@ void main ()
 
 		// call the actual user shader
 		gl_FragColor = surface_color();
-
 		break;
 	}
 }
 
-
-/*
- * Calculate lightspace EVSM map (from a light's perspective)
- */
-const float EXP_FACTOR = 40.0;
 vec4 light_lspace ()
 {
-	float depth = screen_crd.z / screen_crd.w;
-	float pos = exp(EXP_FACTOR * depth);
-	float neg = -exp(-EXP_FACTOR * depth);
-	return vec4(pos, pos*pos, neg, neg*neg);
+	return vec4(0.0);
 }

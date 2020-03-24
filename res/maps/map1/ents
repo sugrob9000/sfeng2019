@@ -5,13 +5,6 @@ prop
 	mat car-red
 	name car
 
-prop
-	pos 472 200 152
-	ang 0 0 110
-	model muscle_car
-	mat car-ghost
-	name ghost
-
 light
 	pos -923.823669 -462.896851 398.892090
 	ang 23 0 43

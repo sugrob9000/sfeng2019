@@ -1,6 +1,7 @@
 #version 330 core
 #extension GL_ARB_explicit_uniform_location: require
 #extension GL_ARB_explicit_attrib_location: require
+#extension GL_ARB_draw_buffers: require
 
 
 /* The user shader which links against the lib should implement these */

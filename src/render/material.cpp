@@ -56,13 +56,10 @@ void t_material::load (const std::string& path)
 		bitmaps.push_back({ key, get_texture(value) });
 	}
 
-	shaders.push_back(get_frag_shader("lib/main"));
-	shaders.push_back(get_vert_shader("lib/main"));
+	shaders.push_back(get_frag_shader("internal/main"));
+	shaders.push_back(get_vert_shader("internal/main"));
 	program = make_glsl_program(shaders);
 	glUseProgram(program);
-
-	glUniform1i(UNIFORM_LOC_DEPTH_MAP, TEXTURE_SLOT_DEPTH_MAP);
-	glUniform1i(UNIFORM_LOC_PREV_SHADOWMAP, TEXTURE_SLOT_PREV_SHADOWMAP);
 
 	glBindAttribLocation(program, ATTRIB_LOC_TANGENT, "tangent");
 

@@ -9,7 +9,7 @@
 #include <cassert>
 #include <chrono>
 
-t_sdlcontext sdlcont;
+t_sdlcontext sdlctx;
 t_render_ctx render_ctx;
 t_visible_set visible_set;
 
@@ -27,7 +27,7 @@ void render_all ()
 	compute_lighting();
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glViewport(0, 0, sdlcont.res_x, sdlcont.res_y);
+	glViewport(0, 0, sdlctx.res_x, sdlctx.res_y);
 	glClear(GL_DEPTH_BUFFER_BIT);
 
 	render_ctx.stage = SHADE_FINAL;
@@ -36,30 +36,24 @@ void render_all ()
 	visible_set.render_debug();
 
 	// HUD
-	glDisable(GL_CULL_FACE);
-	glDisable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
-	glUseProgram(0);
 
 	if (console_active)
 		console_render();
 
-	int err = glGetError();
-	if (err)
+	if (int err = glGetError(); err != 0)
 		warning("OpenGL error 0x%x (%i)", err, err);
 
 	last_frame_time = cr::duration<float>(sc::now() - frame_start).count();
-	SDL_GL_SwapWindow(sdlcont.window);
+	SDL_GL_SwapWindow(sdlctx.window);
 }
 
 
 void init_render ()
 {
-	if (sdlcont.res_x == 0 || sdlcont.res_y == 0) {
-		// resolution has not been initialized,
+	if (sdlctx.res_x == 0 || sdlctx.res_y == 0) {
 		// use a sane default
-		sdlcont.res_x = 640;
-		sdlcont.res_y = 480;
+		sdlctx.res_x = 640;
+		sdlctx.res_y = 480;
 	}
 
 	if (SDL_Init(SDL_INIT_VIDEO) < 0)
@@ -80,23 +74,23 @@ void init_render ()
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
 
-	sdlcont.window = SDL_CreateWindow("churn-engine",
+	sdlctx.window = SDL_CreateWindow("churn-engine",
 			SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-			sdlcont.res_x, sdlcont.res_y,
+			sdlctx.res_x, sdlctx.res_y,
 			SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN
 				| SDL_WINDOW_RESIZABLE);
-	if (sdlcont.window == nullptr)
+	if (sdlctx.window == nullptr)
 		fatal("SDL window creation failed: %s", SDL_GetError());
 
-	sdlcont.glcont = SDL_GL_CreateContext(sdlcont.window);
-	if (sdlcont.glcont == nullptr)
+	sdlctx.glcont = SDL_GL_CreateContext(sdlctx.window);
+	if (sdlctx.glcont == nullptr)
 		fatal("SDL glcont creation failed: %s", SDL_GetError());
 
 	glewExperimental = true;
 	if (glewInit() != GLEW_OK)
 		fatal("GLEW init failed");
 
-	sdlcont.renderer = SDL_CreateRenderer(sdlcont.window, -1,
+	sdlctx.renderer = SDL_CreateRenderer(sdlctx.window, -1,
 			SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
 	if (SDL_GL_SetSwapInterval(-1) == -1) {
@@ -117,8 +111,10 @@ void init_render ()
 
 	extern void init_cuboid ();
 	extern void init_text ();
+	extern void init_debug ();
 
 	init_cuboid();
+	init_debug();
 	init_materials();
 	init_text();
 	init_vis();
@@ -130,17 +126,17 @@ void init_render ()
 void resize_window (int w, int h)
 {
 	if (w <= 0 || h <= 0) {
-		warning("Tried to set window size %i, %i", w, h);
+		warning("Tried to set window size to %i, %i", w, h);
 		return;
 	}
 
-	sdlcont.res_x = w;
-	sdlcont.res_y = h;
+	sdlctx.res_x = w;
+	sdlctx.res_y = h;
 	camera.aspect = (float) w / h;
 
 	sspace_resize_buffers(w, h);
 
-	SDL_SetWindowSize(sdlcont.window, w, h);
+	SDL_SetWindowSize(sdlctx.window, w, h);
 }
 
 COMMAND_ROUTINE (windowsize)
@@ -208,19 +204,19 @@ void init_text ()
 {
 	if (TTF_Init() < 0)
 		fatal("TTF init failed");
-	sdlcont.font = TTF_OpenFont(sdlcont.font_path, sdlcont.font_h);
-	if (sdlcont.font == nullptr)
-		fatal("Failed to find font %s", sdlcont.font_path);
-	if (!TTF_FontFaceIsFixedWidth(sdlcont.font)) {
+	sdlctx.font = TTF_OpenFont(sdlctx.font_path, sdlctx.font_h);
+	if (sdlctx.font == nullptr)
+		fatal("Failed to find font %s", sdlctx.font_path);
+	if (!TTF_FontFaceIsFixedWidth(sdlctx.font)) {
 		warning("Font %s is not monospace. Text will break",
-				sdlcont.font_path);
+				sdlctx.font_path);
 	}
-	TTF_GlyphMetrics(sdlcont.font, '~', nullptr, nullptr,
-			nullptr, nullptr, &sdlcont.font_w);
+	TTF_GlyphMetrics(sdlctx.font, '~', nullptr, nullptr,
+			nullptr, nullptr, &sdlctx.font_w);
 
 	text_program = make_glsl_program(
-			{ get_vert_shader("lib/text"),
-			  get_frag_shader("lib/text") });
+			{ get_vert_shader("internal/text"),
+			  get_frag_shader("internal/text") });
 	text_prg_glyph_loc = glGetUniformLocation(text_program, "glyphs");
 
 	char all_chars[257];
@@ -229,7 +225,7 @@ void init_text ()
 	for (int i = 1; i < 256; i++)
 		all_chars[i] = i;
 
-	SDL_Surface* surf = TTF_RenderText_Blended(sdlcont.font,
+	SDL_Surface* surf = TTF_RenderText_Blended(sdlctx.font,
 			all_chars, text_color);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -257,8 +253,8 @@ void draw_text (const char* str, float x, float y, float charw, float charh)
 	glUniform1i(text_prg_glyph_loc, 0);
 
 	glBegin(GL_QUADS);
-	int w = sdlcont.font_w;
-	int h = sdlcont.font_h;
+	int w = sdlctx.font_w;
+	int h = sdlctx.font_h;
 
 	for (int i = 0; str[i] != 0; i++) {
 		const char c = str[i];
@@ -272,5 +268,39 @@ void draw_text (const char* str, float x, float y, float charw, float charh)
 		glVertex2f(x + charw, y);
 		x += charw;
 	}
+	glEnd();
+}
+
+
+static GLuint debug_program;
+static GLuint debug_loc_xy_size;
+
+void init_debug ()
+{
+	debug_program = make_glsl_program(
+		{ get_vert_shader("internal/debug"),
+		  get_frag_shader("internal/debug") });
+
+	glUseProgram(debug_program);
+	glUniform1i(glGetUniformLocation(debug_program, "tex"), 0);
+	debug_loc_xy_size = glGetUniformLocation(debug_program, "xy_size");
+}
+
+void debug_render_texture (GLuint tex, float x, float y, float size)
+{
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_CULL_FACE);
+
+	glUseProgram(debug_program);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, tex);
+
+	glUniform3f(debug_loc_xy_size, x, y, size);
+
+	glBegin(GL_QUADS);
+	glVertex2i(0, 0);
+	glVertex2i(0, 1);
+	glVertex2i(1, 1);
+	glVertex2i(1, 0);
 	glEnd();
 }

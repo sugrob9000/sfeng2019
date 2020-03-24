@@ -8,8 +8,8 @@ static GLuint program;
 void init_sky ()
 {
 	program = make_glsl_program(
-		{ get_vert_shader("lib/sky"),
-		  get_frag_shader("lib/sky") });
+		{ get_vert_shader("internal/sky"),
+		  get_frag_shader("internal/sky") });
 }
 
 void render_sky ()

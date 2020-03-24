@@ -84,7 +84,7 @@ struct t_fbo
 	int width = 0;
 	int height = 0;
 
-	constexpr static int num_clr_attachments = 16;
+	constexpr static int num_clr_attachments = 8;
 
 	std::array<t_attachment, num_clr_attachments> color;
 	t_attachment depth;

@@ -29,11 +29,11 @@ int oct_max_depth = 0;
 void init_vis ()
 {
 	occ_planes_prog = make_glsl_program(
-		{ get_vert_shader("lib/vis_plane"),
+		{ get_vert_shader("internal/vis_plane"),
 		  get_frag_shader("common/null") });
 
 	occ_cube_prog = make_glsl_program(
-		{ get_vert_shader("lib/vis_cuboid"),
+		{ get_vert_shader("internal/vis_cuboid"),
 		  get_frag_shader("common/null") });
 
 	occ_fbo.make()

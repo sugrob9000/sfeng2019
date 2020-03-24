@@ -93,8 +93,8 @@ int current_sspace_fbo = 0;
 
 static void init_screenspace ()
 {
-	int w = sdlcont.res_x;
-	int h = sdlcont.res_y;
+	int w = sdlctx.res_x;
+	int h = sdlctx.res_y;
 
 	auto depth_rbo = make_rbo(w, h, GL_DEPTH_COMPONENT);
 	for (int i: { 0, 1 }) {
@@ -119,12 +119,10 @@ void init_lighting ()
 		.attach_depth(make_rbo_msaa(
 			s, s, GL_DEPTH_COMPONENT, lspace_samples))
 		.assert_complete();
-	sspace_add_buffer(lspace_fbo_ms);
 
 	lspace_fbo.make()
 		.attach_color(make_tex2d(s, s, GL_RGBA32F))
 		.assert_complete();
-	sspace_add_buffer(lspace_fbo);
 }
 
 
@@ -186,7 +184,7 @@ COMMAND_ROUTINE (light_ambience)
 	case 3:
 		ambient = vec3(atof(args[0].c_str()),
 		               atof(args[1].c_str()),
-			       atof(args[2].c_str()));
+		               atof(args[2].c_str()));
 		break;
 	default:
 		return;

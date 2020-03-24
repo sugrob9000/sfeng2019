@@ -79,6 +79,13 @@ t_fbo& t_fbo::attach_depth (const t_attachment& att, int slice)
 t_fbo& t_fbo::make ()
 {
 	glGenFramebuffers(1, &id);
+	glBindFramebuffer(GL_FRAMEBUFFER, id);
+
+	GLenum buffers[num_clr_attachments];
+	for (int i = 0; i < num_clr_attachments; i++)
+		buffers[i] = GL_COLOR_ATTACHMENT0 + i;
+	glDrawBuffers(num_clr_attachments, buffers);
+
 	return *this;
 }
 
@@ -160,8 +167,8 @@ t_attachment make_tex2d (int w, int h, GLenum internal_type)
 	glBindTexture(target, r.id);
 
 	glTexParameteri(target, GL_GENERATE_MIPMAP, GL_FALSE);
-	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
@@ -263,6 +270,14 @@ t_attachment make_rbo_msaa (int w, int h,
  * e.g.
  * GL_RGBA32F => { GL_RGBA, GL_FLOAT }
  */
+
+/*
+ * GL_R is part of STRQ and not R, RG, RGB, RGBA, so it is incorrect to
+ * use that. That would have been inconvenient for the below macros...
+ */
+#undef GL_R
+#define GL_R GL_RED
+
 #define SIZED_TYPE(components, type, suffix) \
 	{ GL_##components##suffix, { GL_##components, GL_##type } }
 #define ALL_TYPES_FOR(c)                     \

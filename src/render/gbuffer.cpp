@@ -8,8 +8,8 @@ t_fbo gbuf_fbo;
 
 void init_gbuffers ()
 {
-	int w = sdlcont.res_x;
-	int h = sdlcont.res_y;
+	int w = sdlctx.res_x;
+	int h = sdlctx.res_y;
 
 	gbuf_fbo.make()
 		.attach_color(make_tex2d(w, h, GL_RGB32F), MRT_SLOT_WORLD_POS)
@@ -23,6 +23,12 @@ void init_gbuffers ()
 void fill_gbuffers ()
 {
 	gbuf_fbo.apply();
+
+	glClear(GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
+	glDisable(GL_BLEND);
+
 	render_ctx.stage = G_BUFFERS;
 	visible_set.render();
 }

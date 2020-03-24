@@ -4,6 +4,7 @@
 #include "core/entity.h"
 #include "render/render.h"
 #include "render/vis.h"
+#include "render/framebuffer.h"
 
 /*
  * Directional light
@@ -35,6 +36,9 @@ extern std::vector<e_light*> lights;
 
 constexpr float LIGHT_Z_NEAR = 10.0;
 extern vec3 ambient;
+
+extern t_fbo lspace_fbo;
+extern t_fbo lspace_fbo_ms;
 
 void light_apply_uniforms ();
 

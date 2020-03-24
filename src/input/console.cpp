@@ -133,15 +133,19 @@ void console_render ()
 
 	// try to match the actual font size in pixels,
 	// and be 4 away from the top
-	float text_height = sdlcont.font_h * 2.0 / sdlcont.res_y;
-	float text_y = 4.0 * 2.0 / sdlcont.res_y;
+	float text_height = sdlctx.font_h * 2.0 / sdlctx.res_y;
+	float text_y = 4.0 * 2.0 / sdlctx.res_y;
 	float height = text_height + 2.0 * text_y;
 
 	float char_width = text_height *
-		((float) sdlcont.font_w / sdlcont.font_h) *
-		((float) sdlcont.res_y / sdlcont.res_x);
+		((float) sdlctx.font_w / sdlctx.font_h) *
+		((float) sdlctx.res_y / sdlctx.res_x);
 	float text_width = char_width * cmd.length();
 	float text_x = char_width + 0.01;
+
+	glDisable(GL_CULL_FACE);
+	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
 
 	glUseProgram(0);
 	glColor4ubv((GLubyte*) &bg_clr);

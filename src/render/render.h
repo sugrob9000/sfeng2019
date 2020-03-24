@@ -20,7 +20,7 @@ struct t_sdlcontext
 	static constexpr int font_h = 16;
 	int font_w;
 };
-extern t_sdlcontext sdlcont;
+extern t_sdlcontext sdlctx;
 
 
 struct t_visible_set;
@@ -33,9 +33,9 @@ void resize_window (int w, int h);
 const SDL_Color text_color = { 200, 200, 200, 255 };
 void draw_text (const char* text, float x, float y, float charw, float charh);
 
+void debug_render_texture (GLuint tex, float x, float y, float size);
 
 extern GLuint cuboid_dlist_inwards;
 extern GLuint cuboid_dlist_outwards;
 
 #endif // RENDER_H
-

@@ -13,7 +13,7 @@ WARNINGS = \
 	-Wshadow
 
 CC = g++
-CFLAGS = -Og -g $(WARNINGS) --std=gnu++17 -Isrc -Iinclude
+CFLAGS = -Og -g $(WARNINGS) --std=gnu++17 -Isrc -Iinclude -fmax-errors=1
 
 FILES-CPP = $(shell find src/ -name "*.cpp")
 FILES-H = $(shell find src/ -name "*.h")

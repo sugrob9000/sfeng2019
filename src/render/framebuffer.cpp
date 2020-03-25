@@ -2,79 +2,9 @@
 #include "render/framebuffer.h"
 #include <cassert>
 #include <map>
-#include <vector>
 #include <set>
+#include <vector>
 
-static void assert_dimensions_equal (t_fbo& fbo, const t_attachment& att)
-{
-	if ((fbo.width != 0 && att.width != fbo.width)
-	|| (fbo.height != 0 && att.height != fbo.height)) {
-		fatal("Tried to attach object with dimensions %i, %i "
-			"to FBO with dimensions %i, %i",
-			att.width, att.height, fbo.width, fbo.height);
-	}
-	fbo.width = att.width;
-	fbo.height = att.height;
-}
-
-static void attach_low (t_fbo& fbo, const t_attachment& att,
-			GLenum slot, int slice)
-{
-	switch (att.target) {
-	case tex2d:
-		glFramebufferTexture2D(GL_FRAMEBUFFER, slot,
-			GL_TEXTURE_2D, att.id, 0);
-		break;
-	case tex2d_msaa:
-		glFramebufferTexture2D(GL_FRAMEBUFFER, slot,
-			GL_TEXTURE_2D_MULTISAMPLE, att.id, 0);
-		break;
-	case tex2d_array:
-		glFramebufferTextureLayer(GL_FRAMEBUFFER, slot,
-			att.id, 0, slice);
-		break;
-	case tex2d_array_msaa:
-		glFramebufferTexture3D(GL_FRAMEBUFFER, slot,
-			GL_TEXTURE_2D_MULTISAMPLE_ARRAY, att.id, 0, slice);
-		break;
-	case rbo:
-	case rbo_msaa:
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, slot,
-			GL_RENDERBUFFER, att.id);
-		break;
-	default:
-		fatal("FBO %i: Invalid target enum %i", att.id, att.target);
-	}
-}
-
-t_fbo& t_fbo::attach_color (const t_attachment& att, int idx, int slice)
-{
-	assert(idx >= 0 && idx < num_clr_attachments);
-
-	if (color[idx].id != -1) {
-		warning("Replacing existing color attachment #%i on FBO %i "
-			"(was texture %i, now texture %i)",
-			idx, id, color[idx].id, att.id);
-	}
-
-	assert_dimensions_equal(*this, att);
-	glBindFramebuffer(GL_FRAMEBUFFER, id);
-	color[idx] = att;
-	attach_low(*this, att, GL_COLOR_ATTACHMENT0 + idx, slice);
-	return *this;
-}
-
-t_fbo& t_fbo::attach_depth (const t_attachment& att, int slice)
-{
-	if (depth.id != -1)
-		warning("Replacing existing depth attachment on FBO %i", id);
-
-	assert_dimensions_equal(*this, att);
-	glBindFramebuffer(GL_FRAMEBUFFER, id);
-	attach_low(*this, att, GL_DEPTH_ATTACHMENT, slice);
-	depth = att;
-	return *this;
-}
 
 t_fbo& t_fbo::make ()
 {
@@ -105,43 +35,84 @@ t_fbo& t_fbo::assert_complete ()
 	return *this;
 }
 
-void t_attachment::update (int w, int h, int new_depth, int new_samples)
-{
-	width = w;
-	height = h;
-	depth = new_depth;
-	samples = new_samples;
 
-	switch (target) {
+static void attach_low (t_fbo& fbo, t_fbo::t_attachment_ptr att,
+			GLenum slot, int slice)
+{
+	if ((fbo.width != 0 && att->width != fbo.width)
+	|| (fbo.height != 0 && att->height != fbo.height)) {
+		fatal("Tried to attach object with dimensions %i, %i "
+			"to FBO with dimensions %i, %i",
+			att->width, att->height, fbo.width, fbo.height);
+	}
+	fbo.width = att->width;
+	fbo.height = att->height;
+
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo.id);
+
+	switch (att->target) {
 	case tex2d:
-		glTexImage2D(GL_TEXTURE_2D, 0, pixel_type_combined, w, h, 0,
-				GL_RED, GL_FLOAT, nullptr);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, slot,
+			GL_TEXTURE_2D, att->id, 0);
 		break;
 	case tex2d_msaa:
-		glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE,
-				samples, pixel_type_combined, w, h, GL_TRUE);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, slot,
+			GL_TEXTURE_2D_MULTISAMPLE, att->id, 0);
 		break;
 	case tex2d_array:
-		glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, pixel_type_combined,
-				w, h, depth, 0, pixel_components,
-				pixel_type, nullptr);
+		glFramebufferTextureLayer(GL_FRAMEBUFFER, slot,
+			att->id, 0, slice);
 		break;
 	case tex2d_array_msaa:
-		glTexImage3DMultisample(GL_TEXTURE_2D_MULTISAMPLE_ARRAY,
-				samples, pixel_type_combined, w, h,
-				depth, GL_TRUE);
+		glFramebufferTexture3D(GL_FRAMEBUFFER, slot,
+			GL_TEXTURE_2D_MULTISAMPLE_ARRAY, att->id, 0, slice);
 		break;
 	case rbo:
-		glRenderbufferStorage(GL_RENDERBUFFER,
-				pixel_type_combined, w, h);
-		break;
 	case rbo_msaa:
-		glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples,
-				pixel_type_combined, w, h);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, slot,
+			GL_RENDERBUFFER, att->id);
 		break;
 	default:
-		fatal("Attachment %i: Invalid target enum %i", id, target);
+		fatal("FBO %i, attachment id %i: invalid target enum %i",
+			fbo.id, att->id, att->target);
 	}
+}
+
+t_fbo& t_fbo::attach_color (t_attachment* att, int idx, short slice)
+{
+	assert(idx >= 0 && idx < num_clr_attachments);
+
+	if (color[idx].taken()) {
+		warning("Replacing existing color attachment #%i on FBO %i "
+			"(was object %i, now object %i)",
+			idx, id, color[idx]->id, att->id);
+	}
+	color[idx] = { att, slice };
+	attach_low(*this, color[idx], GL_COLOR_ATTACHMENT0 + idx, slice);
+	return *this;
+}
+
+t_fbo& t_fbo::attach_depth (t_attachment* att, short slice)
+{
+	if (depth.taken()) {
+		warning("Replacing existing depth attachment on FBO %i"
+			"(was object %i, now object %i)",
+			id, depth->id, att->id);
+	}
+	depth = { att, slice };
+	attach_low(*this, depth, GL_DEPTH_ATTACHMENT, slice);
+	return *this;
+}
+
+void t_fbo::clear_color (int idx)
+{
+	assert(idx >= 0 && idx < num_clr_attachments);
+	color[idx] = { nullptr, 0 };
+}
+
+void t_fbo::clear_depth ()
+{
+	depth = { nullptr, 0 };
 }
 
 /*
@@ -149,22 +120,22 @@ void t_attachment::update (int w, int h, int new_depth, int new_samples)
  */
 
 std::pair<GLenum, GLenum> dissect_sized_type (GLenum);
-static inline void store_pixel_type (t_attachment& att, GLenum combined)
+static inline void store_pixel_type (t_attachment* att, GLenum combined)
 {
 	auto p = dissect_sized_type(combined);
-	att.pixel_type = p.second;
-	att.pixel_components = p.first;
-	att.pixel_type_combined = combined;
+	att->pixel_type = p.second;
+	att->pixel_components = p.first;
+	att->pixel_type_combined = combined;
 }
 
-t_attachment make_tex2d (int w, int h, GLenum internal_type)
+t_attachment* make_tex2d (int w, int h, GLenum internal_type)
 {
-	t_attachment r(w, h, tex2d);
+	auto r = new t_attachment(w, h, tex2d);
 	store_pixel_type(r, internal_type);
 
 	constexpr GLenum target = GL_TEXTURE_2D;
-	glGenTextures(1, &r.id);
-	glBindTexture(target, r.id);
+	glGenTextures(1, &r->id);
+	glBindTexture(target, r->id);
 
 	glTexParameteri(target, GL_GENERATE_MIPMAP, GL_FALSE);
 	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -172,38 +143,40 @@ t_attachment make_tex2d (int w, int h, GLenum internal_type)
 	glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-	glTexImage2D(target, 0, internal_type, w, h, 0,
-			r.pixel_components, r.pixel_type, nullptr);
+	glTextureStorage2D(r->id, 1, r->pixel_type_combined,
+			r->width, r->height);
+
 	return r;
 }
 
-t_attachment make_tex2d_msaa (int w, int h, GLenum internal_type, int samples)
+t_attachment* make_tex2d_msaa (int w, int h,
+		GLenum internal_type, short samples)
 {
-	t_attachment r(w, h, tex2d_msaa);
+	auto r = new t_attachment(w, h, tex2d_msaa);
 	store_pixel_type(r, internal_type);
-	r.samples = samples;
+	r->samples = samples;
 
 	constexpr GLenum target = GL_TEXTURE_2D_MULTISAMPLE;
 
-	glGenTextures(1, &r.id);
-	glBindTexture(target, r.id);
+	glGenTextures(1, &r->id);
+	glBindTexture(target, r->id);
 
-	glTexImage2DMultisample(target, samples,
-			r.pixel_type_combined, w, h, GL_TRUE);
+	glTextureStorage2DMultisample(r->id, r->samples,
+			r->pixel_type_combined, r->width, r->height, true);
 
 	return r;
 }
 
-t_attachment make_tex2d_array (int w, int h, int d, GLenum internal_type)
+t_attachment* make_tex2d_array (int w, int h, int d, GLenum internal_type)
 {
-	t_attachment r(w, h, tex2d_array);
-	r.depth = d;
+	auto r = new t_attachment(w, h, tex2d_array);
+	r->depth = d;
 	store_pixel_type(r, internal_type);
 
 	constexpr GLenum target = GL_TEXTURE_2D_ARRAY;
 
-	glGenTextures(1, &r.id);
-	glBindTexture(target, r.id);
+	glGenTextures(1, &r->id);
+	glBindTexture(target, r->id);
 
 	glTexParameteri(target, GL_GENERATE_MIPMAP, GL_FALSE);
 	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -211,57 +184,59 @@ t_attachment make_tex2d_array (int w, int h, int d, GLenum internal_type)
 	glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-	glTexImage3D(target, 0, internal_type, w, h, d, 0,
-			r.pixel_components, r.pixel_type, nullptr);
+	glTextureStorage3D(r->id, 1, r->pixel_type_combined, w, h, d);
 
 	return r;
 }
 
-t_attachment make_tex2d_array_msaa (int w, int h, int d,
-		GLenum internal_type, int samples)
+t_attachment* make_tex2d_array_msaa (int w, int h, int d,
+		GLenum internal_type, short samples)
 {
-	t_attachment r(w, h, tex2d_array_msaa);
+	auto r = new t_attachment(w, h, tex2d_array_msaa);
 	store_pixel_type(r, internal_type);
-	r.depth = d;
-	r.samples = samples;
+	r->depth = d;
+	r->samples = samples;
 
 	constexpr GLenum target = GL_TEXTURE_2D_MULTISAMPLE_ARRAY;
 
-	glGenTextures(1, &r.id);
-	glBindTexture(target, r.id);
+	glGenTextures(1, &r->id);
+	glBindTexture(target, r->id);
 
-	glTexImage3DMultisample(target, samples,
-			r.pixel_type_combined, w, h, d, GL_TRUE);
+	glTextureStorage3DMultisample(r->id, r->samples,
+			r->pixel_type_combined, w, h, d, true);
 
 	return r;
 }
 
-t_attachment make_rbo (int w, int h, GLenum internal_type)
+t_attachment* make_rbo (int w, int h, GLenum internal_type)
 {
-	t_attachment r(w, h, rbo);
+	auto r = new t_attachment(w, h, rbo);
 	store_pixel_type(r, internal_type);
 
 	constexpr GLenum target = GL_RENDERBUFFER;
-	glGenRenderbuffers(1, &r.id);
-	glBindRenderbuffer(target, r.id);
-	glRenderbufferStorage(target, r.pixel_type_combined, w, h);
+	glGenRenderbuffers(1, &r->id);
+	glBindRenderbuffer(target, r->id);
+
+	glRenderbufferStorage(target, r->pixel_type_combined, w, h);
 	return r;
 }
 
-t_attachment make_rbo_msaa (int w, int h,
-		GLenum internal_type, int samples)
+t_attachment* make_rbo_msaa (int w, int h,
+		GLenum internal_type, short samples)
 {
-	t_attachment r(w, h, rbo_msaa);
+	auto r = new t_attachment(w, h, rbo_msaa);
 	store_pixel_type(r, internal_type);
-	r.samples = samples;
+	r->samples = samples;
 
 	constexpr GLenum target = GL_RENDERBUFFER;
-	glGenRenderbuffers(1, &r.id);
-	glBindRenderbuffer(target, r.id);
-	glRenderbufferStorageMultisample(target, samples,
-			r.pixel_type_combined, w, h);
+	glGenRenderbuffers(1, &r->id);
+	glBindRenderbuffer(target, r->id);
+
+	glRenderbufferStorageMultisample(target, r->samples,
+			r->pixel_type_combined, w, h);
 	return r;
 }
+
 
 /* ========================================================= */
 
@@ -321,19 +296,4 @@ void sspace_add_buffer (t_fbo& fbo)
 
 void sspace_resize_buffers (int w, int h)
 {
-	std::set<GLuint> already_updated;
-
-	auto upd = [&] (t_attachment& att)
-	-> void {
-		if (att.id == -1 || already_updated.count(att.id))
-			return;
-		att.update(w, h, att.depth, att.samples);
-		already_updated.insert(att.id);
-	};
-
-	for (t_fbo* fbo: ssbuffers) {
-		for (t_attachment& col: fbo->color)
-			upd(col);
-		upd(fbo->depth);
-	}
 }

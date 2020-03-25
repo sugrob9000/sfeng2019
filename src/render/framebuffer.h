@@ -42,7 +42,6 @@ struct t_attachment
 {
 	t_attachment (int w, int h, att_target_enum tgt)
 		: width(w), height(h), target(tgt) { }
-	t_attachment (): id(-1) { }
 
 	GLuint id;
 
@@ -53,26 +52,25 @@ struct t_attachment
 	int width = 0;
 	int height = 0;
 
-	int depth = 1; /* Only relevant in 3D targets */
-	uint8_t samples = 1; /* Only relevant in MSAA targets */
+	short depth = 1; /* Only relevant in 3D targets */
+	short samples = 1; /* Only relevant in MSAA targets */
 	att_target_enum target;
-
-	void update (int w, int h, int depth, int samples);
 };
 
-/*
- * Functions to make an attachment. Different attachments require different
- * parameters with which to be made - the number of samples,
- * 1/2/3 dimensions (TODO for 1D and 3D textures), etc.
- */
-t_attachment make_tex2d (int w, int h, GLenum internal_type);
-t_attachment make_tex2d_msaa (int w, int h, GLenum internal_type, int samples);
-t_attachment make_tex2d_array (int w, int h, int d, GLenum internal_type);
-t_attachment make_tex2d_array_msaa (int w, int h, int d,
-		GLenum internal_type, int samples);
-t_attachment make_rbo (int w, int h, GLenum internal_type);
-t_attachment make_rbo_msaa (int w, int h, GLenum internal_type, int samples);
 
+/*
+ * Allocate and make an attachment. Different attachments require different
+ * parameters with which to be made - the number of samples, dimensions, etc.
+ */
+t_attachment* make_tex2d (int w, int h, GLenum internal_type);
+t_attachment* make_tex2d_msaa (int w, int h,
+		GLenum internal_type, short samples);
+t_attachment* make_tex2d_array (int w, int h, int d, GLenum internal_type);
+t_attachment* make_tex2d_array_msaa (int w, int h, int d,
+		GLenum internal_type, short samples);
+t_attachment* make_rbo (int w, int h, GLenum internal_type);
+t_attachment* make_rbo_msaa (int w, int h,
+		GLenum internal_type, short samples);
 
 /*
  * In all functions, slice only matters when the target is 3D
@@ -86,17 +84,31 @@ struct t_fbo
 
 	constexpr static int num_clr_attachments = 8;
 
-	std::array<t_attachment, num_clr_attachments> color;
-	t_attachment depth;
+	struct t_attachment_ptr {
+		t_attachment* _ptr = nullptr;
+
+		/* Which slice of a 3D texture this FBO uses */
+		short slice_used = 0;
+
+		bool taken () const { return _ptr != nullptr; }
+		t_attachment& operator* () { return *_ptr; }
+		t_attachment* operator-> () { return _ptr; }
+	};
+
+	std::array<t_attachment_ptr, num_clr_attachments> color;
+	t_attachment_ptr depth;
 
 	t_fbo& make ();
-	void bind () { glBindFramebuffer(GL_FRAMEBUFFER, id); }
-	void apply () { bind(); glViewport(0, 0, width, height); }
 	t_fbo& assert_complete ();
 
-	t_fbo& attach_color (const t_attachment& att, int idx = 0,
-			int slice = 0);
-	t_fbo& attach_depth (const t_attachment& att, int slice = 0);
+	t_fbo& attach_color (t_attachment* att, int idx = 0, short slice = 0);
+	t_fbo& attach_depth (t_attachment* att, short slice = 0);
+
+	void clear_color (int idx = 0);
+	void clear_depth ();
+
+	void bind () { glBindFramebuffer(GL_FRAMEBUFFER, id); }
+	void apply () { bind(); glViewport(0, 0, width, height); }
 };
 
 

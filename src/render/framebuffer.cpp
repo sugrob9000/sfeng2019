@@ -327,4 +327,69 @@ void sspace_add_buffer (t_fbo& fbo)
 
 void sspace_resize_buffers (int w, int h)
 {
+	auto del = [&] (const t_attachment* a) -> void {
+		if (a == nullptr)
+			return;
+
+		switch (a->target) {
+		case tex2d:
+		case tex2d_msaa:
+		case tex2d_array:
+		case tex2d_array_msaa:
+			glDeleteTextures(1, &a->id);
+			break;
+		case rbo:
+		case rbo_msaa:
+			glDeleteRenderbuffers(1, &a->id);
+			break;
+		default:
+			break;
+		}
+	};
+
+	for (const t_fbo* fbo: ssbuffers) {
+		for (const auto& p: fbo->color)
+			del(p._ptr);
+		del(fbo->depth._ptr);
+	}
+
+	std::set<t_attachment*> updated;
+
+	auto upd = [&] (t_attachment* a) -> void {
+		if (updated.count(a) > 0)
+			return;
+
+		// leave the rest of the parameters as were
+		a->width = w;
+		a->height = h;
+
+		// this will regenerate the actual texture that has
+		// just been deleted. it's populated with the right data
+		attachment_finalize(a);
+	};
+
+	for (t_fbo* fbo: ssbuffers) {
+		fbo->width = w;
+		fbo->height = h;
+
+		for (int i = 0; i < t_fbo::num_clr_attachments; i++) {
+			t_fbo::t_attachment_ptr p = fbo->color[i];
+
+			if (!p.taken())
+				continue;
+
+			fbo->clear_color(i);
+			upd(p._ptr);
+			fbo->attach_color(p._ptr, i, p.slice_used);
+		}
+
+		t_fbo::t_attachment_ptr p = fbo->depth;
+
+		if (!p.taken())
+			continue;
+
+		fbo->clear_depth();
+		upd(p._ptr);
+		fbo->attach_depth(p._ptr, p.slice_used);
+	}
 }

@@ -33,6 +33,8 @@ enum att_target_enum: uint8_t
 	tex2d, tex2d_msaa,
 	tex2d_array, tex2d_array_msaa,
 	rbo, rbo_msaa,
+
+	num_attachment_targets
 };
 
 /*
@@ -40,23 +42,27 @@ enum att_target_enum: uint8_t
  */
 struct t_attachment
 {
-	t_attachment (int w, int h, att_target_enum tgt)
-		: width(w), height(h), target(tgt) { }
-
-	GLuint id;
+	GLuint id = -1;
 
 	GLenum pixel_type_combined; /* GL_RGBA32F etc. */
 	GLenum pixel_components; /* GL_RGBA etc. */
 	GLenum pixel_type; /* GL_FLOAT etc. */
+	/* Above format storage is redundant; combined is authority */
 
 	int width = 0;
 	int height = 0;
 
 	short depth = 1; /* Only relevant in 3D targets */
 	short samples = 1; /* Only relevant in MSAA targets */
-	att_target_enum target;
+	att_target_enum target = num_attachment_targets;
 };
 
+
+/*
+ * Make a correct attachment out of the given struct,
+ * which is allocated and populated by caller; fills in ID
+ */
+t_attachment* attachment_finalize (t_attachment*);
 
 /*
  * Allocate and make an attachment. Different attachments require different
@@ -75,7 +81,6 @@ t_attachment* make_rbo_msaa (int w, int h,
 /*
  * In all functions, slice only matters when the target is 3D
  */
-
 struct t_fbo
 {
 	GLuint id;

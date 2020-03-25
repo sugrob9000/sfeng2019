@@ -119,122 +119,153 @@ void t_fbo::clear_depth ()
  * ================= Making different attachments =================
  */
 
-std::pair<GLenum, GLenum> dissect_sized_type (GLenum);
-static inline void store_pixel_type (t_attachment* att, GLenum combined)
+static void generate_tex2d (t_attachment& a)
 {
-	auto p = dissect_sized_type(combined);
-	att->pixel_type = p.second;
-	att->pixel_components = p.first;
-	att->pixel_type_combined = combined;
+	glGenTextures(1, &a.id);
+	glBindTexture(GL_TEXTURE_2D, a.id);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, false);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	glTextureStorage2D(a.id, 1, a.pixel_type_combined, a.width, a.height);
 }
 
-t_attachment* make_tex2d (int w, int h, GLenum internal_type)
+static void generate_tex2d_msaa (t_attachment& a)
 {
-	auto r = new t_attachment(w, h, tex2d);
-	store_pixel_type(r, internal_type);
-
-	constexpr GLenum target = GL_TEXTURE_2D;
-	glGenTextures(1, &r->id);
-	glBindTexture(target, r->id);
-
-	glTexParameteri(target, GL_GENERATE_MIPMAP, GL_FALSE);
-	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-	glTextureStorage2D(r->id, 1, r->pixel_type_combined,
-			r->width, r->height);
-
-	return r;
+	glGenTextures(1, &a.id);
+	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, a.id);
+	glTextureStorage2DMultisample(a.id, a.samples,
+			a.pixel_type_combined, a.width, a.height, true);
 }
 
-t_attachment* make_tex2d_msaa (int w, int h,
-		GLenum internal_type, short samples)
+static void generate_tex2d_array (t_attachment& a)
 {
-	auto r = new t_attachment(w, h, tex2d_msaa);
-	store_pixel_type(r, internal_type);
-	r->samples = samples;
+	glGenTextures(1, &a.id);
+	glBindTexture(GL_TEXTURE_2D_ARRAY, a.id);
 
-	constexpr GLenum target = GL_TEXTURE_2D_MULTISAMPLE;
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_GENERATE_MIPMAP, false);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S,
+			GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T,
+			GL_CLAMP_TO_EDGE);
 
-	glGenTextures(1, &r->id);
-	glBindTexture(target, r->id);
-
-	glTextureStorage2DMultisample(r->id, r->samples,
-			r->pixel_type_combined, r->width, r->height, true);
-
-	return r;
+	glTextureStorage3D(a.id, 1, a.pixel_type_combined,
+			a.width, a.height, a.depth);
 }
 
-t_attachment* make_tex2d_array (int w, int h, int d, GLenum internal_type)
+static void generate_tex2d_array_msaa (t_attachment& a)
 {
-	auto r = new t_attachment(w, h, tex2d_array);
-	r->depth = d;
-	store_pixel_type(r, internal_type);
+	glGenTextures(1, &a.id);
+	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE_ARRAY, a.id);
 
-	constexpr GLenum target = GL_TEXTURE_2D_ARRAY;
+	glTextureStorage3DMultisample(a.id, a.samples, a.pixel_type_combined,
+			a.width, a.height, a.depth, true);
+}
 
-	glGenTextures(1, &r->id);
-	glBindTexture(target, r->id);
+static void generate_rbo (t_attachment& a)
+{
+	glGenRenderbuffers(1, &a.id);
+	glBindRenderbuffer(GL_RENDERBUFFER, a.id);
+	glRenderbufferStorage(GL_RENDERBUFFER, a.pixel_type_combined,
+			a.width, a.height);
+}
 
-	glTexParameteri(target, GL_GENERATE_MIPMAP, GL_FALSE);
-	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+static void generate_rbo_msaa (t_attachment& a)
+{
+	glGenRenderbuffers(1, &a.id);
+	glBindRenderbuffer(GL_RENDERBUFFER, a.id);
+	glRenderbufferStorageMultisample(GL_RENDERBUFFER, a.samples,
+			a.pixel_type_combined, a.width, a.height);
+}
 
-	glTextureStorage3D(r->id, 1, r->pixel_type_combined, w, h, d);
+inline t_attachment* attachment_finalize (t_attachment* a)
+{
+	extern std::pair<GLenum, GLenum> dissect_sized_type (GLenum);
+	auto cp = dissect_sized_type(a->pixel_type_combined);
+	a->pixel_components = cp.first;
+	a->pixel_type = cp.second;
 
-	return r;
+	static void (*const gen[num_attachment_targets]) (t_attachment&) =
+		{ generate_tex2d,
+		  generate_tex2d_msaa,
+		  generate_tex2d_array,
+		  generate_tex2d_array_msaa,
+		  generate_rbo,
+		  generate_rbo_msaa };
+
+	gen[a->target](*a);
+	return a;
+}
+
+
+t_attachment* make_tex2d (int w, int h, GLenum t)
+{
+	auto p = new t_attachment;
+	p->width = w;
+	p->height = h;
+	p->pixel_type_combined = t;
+	p->target = tex2d;
+	return attachment_finalize(p);
+}
+
+t_attachment* make_tex2d_msaa (int w, int h, GLenum t, short samples)
+{
+	auto p = new t_attachment;
+	p->width = w;
+	p->height = h;
+	p->pixel_type_combined = t;
+	p->samples = samples;
+	p->target = tex2d_msaa;
+	return attachment_finalize(p);
+}
+
+t_attachment* make_tex2d_array (int w, int h, int d, GLenum t)
+{
+	auto p = new t_attachment;
+	p->width = w;
+	p->height = h;
+	p->depth = d;
+	p->pixel_type_combined = t;
+	p->target = tex2d_array;
+	return attachment_finalize(p);
 }
 
 t_attachment* make_tex2d_array_msaa (int w, int h, int d,
-		GLenum internal_type, short samples)
+		GLenum t, short samples)
 {
-	auto r = new t_attachment(w, h, tex2d_array_msaa);
-	store_pixel_type(r, internal_type);
-	r->depth = d;
-	r->samples = samples;
-
-	constexpr GLenum target = GL_TEXTURE_2D_MULTISAMPLE_ARRAY;
-
-	glGenTextures(1, &r->id);
-	glBindTexture(target, r->id);
-
-	glTextureStorage3DMultisample(r->id, r->samples,
-			r->pixel_type_combined, w, h, d, true);
-
-	return r;
+	auto p = new t_attachment;
+	p->width = w;
+	p->height = h;
+	p->depth = d;
+	p->samples = samples;
+	p->pixel_type_combined = t;
+	p->target = tex2d_array_msaa;
+	return attachment_finalize(p);
 }
 
-t_attachment* make_rbo (int w, int h, GLenum internal_type)
+t_attachment* make_rbo (int w, int h, GLenum t)
 {
-	auto r = new t_attachment(w, h, rbo);
-	store_pixel_type(r, internal_type);
-
-	constexpr GLenum target = GL_RENDERBUFFER;
-	glGenRenderbuffers(1, &r->id);
-	glBindRenderbuffer(target, r->id);
-
-	glRenderbufferStorage(target, r->pixel_type_combined, w, h);
-	return r;
+	auto p = new t_attachment;
+	p->width = w;
+	p->height = h;
+	p->pixel_type_combined = t;
+	p->target = rbo;
+	return attachment_finalize(p);
 }
 
-t_attachment* make_rbo_msaa (int w, int h,
-		GLenum internal_type, short samples)
+t_attachment* make_rbo_msaa (int w, int h, GLenum t, short samples)
 {
-	auto r = new t_attachment(w, h, rbo_msaa);
-	store_pixel_type(r, internal_type);
-	r->samples = samples;
-
-	constexpr GLenum target = GL_RENDERBUFFER;
-	glGenRenderbuffers(1, &r->id);
-	glBindRenderbuffer(target, r->id);
-
-	glRenderbufferStorageMultisample(target, r->samples,
-			r->pixel_type_combined, w, h);
-	return r;
+	auto p = new t_attachment;
+	p->width = w;
+	p->height = h;
+	p->pixel_type_combined = t;
+	p->target = rbo_msaa;
+	return attachment_finalize(p);
 }
 
 

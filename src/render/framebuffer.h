@@ -33,8 +33,6 @@ enum att_target_enum: uint8_t
 	tex2d, tex2d_msaa,
 	tex2d_array, tex2d_array_msaa,
 	rbo, rbo_msaa,
-
-	num_attachment_targets
 };
 
 /*
@@ -54,7 +52,7 @@ struct t_attachment
 
 	short depth = 1; /* Only relevant in 3D targets */
 	short samples = 1; /* Only relevant in MSAA targets */
-	att_target_enum target = num_attachment_targets;
+	att_target_enum target;
 };
 
 

@@ -119,70 +119,6 @@ void t_fbo::clear_depth ()
  * ================= Making different attachments =================
  */
 
-static void generate_tex2d (t_attachment& a)
-{
-	glGenTextures(1, &a.id);
-	glBindTexture(GL_TEXTURE_2D, a.id);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, false);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-	glTextureStorage2D(a.id, 1, a.pixel_type_combined, a.width, a.height);
-}
-
-static void generate_tex2d_msaa (t_attachment& a)
-{
-	glGenTextures(1, &a.id);
-	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, a.id);
-	glTextureStorage2DMultisample(a.id, a.samples,
-			a.pixel_type_combined, a.width, a.height, true);
-}
-
-static void generate_tex2d_array (t_attachment& a)
-{
-	glGenTextures(1, &a.id);
-	glBindTexture(GL_TEXTURE_2D_ARRAY, a.id);
-
-	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_GENERATE_MIPMAP, false);
-	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S,
-			GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T,
-			GL_CLAMP_TO_EDGE);
-
-	glTextureStorage3D(a.id, 1, a.pixel_type_combined,
-			a.width, a.height, a.depth);
-}
-
-static void generate_tex2d_array_msaa (t_attachment& a)
-{
-	glGenTextures(1, &a.id);
-	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE_ARRAY, a.id);
-
-	glTextureStorage3DMultisample(a.id, a.samples, a.pixel_type_combined,
-			a.width, a.height, a.depth, true);
-}
-
-static void generate_rbo (t_attachment& a)
-{
-	glGenRenderbuffers(1, &a.id);
-	glBindRenderbuffer(GL_RENDERBUFFER, a.id);
-	glRenderbufferStorage(GL_RENDERBUFFER, a.pixel_type_combined,
-			a.width, a.height);
-}
-
-static void generate_rbo_msaa (t_attachment& a)
-{
-	glGenRenderbuffers(1, &a.id);
-	glBindRenderbuffer(GL_RENDERBUFFER, a.id);
-	glRenderbufferStorageMultisample(GL_RENDERBUFFER, a.samples,
-			a.pixel_type_combined, a.width, a.height);
-}
-
 inline t_attachment* attachment_finalize (t_attachment* a)
 {
 	extern std::pair<GLenum, GLenum> dissect_sized_type (GLenum);
@@ -190,15 +126,61 @@ inline t_attachment* attachment_finalize (t_attachment* a)
 	a->pixel_components = cp.first;
 	a->pixel_type = cp.second;
 
-	static void (*const gen[num_attachment_targets]) (t_attachment&) =
-		{ generate_tex2d,
-		  generate_tex2d_msaa,
-		  generate_tex2d_array,
-		  generate_tex2d_array_msaa,
-		  generate_rbo,
-		  generate_rbo_msaa };
+	GLenum t;
+	switch (a->target) {
+	case tex2d:
+		t = GL_TEXTURE_2D;
+		glGenTextures(1, &a->id);
+		glBindTexture(t, a->id);
+		glTexParameteri(t, GL_GENERATE_MIPMAP, false);
+		glTexParameteri(t, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(t, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(t, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(t, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTextureStorage2D(a->id, 1, a->pixel_type_combined,
+				a->width, a->height);
+		break;
+	case tex2d_msaa:
+		t = GL_TEXTURE_2D_MULTISAMPLE;
+		glGenTextures(1, &a->id);
+		glBindTexture(t, a->id);
+		glTextureStorage2DMultisample(a->id, a->samples,
+				a->pixel_type_combined,
+				a->width, a->height, true);
+		break;
+	case tex2d_array:
+		t = GL_TEXTURE_2D_ARRAY;
+		glGenTextures(1, &a->id);
+		glBindTexture(t, a->id);
+		glTexParameteri(t, GL_GENERATE_MIPMAP, false);
+		glTexParameteri(t, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(t, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(t, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(t, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTextureStorage3D(a->id, 1, a->pixel_type_combined,
+				a->width, a->height, a->depth);
+		break;
+	case tex2d_array_msaa:
+		glGenTextures(1, &a->id);
+		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE_ARRAY, a->id);
+		glTextureStorage3DMultisample(a->id, a->samples,
+				a->pixel_type_combined,
+				a->width, a->height, a->depth, true);
+		break;
+	case rbo:
+		glGenRenderbuffers(1, &a->id);
+		glBindRenderbuffer(GL_RENDERBUFFER, a->id);
+		glRenderbufferStorage(GL_RENDERBUFFER, a->pixel_type_combined,
+				a->width, a->height);
+		break;
+	case rbo_msaa:
+		glGenRenderbuffers(1, &a->id);
+		glBindRenderbuffer(GL_RENDERBUFFER, a->id);
+		glRenderbufferStorageMultisample(GL_RENDERBUFFER, a->samples,
+				a->pixel_type_combined, a->width, a->height);
+		break;
+	}
 
-	gen[a->target](*a);
 	return a;
 }
 
@@ -330,7 +312,6 @@ void sspace_resize_buffers (int w, int h)
 	auto del = [&] (const t_attachment* a) -> void {
 		if (a == nullptr)
 			return;
-
 		switch (a->target) {
 		case tex2d:
 		case tex2d_msaa:
@@ -341,8 +322,6 @@ void sspace_resize_buffers (int w, int h)
 		case rbo:
 		case rbo_msaa:
 			glDeleteRenderbuffers(1, &a->id);
-			break;
-		default:
 			break;
 		}
 	};
@@ -356,8 +335,9 @@ void sspace_resize_buffers (int w, int h)
 	std::set<t_attachment*> updated;
 
 	auto upd = [&] (t_attachment* a) -> void {
-		if (updated.count(a) > 0)
+		if (updated.count(a))
 			return;
+		updated.insert(a);
 
 		// leave the rest of the parameters as were
 		a->width = w;
@@ -374,7 +354,6 @@ void sspace_resize_buffers (int w, int h)
 
 		for (int i = 0; i < t_fbo::num_clr_attachments; i++) {
 			t_fbo::t_attachment_ptr p = fbo->color[i];
-
 			if (!p.taken())
 				continue;
 
@@ -384,7 +363,6 @@ void sspace_resize_buffers (int w, int h)
 		}
 
 		t_fbo::t_attachment_ptr p = fbo->depth;
-
 		if (!p.taken())
 			continue;
 

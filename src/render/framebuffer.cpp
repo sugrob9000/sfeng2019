@@ -121,11 +121,6 @@ void t_fbo::clear_depth ()
 
 inline t_attachment* attachment_finalize (t_attachment* a)
 {
-	extern std::pair<GLenum, GLenum> dissect_sized_type (GLenum);
-	auto cp = dissect_sized_type(a->pixel_type_combined);
-	a->pixel_components = cp.first;
-	a->pixel_type = cp.second;
-
 	GLenum t;
 	switch (a->target) {
 	case tex2d:
@@ -137,7 +132,7 @@ inline t_attachment* attachment_finalize (t_attachment* a)
 		glTexParameteri(t, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(t, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(t, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTextureStorage2D(a->id, 1, a->pixel_type_combined,
+		glTextureStorage2D(a->id, 1, a->storage_type,
 				a->width, a->height);
 		break;
 	case tex2d_msaa:
@@ -145,8 +140,7 @@ inline t_attachment* attachment_finalize (t_attachment* a)
 		glGenTextures(1, &a->id);
 		glBindTexture(t, a->id);
 		glTextureStorage2DMultisample(a->id, a->samples,
-				a->pixel_type_combined,
-				a->width, a->height, true);
+				a->storage_type, a->width, a->height, true);
 		break;
 	case tex2d_array:
 		t = GL_TEXTURE_2D_ARRAY;
@@ -157,27 +151,27 @@ inline t_attachment* attachment_finalize (t_attachment* a)
 		glTexParameteri(t, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(t, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(t, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTextureStorage3D(a->id, 1, a->pixel_type_combined,
+		glTextureStorage3D(a->id, 1, a->storage_type,
 				a->width, a->height, a->depth);
 		break;
 	case tex2d_array_msaa:
 		glGenTextures(1, &a->id);
 		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE_ARRAY, a->id);
 		glTextureStorage3DMultisample(a->id, a->samples,
-				a->pixel_type_combined,
+				a->storage_type,
 				a->width, a->height, a->depth, true);
 		break;
 	case rbo:
 		glGenRenderbuffers(1, &a->id);
 		glBindRenderbuffer(GL_RENDERBUFFER, a->id);
-		glRenderbufferStorage(GL_RENDERBUFFER, a->pixel_type_combined,
-				a->width, a->height);
+		glRenderbufferStorage(GL_RENDERBUFFER,
+				a->storage_type, a->width, a->height);
 		break;
 	case rbo_msaa:
 		glGenRenderbuffers(1, &a->id);
 		glBindRenderbuffer(GL_RENDERBUFFER, a->id);
 		glRenderbufferStorageMultisample(GL_RENDERBUFFER, a->samples,
-				a->pixel_type_combined, a->width, a->height);
+				a->storage_type, a->width, a->height);
 		break;
 	}
 
@@ -190,7 +184,7 @@ t_attachment* make_tex2d (int w, int h, GLenum t)
 	auto p = new t_attachment;
 	p->width = w;
 	p->height = h;
-	p->pixel_type_combined = t;
+	p->storage_type = t;
 	p->target = tex2d;
 	return attachment_finalize(p);
 }
@@ -200,7 +194,7 @@ t_attachment* make_tex2d_msaa (int w, int h, GLenum t, short samples)
 	auto p = new t_attachment;
 	p->width = w;
 	p->height = h;
-	p->pixel_type_combined = t;
+	p->storage_type = t;
 	p->samples = samples;
 	p->target = tex2d_msaa;
 	return attachment_finalize(p);
@@ -212,7 +206,7 @@ t_attachment* make_tex2d_array (int w, int h, int d, GLenum t)
 	p->width = w;
 	p->height = h;
 	p->depth = d;
-	p->pixel_type_combined = t;
+	p->storage_type = t;
 	p->target = tex2d_array;
 	return attachment_finalize(p);
 }
@@ -225,7 +219,7 @@ t_attachment* make_tex2d_array_msaa (int w, int h, int d,
 	p->height = h;
 	p->depth = d;
 	p->samples = samples;
-	p->pixel_type_combined = t;
+	p->storage_type = t;
 	p->target = tex2d_array_msaa;
 	return attachment_finalize(p);
 }
@@ -235,7 +229,7 @@ t_attachment* make_rbo (int w, int h, GLenum t)
 	auto p = new t_attachment;
 	p->width = w;
 	p->height = h;
-	p->pixel_type_combined = t;
+	p->storage_type = t;
 	p->target = rbo;
 	return attachment_finalize(p);
 }
@@ -245,57 +239,9 @@ t_attachment* make_rbo_msaa (int w, int h, GLenum t, short samples)
 	auto p = new t_attachment;
 	p->width = w;
 	p->height = h;
-	p->pixel_type_combined = t;
+	p->storage_type = t;
 	p->target = rbo_msaa;
 	return attachment_finalize(p);
-}
-
-
-/* ========================================================= */
-
-/*
- * Map an OpenGL sized type to a component enum and type enum pair,
- * e.g.
- * GL_RGBA32F => { GL_RGBA, GL_FLOAT }
- */
-
-/*
- * GL_R is part of STRQ and not R, RG, RGB, RGBA, so it is incorrect to
- * use that. That would have been inconvenient for the below macros...
- */
-#undef GL_R
-#define GL_R GL_RED
-
-#define SIZED_TYPE(components, type, suffix) \
-	{ GL_##components##suffix, { GL_##components, GL_##type } }
-#define ALL_TYPES_FOR(c)                     \
-	SIZED_TYPE(c, FLOAT, 32F),           \
-	SIZED_TYPE(c, HALF_FLOAT, 16F),      \
-	SIZED_TYPE(c, BYTE, 8I),             \
-	SIZED_TYPE(c, UNSIGNED_BYTE, 8UI),   \
-	SIZED_TYPE(c, SHORT, 16I),           \
-	SIZED_TYPE(c, UNSIGNED_SHORT, 16UI), \
-	SIZED_TYPE(c, INT, 32I),             \
-	SIZED_TYPE(c, UNSIGNED_INT, 32UI),   \
-	{ GL_##c, { GL_##c, GL_UNSIGNED_BYTE } }
-
-static std::map<GLenum, std::pair<GLenum, GLenum>> sized_types =
-	{ ALL_TYPES_FOR(R),
-	  ALL_TYPES_FOR(RG),
-	  ALL_TYPES_FOR(RGB),
-	  ALL_TYPES_FOR(RGBA),
-	  SIZED_TYPE(DEPTH_COMPONENT, FLOAT, 32F),
-	  SIZED_TYPE(DEPTH_COMPONENT, HALF_FLOAT, 16),
-	  { GL_DEPTH_COMPONENT, { GL_DEPTH_COMPONENT, GL_FLOAT } } };
-
-std::pair<GLenum, GLenum> dissect_sized_type (GLenum sized)
-{
-	auto iter = sized_types.find(sized);
-	if (iter == sized_types.end()) {
-		fatal("Cannot convert sized type %x into components and type",
-				sized);
-	}
-	return iter->second;
 }
 
 /* ========================================================= */
@@ -309,9 +255,13 @@ void sspace_add_buffer (t_fbo& fbo)
 
 void sspace_resize_buffers (int w, int h)
 {
-	auto del = [&] (const t_attachment* a) -> void {
-		if (a == nullptr)
+	std::set<t_attachment*> updated;
+
+	auto upd = [&] (t_fbo::t_attachment_ptr& a) -> void {
+		if (updated.count(a.ptr))
 			return;
+		updated.insert(a.ptr);
+
 		switch (a->target) {
 		case tex2d:
 		case tex2d_msaa:
@@ -324,20 +274,6 @@ void sspace_resize_buffers (int w, int h)
 			glDeleteRenderbuffers(1, &a->id);
 			break;
 		}
-	};
-
-	for (const t_fbo* fbo: ssbuffers) {
-		for (const auto& p: fbo->color)
-			del(p._ptr);
-		del(fbo->depth._ptr);
-	}
-
-	std::set<t_attachment*> updated;
-
-	auto upd = [&] (t_attachment* a) -> void {
-		if (updated.count(a))
-			return;
-		updated.insert(a);
 
 		// leave the rest of the parameters as were
 		a->width = w;
@@ -345,7 +281,7 @@ void sspace_resize_buffers (int w, int h)
 
 		// this will regenerate the actual texture that has
 		// just been deleted. it's populated with the right data
-		attachment_finalize(a);
+		attachment_finalize(a.ptr);
 	};
 
 	for (t_fbo* fbo: ssbuffers) {
@@ -357,17 +293,17 @@ void sspace_resize_buffers (int w, int h)
 			if (!p.taken())
 				continue;
 
+			upd(p);
 			fbo->clear_color(i);
-			upd(p._ptr);
-			fbo->attach_color(p._ptr, i, p.slice_used);
+			fbo->attach_color(p.ptr, i, p.slice_used);
 		}
 
 		t_fbo::t_attachment_ptr p = fbo->depth;
 		if (!p.taken())
 			continue;
 
+		upd(p);
 		fbo->clear_depth();
-		upd(p._ptr);
-		fbo->attach_depth(p._ptr, p.slice_used);
+		fbo->attach_depth(p.ptr, p.slice_used);
 	}
 }

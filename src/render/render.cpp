@@ -37,6 +37,8 @@ void render_all ()
 
 	// HUD
 
+	debug_show_gbuffers();
+
 	if (console_active)
 		console_render();
 
@@ -102,7 +104,7 @@ void init_render ()
 	auto callback = [] (GLenum src, GLenum type, GLuint id,
 			GLenum severity, GLsizei len,
 			const char* msg, const void* param)
-		-> void { warning ("%s\n", msg); };
+		-> void { warning("%s\n", msg); };
 	glEnable(GL_DEBUG_OUTPUT);
 	glDebugMessageCallback(callback, nullptr);
 #endif

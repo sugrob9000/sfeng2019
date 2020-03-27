@@ -41,11 +41,7 @@ enum att_target_enum: uint8_t
 struct t_attachment
 {
 	GLuint id = -1;
-
-	GLenum pixel_type_combined; /* GL_RGBA32F etc. */
-	GLenum pixel_components; /* GL_RGBA etc. */
-	GLenum pixel_type; /* GL_FLOAT etc. */
-	/* Above format storage is redundant; combined is authority */
+	GLenum storage_type; /* GL_RGBA32F etc. */
 
 	int width = 0;
 	int height = 0;
@@ -88,14 +84,16 @@ struct t_fbo
 	constexpr static int num_clr_attachments = 8;
 
 	struct t_attachment_ptr {
-		t_attachment* _ptr = nullptr;
+		t_attachment* ptr = nullptr;
 
 		/* Which slice of a 3D texture this FBO uses */
 		short slice_used = 0;
 
-		bool taken () const { return _ptr != nullptr; }
-		t_attachment& operator* () { return *_ptr; }
-		t_attachment* operator-> () { return _ptr; }
+		bool taken () const { return ptr != nullptr; }
+		t_attachment& operator* () { return *ptr; }
+		t_attachment* operator-> () { return ptr; }
+		const t_attachment& operator* () const { return *ptr; }
+		const t_attachment* operator-> () const { return ptr; }
 	};
 
 	std::array<t_attachment_ptr, num_clr_attachments> color;

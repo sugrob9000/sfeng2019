@@ -3,6 +3,7 @@
 #include "render/material.h"
 #include "render/ctx.h"
 #include "render/vis.h"
+#include "input/cmds.h"
 
 t_fbo gbuf_fbo;
 
@@ -31,4 +32,17 @@ void fill_gbuffers ()
 
 	render_ctx.stage = G_BUFFERS;
 	visible_set.render();
+}
+
+static bool show_gbuffers = false;
+COMMAND_SET_BOOL (show_gbuf, show_gbuffers);
+
+void debug_show_gbuffers ()
+{
+	if (show_gbuffers) {
+		debug_render_texture(gbuf_fbo.color[MRT_SLOT_WORLD_POS]->id,
+				0.5, 0.5, 0.5);
+		debug_render_texture(gbuf_fbo.color[MRT_SLOT_WORLD_NORM]->id,
+				0.5, 0.0, 0.5);
+	}
 }

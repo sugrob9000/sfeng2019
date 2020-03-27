@@ -75,6 +75,8 @@ COMMAND (vis_disable)
 /* Set lighting ambience color */
 COMMAND (light_ambience)
 
+COMMAND (show_gbuf)
+
 /*
  * (Demo) Tell the entity named "sun"
  * to have the same pos and ang as camera

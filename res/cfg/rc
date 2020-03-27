@@ -13,6 +13,8 @@ bind Left_Ctrl cam_decelerate
 
 bind E sun_at_view
 
+bind F show_gbuf
+
 windowsize 1024 768
 
 loadmap map1

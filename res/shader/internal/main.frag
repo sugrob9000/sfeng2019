@@ -11,9 +11,10 @@ vec3 surface_normal ();
 
 /* ================================================== */
 
-#define G_BUFFERS 0
-#define LIGHTING_LSPACE 1
-#define SHADE_FINAL 2
+#define RENDER_STAGE_G_BUFFERS 0
+#define RENDER_STAGE_LIGHTING_LSPACE 1
+#define RENDER_STAGE_SHADE_FINAL 2
+#define RENDER_STAGE_WIREFRAME 3
 layout (location = 0) uniform int stage;
 
 #define MRT_SLOT_WORLD_POS 0
@@ -30,22 +31,27 @@ vec4 light_lspace ();
 void main ()
 {
 	switch (stage) {
-	case G_BUFFERS:
+	case RENDER_STAGE_G_BUFFERS:
 
 		gl_FragData[MRT_SLOT_WORLD_POS].rgb = world_pos;
 		gl_FragData[MRT_SLOT_WORLD_NORM].rgb =
 			TBN * normalize(surface_normal());
 		break;
 
-	case LIGHTING_LSPACE:
+	case RENDER_STAGE_LIGHTING_LSPACE:
 
 		gl_FragColor = light_lspace();
 		break;
 
-	case SHADE_FINAL:
+	case RENDER_STAGE_SHADE_FINAL:
 
 		// call the actual user shader
 		gl_FragColor = surface_color();
+		break;
+
+	case RENDER_STAGE_WIREFRAME:
+
+		gl_FragColor = vec4(1.0, 0.0, 0.0, 0.5);
 		break;
 	}
 }

@@ -348,15 +348,20 @@ void vis_destroy_world ()
 
 
 bool debug_draw_wireframe = false;
-bool debug_draw_occ_planes = false;
-bool debug_draw_leaves = false;
-bool debug_draw_leaves_nodepth = true;
 COMMAND_SET_BOOL (vis_worldwireframe, debug_draw_wireframe);
-COMMAND_SET_BOOL (vis_occluders, debug_draw_occ_planes);
-COMMAND_SET_BOOL (vis_leaves, debug_draw_leaves);
-COMMAND_SET_BOOL (vis_leaves_nodepth, debug_draw_leaves_nodepth);
 
 void t_visible_set::render_debug () const
 {
-	// TODO
+	if (debug_draw_wireframe) {
+		glDisable(GL_CULL_FACE);
+		glDisable(GL_DEPTH_TEST);
+		glEnable(GL_BLEND);
+
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+		render_ctx.stage = RENDER_STAGE_WIREFRAME;
+		render();
+
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	}
 }

@@ -30,7 +30,7 @@ void fill_gbuffers ()
 	glEnable(GL_CULL_FACE);
 	glDisable(GL_BLEND);
 
-	render_ctx.stage = G_BUFFERS;
+	render_ctx.stage = RENDER_STAGE_G_BUFFERS;
 	visible_set.render();
 }
 

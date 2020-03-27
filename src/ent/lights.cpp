@@ -167,7 +167,7 @@ void fill_depth_map (const e_light* l)
 void compute_lighting ()
 {
 	for (e_light* l: lights) {
-		render_ctx.stage = LIGHTING_LSPACE;
+		render_ctx.stage = RENDER_STAGE_LIGHTING_LSPACE;
 		fill_depth_map(l);
 	}
 }

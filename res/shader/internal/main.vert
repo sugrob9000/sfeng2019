@@ -11,14 +11,16 @@ vec2 vertex_texcoord ();
 
 /* ========================================== */
 
-#define G_BUFFERS 0
-#define LIGHTING_LSPACE 1
-#define SHADE_FINAL 2
+#define RENDER_STAGE_G_BUFFERS 0
+#define RENDER_STAGE_LIGHTING_LSPACE 1
+#define RENDER_STAGE_SHADE_FINAL 2
+#define RENDER_STAGE_WIREFRAME 3
 layout (location = 0) uniform int stage;
 
 layout (location = 100) uniform mat4 proj;
 layout (location = 116) uniform mat4 view;
 layout (location = 132) uniform mat4 model;
+
 attribute vec3 tangent;
 
 out vec2 tex_crd;
@@ -39,7 +41,7 @@ void main ()
 	world_normal = (model * normal).xyz;
 	world_pos = (model * pos).xyz;
 
-	if (stage == G_BUFFERS) {
+	if (stage == RENDER_STAGE_G_BUFFERS) {
 		vec3 w_tangent = (model * vec4(tangent, 0.0)).xyz;
 		vec3 w_bitangent = cross(world_normal, w_tangent);
 		TBN = mat3(w_tangent, w_bitangent, world_normal);

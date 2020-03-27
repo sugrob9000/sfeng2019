@@ -30,7 +30,7 @@ void render_all ()
 	glViewport(0, 0, sdlctx.res_x, sdlctx.res_y);
 	glClear(GL_DEPTH_BUFFER_BIT);
 
-	render_ctx.stage = SHADE_FINAL;
+	render_ctx.stage = RENDER_STAGE_SHADE_FINAL;
 	render_sky();
 	visible_set.render();
 	visible_set.render_debug();
@@ -280,8 +280,8 @@ static GLuint debug_loc_xy_size;
 void init_debug ()
 {
 	debug_program = make_glsl_program(
-		{ get_vert_shader("internal/debug"),
-		  get_frag_shader("internal/debug") });
+		{ get_vert_shader("internal/debug/tex2d"),
+		  get_frag_shader("internal/debug/tex2d") });
 
 	glUseProgram(debug_program);
 	glUniform1i(glGetUniformLocation(debug_program, "tex"), 0);

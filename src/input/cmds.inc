@@ -66,7 +66,7 @@ COMMAND (loadmap)
 /*
  * Visibility debugging commands
  */
-COMMAND (vis_worldwireframe)
+COMMAND (vis_wireframe)
 COMMAND (vis_disable)
 
 /* Set lighting ambience color */

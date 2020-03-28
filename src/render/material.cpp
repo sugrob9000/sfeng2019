@@ -56,8 +56,8 @@ void t_material::load (const std::string& path)
 		bitmaps.push_back({ key, get_texture(value) });
 	}
 
-	shaders.push_back(get_frag_shader("internal/main"));
-	shaders.push_back(get_vert_shader("internal/main"));
+	shaders.push_back(get_frag_shader("internal/material"));
+	shaders.push_back(get_vert_shader("internal/material"));
 	program = make_glsl_program(shaders);
 	glUseProgram(program);
 
@@ -77,6 +77,8 @@ void t_material::load (const std::string& path)
 		glUniform1i(location, i++);
 		bitmap_texture_ids.push_back(d.texid);
 	}
+
+	light_init_material();
 }
 
 /* Material application is idempotent, so we can avoid redundancy */
@@ -97,13 +99,13 @@ void t_material::apply () const
 	glUseProgram(program);
 
 	for (int i = 0; i < bitmap_texture_ids.size(); i++) {
-		glActiveTexture(GL_TEXTURE0 + i + MAT_TEXTURE_SLOT_OFFSET);
-		glBindTexture(GL_TEXTURE_2D, bitmap_texture_ids[i]);
+		bind_tex2d_to_slot(MAT_TEXTURE_SLOT_OFFSET + i,
+				bitmap_texture_ids[i]);
 	}
 
 	render_ctx.submit_matrices();
 	glUniform1i(UNIFORM_LOC_RENDER_STAGE, render_ctx.stage);
-	light_apply_uniforms();
+	light_apply_material();
 }
 
 
@@ -181,9 +183,10 @@ GLuint make_glsl_program (const std::vector<GLuint>& shaders)
 
 	glLinkProgram(r);
 
-	int success = 0;
-	glGetProgramiv(r, GL_LINK_STATUS, &success);
-	if (success)
+	int link_success = 0;
+	glGetProgramiv(r, GL_LINK_STATUS, &link_success);
+
+	if (link_success)
 		return r;
 
 	int log_length = 0;

@@ -348,7 +348,7 @@ void vis_destroy_world ()
 
 
 bool debug_draw_wireframe = false;
-COMMAND_SET_BOOL (vis_worldwireframe, debug_draw_wireframe);
+COMMAND_SET_BOOL (vis_wireframe, debug_draw_wireframe);
 
 void t_visible_set::render_debug () const
 {

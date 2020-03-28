@@ -33,6 +33,8 @@ void resize_window (int w, int h);
 const SDL_Color text_color = { 200, 200, 200, 255 };
 void draw_text (const char* text, float x, float y, float charw, float charh);
 
+void bind_tex2d_to_slot (int slot, GLuint tex);
+
 void debug_render_texture (GLuint tex, float x, float y, float size);
 
 extern GLuint cuboid_dlist_inwards;

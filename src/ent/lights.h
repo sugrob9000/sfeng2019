@@ -27,9 +27,9 @@ class e_light: public e_base
 	void view () const;
 
 	/* Sending lighting info to shader */
-	static mat4 uniform_view;
-	static vec3 uniform_pos;
-	static vec3 uniform_rgb;
+	static mat4 unif_view;
+	static vec3 unif_pos;
+	static vec3 unif_rgb;
 };
 
 extern std::vector<e_light*> lights;
@@ -39,10 +39,36 @@ extern vec3 ambient;
 
 extern t_fbo lspace_fbo;
 extern t_fbo lspace_fbo_ms;
-
-void light_apply_uniforms ();
+extern t_fbo sspace_fbo[2];
+extern int current_sspace_fbo;
 
 void init_lighting ();
 void compute_lighting ();
+
+void light_init_material ();
+void light_apply_material ();
+
+/*
+ * GLSL uniform locations for calculating light
+ */
+constexpr int UNIFORM_LOC_PREV_SHADOWMAP = 0;
+constexpr int UNIFORM_LOC_DEPTH_MAP = 1;
+constexpr int UNIFORM_LOC_EYE_POSITION = 3;
+
+constexpr int UNIFORM_LOC_LIGHT_POS = 6;
+constexpr int UNIFORM_LOC_LIGHT_RGB = 9;
+constexpr int UNIFORM_LOC_LIGHT_VIEW = 12;
+
+/*
+ * GLSL uniform locations for using light - screenspace buffers
+ */
+constexpr int UNIFORM_LOC_LIGHTMAP_DIFFUSE = 1;
+constexpr int UNIFORM_LOC_LIGHTMAP_SPECULAR = 2;
+
+/*
+ * Which texture units to bind the respective buffers to
+ */
+constexpr int TEXTURE_SLOT_PREV_SHADOWMAP = 0;
+constexpr int TEXTURE_SLOT_DEPTH_MAP = 1;
 
 #endif // ENT_LIGHTS_H

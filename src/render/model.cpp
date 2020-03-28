@@ -1,7 +1,7 @@
-#include "model.h"
-#include "render.h"
-#include "material.h"
-#include "resource.h"
+#include "render/model.h"
+#include "render/render.h"
+#include "render/material.h"
+#include "render/resource.h"
 #include "input/cmds.h"
 #include <cassert>
 #include <map>
@@ -99,9 +99,10 @@ void t_model_mem::load_obj (const std::string& path)
 		triangles.push_back(tri);
 	};
 
-	auto pack =
-		[] (char a, char b) constexpr -> uint16_t
-		{ return ((a << 8) | b); };
+	auto pack = [] (char a, char b) constexpr
+	-> uint16_t {
+		return (a << 8) | b;
+	};
 
 	for (std::string line; std::getline(f, line); ) {
 

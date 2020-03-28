@@ -13,8 +13,9 @@ void init_gbuffers ()
 	int h = sdlctx.res_y;
 
 	gbuf_fbo.make()
-		.attach_color(make_tex2d(w, h, GL_RGB32F), MRT_SLOT_WORLD_POS)
-		.attach_color(make_tex2d(w, h, GL_RGB16F), MRT_SLOT_WORLD_NORM)
+		.attach_color(make_tex2d(w, h, GL_RGB32F), GBUF_SLOT_WORLD_POS)
+		.attach_color(make_tex2d(w, h, GL_RGB16F),
+			GBUF_SLOT_WORLD_NORM)
 		.attach_depth(make_rbo(w, h, GL_DEPTH_COMPONENT))
 		.assert_complete();
 
@@ -34,15 +35,25 @@ void fill_gbuffers ()
 	visible_set.render();
 }
 
+void gbuffer_pass ()
+{
+	glBegin(GL_QUADS);
+	glVertex2i(-1, -1);
+	glVertex2i(-1, 1);
+	glVertex2i(1, 1);
+	glVertex2i(1, -1);
+	glEnd();
+}
+
 static bool show_gbuffers = false;
 COMMAND_SET_BOOL (show_gbuf, show_gbuffers);
 
 void debug_show_gbuffers ()
 {
 	if (show_gbuffers) {
-		debug_render_texture(gbuf_fbo.color[MRT_SLOT_WORLD_POS]->id,
+		debug_render_texture(gbuf_fbo.color[GBUF_SLOT_WORLD_POS]->id,
 				0.5, 0.5, 0.5);
-		debug_render_texture(gbuf_fbo.color[MRT_SLOT_WORLD_NORM]->id,
+		debug_render_texture(gbuf_fbo.color[GBUF_SLOT_WORLD_NORM]->id,
 				0.5, 0.0, 0.5);
 	}
 }

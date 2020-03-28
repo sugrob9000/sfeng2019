@@ -288,15 +288,19 @@ void init_debug ()
 	debug_loc_xy_size = glGetUniformLocation(debug_program, "xy_size");
 }
 
+void bind_tex2d_to_slot (int slot, GLuint tex)
+{
+	glActiveTexture(GL_TEXTURE0 + slot);
+	glBindTexture(GL_TEXTURE_2D, tex);
+}
+
 void debug_render_texture (GLuint tex, float x, float y, float size)
 {
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
 
 	glUseProgram(debug_program);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, tex);
-
+	bind_tex2d_to_slot(0, tex);
 	glUniform3f(debug_loc_xy_size, x, y, size);
 
 	glBegin(GL_QUADS);

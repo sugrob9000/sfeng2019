@@ -184,8 +184,6 @@ static void lighting_pass ()
 	sspace_fbo[current_sspace_fbo].apply();
 
 	glUseProgram(lighting_program);
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_CULL_FACE);
 
 	bind_tex2d_to_slot(0, sspace_fbo[current_sspace_fbo ^ 1].color[0]->id);
 	bind_tex2d_to_slot(1, lspace_fbo.color[0]->id);

@@ -39,9 +39,9 @@ void gbuffer_pass ()
 {
 	glBegin(GL_QUADS);
 	glVertex2i(-1, -1);
-	glVertex2i(-1, 1);
-	glVertex2i(1, 1);
 	glVertex2i(1, -1);
+	glVertex2i(1, 1);
+	glVertex2i(-1, 1);
 	glEnd();
 }
 

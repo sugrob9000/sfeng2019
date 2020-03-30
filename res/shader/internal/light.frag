@@ -14,6 +14,9 @@ layout (location = 6) uniform vec3 light_pos;
 layout (location = 9) uniform vec3 light_rgb;
 layout (location = 12) uniform mat4 light_view;
 
+layout (location = 202) uniform vec3 mn;
+layout (location = 205) uniform vec3 mx;
+
 noperspective in vec2 texcrd;
 
 const float DEPTH_BIAS = 3e-3;
@@ -26,6 +29,7 @@ vec3 light ()
 
 	vec4 lspace_pos = light_view * vec4(world_pos, 1.0);
 	vec3 lcoord = lspace_pos.xyz / lspace_pos.w;
+	lcoord = (lcoord - mn) / (mx - mn);
 	lcoord.z -= DEPTH_BIAS;
 
 	if (lcoord.z > texture(depth_map, lcoord.st * 0.5 + 0.5).r)

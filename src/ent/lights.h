@@ -6,6 +6,9 @@
 #include "render/vis.h"
 #include "render/framebuffer.h"
 
+extern vec3 min;
+extern vec3 max;
+
 /*
  * Directional light
  */

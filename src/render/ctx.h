@@ -47,6 +47,9 @@ struct t_camera
 		: pos(p), ang(a), z_far(zf), z_near(zn),
 		  fov(fv), aspect(asp) { }
 
+	mat4 proj;
+	mat4 view;
+
 	void apply ();
 };
 

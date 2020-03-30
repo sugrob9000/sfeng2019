@@ -27,9 +27,9 @@ void t_camera::apply ()
 {
 	using namespace glm;
 
-	render_ctx.proj = perspective(radians(fov), aspect, z_near, z_far);
-	render_ctx.view = rotate_xyz(radians(ang - vec3(90.0, 0.0, 0.0)));
-	render_ctx.view = translate(render_ctx.view, -pos);
+	render_ctx.proj = proj = perspective(radians(fov), aspect, z_near, z_far);
+	render_ctx.view = view = rotate_xyz(radians(ang - vec3(90.0, 0.0, 0.0)));
+	render_ctx.view = view = translate(render_ctx.view, -pos);
 	render_ctx.model = mat4(1.0);
 }
 

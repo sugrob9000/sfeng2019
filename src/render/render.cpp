@@ -46,6 +46,28 @@ void render_all ()
 		warning("OpenGL error 0x%x (%i)", err, err);
 
 	last_frame_time = cr::duration<float>(sc::now() - frame_start).count();
+
+	// debug_render_texture(lspace_fbo.color[0]->id, 0.0, 0.0, 1.0);
+
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_CULL_FACE);
+
+	glUseProgram(0);
+
+	glColor3f(0.1, 0.0, 0.0);
+
+	glBegin(GL_QUADS);
+
+	glVertex2f(min.x, min.y);
+	glVertex2f(max.x, min.y);
+	glVertex2f(max.x, max.y);
+	glVertex2f(min.x, max.y);
+
+	glEnd();
+
+	DEBUG_EXPR(min);
+	DEBUG_EXPR(max);
+
 	SDL_GL_SwapWindow(sdlctx.window);
 }
 
@@ -110,6 +132,7 @@ void init_render ()
 #endif
 
 	glEnable(GL_MULTISAMPLE);
+	glEnable(GL_CULL_FACE);
 
 	extern void init_cuboid ();
 	extern void init_text ();
@@ -309,4 +332,7 @@ void debug_render_texture (GLuint tex, float x, float y, float size)
 	glVertex2i(1, 1);
 	glVertex2i(1, 0);
 	glEnd();
+
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
 }

@@ -70,6 +70,7 @@ void e_light::view () const
 
 	render_ctx.proj = perspective(radians(2.0f * cone_angle),
 			1.0f, LIGHT_Z_NEAR, reach);
+	// render_ctx.proj = ortho(-100.0f, 100.0f, -100.0f, 100.0f, LIGHT_Z_NEAR, 2000.0f);
 	render_ctx.view = rotate_xyz(radians(ang - vec3(90.0, 0.0, 0.0)));
 	render_ctx.view = translate(render_ctx.view, -pos);
 	render_ctx.model = mat4(1.0);
@@ -94,6 +95,36 @@ t_fbo lspace_fbo;
 /* Screen space shadow maps */
 t_fbo sspace_fbo[2];
 int current_sspace_fbo = 0;
+
+constexpr int cascades_num = 1;
+struct t_plane { glm::vec4 points[4]; };
+std::vector<t_plane> planes;
+
+void get_planes ()
+{
+	for (int i = 0; i < cascades_num + 1; i++) {
+		float l = camera.z_near + (float)i * 
+			(200.0 - camera.z_near) / cascades_num;
+		t_plane plane;
+
+		for (int j = 0; j < 4; j++) {
+			plane.points[j].z = -l;
+			plane.points[j].w = 1.0;
+		}
+
+		plane.points[1].x = plane.points[2].x = 
+			l * tan(glm::radians(camera.fov / 2));
+		plane.points[0].x = plane.points[3].x = 
+			-l * tan(glm::radians(camera.fov / 2));
+
+		plane.points[0].y = plane.points[1].y = 
+			-l * tan(glm::radians(camera.fov / 2)) / camera.aspect;
+		plane.points[2].y = plane.points[3].y = 
+			l * tan(glm::radians(camera.fov / 2)) / camera.aspect;
+
+		planes.push_back(plane);
+	}
+}
 
 static GLuint lighting_program;
 
@@ -120,6 +151,8 @@ void init_lighting ()
 		sspace_add_buffer(sspace_fbo[i]);
 	}
 
+	get_planes();
+
 	lighting_program = make_glsl_program(
 		{ get_vert_shader("internal/gbuffer_quad"),
 		  get_frag_shader("internal/light") });
@@ -137,13 +170,59 @@ void light_init_material ()
 	glUniform1i(UNIFORM_LOC_LIGHTMAP_SPECULAR, 1);
 }
 
+vec3 min;
+vec3 max;
+
 void light_apply_material ()
 {
 	bind_tex2d_to_slot(0, sspace_fbo[current_sspace_fbo].color[0]->id);
+
+
+	using glm::value_ptr;
+	glUniform3fv(202, 3, value_ptr(min));
+	glUniform3fv(205, 3, value_ptr(max));
 	// TODO: specular
 }
 
+vec3 get_min (vec3 min, glm::vec4 point)
+{
+	vec3 m;
 
+	if (min.x > point.x)
+		m.x = point.x;
+	else
+		m.x = min.x;
+	if (min.y > point.y)
+		m.y = point.y;
+	else
+		m.y = min.y;
+	if (min.z > point.z)
+		m.z = point.z;
+	else
+		m.z = min.z;
+
+	return m;
+}
+
+vec3 get_max (vec3 max, glm::vec4 point)
+{
+	vec3 m;
+
+	if (max.x < point.x)
+		m.x = point.x;
+	else
+		m.x = max.x;
+	if (max.y < point.y)
+		m.y = point.y;
+	else
+		m.y = max.y;
+	if (max.z < point.z)
+		m.z = point.z;
+	else
+		m.z = max.z;
+
+	return m;
+}
 
 static void fill_depth_map (const e_light* l)
 {
@@ -160,7 +239,62 @@ static void fill_depth_map (const e_light* l)
 	mat4 restore_model = render_ctx.model;
 
 	l->view();
+
+	mat4 cascades_stretch[cascades_num];
+
+	for (int i = 0; i < cascades_num; i++) {
+
+		glm::vec4 p = planes[i].points[0];
+		p = glm::inverse(camera.view) * p;
+		p = render_ctx.view * p;
+
+		min.x = p.x;	min.y = p.y;	min.z = p.z;
+		max.x = p.x;	max.y = p.y;	max.z = p.z;
+
+		for (int j = 1; j < 4; j++) {
+			glm::vec4 point = planes[i].points[j];
+			point = glm::inverse(camera.view) * point;
+			point = render_ctx.view * point;
+
+			min = get_min(min, point);
+			max = get_max(max, point);
+		}
+
+		for (int j = 0; j < 4; j++) {
+			glm::vec4 point = planes[i + 1].points[j];
+			point = glm::inverse(camera.view) * point;
+			point = render_ctx.view * point;
+
+			min = get_min(min, point);
+			max = get_max(max, point);
+		}
+
+		vec3 t = max + min;
+		t /= 2.0;
+		vec3 s = max - min;
+		s /= 2.0;
+
+		cascades_stretch[0] = glm::translate(glm::mat4(1.0), t);
+		cascades_stretch[0] = glm::scale(cascades_stretch[i], s);
+	}
+
+	DEBUG_EXPR(min);
+	DEBUG_EXPR(max);
+
+	mat4 res = render_ctx.proj;
+
+	render_ctx.proj = cascades_stretch[0] * render_ctx.proj;
+	// DEBUG_EXPR(l->name);
+	// for (int i = 0; i < 4; i++) {
+	// 	glm::vec4 point = planes[0].points[i];
+	// 	point = glm::inverse(camera.view) * point;
+	// 	point = render_ctx.view * point;
+	// }
+	// DEBUG_EXPR(point);
+
 	l->vis.render();
+
+	render_ctx.proj = res;
 
 	e_light::unif_view = render_ctx.proj *
 			render_ctx.view * render_ctx.model;
@@ -198,6 +332,9 @@ static void lighting_pass ()
 			value_ptr(e_light::unif_view));
 
 	gbuffer_pass();
+
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
 }
 
 void compute_lighting ()

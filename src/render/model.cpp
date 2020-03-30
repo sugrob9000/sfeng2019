@@ -51,7 +51,7 @@ void t_model_mem::calc_bbox ()
 
 	bbox = { vec3(INFINITY), vec3(-INFINITY) };
 	for (const vertex& v: vertices)
-		bbox.update(v.v.pos);
+		bbox.expand(v.v.pos);
 
 	// just in case, extend slightly
 	bbox.start -= vec3(0.5);

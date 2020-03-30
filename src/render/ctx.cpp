@@ -27,11 +27,42 @@ void t_camera::apply ()
 {
 	using namespace glm;
 
-	render_ctx.proj = perspective(radians(fov), aspect, z_near, z_far);
-	render_ctx.view = rotate_xyz(radians(ang - vec3(90.0, 0.0, 0.0)));
-	render_ctx.view = translate(render_ctx.view, -pos);
+	render_ctx.proj = get_proj();
+	render_ctx.view = get_view();
 	render_ctx.model = mat4(1.0);
 }
+
+mat4 t_camera::get_proj ()
+{
+	using namespace glm;
+	return perspective(radians(fov), aspect, z_near, z_far);
+}
+
+mat4 t_camera::get_view ()
+{
+	using namespace glm;
+	mat4 r = rotate_xyz(radians(ang - vec3(90.0, 0.0, 0.0)));
+	r = translate(r, -pos);
+	return r;
+}
+
+
+std::array<vec3, 4> t_camera::corner_points (float depth)
+{
+	int dir[4][2] = { {  1,  1 }, {  1, -1 },
+	                  { -1, -1 }, { -1,  1 } };
+	mat4 inv_view = glm::inverse(get_view());
+	float factor = depth * tan(glm::radians(fov) * 0.5);
+
+	std::array<vec3, 4> result;
+	for (int i = 0; i < 4; i++) {
+		result[i] = inv_view * vec4(
+			factor * dir[i][0] * aspect,
+			factor * dir[i][1], -depth, 1.0);
+	}
+	return result;
+}
+
 
 MOUSEMOVE_ROUTINE (camera)
 {

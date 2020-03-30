@@ -36,7 +36,6 @@ void render_all ()
 	visible_set.render_debug();
 
 	// HUD
-
 	debug_show_gbuffers();
 
 	if (console_active)

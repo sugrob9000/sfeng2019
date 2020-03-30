@@ -37,9 +37,10 @@ void warning (const char* format, ...);
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 
-typedef glm::vec2 vec2;
-typedef glm::vec3 vec3;
-typedef glm::mat4 mat4;
+using glm::vec2;
+using glm::vec3;
+using glm::vec4;
+using glm::mat4;
 
 std::ostream& operator<< (std::ostream& s, const vec3& v);
 std::istream& operator>> (std::istream& s, vec3& v);
@@ -72,7 +73,7 @@ mat4 rotate_xyz (const vec3& angles);
  * create maps of them, etc. Not very meaningful otheriwse
  */
 template <int N, class S, glm::qualifier Q>
-bool operator< (const glm::vec<N, S, Q> a, const glm::vec<N, S, Q> b)
+bool operator< (const glm::vec<N, S, Q>& a, const glm::vec<N, S, Q>& b)
 {
 	for (int i = 0; i < N; i++) {
 		if (a[i] != b[i])
@@ -82,7 +83,7 @@ bool operator< (const glm::vec<N, S, Q> a, const glm::vec<N, S, Q> b)
 }
 
 template <int N, class S, glm::qualifier Q>
-bool operator== (const glm::vec<N, S, Q> a, const glm::vec<N, S, Q> b)
+bool operator== (const glm::vec<N, S, Q>& a, const glm::vec<N, S, Q>& b)
 {
 	for (int i = 0; i < N; i++) {
 		if (a[i] != b[i])

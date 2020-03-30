@@ -79,10 +79,6 @@ void e_light::view () const
 
 /* ======================================== */
 
-mat4 e_light::unif_view;
-vec3 e_light::unif_pos;
-vec3 e_light::unif_rgb;
-
 /* Depth maps from lights' perspective */
 constexpr int lspace_samples = 4;
 constexpr int lspace_resolution = 1024;
@@ -144,9 +140,37 @@ void light_apply_material ()
 }
 
 
+mat4 e_light::unif_view;
+vec3 e_light::unif_pos;
+vec3 e_light::unif_rgb;
+t_bound_box e_light::unif_cascade_bounds;
 
-static void fill_depth_map (const e_light* l)
+
+/* Returns: whether this light is actually potentially visible */
+static bool fill_depth_map (const e_light* l)
 {
+	matrix_restorer restore(render_ctx);
+
+	l->view();
+
+	std::array<vec3, 4> planes[2] =
+		{ camera.corner_points(camera.z_near),
+		  camera.corner_points(camera.z_far) };
+
+	t_bound_box bounds = { vec3(INFINITY), vec3(-INFINITY) };
+	for (int i = 0; i < 8; i++) {
+		vec4 v = render_ctx.proj * render_ctx.view *
+				vec4(planes[i / 4][i % 4], 1.0);
+		bounds.expand(v / std::abs(v.w));
+	}
+	bounds.intersect({ { -1.0, -1.0, 0.0 }, { 1.0, 1.0, 1.0 } });
+	if (bounds.volume() <= 0.0) {
+		// cannot see this light
+		return false;
+	}
+	// ensure everything between the light and the slice is rendered
+	bounds.start.z = 0.0;
+
 	lspace_fbo_ms.apply();
 	glDepthMask(GL_TRUE);
 	glDepthFunc(GL_LESS);
@@ -155,27 +179,21 @@ static void fill_depth_map (const e_light* l)
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-	mat4 restore_proj = render_ctx.proj;
-	mat4 restore_view = render_ctx.view;
-	mat4 restore_model = render_ctx.model;
-
-	l->view();
 	l->vis.render();
-
-	e_light::unif_view = render_ctx.proj *
-			render_ctx.view * render_ctx.model;
-	e_light::unif_pos = l->pos;
-	e_light::unif_rgb = l->rgb;
-
-	render_ctx.proj = restore_proj;
-	render_ctx.view = restore_view;
-	render_ctx.model = restore_model;
 
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, lspace_fbo_ms.id);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, lspace_fbo.id);
 	glBlitFramebuffer(0, 0, lspace_resolution, lspace_resolution,
 	                  0, 0, lspace_resolution, lspace_resolution,
 	                  GL_COLOR_BUFFER_BIT, GL_NEAREST);
+
+	e_light::unif_view = render_ctx.proj *
+			render_ctx.view * render_ctx.model;
+	e_light::unif_pos = l->pos;
+	e_light::unif_rgb = l->rgb;
+	e_light::unif_cascade_bounds = bounds;
+
+	return true;
 }
 
 static void lighting_pass ()
@@ -207,8 +225,8 @@ void compute_lighting ()
 
 	render_ctx.stage = RENDER_STAGE_LIGHTING_LSPACE;
 	for (e_light* l: lights) {
-		fill_depth_map(l);
-		lighting_pass();
+		if (fill_depth_map(l))
+			lighting_pass();
 	}
 }
 

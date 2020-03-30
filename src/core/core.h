@@ -39,14 +39,16 @@ struct t_bound_box
 	vec3 start;
 	vec3 end;
 
-	/* Expand to include the argument */
-	void update (const vec3& pt);
-	void update (const t_bound_box& other);
+	void expand (const vec3& pt);
+	void expand (const t_bound_box& other);
 
 	bool point_in (const vec3& pt) const;
 	float volume () const;
 
-	bool intersects (t_bound_box b) const;
+	bool intersects (const t_bound_box& b) const;
+
+	void intersect (const t_bound_box& b);
+	void intersect_guarded (const t_bound_box& b);
 
 	inline const float* data () const { return glm::value_ptr(start); }
 };

@@ -159,13 +159,13 @@ float t_bound_box::volume () const
 	     * (end.z - start.z);
 }
 
-void t_bound_box::update (const vec3& pt)
+void t_bound_box::expand (const vec3& pt)
 {
 	start = min_components(start, pt);
 	end = max_components(end, pt);
 }
 
-void t_bound_box::update (const t_bound_box& other)
+void t_bound_box::expand (const t_bound_box& other)
 {
 	start = min_components(start, other.start);
 	end = max_components(end, other.end);
@@ -177,12 +177,25 @@ bool t_bound_box::point_in (const vec3& pt) const
 		&& (pt.x <= end.x) && (pt.y <= end.y) && (pt.z <= end.z);
 }
 
-bool t_bound_box::intersects (t_bound_box b) const
+bool t_bound_box::intersects (const t_bound_box& b) const
 {
-	b.start = max(b.start, start);
-	b.end = min(b.end, end);
-	return b.end.x >= b.start.x
-	    && b.end.y >= b.start.y
-	    && b.end.z >= b.start.z;
+	t_bound_box tmp = { max_components(start, b.start),
+	                    min_components(end, b.end) };
+	return tmp.end.x >= tmp.start.x
+	    && tmp.end.y >= tmp.start.y
+	    && tmp.end.z >= tmp.start.z;
 }
 
+void t_bound_box::intersect (const t_bound_box& b)
+{
+	start = max_components(start, b.start);
+	end = min_components(end, b.end);
+}
+
+void t_bound_box::intersect_guarded (const t_bound_box& b)
+{
+	start = max_components(start, b.start);
+	end = min_components(end, b.end);
+	for (int i = 0; i < 3; i++)
+		end[i] = std::max(end[i], start[i]);
+}

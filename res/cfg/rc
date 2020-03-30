@@ -13,7 +13,6 @@ bind Left_Ctrl cam_decelerate
 
 bind E sun_at_view
 
-bind F show_gbuf
 bind X vis_wireframe
 
 windowsize 1024 768

@@ -3,6 +3,7 @@
 
 #include "inc_gl.h"
 #include "misc.h"
+#include <array>
 
 enum t_render_stage: uint32_t
 {
@@ -32,6 +33,31 @@ struct t_render_ctx
 extern t_render_ctx render_ctx;
 
 
+/*
+ * Use RAII to save and restore matrices, e.g.:
+ * {
+ *	matrix_restorer r(render_ctx);
+ *	my_camera.apply(); // changes matrices
+ *	// ... do some rendering
+ * }
+ * after exiting the scope, matrices are restored automatrically
+ */
+struct matrix_restorer
+{
+	t_render_ctx* ctx;
+	mat4 proj;
+	mat4 view;
+	mat4 model;
+	matrix_restorer (t_render_ctx& c)
+		: ctx(&c), proj(c.proj), view(c.view), model(c.model) { }
+	~matrix_restorer () {
+		ctx->proj = proj;
+		ctx->view = view;
+		ctx->model = model;
+	}
+};
+
+
 struct t_camera
 {
 	vec3 pos;
@@ -48,6 +74,15 @@ struct t_camera
 		  fov(fv), aspect(asp) { }
 
 	void apply ();
+
+	mat4 get_view ();
+	mat4 get_proj ();
+
+	/*
+	 * The four points in worldspace that correspond to this
+	 * camera's screen corners at a given depth
+	 */
+	std::array<vec3, 4> corner_points (float depth);
 };
 
 extern t_camera camera;

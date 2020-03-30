@@ -50,7 +50,7 @@ static t_model_mem world;
  * The ID of the octant in which point is
  * if the midpoint of the bbox is origin
  */
-uint8_t which_octant (vec3 origin, vec3 point)
+static uint8_t which_octant (vec3 origin, vec3 point)
 {
 	return (point.x > origin.x)
 	    + ((point.y > origin.y) << 1)
@@ -60,7 +60,7 @@ uint8_t which_octant (vec3 origin, vec3 point)
 /*
  * The bbox of an octant with given ID, given the parent
  */
-t_bound_box octant_bound (t_bound_box parent, uint8_t octant_id)
+static t_bound_box octant_bound (t_bound_box parent, uint8_t octant_id)
 {
 	vec3 mid = (parent.start + parent.end) * 0.5f;
 	t_bound_box r = parent;
@@ -75,7 +75,7 @@ void oct_node::build (t_bound_box b, int level)
 	// ensure that bounds include the triangles entirely
 	for (int d: bucket) {
 		for (int i = 0; i < 3; i++)
-			b.update(world.get_vertex(d, i).pos);
+			b.expand(world.get_vertex(d, i).pos);
 	}
 	bounds = b;
 

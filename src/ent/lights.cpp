@@ -80,11 +80,7 @@ void e_light::view () const
 /* ======================================== */
 
 /* Depth maps from lights' perspective */
-constexpr int lspace_samples = 4;
 constexpr int lspace_resolution = 1024;
-
-/* Render to multisampled, then blit into regular for sampling */
-t_fbo lspace_fbo_ms;
 t_fbo lspace_fbo;
 
 /* Screen space shadow maps */
@@ -97,14 +93,9 @@ void init_lighting ()
 {
 	constexpr int s = lspace_resolution;
 
-	lspace_fbo_ms.make()
-		.attach_color(make_rbo_msaa(s, s, GL_R16F, lspace_samples))
-		.attach_depth(make_rbo_msaa(
-			s, s, GL_DEPTH_COMPONENT, lspace_samples))
-		.assert_complete();
-
 	lspace_fbo.make()
-		.attach_color(make_tex2d(s, s, GL_R16F))
+		.attach_color(make_tex2d(s, s, GL_R32F))
+		.attach_depth(make_rbo(s, s, GL_DEPTH_COMPONENT))
 		.assert_complete();
 
 	int sw = sdlctx.res_x;
@@ -140,10 +131,10 @@ void light_apply_material ()
 }
 
 
-mat4 e_light::unif_view;
 vec3 e_light::unif_pos;
 vec3 e_light::unif_rgb;
-t_bound_box e_light::unif_cascade_bounds;
+mat4 e_light::unif_view;
+t_bound_box e_light::unif_cascade_bounds[1];
 
 
 /* Returns: whether this light is actually potentially visible */
@@ -171,7 +162,21 @@ static bool fill_depth_map (const e_light* l)
 	// ensure everything between the light and the slice is rendered
 	bounds.start.z = 0.0;
 
-	lspace_fbo_ms.apply();
+	e_light::unif_view = render_ctx.proj * render_ctx.view;
+	e_light::unif_pos = l->pos;
+	e_light::unif_rgb = l->rgb;
+	e_light::unif_cascade_bounds[0] = bounds;
+
+	vec3 center = -(bounds.start + bounds.end) * 0.5f;
+	vec3 scale = vec3(2.0) / (bounds.end - bounds.start);
+	center.z = 0.0;
+	scale.z *= 0.5;
+
+	mat4 subfrustum = glm::scale(mat4(1.0), scale);
+	subfrustum = glm::translate(subfrustum, center);
+	render_ctx.proj = subfrustum * render_ctx.proj;
+
+	lspace_fbo.apply();
 	glDepthMask(GL_TRUE);
 	glDepthFunc(GL_LESS);
 	glEnable(GL_DEPTH_TEST);
@@ -180,18 +185,6 @@ static bool fill_depth_map (const e_light* l)
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
 	l->vis.render();
-
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, lspace_fbo_ms.id);
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, lspace_fbo.id);
-	glBlitFramebuffer(0, 0, lspace_resolution, lspace_resolution,
-	                  0, 0, lspace_resolution, lspace_resolution,
-	                  GL_COLOR_BUFFER_BIT, GL_NEAREST);
-
-	e_light::unif_view = render_ctx.proj *
-			render_ctx.view * render_ctx.model;
-	e_light::unif_pos = l->pos;
-	e_light::unif_rgb = l->rgb;
-	e_light::unif_cascade_bounds = bounds;
 
 	return true;
 }
@@ -212,6 +205,9 @@ static void lighting_pass ()
 	glUniform3fv(UNIFORM_LOC_LIGHT_RGB, 1, value_ptr(e_light::unif_rgb));
 	glUniformMatrix4fv(UNIFORM_LOC_LIGHT_VIEW, 1, false,
 			value_ptr(e_light::unif_view));
+
+	glUniform3fv(UNIFORM_LOC_LIGHT_CASCADE, 2,
+			e_light::unif_cascade_bounds[0].data());
 
 	gbuffer_pass();
 }

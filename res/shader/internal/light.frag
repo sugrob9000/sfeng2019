@@ -14,9 +14,12 @@ layout (location = 6) uniform vec3 light_pos;
 layout (location = 9) uniform vec3 light_rgb;
 layout (location = 12) uniform mat4 light_view;
 
+const int NUM_CASCADES = 1;
+layout (location = 100) uniform vec3 cascade_bound[2 * NUM_CASCADES];
+
 noperspective in vec2 texcrd;
 
-const float DEPTH_BIAS = 3e-3;
+const float DEPTH_BIAS = 6e-4;
 const float MIN_FALLOFF = 2e-2;
 
 vec3 light ()
@@ -26,19 +29,24 @@ vec3 light ()
 
 	vec4 lspace_pos = light_view * vec4(world_pos, 1.0);
 	vec3 lcoord = lspace_pos.xyz / lspace_pos.w;
+	float len_xy = length(lcoord.xy);
+
+	vec3 casc_low = cascade_bound[0];
+	vec3 casc_high = cascade_bound[1];
+
+	lcoord = (lcoord - casc_low) / (casc_high - casc_low);
 	lcoord.z -= DEPTH_BIAS;
 
-	if (lcoord.z > texture(depth_map, lcoord.st * 0.5 + 0.5).r)
-		return vec3(0.0);
-
-	float bright = max(0.0, 1.0 - length(lcoord.xy));
+	float bright = max(0.0, 1.0 - len_xy);
+	bright *= max(0.0, dot(world_norm,
+			normalize(light_pos - world_pos)));
 	if (bright == 0.0)
 		return vec3(0.0);
 
-	float lambert = max(0.0,
-		dot(world_norm, normalize(light_pos - world_pos)));
+	if (texture(depth_map, lcoord.xy).r < lcoord.z)
+		return vec3(0.0);
 
-	return bright * lambert * light_rgb;
+	return bright * light_rgb;
 }
 
 

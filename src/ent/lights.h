@@ -27,10 +27,10 @@ class e_light: public e_base
 	void view () const;
 
 	/* Sending lighting info to shader */
-	static mat4 unif_view;
 	static vec3 unif_pos;
 	static vec3 unif_rgb;
-	static t_bound_box unif_cascade_bounds;
+	static mat4 unif_view;
+	static t_bound_box unif_cascade_bounds[1];
 };
 
 extern std::vector<e_light*> lights;
@@ -39,7 +39,6 @@ constexpr float LIGHT_Z_NEAR = 10.0;
 extern vec3 ambient;
 
 extern t_fbo lspace_fbo;
-extern t_fbo lspace_fbo_ms;
 extern t_fbo sspace_fbo[2];
 extern int current_sspace_fbo;
 
@@ -59,6 +58,7 @@ constexpr int UNIFORM_LOC_EYE_POSITION = 3;
 constexpr int UNIFORM_LOC_LIGHT_POS = 6;
 constexpr int UNIFORM_LOC_LIGHT_RGB = 9;
 constexpr int UNIFORM_LOC_LIGHT_VIEW = 12;
+constexpr int UNIFORM_LOC_LIGHT_CASCADE = 100;
 
 /*
  * GLSL uniform locations for using light - screenspace buffers

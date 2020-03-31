@@ -12,6 +12,9 @@ struct t_material
 	std::string name;
 	std::vector<GLuint> bitmap_texture_ids;
 
+	std::vector<GLuint> vertex_shaders;
+	std::vector<GLuint> fragment_shaders;
+
 	void load (const std::string& path);
 	void apply () const;
 };

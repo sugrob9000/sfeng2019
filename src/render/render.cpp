@@ -99,6 +99,8 @@ void init_render ()
 		SDL_GL_SetSwapInterval(1);
 	}
 
+	glEnable(GL_MULTISAMPLE);
+
 #if 0
 	auto callback = [] (GLenum src, GLenum type, GLuint id,
 			GLenum severity, GLsizei len,
@@ -107,8 +109,6 @@ void init_render ()
 	glEnable(GL_DEBUG_OUTPUT);
 	glDebugMessageCallback(callback, nullptr);
 #endif
-
-	glEnable(GL_MULTISAMPLE);
 
 	extern void init_cuboid ();
 	extern void init_text ();

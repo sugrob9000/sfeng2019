@@ -1,10 +1,11 @@
 #include "ent/lights.h"
 #include "inc_gl.h"
 #include "input/cmds.h"
-#include "material.h"
-#include "render.h"
-#include "resource.h"
+#include "render/material.h"
+#include "render/render.h"
+#include "render/resource.h"
 #include <cassert>
+#include <algorithm>
 
 t_material mat_none_instance;
 t_material* mat_none = &mat_none_instance;
@@ -45,16 +46,25 @@ void t_material::load (const std::string& path)
 			break;
 
 		if (key == "FRAG") {
-			shaders.push_back(get_frag_shader(value));
+			GLuint s = get_frag_shader(value);
+			shaders.push_back(s);
+			fragment_shaders.push_back(s);
 			continue;
 		} else if (key == "VERT") {
-			shaders.push_back(get_vert_shader(value));
+			GLuint s = get_vert_shader(value);
+			shaders.push_back(s);
+			vertex_shaders.push_back(s);
 			continue;
 		}
 
 		key = "map_" + key;
 		bitmaps.push_back({ key, get_texture(value) });
 	}
+
+	// make sure any two materials with the same set of shaders
+	// will have these vectors compare equal
+	std::sort(fragment_shaders.begin(), fragment_shaders.end());
+	std::sort(vertex_shaders.begin(), vertex_shaders.end());
 
 	shaders.push_back(get_frag_shader("internal/material"));
 	shaders.push_back(get_vert_shader("internal/material"));
@@ -81,20 +91,39 @@ void t_material::load (const std::string& path)
 	light_init_material();
 }
 
+
 /* Material application is idempotent, so we can avoid redundancy */
-const t_material* latest_material = nullptr;
-t_render_stage latest_render_stage;
+static const t_material* latest_material = nullptr;
+static t_render_stage latest_render_stage;
 void material_barrier ()
 {
 	latest_material = nullptr;
 }
 
+static bool should_skip_application (const t_material* m)
+{
+	t_render_stage s = latest_render_stage;
+	if (s != render_ctx.stage || latest_material == nullptr)
+		return false;
+
+	if (m == latest_material)
+		return true;
+
+	if (s == RENDER_STAGE_LIGHTING_LSPACE
+	|| s == RENDER_STAGE_WIREFRAME) {
+		// these render stages only care about user vertex shaders
+		if (latest_material->vertex_shaders == m->vertex_shaders)
+			return true;
+	}
+
+	return false;
+}
+
+
 void t_material::apply () const
 {
-	if (latest_material == this && render_ctx.stage == latest_render_stage)
+	if (should_skip_application(this))
 		return;
-	latest_material = this;
-	latest_render_stage = render_ctx.stage;
 
 	glUseProgram(program);
 

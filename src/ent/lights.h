@@ -30,7 +30,7 @@ class e_light: public e_base
 	static vec3 unif_pos;
 	static vec3 unif_rgb;
 	static mat4 unif_view;
-	static t_bound_box unif_cascade_bounds[1];
+	static vec2 unif_cascade_bounds[2];
 };
 
 extern std::vector<e_light*> lights;

@@ -16,12 +16,9 @@ layout (location = 9) uniform vec3 light_rgb;
 layout (location = 12) uniform mat4 light_view;
 
 const int NUM_CASCADES = 1;
-layout (location = 100) uniform vec3 cascade_bound[2 * NUM_CASCADES];
+layout (location = 100) uniform vec2 cascade_bound[2 * NUM_CASCADES];
 
 noperspective in vec2 texcrd;
-
-const float DEPTH_BIAS = 3e-4;
-const float MIN_FALLOFF = 2e-2;
 
 vec3 light ()
 {
@@ -30,24 +27,28 @@ vec3 light ()
 	float screen_depth = texture(gbuffer_screen_depth, texcrd).r;
 
 	vec4 lspace_pos = light_view * vec4(world_pos, 1.0);
-	vec3 lcoord = lspace_pos.xyz / lspace_pos.w;
-	float len_xy = length(lcoord.xy);
+	if (lspace_pos.w < 0.0)
+		return vec3(0.0);
 
-	vec3 casc_low = cascade_bound[0];
-	vec3 casc_high = cascade_bound[1];
+	vec2 lcoord = lspace_pos.xy / lspace_pos.w;
+	float bright = max(0.0, 1.0 - length(lcoord));
+	if (bright == 0.0)
+		return vec3(0.0);
+
+	vec2 casc_low = cascade_bound[0];
+	vec2 casc_high = cascade_bound[1];
 	lcoord = (lcoord - casc_low) / (casc_high - casc_low);
-	lcoord.z *= (1.0 - 5e-5);
 
-	float bright = max(0.0, 1.0 - len_xy);
-	bright *= max(0.0, dot(world_norm,
+	float lambert = max(0.0, dot(world_norm,
 			normalize(light_pos - world_pos)));
-	if (bright == 0.0 || lcoord.z < 0)
+	if (lambert == 0.0)
 		return vec3(0.0);
 
-	if (texture(depth_map, lcoord.xy).r < lcoord.z)
+	float depth = lspace_pos.w * (1.0 - 1e-2);
+	if (texture(depth_map, lcoord).r < depth)
 		return vec3(0.0);
 
-	return bright * light_rgb;
+	return bright * lambert * light_rgb;
 }
 
 

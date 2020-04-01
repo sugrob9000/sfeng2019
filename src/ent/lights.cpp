@@ -136,7 +136,7 @@ void light_apply_material ()
 vec3 e_light::unif_pos;
 vec3 e_light::unif_rgb;
 mat4 e_light::unif_view;
-t_bound_box e_light::unif_cascade_bounds[1];
+vec2 e_light::unif_cascade_bounds[2];
 
 
 
@@ -187,7 +187,8 @@ static bool fill_depth_map (const e_light* l)
 	e_light::unif_view = proj * view;
 	e_light::unif_pos = l->pos;
 	e_light::unif_rgb = l->rgb;
-	e_light::unif_cascade_bounds[0] = lspace_bounds;
+	e_light::unif_cascade_bounds[0] = lspace_bounds.start;
+	e_light::unif_cascade_bounds[1] = lspace_bounds.end;
 
 	vec3 center = -(lspace_bounds.start + lspace_bounds.end) * 0.5f;
 	vec3 scale = vec3(2.0) / (lspace_bounds.end - lspace_bounds.start);
@@ -229,8 +230,8 @@ static void lighting_pass ()
 	glUniformMatrix4fv(UNIFORM_LOC_LIGHT_VIEW, 1, false,
 			value_ptr(e_light::unif_view));
 
-	glUniform3fv(UNIFORM_LOC_LIGHT_CASCADE, 2,
-			e_light::unif_cascade_bounds[0].data());
+	glUniform2fv(UNIFORM_LOC_LIGHT_CASCADE, 2,
+			value_ptr(e_light::unif_cascade_bounds[0]));
 
 	gbuffer_pass();
 }

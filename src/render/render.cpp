@@ -21,6 +21,7 @@ void render_all ()
 	static float last_frame_time = -1.0;
 
 	camera.apply();
+
 	visible_set.fill(camera.pos);
 
 	fill_gbuffers();
@@ -36,8 +37,6 @@ void render_all ()
 	visible_set.render_debug();
 
 	// HUD
-	debug_show_gbuffers();
-
 	if (console_active)
 		console_render();
 

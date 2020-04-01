@@ -114,8 +114,10 @@ void init_lighting ()
 	glUseProgram(lighting_program);
 	glUniform1i(UNIFORM_LOC_PREV_SHADOWMAP, 0);
 	glUniform1i(UNIFORM_LOC_DEPTH_MAP, 1);
+
 	glUniform1i(UNIFORM_LOC_GBUFFER_WORLD_POS, 2);
 	glUniform1i(UNIFORM_LOC_GBUFFER_WORLD_NORM, 3);
+	glUniform1i(UNIFORM_LOC_GBUFFER_SCREEN_DEPTH, 4);
 }
 
 void light_init_material ()
@@ -137,43 +139,62 @@ mat4 e_light::unif_view;
 t_bound_box e_light::unif_cascade_bounds[1];
 
 
+
 /* Returns: whether this light is actually potentially visible */
 static bool fill_depth_map (const e_light* l)
 {
-	matrix_restorer restore(render_ctx);
+	static t_bound_box view_bounds =
+		{ { -1.0, -1.0, 0.0 }, { 1.0, 1.0, 1.0 } };
 
+	// aliases
+	mat4& proj = render_ctx.proj;
+	mat4& view = render_ctx.view;
+
+	// whether center of light is visible by camera
+	vec4 camspace = proj * view * vec4(l->pos, 1.0);
+	bool inside_camera = view_bounds.point_in(camspace / camspace.w);
+
+	matrix_restorer restore(render_ctx);
 	l->view();
+
+	t_bound_box lspace_bounds;
+	if (inside_camera)
+		lspace_bounds = { { -1.0, -1.0, 0.0 }, { 1.0, 1.0, 0.0 } };
+	else
+		lspace_bounds = { vec3(INFINITY), vec3(-INFINITY) };
 
 	std::array<vec3, 4> planes[2] =
 		{ camera.corner_points(camera.z_near),
 		  camera.corner_points(camera.z_far) };
 
-	t_bound_box bounds = { vec3(INFINITY), vec3(-INFINITY) };
 	for (int i = 0; i < 8; i++) {
-		vec4 v = render_ctx.proj * render_ctx.view *
-				vec4(planes[i / 4][i % 4], 1.0);
-		bounds.expand(v / std::abs(v.w));
+		vec4 v = proj * view * vec4(planes[i / 4][i % 4], 1.0);
+		lspace_bounds.expand(v / std::abs(v.w));
 	}
-	bounds.intersect({ { -1.0, -1.0, 0.0 }, { 1.0, 1.0, 1.0 } });
-	if (bounds.volume() <= 0.0) {
+
+	// clip to what light can see
+	lspace_bounds.intersect_guarded(view_bounds);
+
+	if (lspace_bounds.volume() <= 0.0) {
 		// cannot see this light
 		return false;
 	}
-	// ensure everything between the light and the slice is rendered
-	bounds.start.z = 0.0;
 
-	e_light::unif_view = render_ctx.proj * render_ctx.view;
+	// ensure everything between the light and the slice is rendered
+	lspace_bounds.start.z = 0.0;
+
+	// save values for use as uniforms in later pass
+	e_light::unif_view = proj * view;
 	e_light::unif_pos = l->pos;
 	e_light::unif_rgb = l->rgb;
-	e_light::unif_cascade_bounds[0] = bounds;
+	e_light::unif_cascade_bounds[0] = lspace_bounds;
 
-	vec3 center = -(bounds.start + bounds.end) * 0.5f;
-	vec3 scale = vec3(2.0) / (bounds.end - bounds.start);
+	vec3 center = -(lspace_bounds.start + lspace_bounds.end) * 0.5f;
+	vec3 scale = vec3(2.0) / (lspace_bounds.end - lspace_bounds.start);
 	center.z = 0.0;
 	scale.z *= 0.5;
 
-	mat4 subfrustum = glm::scale(mat4(1.0), scale);
-	subfrustum = glm::translate(subfrustum, center);
+	mat4 subfrustum = glm::translate(glm::scale(mat4(1.0), scale), center);
 	render_ctx.proj = subfrustum * render_ctx.proj;
 
 	lspace_fbo.apply();
@@ -181,7 +202,7 @@ static bool fill_depth_map (const e_light* l)
 	glDepthFunc(GL_LESS);
 	glEnable(GL_DEPTH_TEST);
 
-	glClearColor(1.0, 1.0, 1.0, 1.0);
+	glClearColor(0.0, 0.0, 0.0, 1.0);
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
 	l->vis.render();
@@ -198,8 +219,10 @@ static void lighting_pass ()
 
 	bind_tex2d_to_slot(0, sspace_fbo[current_sspace_fbo ^ 1].color[0]->id);
 	bind_tex2d_to_slot(1, lspace_fbo.color[0]->id);
+
 	bind_tex2d_to_slot(2, gbuf_fbo.color[GBUF_SLOT_WORLD_POS]->id);
 	bind_tex2d_to_slot(3, gbuf_fbo.color[GBUF_SLOT_WORLD_NORM]->id);
+	bind_tex2d_to_slot(4, gbuf_fbo.depth->id);
 
 	glUniform3fv(UNIFORM_LOC_LIGHT_POS, 1, value_ptr(e_light::unif_pos));
 	glUniform3fv(UNIFORM_LOC_LIGHT_RGB, 1, value_ptr(e_light::unif_rgb));

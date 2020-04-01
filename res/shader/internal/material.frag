@@ -25,6 +25,7 @@ layout (location = 2) uniform sampler2D lightmap_specular;
 #define GBUF_SLOT_WORLD_NORM 1
 
 in vec3 world_pos;
+in vec3 world_normal;
 in vec4 screen_crd;
 in mat3 TBN;
 

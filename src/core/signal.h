@@ -88,6 +88,7 @@ void add_signal (t_signal s);
 		_SIGH_INTERNAL(entclass, setpos, sig_base_setpos);   \
 		_SIGH_INTERNAL(entclass, setang, sig_base_setang);   \
 		_SIGH_INTERNAL(entclass, setname, sig_base_setname); \
+		_SIGH_INTERNAL(entclass, showpos, sig_base_showpos); \
 	} while (0)
 
 class e_base;
@@ -97,6 +98,7 @@ typedef std::map<std::string, f_sig_handler> t_sigmap;
 SIG_HANDLER (base, setpos);
 SIG_HANDLER (base, setang);
 SIG_HANDLER (base, setname);
+SIG_HANDLER (base, showpos);
 
 /*
  * Events: each entity object (as opposed to class) may specify

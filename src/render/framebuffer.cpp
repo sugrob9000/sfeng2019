@@ -115,6 +115,13 @@ void t_fbo::clear_depth ()
 	depth = { nullptr, 0 };
 }
 
+t_fbo& t_fbo::set_mrt_slots (const std::vector<GLenum>& slots)
+{
+	bind();
+	glDrawBuffers(slots.size(), slots.data());
+	return *this;
+}
+
 /*
  * ================= Making different attachments =================
  */

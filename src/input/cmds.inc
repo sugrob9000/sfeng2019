@@ -1,81 +1,20 @@
-/*
- * Do nothing.
- */
 COMMAND (nop)
-
-/*
- * Exit the engine.
- */
 COMMAND (exit)
-
-/*
- * Output arguments to stdout
- */
 COMMAND (echo)
-
-/*
- * Bind a key to a command.
- * The key's name is the first argument
- * (In key names that contain spaces,
- *  they are replaced with underscores)
- * The command is the rest of the arguments
- */
+COMMAND (loadmap)
+COMMAND (signal)
+COMMAND (light_ambience)
 COMMAND (bind)
-
-/*
- * In-game interactive console
- */
 COMMAND (console_open)
 COMMAND (console_close)
-
-/*
- * Run the commands from a file
- */
 COMMAND (exec)
-
-/*
- * Start/stop moving the camera in a direction
- * (f, l, r, b for forward, left, right, backward respectively)
- */
-COMMAND (cam_move)
+COMMAND (sun_at_view)
+COMMAND (cam_dump_pos)
 COMMAND (cam_accelerate)
 COMMAND (cam_decelerate)
-COMMAND (cam_dump_pos)
-
-/*
- * Set app window size
- */
-COMMAND (windowsize)
-
-/*
- * Convert an obj model to rvd
- */
-COMMAND (obj2rvd)
-
-/*
- * Fire a signal to an entity:
- * signal [delay] [target name] [signal name] [arguments...]
- */
-COMMAND (signal)
-
-/*
- * Load a map
- */
-COMMAND (loadmap)
-
-/*
- * Visibility debugging commands
- */
-COMMAND (vis_wireframe)
-COMMAND (vis_disable)
-
-/* Set lighting ambience color */
-COMMAND (light_ambience)
-
+COMMAND (cam_move)
 COMMAND (show_gbuf)
-
-/*
- * (Demo) Tell the entity named "sun"
- * to have the same pos and ang as camera
- */
-COMMAND (sun_at_view)
+COMMAND (obj2rvd)
+COMMAND (windowsize)
+COMMAND (vis_disable)
+COMMAND (vis_wireframe)

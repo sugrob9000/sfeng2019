@@ -35,7 +35,7 @@ class e_light: public e_base
 
 extern std::vector<e_light*> lights;
 
-constexpr float LIGHT_Z_NEAR = 10.0;
+constexpr float LIGHT_Z_NEAR = 0.5;
 extern vec3 ambient;
 
 extern t_fbo lspace_fbo;

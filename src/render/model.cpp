@@ -99,9 +99,9 @@ void t_model_mem::load_obj (const std::string& path)
 		triangles.push_back(tri);
 	};
 
-	auto pack = [] (char a, char b) constexpr
-	-> uint16_t {
-		return (a << 8) | b;
+	auto pack = [] (const char* s)
+	constexpr -> uint16_t {
+		return (s[0] << 8) | s[1];
 	};
 
 	for (std::string line; std::getline(f, line); ) {
@@ -113,29 +113,29 @@ void t_model_mem::load_obj (const std::string& path)
 		if (line.size() < 2)
 			continue;
 
-		switch (pack(line[0], line[1])) {
-		case pack('v', ' '): {
+		switch (pack(line.c_str())) {
+		case pack("v "): {
 			// vertex
 			float x, y, z;
 			sscanf(line.c_str(), "%*s %f %f %f", &x, &y, &z);
 			points.push_back({ x, y, z });
 			break;
 		}
-		case pack('v', 'n'): {
+		case pack("vn"): {
 			// vertex normal
 			float x, y, z;
 			sscanf(line.c_str(), "%*s %f %f %f", &x, &y, &z);
 			normals.push_back({ x, y, z });
 			break;
 		}
-		case pack('v', 't'): {
+		case pack("vt"): {
 			// tex coord
 			float u, v;
 			sscanf(line.c_str(), "%*s %f %f", &u, &v);
 			texcrds.push_back({ u, v });
 			break;
 		}
-		case pack('f', ' '): {
+		case pack("f "): {
 			// face
 			int v[3];
 			int n[3];
@@ -152,7 +152,7 @@ void t_model_mem::load_obj (const std::string& path)
 			add_face(v, n, t);
 			break;
 		}
-		case pack('u', 's'): {
+		case pack("us"): {
 			// usemtl - update current material
 			char buf[line.length()];
 			sscanf(line.c_str(), "%*s %s", buf);

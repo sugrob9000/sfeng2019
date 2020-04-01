@@ -72,3 +72,12 @@ SIG_HANDLER (base, setname)
 {
 	ent->set_name(arg);
 }
+
+SIG_HANDLER (base, showpos)
+{
+	std::ostringstream os;
+	os << ent->name
+	   << " - pos " << ent->pos
+	   << " ang " << ent->ang << '\n';
+	DEBUG_MSG(os.str());
+}

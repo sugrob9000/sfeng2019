@@ -16,7 +16,7 @@ void init_gbuffers ()
 		.attach_color(make_tex2d(w, h, GL_RGB32F), GBUF_SLOT_WORLD_POS)
 		.attach_color(make_tex2d(w, h, GL_RGB16F),
 			GBUF_SLOT_WORLD_NORM)
-		.attach_depth(make_rbo(w, h, GL_DEPTH_COMPONENT))
+		.attach_depth(make_tex2d(w, h, GL_DEPTH_COMPONENT24))
 		.assert_complete();
 
 	sspace_add_buffer(gbuf_fbo);

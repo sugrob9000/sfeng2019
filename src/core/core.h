@@ -47,14 +47,20 @@ struct t_bound_box
 
 	bool intersects (const t_bound_box& b) const;
 
+	/*
+	 * In a case with no intersection, the _guarded version
+	 * brings the box to a state where its volume is 0.
+	 * The regular version might end up with a box which has
+	 * exactly two negative sides, giving volume > 0
+	 */
 	void intersect (const t_bound_box& b);
 	void intersect_guarded (const t_bound_box& b);
 
 	inline const float* data () const { return glm::value_ptr(start); }
 };
-static_assert(
-	offsetof(t_bound_box, end) - offsetof(t_bound_box, start)
-		== sizeof(vec3),
-	"Alignment for t_bound_box is broken");
+static_assert(offsetof(t_bound_box, start) == 0
+           && offsetof(t_bound_box, end) == sizeof(vec3)
+           && sizeof(vec3) == 3 * sizeof(float),
+	"Alignment for t_bound_box is broken: data() will not work");
 
 #endif // CORE_H

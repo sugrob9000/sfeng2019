@@ -105,6 +105,8 @@ struct t_fbo
 	t_fbo& attach_color (t_attachment* att, int idx = 0, short slice = 0);
 	t_fbo& attach_depth (t_attachment* att, short slice = 0);
 
+	t_fbo& set_mrt_slots (const std::vector<GLenum>& slots);
+
 	void clear_color (int idx = 0);
 	void clear_depth ();
 

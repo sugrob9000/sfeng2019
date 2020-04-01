@@ -4,6 +4,7 @@
 #include "inc_gl.h"
 #include <cassert>
 #include <array>
+#include <vector>
 
 /*
  * Helper / abstraction for OpenGL framebuffers and their attachments.

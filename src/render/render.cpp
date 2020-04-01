@@ -1,4 +1,3 @@
-#include "ent/lights.h"
 #include "input/cmds.h"
 #include "render/render.h"
 #include "render/resource.h"
@@ -6,6 +5,7 @@
 #include "render/vis.h"
 #include "render/framebuffer.h"
 #include "render/gbuffer.h"
+#include "render/light/all.h"
 #include <cassert>
 #include <chrono>
 
@@ -25,7 +25,7 @@ void render_all ()
 	visible_set.fill(camera.pos);
 
 	fill_gbuffers();
-	compute_lighting();
+	compute_all_lighting();
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, sdlctx.res_x, sdlctx.res_y);

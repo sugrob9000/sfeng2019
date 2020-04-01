@@ -1,9 +1,9 @@
-#include "ent/lights.h"
 #include "inc_gl.h"
 #include "input/cmds.h"
 #include "render/material.h"
 #include "render/render.h"
 #include "render/resource.h"
+#include "render/light/all.h"
 #include <cassert>
 #include <algorithm>
 

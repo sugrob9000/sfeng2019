@@ -35,12 +35,14 @@ void init_lighting_cone ()
 		  get_frag_shader("internal/light_cone") });
 	glUseProgram(program);
 
-	glUniform1i(UNIFORM_LOC_PREV_SHADOWMAP, 0);
-	glUniform1i(UNIFORM_LOC_DEPTH_MAP, 1);
+	glUniform1i(UNIFORM_LOC_DEPTH_MAP, 0);
+	glUniform1i(UNIFORM_LOC_PREV_DIFFUSE_MAP, 1);
+	glUniform1i(UNIFORM_LOC_PREV_SPECULAR_MAP, 2);
 
-	glUniform1i(UNIFORM_LOC_GBUFFER_WORLD_POS, 2);
-	glUniform1i(UNIFORM_LOC_GBUFFER_WORLD_NORM, 3);
-	glUniform1i(UNIFORM_LOC_GBUFFER_SCREEN_DEPTH, 4);
+	glUniform1i(UNIFORM_LOC_GBUFFER_WORLD_POS, 3);
+	glUniform1i(UNIFORM_LOC_GBUFFER_WORLD_NORM, 4);
+	glUniform1i(UNIFORM_LOC_GBUFFER_SPECULAR, 5);
+	glUniform1i(UNIFORM_LOC_GBUFFER_SCREEN_DEPTH, 6);
 }
 
 void light_cone_init_material_uniforms ()
@@ -52,8 +54,8 @@ void light_cone_init_material_uniforms ()
 void light_cone_apply_material_uniforms ()
 {
 	const t_fbo& sspace = sspace_fbo[current_sspace_fbo];
-	bind_tex2d_to_slot(0, sspace.color[0]->id);
-	// TODO: specular
+	bind_tex2d_to_slot(0, sspace.color[LIGHT_SLOT_DIFFUSE]->id);
+	bind_tex2d_to_slot(1, sspace.color[LIGHT_SLOT_SPECULAR]->id);
 }
 
 /* Returns: whether this light is potentially visible */
@@ -135,12 +137,16 @@ static void lighting_pass ()
 
 	glUseProgram(program);
 
-	bind_tex2d_to_slot(0, sspace_fbo[current_sspace_fbo ^ 1].color[0]->id);
-	bind_tex2d_to_slot(1, lspace_fbo.color[0]->id);
+	bind_tex2d_to_slot(0, lspace_fbo.color[0]->id);
 
-	bind_tex2d_to_slot(2, gbuf_fbo.color[GBUF_SLOT_WORLD_POS]->id);
-	bind_tex2d_to_slot(3, gbuf_fbo.color[GBUF_SLOT_WORLD_NORM]->id);
-	bind_tex2d_to_slot(4, gbuf_fbo.depth->id);
+	const t_fbo& other_fbo = sspace_fbo[current_sspace_fbo ^ 1];
+	bind_tex2d_to_slot(1, other_fbo.color[LIGHT_SLOT_DIFFUSE]->id);
+	bind_tex2d_to_slot(2, other_fbo.color[LIGHT_SLOT_SPECULAR]->id);
+
+	bind_tex2d_to_slot(3, gbuf_fbo.color[GBUF_SLOT_WORLD_POS]->id);
+	bind_tex2d_to_slot(4, gbuf_fbo.color[GBUF_SLOT_WORLD_NORM]->id);
+	bind_tex2d_to_slot(5, gbuf_fbo.color[GBUF_SLOT_SPECULAR]->id);
+	bind_tex2d_to_slot(6, gbuf_fbo.depth->id);
 
 	using glm::value_ptr;
 	glUniform3fv(UNIFORM_LOC_LIGHT_POS, 1, value_ptr(unif_pos));
@@ -149,6 +155,8 @@ static void lighting_pass ()
 			value_ptr(unif_view));
 	glUniform2fv(UNIFORM_LOC_LIGHT_CASCADE, 2,
 			value_ptr(unif_cascade_bounds[0]));
+
+	glUniform3fv(UNIFORM_LOC_EYE_POSITION, 1, value_ptr(camera.pos));
 
 	gbuffer_pass();
 }

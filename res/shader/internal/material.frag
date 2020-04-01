@@ -4,10 +4,18 @@
 #extension GL_ARB_draw_buffers: require
 
 
-/* The user shader which links against the lib should implement these */
-vec4 surface_color ();
-vec3 surface_normal ();
+/*
+ * ==================================================
+ * These functions should be implemented by the
+ * user material shader that links against this
+ */
 
+/* Called during g-buffer stage */
+vec3 surface_normal ();
+float specular_exponent () { return 5.0; }
+
+/* Called during final shading stage */
+vec4 surface_color ();
 
 /* ================================================== */
 
@@ -21,9 +29,6 @@ layout (location = 0) uniform int stage;
 layout (location = 1) uniform sampler2D lightmap_diffuse;
 layout (location = 2) uniform sampler2D lightmap_specular;
 
-#define GBUF_SLOT_WORLD_POS 0
-#define GBUF_SLOT_WORLD_NORM 1
-
 in vec3 world_pos;
 in vec3 world_normal;
 in vec4 screen_crd;
@@ -36,9 +41,14 @@ void main ()
 	switch (stage) {
 	case RENDER_STAGE_G_BUFFERS:
 
-		gl_FragData[GBUF_SLOT_WORLD_POS].rgb = world_pos;
-		gl_FragData[GBUF_SLOT_WORLD_NORM].rgb =
-			TBN * normalize(surface_normal());
+		#define GBUF_WORLD_POS gl_FragData[0].rgb
+		#define GBUF_WORLD_NORM gl_FragData[1].rgb
+		#define GBUF_SPECULAR_DATA gl_FragData[2].r
+
+		GBUF_WORLD_POS = world_pos;
+		GBUF_WORLD_NORM = TBN * normalize(surface_normal());
+		GBUF_SPECULAR_DATA = specular_exponent();
+
 		break;
 
 	case RENDER_STAGE_LIGHTING_LSPACE:
@@ -52,7 +62,11 @@ void main ()
 
 		// call the actual user shader
 		gl_FragColor = surface_color();
-		gl_FragColor.rgb *= texture(lightmap_diffuse, texcrd).rgb;
+
+		vec3 light = texture(lightmap_diffuse, texcrd).rgb;
+		light += texture(lightmap_specular, texcrd).rgb;
+
+		gl_FragColor.rgb *= light;
 		break;
 
 	case RENDER_STAGE_WIREFRAME:

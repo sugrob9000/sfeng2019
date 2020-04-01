@@ -19,4 +19,4 @@ light
 	name sun
 	reach 1500
 	cone 40
-	rgb 0.9 0.95 1.3
+	rgb 1.9 1.95 1.3

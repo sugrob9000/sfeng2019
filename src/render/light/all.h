@@ -37,4 +37,8 @@ extern int current_sspace_fbo;
 
 extern vec3 light_ambience;
 
+/* Framebuffer slots for light MRT */
+constexpr int LIGHT_SLOT_DIFFUSE = 0;
+constexpr int LIGHT_SLOT_SPECULAR = 1;
+
 #endif // ALL_LIGHTING_H

@@ -11,10 +11,12 @@ void init_lighting ()
 {
 	int w = sdlctx.res_x;
 	int h = sdlctx.res_y;
+	constexpr GLenum f = GL_R11F_G11F_B10F;
 
 	for (int i: { 0, 1 }) {
 		sspace_fbo[i].make()
-			.attach_color(make_tex2d(w, h, GL_RGB16F))
+			.attach_color(make_tex2d(w, h, f), LIGHT_SLOT_DIFFUSE)
+			.attach_color(make_tex2d(w, h, f), LIGHT_SLOT_SPECULAR)
 			.assert_complete();
 		sspace_add_buffer(sspace_fbo[i]);
 	}

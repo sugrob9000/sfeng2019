@@ -15,7 +15,8 @@ void init_gbuffers ()
 	gbuf_fbo.make()
 		.attach_color(make_tex2d(w, h, GL_RGB32F), GBUF_SLOT_WORLD_POS)
 		.attach_color(make_tex2d(w, h, GL_RGB16F),
-			GBUF_SLOT_WORLD_NORM)
+				GBUF_SLOT_WORLD_NORM)
+		.attach_color(make_tex2d(w, h, GL_R16F), GBUF_SLOT_SPECULAR)
 		.attach_depth(make_tex2d(w, h, GL_DEPTH_COMPONENT24))
 		.assert_complete();
 
@@ -26,7 +27,8 @@ void fill_gbuffers ()
 {
 	gbuf_fbo.apply();
 
-	glClear(GL_DEPTH_BUFFER_BIT);
+	glClearColor(0.0, 0.0, 0.0, 0.0);
+	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	glDisable(GL_BLEND);
@@ -55,5 +57,7 @@ void debug_show_gbuffers ()
 				0.5, 0.5, 0.5);
 		debug_render_texture(gbuf_fbo.color[GBUF_SLOT_WORLD_NORM]->id,
 				0.5, 0.0, 0.5);
+		debug_render_texture(gbuf_fbo.color[GBUF_SLOT_SPECULAR]->id,
+				0.5, -0.5, 0.5);
 	}
 }

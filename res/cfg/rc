@@ -19,3 +19,5 @@ windowsize 1024 768
 
 loadmap map1
 light_ambience 0.6
+
+bind F show_gbuf

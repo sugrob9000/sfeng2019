@@ -119,22 +119,22 @@ static bool should_skip_application (const t_material* m)
 	return false;
 }
 
-
 void t_material::apply () const
 {
-	if (should_skip_application(this))
-		return;
-
-	glUseProgram(program);
-
-	for (int i = 0; i < bitmap_texture_ids.size(); i++) {
-		bind_tex2d_to_slot(MAT_TEXTURE_SLOT_OFFSET + i,
-				bitmap_texture_ids[i]);
+	if (!should_skip_application(this)) {
+		glUseProgram(program);
+		for (int i = 0; i < bitmap_texture_ids.size(); i++) {
+			bind_tex2d_to_slot(MAT_TEXTURE_SLOT_OFFSET + i,
+					bitmap_texture_ids[i]);
+		}
 	}
 
 	render_ctx.submit_matrices();
 	glUniform1i(UNIFORM_LOC_RENDER_STAGE, render_ctx.stage);
 	light_apply_material();
+
+	latest_material = this;
+	latest_render_stage = render_ctx.stage;
 }
 
 

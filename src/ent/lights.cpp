@@ -140,7 +140,7 @@ vec2 e_light::unif_cascade_bounds[2];
 
 
 
-/* Returns: whether this light is actually potentially visible */
+/* Returns: whether this light is potentially visible */
 static bool fill_depth_map (const e_light* l)
 {
 	static t_bound_box view_bounds =
@@ -206,6 +206,7 @@ static bool fill_depth_map (const e_light* l)
 	glClearColor(0.0, 0.0, 0.0, 1.0);
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
+	material_barrier();
 	l->vis.render();
 
 	return true;

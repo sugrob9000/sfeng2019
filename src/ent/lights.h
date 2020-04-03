@@ -20,6 +20,7 @@ class e_light_cone: public e_base
 	t_visible_set vis;
 
 	e_light_cone ();
+	~e_light_cone ();
 
 	ENT_MEMBERS (light_cone);
 	virtual void moved ();
@@ -45,6 +46,8 @@ class e_light_sun: public e_base
 	/* Position is mostly irrelevant */
 
 	e_light_sun ();
+	~e_light_sun ();
+
 	ENT_MEMBERS (light_sun);
 };
 

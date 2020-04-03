@@ -56,6 +56,9 @@ std::string vec3toa (const vec3& v);
 vec3 min_components (const vec3& a, const vec3& b);
 vec3 max_components (const vec3& a, const vec3& b);
 
+/* Rotation matrix for Euler angles - just x, then y, then z */
+mat4 rotate_xyz (const vec3& angles);
+
 
 /* Clear a std::vector with guaranteed deallocation of data */
 template <class T>
@@ -65,8 +68,7 @@ void vector_clear_dealloc (std::vector<T>& v)
 }
 
 
-mat4 rotate_xyz (const vec3& angles);
-
+bool str_starts_with (const std::string& haystack, const std::string& needle);
 
 /*
  * Be able to component-wise "compare" vectors to

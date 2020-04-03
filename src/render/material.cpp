@@ -230,23 +230,47 @@ GLuint make_glsl_program (const std::vector<GLuint>& shaders)
 	fatal("OpenGL program %i failed to link. Log:\n%s\n", r, log);
 }
 
-GLuint compile_glsl (std::string path, GLenum type)
+
+/*
+ * Below is a quick and dirty implementation of something akin to #include.
+ *   it DOES NOT do real preprocessing, so if a file ends up
+ *   including itself, this will just run out of memory.
+ * That is why it is "#pragma include" and not just "#include".
+ *   One should be aware that it does not work like a proper directive
+ */
+
+bool get_glsl_source (const std::string& path, std::string& src)
 {
 	std::ifstream f(path);
+	if (!f) {
+		warning("\"%s\": cannot open shader file", path.c_str());
+		return false;
+	}
 
-	if (!f)
-		return 0;
-
-	int filesize;
-	f.seekg(0, f.end);
-	filesize = f.tellg();
-	f.seekg(0, f.beg);
-
-	std::string source;
+	const char constexpr incl_pref[] = "#pragma include ";
 
 	for (std::string line; std::getline(f, line); ) {
-		source += line;
-		source += '\n';
+		if (str_starts_with(line, incl_pref)) {
+			if (!get_glsl_source(PATH_SHADER + line.substr(
+					sizeof(incl_pref) / sizeof(char) - 1,
+					std::string::npos), src))
+				return false;
+		} else {
+			src += line;
+		}
+		src += '\n';
+	}
+
+	return true;
+}
+
+GLuint compile_glsl (std::string path, GLenum type)
+{
+	std::string source;
+
+	if (!get_glsl_source(path, source)) {
+		warning("Failed to compile shader %s", path.c_str());
+		return 0;
 	}
 
 	GLuint id = glCreateShader(type);

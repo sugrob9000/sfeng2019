@@ -31,6 +31,18 @@ e_light_cone::e_light_cone ()
 	lights_cone.push_back(this);
 }
 
+e_light_cone::~e_light_cone ()
+{
+	for (e_light_cone*& p: lights_cone) {
+		if (p == this) {
+			p = lights_cone.back();
+			lights_cone.pop_back();
+			break;
+		}
+	}
+}
+
+
 void e_light_cone::moved ()
 {
 	e_base::moved();
@@ -107,4 +119,15 @@ void e_light_sun::apply_keyvals (const t_ent_keyvals& kv)
 e_light_sun::e_light_sun ()
 {
 	lights_sun.push_back(this);
+}
+
+e_light_sun::~e_light_sun ()
+{
+	for (e_light_sun*& p: lights_sun) {
+		if (p == this) {
+			p = lights_sun.back();
+			lights_sun.pop_back();
+			break;
+		}
+	}
 }

@@ -7,8 +7,8 @@
  * The screenspace pass for directional cone light
  */
 
-layout (location = 0) uniform sampler2D prev_diffuse_map;
-layout (location = 1) uniform sampler2D prev_specular_map;
+#pragma include internal/light/_sspace_pass.inc
+#pragma include internal/_gbuffer.inc
 
 layout (location = 2) uniform sampler2D depth_map;
 
@@ -17,18 +17,7 @@ layout (location = 6) uniform vec3 light_pos;
 layout (location = 9) uniform vec3 light_rgb;
 layout (location = 12) uniform mat4 light_view;
 
-layout (location = 200) uniform sampler2D gbuffer_world_pos;
-layout (location = 201) uniform sampler2D gbuffer_world_norm;
-layout (location = 202) uniform sampler2D gbuffer_screen_depth;
-layout (location = 203) uniform sampler2D gbuffer_specular;
-
-/* X_low, Y_low, X_high, Y_high, Z_high */
-layout (location = 100) uniform float view_bound[5];
-
-noperspective in vec2 texcrd;
-
-#define OUT_DIFFUSE gl_FragData[0].rgb
-#define OUT_SPECULAR gl_FragData[1].rgb
+layout (location = 100) uniform vec2 view_bound[2];
 
 const float DEPTH_BIAS_MULTIPLIER = (1.0 - 1e-2);
 
@@ -43,8 +32,8 @@ void main ()
 	vec2 lcoord = lspace.xy / lspace.w;
 	float bright = max(0.0, 1.0 - length(lcoord)) * step(0.0, lspace.w);
 
-	vec2 casc_low = vec2(view_bound[0], view_bound[1]);
-	vec2 casc_high = vec2(view_bound[2], view_bound[3]);
+	vec2 casc_low = view_bound[0];
+	vec2 casc_high =view_bound[1];
 	lcoord = (lcoord - casc_low) / (casc_high - casc_low);
 
 	bright *= max(0.0, dot(world_norm, normalize(light_pos - world_pos)));

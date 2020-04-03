@@ -25,8 +25,10 @@ t_fbo& t_fbo::assert_complete ()
 	GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 
 	if (width <= 0 || height <= 0) {
-		fatal("Framebuffer %i with invalid dimensions %i, %i",
-				id, width, height);
+		const char* hint = (width == 0 && height == 0)
+			? " - perhaps nothing has been attached?" : "";
+		fatal("Framebuffer %i with invalid dimensions %i, %i%s",
+				id, width, height, hint);
 	}
 
 	if (status != GL_FRAMEBUFFER_COMPLETE)
@@ -39,14 +41,15 @@ t_fbo& t_fbo::assert_complete ()
 static void attach_low (t_fbo& fbo, t_fbo::t_attachment_ptr att,
 			GLenum slot, int slice)
 {
-	if ((fbo.width != 0 && att->width != fbo.width)
-	|| (fbo.height != 0 && att->height != fbo.height)) {
-		fatal("Tried to attach object with dimensions %i, %i "
-			"to FBO with dimensions %i, %i",
-			att->width, att->height, fbo.width, fbo.height);
+	if (fbo.width == 0 && fbo.height == 0) {
+		fbo.width = att->width;
+		fbo.height = att->height;
+	} else if (fbo.width != att->width || fbo.height != att->height) {
+		fatal("Tried to attach object %i with dimensions %i, %i "
+			"to framebuffer %i with dimensions %i, %i",
+			att->id, att->width, att->height,
+			fbo.id, fbo.width, fbo.height);
 	}
-	fbo.width = att->width;
-	fbo.height = att->height;
 
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo.id);
 

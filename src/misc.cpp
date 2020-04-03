@@ -97,3 +97,17 @@ mat4 rotate_xyz (const vec3& angles)
 	return r;
 }
 
+
+bool str_starts_with (const std::string& haystack, const std::string& needle)
+{
+	if (needle.size() > haystack.size())
+		return false;
+
+	for (int i = 0; i < needle.size(); i++) {
+		if (haystack[i] != needle[i])
+			return false;
+	}
+
+	return true;
+}
+

@@ -2,6 +2,7 @@
 #include "render/light/cone.h"
 #include "render/render.h"
 #include "render/resource.h"
+#include "render/framebuffer.h"
 #include "render/gbuffer.h"
 #include "input/cmds.h"
 #include "misc.h"
@@ -9,8 +10,6 @@
 t_fbo sspace_fbo[2];
 int current_sspace_fbo;
 vec3 light_ambience;
-
-static GLuint postproc_program;
 
 /* TODO: do anything useful in post-processing */
 

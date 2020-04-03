@@ -19,8 +19,9 @@
  *   fbo.apply();
  *   // do the drawing, etc.
  *
- * Note that OpenGL requires all attachments in a FBO to be of
- * the same dimensions; this is only asserted at runtime
+ * Note: the attachments might be better off written
+ * using templates, or polymorphism, or both -
+ * right now this is the simplest, most C-like version
  */
 
 

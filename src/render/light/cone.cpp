@@ -13,7 +13,7 @@ std::vector<e_light_cone*> lights_cone;
 static vec3 unif_pos;
 static vec3 unif_rgb;
 static mat4 unif_view;
-static float unif_bounds[5]; /* X_low, Y_low, X_high, Y_high, Z_high */
+static vec2 unif_bounds[2];
 
 constexpr int cone_lspace_resolution = 1024;
 static t_fbo lspace_fbo;
@@ -30,11 +30,11 @@ void init_lighting_cone ()
 
 	program = make_glsl_program(
 		{ get_vert_shader("internal/gbuffer_quad"),
-		  get_frag_shader("internal/light_cone") });
+		  get_frag_shader("internal/light/cone") });
 	glUseProgram(program);
 
-	glUniform1i(UNIFORM_LOC_PREV_DIFFUSE_MAP, 0);
-	glUniform1i(UNIFORM_LOC_PREV_SPECULAR_MAP, 1);
+	glUniform1i(uniform_loc_light::prev_diffuse_map, 0);
+	glUniform1i(uniform_loc_light::prev_specular_map, 1);
 
 	glUniform1i(uniform_loc_light_cone::depth_map, 2);
 
@@ -90,11 +90,8 @@ static bool fill_depth_map (const e_light_cone* l)
 	unif_view = proj * view;
 	unif_pos = l->pos;
 	unif_rgb = l->rgb;
-	unif_bounds[0] = lbounds.start.x;
-	unif_bounds[1] = lbounds.start.y;
-	unif_bounds[2] = lbounds.end.x;
-	unif_bounds[3] = lbounds.end.y;
-	unif_bounds[4] = lbounds.end.z;
+	unif_bounds[0] = lbounds.start;
+	unif_bounds[1] = lbounds.end;
 
 	// do the rendering at the intersection
 	// of what light sees and what we see
@@ -140,7 +137,7 @@ static void lighting_pass ()
 	glUniform3fv(light_pos, 1, value_ptr(unif_pos));
 	glUniform3fv(light_rgb, 1, value_ptr(unif_rgb));
 	glUniformMatrix4fv(light_view, 1, false, value_ptr(unif_view));
-	glUniform1fv(light_bounds, 5, unif_bounds);
+	glUniform2fv(light_bounds, 2, value_ptr(unif_bounds[0]));
 
 	glUniform3fv(eye_position, 1, value_ptr(camera.pos));
 

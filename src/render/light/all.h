@@ -7,9 +7,6 @@
 /*
  * The collective file for all light types
  *  - init them all, compute them all, etc.
- *
- * Note: so far there is only one light type, the cone light.
- * TODO: omnidirectional light and a "sun" (single-directional everywhere)
  */
 
 void init_lighting ();
@@ -25,12 +22,18 @@ extern int current_sspace_fbo;
 
 extern vec3 light_ambience;
 
-constexpr int UNIFORM_LOC_PREV_DIFFUSE_MAP = 0;
-constexpr int UNIFORM_LOC_PREV_SPECULAR_MAP = 1;
+/*
+ * GLSL uniform location for *generating* the light maps
+ * Any screenspace light shader should have these declared at these locations
+ */
+namespace uniform_loc_light
+{
+	constexpr int prev_diffuse_map = 0;
+	constexpr int prev_specular_map = 1;
+}
 
 /*
- * GLSL uniform locations for using light
- * when rendering screenspace buffers
+ * GLSL uniform locations for *using* light in a material
  */
 namespace uniform_loc_light_material
 {

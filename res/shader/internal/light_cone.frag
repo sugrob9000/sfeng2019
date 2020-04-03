@@ -3,6 +3,10 @@
 #extension GL_ARB_explicit_attrib_location: require
 #extension GL_ARB_draw_buffers: require
 
+/*
+ * The screenspace pass for directional cone light
+ */
+
 layout (location = 0) uniform sampler2D depth_map;
 layout (location = 1) uniform sampler2D prev_diffuse_map;
 layout (location = 2) uniform sampler2D prev_specular_map;
@@ -17,8 +21,8 @@ layout (location = 6) uniform vec3 light_pos;
 layout (location = 9) uniform vec3 light_rgb;
 layout (location = 12) uniform mat4 light_view;
 
-const int NUM_CASCADES = 1;
-layout (location = 100) uniform vec2 cascade_bound[2 * NUM_CASCADES];
+/* X_low, Y_low, X_high, Y_high, Z_high */
+layout (location = 100) uniform float view_bound[5];
 
 noperspective in vec2 texcrd;
 
@@ -36,19 +40,18 @@ void main ()
 	vec4 lspace = light_view * vec4(world_pos, 1.0);
 
 	vec2 lcoord = lspace.xy / lspace.w;
-	float bright = max(0.0, 1.0 - length(lcoord));
+	float bright = max(0.0, 1.0 - length(lcoord)) * step(0.0, lspace.w);
 
-	vec2 casc_low = cascade_bound[0];
-	vec2 casc_high = cascade_bound[1];
+	vec2 casc_low = vec2(view_bound[0], view_bound[1]);
+	vec2 casc_high = vec2(view_bound[2], view_bound[3]);
 	lcoord = (lcoord - casc_low) / (casc_high - casc_low);
 
-	bright *= max(0.0, dot(world_norm,
-		normalize(light_pos - world_pos)));
+	bright *= max(0.0, dot(world_norm, normalize(light_pos - world_pos)));
 
 	float depth = lspace.w * DEPTH_BIAS_MULTIPLIER;
 	bright *= step(depth, texture(depth_map, lcoord).r);
-	OUT_DIFFUSE = texture(prev_diffuse_map, texcrd).rgb
-			+ bright * light_rgb;
+
+	vec3 diffuse = bright * light_rgb;
 
 	vec3 specular;
 	if (bright > 0.0) {
@@ -60,4 +63,5 @@ void main ()
 	}
 
 	OUT_SPECULAR = texture(prev_specular_map, texcrd).rgb + specular;
+	OUT_DIFFUSE = texture(prev_diffuse_map, texcrd).rgb + diffuse;
 }

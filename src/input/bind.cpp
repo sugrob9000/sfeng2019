@@ -1,5 +1,5 @@
-#include "bind.h"
-#include "cmds.h"
+#include "input/bind.h"
+#include "input/cmds.h"
 
 t_command t_keybind_map::empty_cmd;
 t_keybind_map key_binds;

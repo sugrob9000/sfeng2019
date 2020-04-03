@@ -1,7 +1,7 @@
 #ifndef CMDS_H
 #define CMDS_H
 
-#include "input.h"
+#include "input/input.h"
 
 #define COMMAND_ROUTINE(name)                                     \
 	void cmd_##name ([[maybe_unused]] const t_cmd_args& args, \
@@ -21,7 +21,7 @@
 
 #define COMMAND(name) \
 	COMMAND_ROUTINE (name);
-#include "cmds.inc"
+#include "input/_cmds.inc"
 #undef COMMAND
 
 MOUSEMOVE_ROUTINE (camera);

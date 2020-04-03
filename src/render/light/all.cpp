@@ -1,11 +1,18 @@
 #include "render/light/all.h"
 #include "render/light/cone.h"
 #include "render/render.h"
+#include "render/resource.h"
+#include "render/gbuffer.h"
 #include "input/cmds.h"
 #include "misc.h"
 
 t_fbo sspace_fbo[2];
 int current_sspace_fbo;
+vec3 light_ambience;
+
+static GLuint postproc_program;
+
+/* TODO: do anything useful in post-processing */
 
 void init_lighting ()
 {
@@ -32,11 +39,38 @@ void compute_all_lighting ()
 			light_ambience.z, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	// go through all the kinds of lights
+	// go through all the kinds of lights (there is only one yet)
 	compute_lighting_cone();
 }
 
-vec3 light_ambience;
+void postprocess ()
+{
+	current_sspace_fbo ^= 1;
+	sspace_fbo[current_sspace_fbo].apply();
+
+	glUseProgram(postproc_program);
+
+	const t_fbo& other_fbo = sspace_fbo[current_sspace_fbo ^ 1];
+	bind_tex2d_to_slot(0, other_fbo.color[LIGHT_SLOT_DIFFUSE]->id);
+	bind_tex2d_to_slot(1, other_fbo.color[LIGHT_SLOT_SPECULAR]->id);
+
+	gbuffer_pass();
+}
+
+void light_init_material ()
+{
+	glUniform1i(UNIFORM_LOC_LIGHTMAP_DIFFUSE, 0);
+	glUniform1i(UNIFORM_LOC_LIGHTMAP_SPECULAR, 1);
+}
+
+void light_apply_material ()
+{
+	const t_fbo& sspace = sspace_fbo[current_sspace_fbo];
+	bind_tex2d_to_slot(0, sspace.color[LIGHT_SLOT_DIFFUSE]->id);
+	bind_tex2d_to_slot(1, sspace.color[LIGHT_SLOT_SPECULAR]->id);
+}
+
+
 COMMAND_ROUTINE (light_ambience)
 {
 	if (ev != PRESS)

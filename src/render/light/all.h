@@ -16,26 +16,18 @@
 void init_lighting ();
 void compute_all_lighting ();
 
-/*
- * This is run *once* at material's creation
- */
-inline void light_init_material ()
-{
-	light_cone_init_material_uniforms();
-}
-
-/*
- * This is run *every time* the material is applied
- */
-inline void light_apply_material ()
-{
-	light_cone_apply_material_uniforms();
-}
+/* Called once per material creation - sets the uniforms */
+void light_init_material ();
+/* Called on each material application - binds the textures */
+void light_apply_material ();
 
 extern t_fbo sspace_fbo[2];
 extern int current_sspace_fbo;
 
 extern vec3 light_ambience;
+
+constexpr int UNIFORM_LOC_PREV_DIFFUSE_MAP = 1;
+constexpr int UNIFORM_LOC_PREV_SPECULAR_MAP = 2;
 
 /* Framebuffer slots for light MRT */
 constexpr int LIGHT_SLOT_DIFFUSE = 0;

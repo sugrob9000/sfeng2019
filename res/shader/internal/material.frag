@@ -12,7 +12,7 @@
 
 /* Called during g-buffer stage */
 vec3 surface_normal ();
-float specular_exponent () { return 5.0; }
+float specular_exponent () { return 90.0; }
 
 /* Called during final shading stage */
 vec4 surface_color ();

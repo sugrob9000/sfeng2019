@@ -1,6 +1,6 @@
-#include "input.h"
-#include "bind.h"
-#include "cmds.h"
+#include "input/input.h"
+#include "input/bind.h"
+#include "input/cmds.h"
 #include "render/render.h"
 
 t_command_registry cmd_registry;
@@ -11,7 +11,7 @@ void init_input ()
 	// register all commands
 	#define COMMAND(name) \
 		cmd_registry.register_command(#name, &cmd_##name);
-	#include "cmds.inc"
+	#include "input/_cmds.inc"
 	#undef COMMAND
 
 	mousemove_proc = &mouse_camera;

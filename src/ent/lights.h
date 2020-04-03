@@ -6,7 +6,7 @@
 #include "render/vis.h"
 
 /*
- * Directional light
+ * Directional cone light
  */
 class e_light: public e_base
 {
@@ -25,12 +25,6 @@ class e_light: public e_base
 	virtual void moved ();
 
 	void view () const;
-
-	/* Sending lighting info to shader */
-	static vec3 unif_pos;
-	static vec3 unif_rgb;
-	static mat4 unif_view;
-	static vec2 unif_cascade_bounds[2];
 };
 
 #endif // ENT_LIGHTS_H

@@ -9,13 +9,11 @@
 
 std::vector<e_light*> cone_lights;
 
-constexpr int num_cascades = 1;
-
 /* Sending lighting info to shader */
 vec3 unif_pos;
 vec3 unif_rgb;
 mat4 unif_view;
-vec2 unif_cascade_bounds[2 * num_cascades];
+float unif_bounds[5]; /* X_low, Y_low, X_high, Y_high, Z_high */
 
 constexpr int lspace_resolution = 1024;
 t_fbo lspace_fbo;
@@ -45,19 +43,6 @@ void init_lighting_cone ()
 	glUniform1i(UNIFORM_LOC_GBUFFER_SCREEN_DEPTH, 6);
 }
 
-void light_cone_init_material_uniforms ()
-{
-	glUniform1i(UNIFORM_LOC_LIGHTMAP_DIFFUSE, 0);
-	glUniform1i(UNIFORM_LOC_LIGHTMAP_SPECULAR, 1);
-}
-
-void light_cone_apply_material_uniforms ()
-{
-	const t_fbo& sspace = sspace_fbo[current_sspace_fbo];
-	bind_tex2d_to_slot(0, sspace.color[LIGHT_SLOT_DIFFUSE]->id);
-	bind_tex2d_to_slot(1, sspace.color[LIGHT_SLOT_SPECULAR]->id);
-}
-
 /* Returns: whether this light is potentially visible */
 static bool fill_depth_map (const e_light* l)
 {
@@ -68,20 +53,17 @@ static bool fill_depth_map (const e_light* l)
 	mat4& proj = render_ctx.proj;
 	mat4& view = render_ctx.view;
 
-	// whether center of light is visible by camera
-	// (requires special treatment)
 	vec4 camspace = proj * view * vec4(l->pos, 1.0);
-	bool inside_camera = view_bounds.point_in(camspace / camspace.w);
+	t_bound_box lbounds;
+	if (view_bounds.point_in(camspace / camspace.w)) {
+		// cannot cull XY when light is visible on screen
+		lbounds = { { -1.0, -1.0, 0.0 }, { 1.0, 1.0, 0.0 } };
+	} else {
+		lbounds = { vec3(INFINITY), vec3(-INFINITY) };
+	}
 
 	matrix_restorer rest(render_ctx);
 	l->view();
-
-	// the bound of the camera slice in lightspace
-	t_bound_box lbounds;
-	if (inside_camera)
-		lbounds = { { -1.0, -1.0, 0.0 }, { 1.0, 1.0, 0.0 } };
-	else
-		lbounds = { vec3(INFINITY), vec3(-INFINITY) };
 
 	std::array<vec3, 4> planes[2] =
 		{ camera.corner_points(camera.z_far),
@@ -106,8 +88,11 @@ static bool fill_depth_map (const e_light* l)
 	unif_view = proj * view;
 	unif_pos = l->pos;
 	unif_rgb = l->rgb;
-	unif_cascade_bounds[0] = lbounds.start;
-	unif_cascade_bounds[1] = lbounds.end;
+	unif_bounds[0] = lbounds.start.x;
+	unif_bounds[1] = lbounds.start.y;
+	unif_bounds[2] = lbounds.end.x;
+	unif_bounds[3] = lbounds.end.y;
+	unif_bounds[4] = lbounds.end.z;
 
 	// do the rendering at the intersection
 	// of what light sees and what we see
@@ -153,8 +138,7 @@ static void lighting_pass ()
 	glUniform3fv(UNIFORM_LOC_LIGHT_RGB, 1, value_ptr(unif_rgb));
 	glUniformMatrix4fv(UNIFORM_LOC_LIGHT_VIEW, 1, false,
 			value_ptr(unif_view));
-	glUniform2fv(UNIFORM_LOC_LIGHT_CASCADE, 2,
-			value_ptr(unif_cascade_bounds[0]));
+	glUniform1fv(UNIFORM_LOC_LIGHT_BOUNDS, 5, unif_bounds);
 
 	glUniform3fv(UNIFORM_LOC_EYE_POSITION, 1, value_ptr(camera.pos));
 

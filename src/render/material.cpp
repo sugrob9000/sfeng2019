@@ -4,6 +4,7 @@
 #include "render/render.h"
 #include "render/resource.h"
 #include "render/light/all.h"
+#include "render/gbuffer.h"
 #include <cassert>
 #include <algorithm>
 
@@ -131,6 +132,7 @@ void t_material::apply () const
 
 	render_ctx.submit_matrices();
 	glUniform1i(UNIFORM_LOC_RENDER_STAGE, render_ctx.stage);
+
 	light_apply_material();
 
 	latest_material = this;

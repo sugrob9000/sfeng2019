@@ -9,9 +9,6 @@ void init_lighting_cone ();
 
 void compute_lighting_cone ();
 
-void light_cone_init_material_uniforms ();
-void light_cone_apply_material_uniforms ();
-
 extern std::vector<e_light*> cone_lights;
 
 /*
@@ -19,14 +16,12 @@ extern std::vector<e_light*> cone_lights;
  * when rendering actual geometry from a light's perspective
  */
 constexpr int UNIFORM_LOC_DEPTH_MAP = 0;
-constexpr int UNIFORM_LOC_PREV_DIFFUSE_MAP = 1;
-constexpr int UNIFORM_LOC_PREV_SPECULAR_MAP = 2;
 constexpr int UNIFORM_LOC_EYE_POSITION = 3;
 
 constexpr int UNIFORM_LOC_LIGHT_POS = 6;
 constexpr int UNIFORM_LOC_LIGHT_RGB = 9;
 constexpr int UNIFORM_LOC_LIGHT_VIEW = 12;
-constexpr int UNIFORM_LOC_LIGHT_CASCADE = 100;
+constexpr int UNIFORM_LOC_LIGHT_BOUNDS = 100;
 
 /*
  * GLSL uniform locations for using light

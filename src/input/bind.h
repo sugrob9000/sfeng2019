@@ -2,7 +2,7 @@
 #define BIND_H
 
 #include "misc.h"
-#include "input.h"
+#include "input/input.h"
 
 /*
  * Use obscure but valid scancodes for mouse.

@@ -43,20 +43,6 @@ void compute_all_lighting ()
 	compute_lighting_cone();
 }
 
-void postprocess ()
-{
-	current_sspace_fbo ^= 1;
-	sspace_fbo[current_sspace_fbo].apply();
-
-	glUseProgram(postproc_program);
-
-	const t_fbo& other_fbo = sspace_fbo[current_sspace_fbo ^ 1];
-	bind_tex2d_to_slot(0, other_fbo.color[LIGHT_SLOT_DIFFUSE]->id);
-	bind_tex2d_to_slot(1, other_fbo.color[LIGHT_SLOT_SPECULAR]->id);
-
-	gbuffer_pass();
-}
-
 void light_init_material ()
 {
 	glUniform1i(UNIFORM_LOC_LIGHTMAP_DIFFUSE, 0);

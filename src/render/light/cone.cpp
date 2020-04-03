@@ -7,7 +7,7 @@
 #include "core/core.h"
 #include "misc.h"
 
-std::vector<e_light*> cone_lights;
+std::vector<e_light_cone*> cone_lights;
 
 /* Sending lighting info to shader */
 vec3 unif_pos;
@@ -44,7 +44,7 @@ void init_lighting_cone ()
 }
 
 /* Returns: whether this light is potentially visible */
-static bool fill_depth_map (const e_light* l)
+static bool fill_depth_map (const e_light_cone* l)
 {
 	static t_bound_box view_bounds =
 		{ { -1.0, -1.0, 0.0 }, { 1.0, 1.0, 1.0 } };
@@ -148,7 +148,7 @@ static void lighting_pass ()
 void compute_lighting_cone ()
 {
 	render_ctx.stage = RENDER_STAGE_LIGHTING_LSPACE;
-	for (e_light* l: cone_lights) {
+	for (e_light_cone* l: cone_lights) {
 		if (fill_depth_map(l))
 			lighting_pass();
 	}

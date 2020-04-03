@@ -9,7 +9,7 @@ void init_lighting_cone ();
 
 void compute_lighting_cone ();
 
-extern std::vector<e_light*> cone_lights;
+extern std::vector<e_light_cone*> cone_lights;
 
 /*
  * GLSL uniform locations for calculating light

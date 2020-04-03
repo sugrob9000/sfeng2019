@@ -5,7 +5,7 @@ prop
 	mat car-red
 	name car
 
-light
+light_cone
 	pos -923.823669 -462.896851 398.892090
 	ang 23 0 43
 	name light1
@@ -13,7 +13,7 @@ light
 	cone 40
 	rgb 0.7 0.85 0.95
 
-light
+light_cone
 	pos 650.738 -52.3615 199.923
 	ang 7 0 -73
 	name sun

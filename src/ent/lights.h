@@ -8,7 +8,7 @@
 /*
  * Directional cone light
  */
-class e_light: public e_base
+class e_light_cone: public e_base
 {
 	public:
 
@@ -19,9 +19,9 @@ class e_light: public e_base
 
 	t_visible_set vis;
 
-	e_light ();
+	e_light_cone ();
 
-	ENT_MEMBERS (light);
+	ENT_MEMBERS (light_cone);
 	virtual void moved ();
 
 	void view () const;

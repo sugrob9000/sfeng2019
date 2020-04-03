@@ -2,35 +2,35 @@
 #include "render/render.h"
 #include "render/light/cone.h"
 
-std::vector<e_light*> lights;
+std::vector<e_light_cone*> lights;
 
-/* ============= e_light code ============= */
+/* ============= e_light_cone code ============= */
 
-SIG_HANDLER (light, setcolor)
+SIG_HANDLER (light_cone, setcolor)
 {
 	atovec3(arg, ent->rgb);
 }
 
-SIG_HANDLER (light, setcone)
+SIG_HANDLER (light_cone, setcone)
 {
 	float cone = atof(arg.c_str());
 	if (cone > 0.0 && cone < 180.0)
 		ent->cone_angle = cone;
 }
 
-FILL_IO_DATA (light)
+FILL_IO_DATA (light_cone)
 {
-	BASIC_SIG_HANDLERS(light);
-	SET_SIG_HANDLER(light, setcolor);
-	SET_SIG_HANDLER(light, setcone);
+	BASIC_SIG_HANDLERS(light_cone);
+	SET_SIG_HANDLER(light_cone, setcolor);
+	SET_SIG_HANDLER(light_cone, setcone);
 }
 
-e_light::e_light ()
+e_light_cone::e_light_cone ()
 {
 	cone_lights.push_back(this);
 }
 
-void e_light::moved ()
+void e_light_cone::moved ()
 {
 	e_base::moved();
 
@@ -39,9 +39,9 @@ void e_light::moved ()
 	vis.fill(pos);
 }
 
-void e_light::think () { }
+void e_light_cone::think () { }
 
-void e_light::apply_keyvals (const t_ent_keyvals& kv)
+void e_light_cone::apply_keyvals (const t_ent_keyvals& kv)
 {
 	apply_basic_keyvals(kv);
 
@@ -60,11 +60,11 @@ void e_light::apply_keyvals (const t_ent_keyvals& kv)
 		near_plane = 1.0; );
 }
 
-void e_light::render () const { }
+void e_light_cone::render () const { }
 
-t_bound_box e_light::get_bbox () const { return { }; }
+t_bound_box e_light_cone::get_bbox () const { return { }; }
 
-void e_light::view () const
+void e_light_cone::view () const
 {
 	using namespace glm;
 

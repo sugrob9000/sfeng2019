@@ -15,7 +15,7 @@ extern std::vector<e_light_cone*> cone_lights;
  * GLSL uniform locations for calculating light
  * when rendering actual geometry from a light's perspective
  */
-constexpr int UNIFORM_LOC_DEPTH_MAP = 0;
+constexpr int UNIFORM_LOC_DEPTH_MAP = 2;
 constexpr int UNIFORM_LOC_EYE_POSITION = 3;
 
 constexpr int UNIFORM_LOC_LIGHT_POS = 6;

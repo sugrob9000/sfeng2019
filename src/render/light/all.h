@@ -2,7 +2,6 @@
 #define ALL_LIGHTING_H
 
 #include "render/framebuffer.h"
-#include "render/light/cone.h"
 #include "misc.h"
 
 /*
@@ -26,8 +25,8 @@ extern int current_sspace_fbo;
 
 extern vec3 light_ambience;
 
-constexpr int UNIFORM_LOC_PREV_DIFFUSE_MAP = 1;
-constexpr int UNIFORM_LOC_PREV_SPECULAR_MAP = 2;
+constexpr int UNIFORM_LOC_PREV_DIFFUSE_MAP = 0;
+constexpr int UNIFORM_LOC_PREV_SPECULAR_MAP = 1;
 
 /* Framebuffer slots for light MRT */
 constexpr int LIGHT_SLOT_DIFFUSE = 0;

@@ -7,19 +7,20 @@
  * The screenspace pass for directional cone light
  */
 
-layout (location = 0) uniform sampler2D depth_map;
-layout (location = 1) uniform sampler2D prev_diffuse_map;
-layout (location = 2) uniform sampler2D prev_specular_map;
+layout (location = 0) uniform sampler2D prev_diffuse_map;
+layout (location = 1) uniform sampler2D prev_specular_map;
 
-layout (location = 200) uniform sampler2D gbuffer_world_pos;
-layout (location = 201) uniform sampler2D gbuffer_world_norm;
-layout (location = 202) uniform sampler2D gbuffer_screen_depth;
-layout (location = 203) uniform sampler2D gbuffer_specular;
+layout (location = 2) uniform sampler2D depth_map;
 
 layout (location = 3) uniform vec3 eye_pos;
 layout (location = 6) uniform vec3 light_pos;
 layout (location = 9) uniform vec3 light_rgb;
 layout (location = 12) uniform mat4 light_view;
+
+layout (location = 200) uniform sampler2D gbuffer_world_pos;
+layout (location = 201) uniform sampler2D gbuffer_world_norm;
+layout (location = 202) uniform sampler2D gbuffer_screen_depth;
+layout (location = 203) uniform sampler2D gbuffer_specular;
 
 /* X_low, Y_low, X_high, Y_high, Z_high */
 layout (location = 100) uniform float view_bound[5];

@@ -33,9 +33,10 @@ void init_lighting_cone ()
 		  get_frag_shader("internal/light_cone") });
 	glUseProgram(program);
 
-	glUniform1i(UNIFORM_LOC_DEPTH_MAP, 0);
-	glUniform1i(UNIFORM_LOC_PREV_DIFFUSE_MAP, 1);
-	glUniform1i(UNIFORM_LOC_PREV_SPECULAR_MAP, 2);
+	glUniform1i(UNIFORM_LOC_PREV_DIFFUSE_MAP, 0);
+	glUniform1i(UNIFORM_LOC_PREV_SPECULAR_MAP, 1);
+
+	glUniform1i(UNIFORM_LOC_DEPTH_MAP, 2);
 
 	glUniform1i(UNIFORM_LOC_GBUFFER_WORLD_POS, 3);
 	glUniform1i(UNIFORM_LOC_GBUFFER_WORLD_NORM, 4);
@@ -122,11 +123,11 @@ static void lighting_pass ()
 
 	glUseProgram(program);
 
-	bind_tex2d_to_slot(0, lspace_fbo.color[0]->id);
-
 	const t_fbo& other_fbo = sspace_fbo[current_sspace_fbo ^ 1];
-	bind_tex2d_to_slot(1, other_fbo.color[LIGHT_SLOT_DIFFUSE]->id);
-	bind_tex2d_to_slot(2, other_fbo.color[LIGHT_SLOT_SPECULAR]->id);
+	bind_tex2d_to_slot(0, other_fbo.color[LIGHT_SLOT_DIFFUSE]->id);
+	bind_tex2d_to_slot(1, other_fbo.color[LIGHT_SLOT_SPECULAR]->id);
+
+	bind_tex2d_to_slot(2, lspace_fbo.color[0]->id);
 
 	bind_tex2d_to_slot(3, gbuf_fbo.color[GBUF_SLOT_WORLD_POS]->id);
 	bind_tex2d_to_slot(4, gbuf_fbo.color[GBUF_SLOT_WORLD_NORM]->id);

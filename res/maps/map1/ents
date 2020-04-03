@@ -16,7 +16,13 @@ light_cone
 light_cone
 	pos 650.738 -52.3615 199.923
 	ang 7 0 -73
-	name sun
+	name light2
 	reach 1500
 	cone 40
-	rgb 1.9 1.95 1.3
+	rgb 0.9 0.95 1.3
+
+light_sun
+	ang 7 0 4
+	name sun
+	distance 2000
+	rgb 2.0 2.0 1.3

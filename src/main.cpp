@@ -11,8 +11,6 @@ COMMAND_ROUTINE (sun_at_view)
 {
 	if (ev != PRESS)
 		return;
-
-	run_cmd_ext("signal 0 sun setpos " + vec3toa(camera.pos));
 	run_cmd_ext("signal 0 sun setang " + vec3toa(camera.ang));
 }
 

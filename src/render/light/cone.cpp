@@ -7,22 +7,22 @@
 #include "core/core.h"
 #include "misc.h"
 
-std::vector<e_light_cone*> cone_lights;
+std::vector<e_light_cone*> lights_cone;
 
 /* Sending lighting info to shader */
-vec3 unif_pos;
-vec3 unif_rgb;
-mat4 unif_view;
-float unif_bounds[5]; /* X_low, Y_low, X_high, Y_high, Z_high */
+static vec3 unif_pos;
+static vec3 unif_rgb;
+static mat4 unif_view;
+static float unif_bounds[5]; /* X_low, Y_low, X_high, Y_high, Z_high */
 
-constexpr int lspace_resolution = 1024;
-t_fbo lspace_fbo;
+constexpr int cone_lspace_resolution = 1024;
+static t_fbo lspace_fbo;
 
 static GLuint program;
 
 void init_lighting_cone ()
 {
-	int s = lspace_resolution;
+	int s = cone_lspace_resolution;
 	lspace_fbo.make()
 		.attach_color(make_tex2d(s, s, GL_R32F))
 		.attach_depth(make_rbo(s, s, GL_DEPTH_COMPONENT))
@@ -36,12 +36,13 @@ void init_lighting_cone ()
 	glUniform1i(UNIFORM_LOC_PREV_DIFFUSE_MAP, 0);
 	glUniform1i(UNIFORM_LOC_PREV_SPECULAR_MAP, 1);
 
-	glUniform1i(UNIFORM_LOC_DEPTH_MAP, 2);
+	glUniform1i(uniform_loc_light_cone::depth_map, 2);
 
-	glUniform1i(UNIFORM_LOC_GBUFFER_WORLD_POS, 3);
-	glUniform1i(UNIFORM_LOC_GBUFFER_WORLD_NORM, 4);
-	glUniform1i(UNIFORM_LOC_GBUFFER_SPECULAR, 5);
-	glUniform1i(UNIFORM_LOC_GBUFFER_SCREEN_DEPTH, 6);
+	using namespace uniform_loc_gbuffer;
+	glUniform1i(world_pos, 3);
+	glUniform1i(world_norm, 4);
+	glUniform1i(specular, 5);
+	glUniform1i(screen_depth, 6);
 }
 
 /* Returns: whether this light is potentially visible */
@@ -135,13 +136,13 @@ static void lighting_pass ()
 	bind_tex2d_to_slot(6, gbuf_fbo.depth->id);
 
 	using glm::value_ptr;
-	glUniform3fv(UNIFORM_LOC_LIGHT_POS, 1, value_ptr(unif_pos));
-	glUniform3fv(UNIFORM_LOC_LIGHT_RGB, 1, value_ptr(unif_rgb));
-	glUniformMatrix4fv(UNIFORM_LOC_LIGHT_VIEW, 1, false,
-			value_ptr(unif_view));
-	glUniform1fv(UNIFORM_LOC_LIGHT_BOUNDS, 5, unif_bounds);
+	using namespace uniform_loc_light_cone;
+	glUniform3fv(light_pos, 1, value_ptr(unif_pos));
+	glUniform3fv(light_rgb, 1, value_ptr(unif_rgb));
+	glUniformMatrix4fv(light_view, 1, false, value_ptr(unif_view));
+	glUniform1fv(light_bounds, 5, unif_bounds);
 
-	glUniform3fv(UNIFORM_LOC_EYE_POSITION, 1, value_ptr(camera.pos));
+	glUniform3fv(eye_position, 1, value_ptr(camera.pos));
 
 	gbuffer_pass();
 }
@@ -149,7 +150,7 @@ static void lighting_pass ()
 void compute_lighting_cone ()
 {
 	render_ctx.stage = RENDER_STAGE_LIGHTING_LSPACE;
-	for (e_light_cone* l: cone_lights) {
+	for (e_light_cone* l: lights_cone) {
 		if (fill_depth_map(l))
 			lighting_pass();
 	}

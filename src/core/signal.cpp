@@ -12,8 +12,11 @@ bool operator< (const t_signal& a, const t_signal& b)
 void t_signal::execute () const
 {
 	e_base* e = ents.find_by_name(target);
-	if (e == nullptr)
+	if (e == nullptr) {
+		warning("tried to send signal to nonexistent entity %s",
+				target.c_str());
 		return;
+	}
 
 	const t_sigmap& sigmap = e->get_sigmap();
 	auto i = sigmap.find(signal_name);

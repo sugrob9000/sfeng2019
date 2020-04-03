@@ -28,6 +28,16 @@ extern vec3 light_ambience;
 constexpr int UNIFORM_LOC_PREV_DIFFUSE_MAP = 0;
 constexpr int UNIFORM_LOC_PREV_SPECULAR_MAP = 1;
 
+/*
+ * GLSL uniform locations for using light
+ * when rendering screenspace buffers
+ */
+namespace uniform_loc_light_material
+{
+	constexpr int lightmap_diffuse = 1;
+	constexpr int lightmap_specular = 2;
+}
+
 /* Framebuffer slots for light MRT */
 constexpr int LIGHT_SLOT_DIFFUSE = 0;
 constexpr int LIGHT_SLOT_SPECULAR = 1;

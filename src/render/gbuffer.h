@@ -23,9 +23,12 @@ constexpr int GBUF_SLOT_WORLD_POS = 0;
 constexpr int GBUF_SLOT_WORLD_NORM = 1;
 constexpr int GBUF_SLOT_SPECULAR = 2;
 
-constexpr int UNIFORM_LOC_GBUFFER_WORLD_POS = 200;
-constexpr int UNIFORM_LOC_GBUFFER_WORLD_NORM = 201;
-constexpr int UNIFORM_LOC_GBUFFER_SCREEN_DEPTH = 202;
-constexpr int UNIFORM_LOC_GBUFFER_SPECULAR = 203;
+namespace uniform_loc_gbuffer
+{
+	constexpr int world_pos = 200;
+	constexpr int world_norm = 201;
+	constexpr int screen_depth = 202;
+	constexpr int specular = 203;
+}
 
 #endif // GBUFFER_H

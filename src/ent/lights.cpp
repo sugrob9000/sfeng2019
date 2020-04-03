@@ -1,10 +1,11 @@
 #include "ent/lights.h"
 #include "render/render.h"
 #include "render/light/cone.h"
+#include "render/light/sun.h"
 
 std::vector<e_light_cone*> lights;
 
-/* ============= e_light_cone code ============= */
+/* ======================== e_light_cone code ======================== */
 
 SIG_HANDLER (light_cone, setcolor)
 {
@@ -27,7 +28,7 @@ FILL_IO_DATA (light_cone)
 
 e_light_cone::e_light_cone ()
 {
-	cone_lights.push_back(this);
+	lights_cone.push_back(this);
 }
 
 void e_light_cone::moved ()
@@ -39,7 +40,6 @@ void e_light_cone::moved ()
 	vis.fill(pos);
 }
 
-void e_light_cone::think () { }
 
 void e_light_cone::apply_keyvals (const t_ent_keyvals& kv)
 {
@@ -60,8 +60,8 @@ void e_light_cone::apply_keyvals (const t_ent_keyvals& kv)
 		near_plane = 1.0; );
 }
 
+void e_light_cone::think () { }
 void e_light_cone::render () const { }
-
 t_bound_box e_light_cone::get_bbox () const { return { }; }
 
 void e_light_cone::view () const
@@ -73,4 +73,38 @@ void e_light_cone::view () const
 	render_ctx.view = rotate_xyz(radians(ang - vec3(90.0, 0.0, 0.0)));
 	render_ctx.view = translate(render_ctx.view, -pos);
 	render_ctx.model = mat4(1.0);
+}
+
+/* ======================== e_light_sun code ======================== */
+
+SIG_HANDLER (light_sun, setcolor)
+{
+	atovec3(arg, ent->rgb);
+}
+
+FILL_IO_DATA (light_sun)
+{
+	BASIC_SIG_HANDLERS(light_sun);
+	SET_SIG_HANDLER(light_sun, setcolor);
+}
+
+void e_light_sun::think () { }
+void e_light_sun::render () const { }
+t_bound_box e_light_sun::get_bbox () const { return { }; }
+
+void e_light_sun::apply_keyvals (const t_ent_keyvals& kv)
+{
+	apply_basic_keyvals(kv);
+
+	KV_TRY_GET(kv["distance"],
+		distance = atof(val.c_str());,
+		distance = 2000.0; );
+	KV_TRY_GET(kv["rgb"],
+		atovec3(val, rgb),
+		rgb = vec3(0.5); );
+}
+
+e_light_sun::e_light_sun ()
+{
+	lights_sun.push_back(this);
 }

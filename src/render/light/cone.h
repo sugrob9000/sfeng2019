@@ -6,34 +6,23 @@
 #include <vector>
 
 void init_lighting_cone ();
-
 void compute_lighting_cone ();
 
-extern std::vector<e_light_cone*> cone_lights;
+extern std::vector<e_light_cone*> lights_cone;
 
 /*
  * GLSL uniform locations for calculating light
  * when rendering actual geometry from a light's perspective
  */
-constexpr int UNIFORM_LOC_DEPTH_MAP = 2;
-constexpr int UNIFORM_LOC_EYE_POSITION = 3;
+namespace uniform_loc_light_cone
+{
+	constexpr int depth_map = 2;
+	constexpr int eye_position = 3;
 
-constexpr int UNIFORM_LOC_LIGHT_POS = 6;
-constexpr int UNIFORM_LOC_LIGHT_RGB = 9;
-constexpr int UNIFORM_LOC_LIGHT_VIEW = 12;
-constexpr int UNIFORM_LOC_LIGHT_BOUNDS = 100;
-
-/*
- * GLSL uniform locations for using light
- * when rendering screenspace buffers
- */
-constexpr int UNIFORM_LOC_LIGHTMAP_DIFFUSE = 1;
-constexpr int UNIFORM_LOC_LIGHTMAP_SPECULAR = 2;
-
-/*
- * Which texture units to bind the respective buffers to
- */
-constexpr int TEXTURE_SLOT_PREV_SHADOWMAP = 0;
-constexpr int TEXTURE_SLOT_DEPTH_MAP = 1;
+	constexpr int light_pos = 6;
+	constexpr int light_rgb = 9;
+	constexpr int light_view = 12;
+	constexpr int light_bounds = 100;
+}
 
 #endif // LIGHT_CONE_H

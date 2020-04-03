@@ -45,8 +45,9 @@ void compute_all_lighting ()
 
 void light_init_material ()
 {
-	glUniform1i(UNIFORM_LOC_LIGHTMAP_DIFFUSE, 0);
-	glUniform1i(UNIFORM_LOC_LIGHTMAP_SPECULAR, 1);
+	using namespace uniform_loc_light_material;
+	glUniform1i(lightmap_diffuse, 0);
+	glUniform1i(lightmap_specular, 1);
 }
 
 void light_apply_material ()

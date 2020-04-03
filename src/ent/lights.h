@@ -27,4 +27,25 @@ class e_light_cone: public e_base
 	void view () const;
 };
 
+/*
+ * Directional light i.e. sun
+ */
+class e_light_sun: public e_base
+{
+	public:
+
+	vec3 rgb;
+
+	/*
+	 * Consider the sun to be this far from the player.
+	 * If this is closer than anything else on the map,
+	 * that will not cast shadows
+	 */
+	float distance;
+	/* Position is mostly irrelevant */
+
+	e_light_sun ();
+	ENT_MEMBERS (light_sun);
+};
+
 #endif // ENT_LIGHTS_H

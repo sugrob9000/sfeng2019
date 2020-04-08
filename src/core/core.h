@@ -43,6 +43,7 @@ struct t_bound_box
 	void expand (const t_bound_box& other);
 
 	bool point_in (const vec3& pt) const;
+	bool point_in (const vec3& pt, float tolerance) const;
 	float volume () const;
 
 	bool intersects (const t_bound_box& b) const;

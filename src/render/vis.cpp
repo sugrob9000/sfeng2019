@@ -195,10 +195,10 @@ void t_visible_set::fill (const vec3& cam)
 			if (!c)
 				continue;
 			for (int j = 0; j < 8; j++) {
-				unsigned int pixels;
+				unsigned int px;
 				glGetQueryObjectuiv(c[j].query,
-						GL_QUERY_RESULT, &pixels);
-				if (pixels > 0 || c[j].bounds.point_in(cam))
+						GL_QUERY_RESULT, &px);
+				if (px > 0 || c[j].bounds.point_in(cam, 1.5))
 					queues[cur_queue ^ 1].push_back(&c[j]);
 			}
 		}
@@ -347,7 +347,7 @@ void vis_destroy_world ()
 }
 
 
-bool debug_draw_wireframe = false;
+static bool debug_draw_wireframe = false;
 COMMAND_SET_BOOL (vis_wireframe, debug_draw_wireframe);
 
 void t_visible_set::render_debug () const

@@ -177,6 +177,13 @@ bool t_bound_box::point_in (const vec3& pt) const
 		&& (pt.x <= end.x) && (pt.y <= end.y) && (pt.z <= end.z);
 }
 
+bool t_bound_box::point_in (const vec3& pt, float tolerance) const
+{
+	return (pt.x >= start.x - tolerance) && (pt.y >= start.y - tolerance)
+	    && (pt.z >= start.z - tolerance) && (pt.x <= end.x + tolerance)
+	    && (pt.y <= end.y + tolerance) && (pt.z <= end.z + tolerance);
+}
+
 bool t_bound_box::intersects (const t_bound_box& b) const
 {
 	t_bound_box tmp = { max_components(start, b.start),

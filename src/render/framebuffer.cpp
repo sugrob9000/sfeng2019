@@ -157,8 +157,8 @@ inline t_attachment* attachment_finalize (t_attachment* a)
 		glGenTextures(1, &a->id);
 		glBindTexture(t, a->id);
 		glTexParameteri(t, GL_GENERATE_MIPMAP, false);
-		glTexParameteri(t, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(t, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(t, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(t, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(t, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(t, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTextureStorage3D(a->id, 1, a->storage_type,

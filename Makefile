@@ -11,12 +11,12 @@ WARNINGS = \
 	-Wno-attributes \
 	-Wno-cast-function-type \
 	-Wshadow
+ENGINE-FLAGS =
 
 CC = g++
 CFLAGS = -Og -g $(WARNINGS) --std=gnu++17 -Isrc -Iinclude -fmax-errors=1
 
-FILES-CPP = $(shell find src/ -name "*.cpp")
-FILES-H = $(shell find src/ -name "*.h")
+FILES-CPP = $(shell find src/ -type f -name "*.cpp")
 FILES-O = $(FILES-CPP:$(SRC)/%.cpp=$(BIN)/%.o)
 
 LBITS = $(shell getconf LONG_BIT)
@@ -45,12 +45,12 @@ endif
 all: commands $(EXEC)
 	@echo $(EXEC) is up to date
 
+commands:
+	@./regen_cmds.sh $(FILES-CPP)
+
 $(EXEC): $(FILES-O)
 	@echo Linking $@
 	@$(CC) $^ $(LIBS) -o $@
-
-commands:
-	@./regen_cmds.sh
 
 $(BIN)/%.o: $(SRC)/%.cpp
 	@mkdir -p $(dir $@)
@@ -69,4 +69,4 @@ $(BIN)/glew.o: include/GL/glew.c
 
 run: all
 	@echo Running:
-	$(EXEC)
+	$(EXEC) $(ENGINE-FLAGS)

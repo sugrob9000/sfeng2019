@@ -40,10 +40,25 @@ void warning (const char* format, ...);
 using glm::vec2;
 using glm::vec3;
 using glm::vec4;
+using glm::mat3;
 using glm::mat4;
 
-std::ostream& operator<< (std::ostream& s, const vec3& v);
-std::istream& operator>> (std::istream& s, vec3& v);
+
+template<int N, class S, glm::qualifier Q>
+std::ostream& operator<< (std::ostream& s, const glm::vec<N, S, Q>& v)
+{
+	for (int i = 0; i < N-1; i++)
+		s << v[i] << ' ';
+	return s << v[N-1];
+}
+
+template <int N, class S, glm::qualifier Q>
+std::istream& operator>> (std::istream& s, glm::vec<N, S, Q>& v)
+{
+	for (int i = 0; i < N; i++)
+		s >> v[i];
+	return s;
+}
 
 vec3 atovec3 (const char* s);
 void atovec3 (const char* s, vec3& v);
@@ -56,8 +71,10 @@ std::string vec3toa (const vec3& v);
 vec3 min_components (const vec3& a, const vec3& b);
 vec3 max_components (const vec3& a, const vec3& b);
 
+
 /* Rotation matrix for Euler angles - just x, then y, then z */
-mat4 rotate_xyz (const vec3& angles);
+mat3 rotate_xyz (const vec3& angles);
+inline mat4 rotate_xyz_4x4 (const vec3& a) { return mat4(rotate_xyz(a)); }
 
 
 /* Clear a std::vector with guaranteed deallocation of data */

@@ -2,6 +2,7 @@ bind Escape exit
 bind Q exit
 
 bind R console_open
+bind X vis_wireframe
 
 bind W cam_move f
 bind A cam_move l
@@ -11,13 +12,11 @@ bind D cam_move r
 bind Left_Shift cam_accelerate
 bind Left_Ctrl cam_decelerate
 
-bind E sun_at_view
-
-bind X vis_wireframe
+bind F at_view sun
+bind E at_view light2
 
 windowsize 1024 768
 
 loadmap map1
-light_ambience 0.6
 
-bind F show_gbuf
+light_ambience 0.0

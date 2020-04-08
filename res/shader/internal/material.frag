@@ -52,8 +52,7 @@ void main ()
 		break;
 
 	case RENDER_STAGE_LIGHTING_LSPACE:
-
-		gl_FragColor.r = screen_crd.w;
+		gl_FragColor.r = screen_crd.z;
 		break;
 
 	case RENDER_STAGE_SHADE_FINAL:

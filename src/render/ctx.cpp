@@ -47,20 +47,18 @@ mat4 t_camera::get_view ()
 }
 
 
-std::array<vec3, 4> t_camera::corner_points (float depth)
+void t_camera::get_corner_points (float depth, vec3* dest)
 {
 	int dir[4][2] = { {  1,  1 }, {  1, -1 },
 	                  { -1, -1 }, { -1,  1 } };
 	mat4 inv_view = glm::inverse(get_view());
 	float factor = depth * tan(glm::radians(fov) * 0.5);
 
-	std::array<vec3, 4> result;
 	for (int i = 0; i < 4; i++) {
-		result[i] = inv_view * vec4(
+		dest[i] = inv_view * vec4(
 			factor * dir[i][0] * aspect,
 			factor * dir[i][1], -depth, 1.0);
 	}
-	return result;
 }
 
 

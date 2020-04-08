@@ -7,6 +7,7 @@
 #include "render/gbuffer.h"
 #include <cassert>
 #include <algorithm>
+#include <sstream>
 
 t_material mat_none_instance;
 t_material* mat_none = &mat_none_instance;
@@ -235,11 +236,11 @@ GLuint make_glsl_program (const std::vector<GLuint>& shaders)
  * Below is a quick and dirty implementation of something akin to #include.
  *   it DOES NOT do real preprocessing, so if a file ends up
  *   including itself, this will just run out of memory.
- * That is why it is "#pragma include" and not just "#include".
- *   One should be aware that it does not work like a proper directive
  */
 
-bool get_glsl_source (const std::string& path, std::string& src)
+static bool append_glsl_source (
+		const std::string& path,
+		std::ostringstream& src)
 {
 	std::ifstream f(path);
 	if (!f) {
@@ -247,18 +248,29 @@ bool get_glsl_source (const std::string& path, std::string& src)
 		return false;
 	}
 
-	const char constexpr incl_pref[] = "#pragma include ";
+	int linenr = 1;
+	std::string line;
+	for (; std::getline(f, line); linenr++) {
+		if (str_starts_with(line, "#include ")) {
 
-	for (std::string line; std::getline(f, line); ) {
-		if (str_starts_with(line, incl_pref)) {
-			if (!get_glsl_source(PATH_SHADER + line.substr(
-					sizeof(incl_pref) / sizeof(char) - 1,
-					std::string::npos), src))
+			std::string incl_path = PATH_SHADER + line.substr(
+					9, std::string::npos);
+			src << "#line 0 \"" << incl_path << "\"\n";
+
+			if (!append_glsl_source(incl_path, src))
 				return false;
+
+			src << "\n#line " << linenr+1 << " \"" << path << '\"';
 		} else {
-			src += line;
+			src << line;
 		}
-		src += '\n';
+
+		if (str_starts_with(line, "#version ")) {
+			// we can only put #line once we're past #version
+			src << "\n#line " << linenr << " \"" << path << '\"';
+		}
+
+		src << '\n';
 	}
 
 	return true;
@@ -266,16 +278,17 @@ bool get_glsl_source (const std::string& path, std::string& src)
 
 GLuint compile_glsl (std::string path, GLenum type)
 {
-	std::string source;
+	std::ostringstream src("");
 
-	if (!get_glsl_source(path, source)) {
+	if (!append_glsl_source(path, src)) {
 		warning("Failed to compile shader %s", path.c_str());
 		return 0;
 	}
 
 	GLuint id = glCreateShader(type);
 
-	const char* ptr = source.c_str();
+	std::string s = src.str();
+	const char* ptr = s.c_str();
 	glShaderSource(id, 1, &ptr, nullptr);
 	glCompileShader(id);
 

@@ -1,5 +1,7 @@
 #include "render/light/all.h"
 #include "render/light/cone.h"
+#include "render/light/sun.h"
+
 #include "render/render.h"
 #include "render/resource.h"
 #include "render/framebuffer.h"
@@ -28,18 +30,21 @@ void init_lighting ()
 	}
 
 	init_lighting_cone();
+	init_lighting_sun();
 }
 
 void compute_all_lighting ()
 {
 	current_sspace_fbo = 0;
 	sspace_fbo[0].apply();
+
 	glClearColor(light_ambience.x, light_ambience.y,
 			light_ambience.z, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	// go through all the kinds of lights (there is only one yet)
+	// go through all the kinds of lights
 	compute_lighting_cone();
+	compute_lighting_sun();
 }
 
 void light_init_material ()

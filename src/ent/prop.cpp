@@ -25,7 +25,7 @@ void e_prop::render () const
 {
 	mat4 restore = render_ctx.model;
 	render_ctx.model = glm::translate(render_ctx.model, pos);
-	render_ctx.model *= rotate_xyz(glm::radians(ang));
+	render_ctx.model *= rotate_xyz_4x4(glm::radians(ang));
 
 	material->apply();
 	model->render();

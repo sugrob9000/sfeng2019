@@ -8,8 +8,8 @@
  * Does nothing yet
  */
 
-#pragma include internal/light/_sspace_pass.inc
-#pragma include internal/_gbuffer.inc
+#include internal/light/_sspace_pass.inc
+#include internal/_gbuffer.inc
 
 void main ()
 {

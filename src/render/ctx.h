@@ -80,9 +80,10 @@ struct t_camera
 
 	/*
 	 * The four points in worldspace that correspond to this
-	 * camera's screen corners at a given depth
+	 *   camera's screen corners at a given depth
+	 * dest is a C-style destination argument: caller must allocate
 	 */
-	std::array<vec3, 4> corner_points (float depth);
+	void get_corner_points (float depth, vec3* dest);
 };
 
 extern t_camera camera;

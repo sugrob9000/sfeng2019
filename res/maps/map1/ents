@@ -22,7 +22,7 @@ light_cone
 	rgb 0.9 0.95 1.3
 
 light_sun
-	ang 7 0 4
+	ang 28 0 -25
 	name sun
-	distance 2000
+	distance 5000
 	rgb 2.0 2.0 1.3

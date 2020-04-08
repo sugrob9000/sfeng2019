@@ -8,7 +8,7 @@
 #include <cstring>
 
 oct_node* root = nullptr;
-std::vector<const oct_node*> all_leaves;
+t_visible_set all_leaves;
 
 constexpr int occ_fbo_size = 256;
 t_fbo occ_fbo;
@@ -104,7 +104,7 @@ void oct_node::build (t_bound_box b, int level)
 
 void oct_node::make_leaf ()
 {
-	all_leaves.push_back(this);
+	all_leaves.leaves.push_back(this);
 
 	std::map<t_material*, std::vector<int>> m;
 	for (int d: bucket)
@@ -142,7 +142,7 @@ oct_node::~oct_node ()
 void t_visible_set::fill (const vec3& cam)
 {
 	if (pass_all_nodes) {
-		leaves = all_leaves;
+		leaves = all_leaves.leaves;
 		return;
 	}
 	leaves.clear();

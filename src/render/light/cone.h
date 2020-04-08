@@ -17,7 +17,6 @@ extern std::vector<e_light_cone*> lights_cone;
 namespace uniform_loc_light_cone
 {
 	constexpr int depth_map = 2;
-	constexpr int eye_position = 3;
 
 	constexpr int light_pos = 6;
 	constexpr int light_rgb = 9;

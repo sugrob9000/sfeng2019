@@ -12,7 +12,10 @@
 void init_lighting ();
 void compute_all_lighting ();
 
-/* Called once per material creation - sets the uniforms */
+/*
+ * Called once per material creation - sets the uniforms that do
+ * not change between frames, i.e. texture units
+ */
 void light_init_material ();
 /* Called on each material application - binds the textures */
 void light_apply_material ();
@@ -28,8 +31,22 @@ extern vec3 light_ambience;
  */
 namespace uniform_loc_light
 {
+	/*
+	 * For doing the "ping-pong" accumulation, sampling
+	 * the previous buffer while writing to the new one.
+	 * TODO: image load/store may be more efficient?
+	 */
 	constexpr int prev_diffuse_map = 0;
 	constexpr int prev_specular_map = 1;
+
+	/*
+	 * The sampler for light mapping.
+	 * Each light type implements its own, actually
+	 */
+	constexpr int depth_map = 2;
+
+	/* For specular highlights */
+	constexpr int eye_position = 3;
 }
 
 /*

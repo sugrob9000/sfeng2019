@@ -5,7 +5,9 @@
 #include "render/vis.h"
 #include "render/framebuffer.h"
 #include "render/gbuffer.h"
+#include "render/debug.h"
 #include "render/light/all.h"
+#include "render/light/sun.h"
 #include <cassert>
 #include <chrono>
 
@@ -29,7 +31,7 @@ void render_all ()
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, sdlctx.res_x, sdlctx.res_y);
-	glClear(GL_DEPTH_BUFFER_BIT);
+	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
 	render_ctx.stage = RENDER_STAGE_SHADE_FINAL;
 	render_sky();
@@ -114,10 +116,9 @@ void init_render ()
 
 	extern void init_cuboid ();
 	extern void init_text ();
-	extern void init_debug ();
 
 	init_cuboid();
-	init_debug();
+	init_render_debug();
 	init_materials();
 	init_text();
 	init_vis();
@@ -274,40 +275,8 @@ void draw_text (const char* str, float x, float y, float charw, float charh)
 	glEnd();
 }
 
-
-static GLuint debug_program;
-static GLuint debug_loc_xy_size;
-
-void init_debug ()
-{
-	debug_program = make_glsl_program(
-		{ get_vert_shader("internal/debug/tex2d"),
-		  get_frag_shader("internal/debug/tex2d") });
-
-	glUseProgram(debug_program);
-	glUniform1i(glGetUniformLocation(debug_program, "tex"), 0);
-	debug_loc_xy_size = glGetUniformLocation(debug_program, "xy_size");
-}
-
-void bind_tex2d_to_slot (int slot, GLuint tex)
+void bind_to_slot (int slot, GLenum target, GLuint tex)
 {
 	glActiveTexture(GL_TEXTURE0 + slot);
-	glBindTexture(GL_TEXTURE_2D, tex);
-}
-
-void debug_render_texture (GLuint tex, float x, float y, float size)
-{
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_CULL_FACE);
-
-	glUseProgram(debug_program);
-	bind_tex2d_to_slot(0, tex);
-	glUniform3f(debug_loc_xy_size, x, y, size);
-
-	glBegin(GL_QUADS);
-	glVertex2i(0, 0);
-	glVertex2i(0, 1);
-	glVertex2i(1, 1);
-	glVertex2i(1, 0);
-	glEnd();
+	glBindTexture(target, tex);
 }

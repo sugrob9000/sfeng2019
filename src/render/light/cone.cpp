@@ -48,7 +48,7 @@ void init_lighting_cone ()
 /* Returns: whether this light is potentially visible */
 static bool fill_depth_map (const e_light_cone* l)
 {
-	static t_bound_box view_bounds =
+	static constexpr t_bound_box view_bounds =
 		{ { -1.0, -1.0, 0.0 }, { 1.0, 1.0, 1.0 } };
 
 	// aliases
@@ -67,12 +67,11 @@ static bool fill_depth_map (const e_light_cone* l)
 	matrix_restorer rest(render_ctx);
 	l->view();
 
-	std::array<vec3, 4> planes[2] =
-		{ camera.corner_points(camera.z_far),
-		  camera.corner_points(camera.z_near) };
+	vec3 planes[8];
+	camera.get_corner_points(camera.z_near, planes);
+	camera.get_corner_points(camera.z_far, planes + 4);
 	for (int i = 0; i < 8; i++) {
-		const vec3& worldspace = planes[i / 4][i % 4];
-		vec4 lightspace = proj * view * vec4(worldspace, 1.0);
+		vec4 lightspace = proj * view * vec4(planes[i], 1.0);
 		lbounds.expand(lightspace / std::abs(lightspace.w));
 	}
 
@@ -139,7 +138,8 @@ static void lighting_pass ()
 	glUniformMatrix4fv(light_view, 1, false, value_ptr(unif_view));
 	glUniform2fv(light_bounds, 2, value_ptr(unif_bounds[0]));
 
-	glUniform3fv(eye_position, 1, value_ptr(camera.pos));
+	glUniform3fv(uniform_loc_light::eye_position,
+			1, value_ptr(camera.pos));
 
 	gbuffer_pass();
 }
@@ -147,6 +147,7 @@ static void lighting_pass ()
 void compute_lighting_cone ()
 {
 	render_ctx.stage = RENDER_STAGE_LIGHTING_LSPACE;
+
 	for (e_light_cone* l: lights_cone) {
 		if (fill_depth_map(l))
 			lighting_pass();

@@ -69,6 +69,8 @@ struct t_visible_set
 	void render_debug () const;
 };
 
+extern t_visible_set all_leaves;
+
 void vis_requery_entity (e_base* e);
 
 #endif // VIS_H

@@ -30,17 +30,6 @@ void warning (const char* format, ...)
 	va_end(args);
 }
 
-
-std::ostream& operator<< (std::ostream& s, const vec3& v)
-{
-	return (s << v.x << ' ' << v.y << ' ' << v.z);
-}
-
-std::istream& operator>> (std::istream& s, vec3& v)
-{
-	return (s >> v.x >> v.y >> v.z);
-}
-
 vec3 atovec3 (const char* s)
 {
 	vec3 r;
@@ -89,11 +78,27 @@ static vec3 euler_dir[3] =
 	  { 0.0, 1.0, 0.0 },
 	  { 0.0, 0.0, 1.0 } };
 
-mat4 rotate_xyz (const vec3& angles)
+mat3 rotate_xyz (const vec3& angles)
 {
-	mat4 r(1.0);
-	for (int i = 0; i < 3; i++)
-		r = glm::rotate(r, angles[i], euler_dir[i]);
+	mat3 r(1.0);
+	for (int i = 0; i < 3; i++) {
+		const float c = cos(angles[i]);
+		const float s = sin(angles[i]);
+		vec3 axis(0.0);
+		vec3 temp(0.0);
+		axis[i] = 1.0;
+		temp[i] = 1.0 - c;
+
+		r *= mat3(c + temp[0] * axis[0],
+		          temp[0] * axis[1] + s * axis[2],
+		          temp[0] * axis[2] - s * axis[1],
+		          temp[1] * axis[0] - s * axis[2],
+		          c + temp[1] * axis[1],
+		          temp[1] * axis[2] + s * axis[0],
+		          temp[2] * axis[0] + s * axis[1],
+		          temp[2] * axis[1] - s * axis[0],
+		          c + temp[2] * axis[2]);
+	}
 	return r;
 }
 

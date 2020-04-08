@@ -7,11 +7,18 @@
 #include "render/ctx.h"
 #include "render/render.h"
 
-COMMAND_ROUTINE (sun_at_view)
+COMMAND_ROUTINE (at_view)
 {
-	if (ev != PRESS)
+	if (ev != PRESS || args.empty())
 		return;
-	run_cmd_ext("signal 0 sun setang " + vec3toa(camera.ang));
+
+	std::string sigpos = "setpos " + vec3toa(camera.pos);
+	std::string sigang = "setang " + vec3toa(camera.ang);
+
+	for (const std::string& s: args) {
+		run_cmd_ext("signal 0 " + s + ' ' + sigpos);
+		run_cmd_ext("signal 0 " + s + ' ' + sigang);
+	}
 }
 
 int main (int argc, const char* const* argv)
@@ -24,7 +31,7 @@ int main (int argc, const char* const* argv)
 
 	camera = t_camera({ 726.066, -74.7267, 214.754 },
 	                  { 0, 0, -64 },
-	                  2000.0f, 1.5f, 60.0f, 1.0);
+	                  3500.0f, 1.5f, 60.0f, 1.0);
 
 	run_script("res/cfg/rc");
 	run_argv_commands(argc, argv);

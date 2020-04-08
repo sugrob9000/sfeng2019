@@ -252,7 +252,6 @@ static bool append_glsl_source (
 	std::string line;
 	for (; std::getline(f, line); linenr++) {
 		if (str_starts_with(line, "#include ")) {
-
 			std::string incl_path = PATH_SHADER + line.substr(
 					9, std::string::npos);
 			src << "#line 0 \"" << incl_path << "\"\n";

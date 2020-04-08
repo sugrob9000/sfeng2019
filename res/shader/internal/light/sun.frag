@@ -27,8 +27,6 @@ void main ()
 {
 	vec3 world_pos = texture(gbuffer_world_pos, texcrd).rgb;
 	vec3 world_norm = texture(gbuffer_world_norm, texcrd).rgb;
-	vec3 diffuse;
-	vec3 specular;
 
 	int casc = get_cascade();
 
@@ -41,8 +39,16 @@ void main ()
 	if (lcoord.z <= texture(depth_map, vec3(lcoord.xy, casc)).r)
 		bright = max(0.0, dot(world_norm, light_direction));
 
-	diffuse = light_rgb * bright;
-	specular = vec3(0.0) // TODO
+	vec3 diffuse = light_rgb * bright;
+	vec3 specular = vec3(0.0);
+	if (bright > 0.0) {
+		float exp = texture(gbuffer_specular, texcrd).r;
+		float cos_spec = max(0.0, dot(
+			reflect(-light_direction, world_norm),
+			normalize(eye_pos - world_pos)));
+		specular = bright * light_rgb * pow(cos_spec, exp);
+	}
+
 	OUT_DIFFUSE = IN_DIFFUSE + diffuse;
 	OUT_SPECULAR = IN_SPECULAR + specular;
 }

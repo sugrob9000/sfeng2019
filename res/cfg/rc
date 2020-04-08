@@ -20,3 +20,4 @@ windowsize 1024 768
 loadmap map1
 
 light_ambience 0.0
+light_cascades 400 1500

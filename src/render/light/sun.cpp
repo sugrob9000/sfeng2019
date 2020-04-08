@@ -6,6 +6,7 @@
 #include "render/render.h"
 #include "render/vis.h"
 #include "render/gbuffer.h"
+#include "input/cmds.h"
 #include <array>
 #include <vector>
 
@@ -67,6 +68,10 @@ static void fill_depth_maps (const e_light_sun* l)
 		// get the depth value while we're at it
 		vec4 v = render_ctx.proj * render_ctx.view *
 				vec4(planes[4*i], 1.0);
+
+		// so * 0.5 + 0.5 is almost definitely not
+		// the right way to do this, but it seems to get
+		// all the boundaries *almost* right
 		unif_depths[i] = v.z / v.w * 0.5 + 0.5;
 
 		for (int j = 0; j < 4; j++)
@@ -139,11 +144,8 @@ static void lighting_pass ()
 
 void compute_lighting_sun ()
 {
-	cascade_depths =
-		{ camera.z_near,
-		  camera.z_far * 0.2f,
-		  camera.z_far * 0.5f,
-		  camera.z_far };
+	cascade_depths[0] = camera.z_near;
+	cascade_depths[sun_num_cascades] = camera.z_far;
 
 	render_ctx.stage = RENDER_STAGE_LIGHTING_LSPACE;
 
@@ -151,4 +153,20 @@ void compute_lighting_sun ()
 		fill_depth_maps(l);
 		lighting_pass();
 	}
+}
+
+COMMAND_ROUTINE (light_cascades)
+{
+	if (ev != PRESS || args.size() != sun_num_cascades - 1)
+		return;
+
+	float new_depths[sun_num_cascades-1];
+	for (int i = 0; i < sun_num_cascades-1; i++) {
+		new_depths[i] = atof(args[i].c_str());
+		if (new_depths[i] < camera.z_near)
+			return;
+	}
+
+	for (int i = 0; i < sun_num_cascades-1; i++)
+		cascade_depths[i + 1] = new_depths[i];
 }

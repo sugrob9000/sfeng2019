@@ -30,7 +30,7 @@ static GLuint program;
 
 t_bound_box garbage_bounds[sun_num_cascades];
 
-constexpr int sun_lspace_resolution = 1024;
+constexpr int sun_lspace_resolution = 2048;
 
 t_fbo sun_lspace_fbo;
 
@@ -91,6 +91,16 @@ static void fill_depth_maps (const e_light_sun* l)
 		t_bound_box lbound = { vec3(INFINITY), vec3(-INFINITY) };
 		for (int j = 0; j < 8; j++)
 			lbound.expand(planes[4*i + j]);
+
+		// snap the lightspace bounds so they really only change once
+		// in a while during movement. this reduces flicker and gives
+		// a bit of leeway for the calculations
+		for (int j = 0; j < 3; j++) {
+			// round more on farther cascades
+			const float step = 15.0 * (i + 1);
+			lbound.start[j] = floor_step(lbound.start[j], step);
+			lbound.end[j] = ceil_step(lbound.end[j], step);
+		}
 
 		garbage_bounds[i] = lbound;
 

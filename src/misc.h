@@ -85,6 +85,11 @@ void vector_clear_dealloc (std::vector<T>& v)
 }
 
 
+/* Floor/ceil to nearest multiple of */
+inline float floor_step (float a, float step) { return step * floor(a / step); }
+inline float ceil_step (float a, float step) { return step * ceil(a / step); }
+
+
 bool str_starts_with (const std::string& haystack, const std::string& needle);
 
 /*

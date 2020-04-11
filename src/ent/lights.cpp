@@ -49,7 +49,7 @@ void e_light_cone::moved ()
 
 	// update visible set
 	view();
-	vis.fill(pos);
+	vis.fill();
 }
 
 
@@ -85,6 +85,8 @@ void e_light_cone::view () const
 	render_ctx.view = rotate_xyz(radians(ang - vec3(90.0, 0.0, 0.0)));
 	render_ctx.view = translate(render_ctx.view, -pos);
 	render_ctx.model = mat4(1.0);
+
+	render_ctx.eye_pos = pos;
 }
 
 /* ======================== e_light_sun code ======================== */

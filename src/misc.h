@@ -86,8 +86,8 @@ void vector_clear_dealloc (std::vector<T>& v)
 
 
 /* Floor/ceil to nearest multiple of */
-inline float floor_step (float a, float step) { return step * floor(a / step); }
-inline float ceil_step (float a, float step) { return step * ceil(a / step); }
+inline float floor_step (float a, float st) { return st * floor(a / st); }
+inline float ceil_step (float a, float st) { return st * ceil(a / st); }
 
 
 bool str_starts_with (const std::string& haystack, const std::string& needle);
@@ -115,6 +115,29 @@ bool operator== (const glm::vec<N, S, Q>& a, const glm::vec<N, S, Q>& b)
 	}
 	return true;
 }
+
+
+/*
+ * Restorer: use RAII to restore an object to
+ * its original state after scope ends, for example:
+ *
+ * camera1.apply();
+ * {
+ * 	restorer rest(render_ctx);
+ * 	camera2.apply();
+ * 	// do rendering from the viewpoint of camera1
+ * }
+ * // camera1 is applied now
+ */
+
+template <class T> struct restorer
+{
+	T* ptr;
+	T original_value;
+
+	restorer (T& obj): ptr(&obj), original_value(obj) { }
+	~restorer () { *ptr = original_value; }
+};
 
 
 #endif // MISC_H

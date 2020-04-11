@@ -24,6 +24,8 @@ struct t_render_ctx
 	mat4 view;
 	mat4 model;
 
+	vec3 eye_pos;
+
 	/* Set the matrices as their corresponding uniforms */
 	void submit_matrices () const;
 
@@ -31,31 +33,6 @@ struct t_render_ctx
 	void submit_viewproj () const;
 };
 extern t_render_ctx render_ctx;
-
-
-/*
- * Use RAII to save and restore matrices, e.g.:
- * {
- *	matrix_restorer r(render_ctx);
- *	my_camera.apply(); // changes matrices
- *	// ... do some rendering
- * }
- * after exiting the scope, matrices are restored automatrically
- */
-struct matrix_restorer
-{
-	t_render_ctx* ctx;
-	mat4 proj;
-	mat4 view;
-	mat4 model;
-	matrix_restorer (t_render_ctx& c)
-		: ctx(&c), proj(c.proj), view(c.view), model(c.model) { }
-	~matrix_restorer () {
-		ctx->proj = proj;
-		ctx->view = view;
-		ctx->model = model;
-	}
-};
 
 
 struct t_camera

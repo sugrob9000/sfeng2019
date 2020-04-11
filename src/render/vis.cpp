@@ -139,7 +139,7 @@ oct_node::~oct_node ()
 }
 
 
-void t_visible_set::fill (const vec3& cam)
+void t_visible_set::fill ()
 {
 	if (pass_all_nodes) {
 		leaves = all_leaves.leaves;
@@ -194,12 +194,13 @@ void t_visible_set::fill (const vec3& cam)
 			oct_node* c = n->children;
 			if (!c)
 				continue;
-			for (int j = 0; j < 8; j++) {
-				unsigned int px;
-				glGetQueryObjectuiv(c[j].query,
-						GL_QUERY_RESULT, &px);
-				if (px > 0 || c[j].bounds.point_in(cam, 1.5))
-					queues[cur_queue ^ 1].push_back(&c[j]);
+			for (; c < n->children + 8; c++) {
+				unsigned int pixels;
+				glGetQueryObjectuiv(c->query,
+						GL_QUERY_RESULT, &pixels);
+				if (pixels > 0
+				|| c->bounds.point_in(render_ctx.eye_pos, 1.5))
+					queues[cur_queue ^ 1].push_back(c);
 			}
 		}
 

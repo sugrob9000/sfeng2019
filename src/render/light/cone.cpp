@@ -64,7 +64,7 @@ static bool fill_depth_map (const e_light_cone* l)
 		lbounds = { vec3(INFINITY), vec3(-INFINITY) };
 	}
 
-	matrix_restorer rest(render_ctx);
+	restorer rest(render_ctx);
 	l->view();
 
 	vec3 planes[8];

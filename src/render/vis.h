@@ -64,7 +64,7 @@ struct t_visible_set
 {
 	std::vector<const oct_node*> leaves;
 
-	void fill (const vec3& cam);
+	void fill ();
 	void render () const;
 	void render_debug () const;
 };

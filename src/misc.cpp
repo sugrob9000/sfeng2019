@@ -73,11 +73,6 @@ vec3 max_components (const vec3& a, const vec3& b)
 }
 
 
-static vec3 euler_dir[3] =
-	{ { 1.0, 0.0, 0.0 },
-	  { 0.0, 1.0, 0.0 },
-	  { 0.0, 0.0, 1.0 } };
-
 mat3 rotate_xyz (const vec3& angles)
 {
 	mat3 r(1.0);

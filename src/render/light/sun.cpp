@@ -83,7 +83,7 @@ static void fill_depth_maps (const e_light_sun* l)
 
 	material_barrier();
 
-	matrix_restorer rest(render_ctx);
+	restorer rest(render_ctx);
 	render_ctx.view = rot;
 	render_ctx.model = mat4(1.0);
 

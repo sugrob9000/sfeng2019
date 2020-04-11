@@ -30,6 +30,8 @@ void t_camera::apply ()
 	render_ctx.proj = get_proj();
 	render_ctx.view = get_view();
 	render_ctx.model = mat4(1.0);
+
+	render_ctx.eye_pos = pos;
 }
 
 mat4 t_camera::get_proj ()

@@ -24,7 +24,7 @@ void render_all ()
 
 	camera.apply();
 
-	visible_set.fill(camera.pos);
+	visible_set.fill();
 
 	fill_gbuffers();
 	compute_all_lighting();

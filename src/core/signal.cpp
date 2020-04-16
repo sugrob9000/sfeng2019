@@ -65,6 +65,12 @@ SIG_HANDLER (base, setpos)
 	ent->moved();
 }
 
+SIG_HANDLER (base, addpos)
+{
+	ent->pos += atovec3(arg);
+	ent->moved();
+}
+
 SIG_HANDLER (base, setang)
 {
 	atovec3(arg, ent->ang);

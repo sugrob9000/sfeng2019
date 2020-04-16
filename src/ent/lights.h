@@ -29,7 +29,8 @@ class e_light_cone: public e_base
 };
 
 /*
- * Directional light i.e. sun
+ * Parallel omnipresent light i.e. a sun
+ * World position on this doesn't change anything about its lighting
  */
 class e_light_sun: public e_base
 {
@@ -38,12 +39,12 @@ class e_light_sun: public e_base
 	vec3 rgb;
 
 	/*
-	 * Consider the sun to be this far from the player.
-	 * If this is closer than anything else on the map,
-	 * that will not cast shadows
+	 * Consider the sun to be this far from the eye, in the (opposite)
+	 *   direction of the rays. If there's something in the map farther
+	 *   than this, it will not cast shadows
+	 * Smaller values mean better depth buffer precision, though
 	 */
 	float distance;
-	/* Position is mostly irrelevant */
 
 	e_light_sun ();
 	~e_light_sun ();

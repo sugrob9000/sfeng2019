@@ -289,8 +289,8 @@ void sspace_resize_buffers (int w, int h)
 		a->width = w;
 		a->height = h;
 
-		// this will regenerate the actual texture that has
-		// just been deleted. it's populated with the right data
+		// regenerate the actual texture that has just been
+		// deleted and repopulated with the new parameters
 		attachment_finalize(a.ptr);
 	};
 

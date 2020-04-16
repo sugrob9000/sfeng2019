@@ -5,8 +5,8 @@
 #include "misc.h"
 
 /*
- * The collective file for all light types
- *  - init them all, compute them all, etc.
+ * The common core for lighting. After all, any light will do
+ * roughly the same thing regarding the usage of screenspace buffers
  */
 
 void init_lighting ();

@@ -38,6 +38,8 @@ void material_barrier ();
 /*
  * The first N texture slots are reserved for engine use
  * (lighting buffers etc.); after Nth, the slots are used for user bitmaps
+ *
+ * 0 and 1 are screenspace light maps, diffuse and specular, respectively
  */
 constexpr int MAT_TEXTURE_SLOT_OFFSET = 2;
 

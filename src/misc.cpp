@@ -30,29 +30,36 @@ void warning (const char* format, ...)
 	va_end(args);
 }
 
-vec3 atovec3 (const char* s)
-{
-	vec3 r;
-	sscanf(s, "%f %f %f", &r.x, &r.y, &r.z);
-	return r;
-}
-
 void atovec3 (const char* s, vec3& v)
 {
-	sscanf(s, "%f %f %f", &v.x, &v.y, &v.z);
-}
-
-vec3 atovec3 (const std::string& s)
-{
-	vec3 r;
-	sscanf(s.c_str(), "%f %f %f", &r.x, &r.y, &r.z);
-	return r;
+	int n = sscanf(s, "%f%f%f", &v.x, &v.y, &v.z);
+	if (n == 1) {
+		// "1" -> { 1, 1, 1 }
+		v.y = v.x;
+		v.z = v.x;
+	}
 }
 
 void atovec3 (const std::string& s, vec3& v)
 {
-	sscanf(s.c_str(), "%f %f %f", &v.x, &v.y, &v.z);
+	atovec3(s.c_str(), v);
 }
+
+vec3 atovec3 (const char* s)
+{
+	vec3 r;
+	atovec3(s, r);
+	return r;
+}
+
+
+vec3 atovec3 (const std::string& s)
+{
+	vec3 r;
+	atovec3(s, r);
+	return r;
+}
+
 
 std::string vec3toa (const vec3& v)
 {
@@ -75,39 +82,15 @@ vec3 max_components (const vec3& a, const vec3& b)
 
 mat3 rotate_xyz (const vec3& angles)
 {
-	mat3 r(1.0);
-	for (int i = 0; i < 3; i++) {
-		const float c = cos(angles[i]);
-		const float s = sin(angles[i]);
-		vec3 axis(0.0);
-		vec3 temp(0.0);
-		axis[i] = 1.0;
-		temp[i] = 1.0 - c;
-
-		r *= mat3(c + temp[0] * axis[0],
-		          temp[0] * axis[1] + s * axis[2],
-		          temp[0] * axis[2] - s * axis[1],
-		          temp[1] * axis[0] - s * axis[2],
-		          c + temp[1] * axis[1],
-		          temp[1] * axis[2] + s * axis[0],
-		          temp[2] * axis[0] + s * axis[1],
-		          temp[2] * axis[1] - s * axis[0],
-		          c + temp[2] * axis[2]);
-	}
-	return r;
+	const vec3 c = glm::cos(angles);
+	const vec3 s = glm::sin(angles);
+	return mat3(1.0,   0.0, 0.0,
+	            0.0,  c[0], s[0],
+	            0.0, -s[0], c[0]) *
+	       mat3(c[1], 0.0, s[1],
+	             0.0, 1.0, 0.0,
+	           -s[1], 0.0, c[1]) *
+	       mat3(c[2], s[2], 0.0,
+	           -s[2], c[2], 0.0,
+	             0.0, 0.0,  1.0);
 }
-
-
-bool str_starts_with (const std::string& haystack, const std::string& needle)
-{
-	if (needle.size() > haystack.size())
-		return false;
-
-	for (int i = 0; i < needle.size(); i++) {
-		if (haystack[i] != needle[i])
-			return false;
-	}
-
-	return true;
-}
-

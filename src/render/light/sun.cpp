@@ -21,14 +21,7 @@ std::vector<e_light_sun*> lights_sun;
 constexpr int sun_num_cascades = 3;
 std::array<float, sun_num_cascades + 1> cascade_depths;
 
-static vec3 unif_rgb;
-static mat4 unif_view[sun_num_cascades];
-static vec3 unif_direction;
-static float unif_depths[sun_num_cascades + 1];
-
 static GLuint program;
-
-t_bound_box garbage_bounds[sun_num_cascades];
 
 constexpr int sun_lspace_resolution = 2048;
 
@@ -56,6 +49,12 @@ void init_lighting_sun ()
 	glUniform1i(uniform_loc_gbuffer::specular, 5);
 	glUniform1i(uniform_loc_gbuffer::screen_depth, 6);
 }
+
+
+static vec3 unif_rgb;
+static mat4 unif_view[sun_num_cascades];
+static vec3 unif_direction;
+static float unif_depths[sun_num_cascades + 1];
 
 static void fill_depth_maps (const e_light_sun* l)
 {
@@ -87,30 +86,28 @@ static void fill_depth_maps (const e_light_sun* l)
 	render_ctx.view = rot;
 	render_ctx.model = mat4(1.0);
 
-	for (unsigned int i = 0; i < sun_num_cascades; i++) {
+	for (unsigned int casc = 0; casc < sun_num_cascades; casc++) {
 		t_bound_box lbound = { vec3(INFINITY), vec3(-INFINITY) };
 		for (int j = 0; j < 8; j++)
-			lbound.expand(planes[4*i + j]);
+			lbound.expand(planes[4*casc + j]);
 
 		// snap the lightspace bounds so they really only change once
 		// in a while during movement. this reduces flicker and gives
 		// a bit of leeway for the calculations
 		for (int j = 0; j < 3; j++) {
 			// round more on farther cascades
-			const float step = 15.0 * (i + 1);
+			const float step = 15.0 * (casc + 1);
 			lbound.start[j] = floor_step(lbound.start[j], step);
 			lbound.end[j] = ceil_step(lbound.end[j], step);
 		}
-
-		garbage_bounds[i] = lbound;
 
 		render_ctx.proj = glm::ortho(
 			lbound.start.x, lbound.end.x,
 			lbound.start.y, lbound.end.y,
 			-lbound.start.z - l->distance, -lbound.start.z);
-		unif_view[i] = render_ctx.proj * render_ctx.view;
+		unif_view[casc] = render_ctx.proj * render_ctx.view;
 
-		sun_lspace_fbo.set_mrt_slots({ GL_COLOR_ATTACHMENT0 + i });
+		sun_lspace_fbo.set_mrt_slots({ GL_COLOR_ATTACHMENT0 + casc });
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
 		all_leaves.render();

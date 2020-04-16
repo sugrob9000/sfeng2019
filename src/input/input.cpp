@@ -141,7 +141,7 @@ void run_script (std::string path)
 		return;
 	}
 	for (std::string line; std::getline(f, line); ) {
-		if (!line.empty())
+		if (!line.empty() && line[0] != '#')
 			run_cmd_ext(line);
 	}
 }

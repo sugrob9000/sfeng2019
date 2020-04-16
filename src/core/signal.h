@@ -86,6 +86,7 @@ void add_signal (t_signal s);
 #define BASIC_SIG_HANDLERS(entclass)                                 \
 	do {                                                         \
 		_SIGH_INTERNAL(entclass, setpos, sig_base_setpos);   \
+		_SIGH_INTERNAL(entclass, addpos, sig_base_addpos);   \
 		_SIGH_INTERNAL(entclass, setang, sig_base_setang);   \
 		_SIGH_INTERNAL(entclass, setname, sig_base_setname); \
 		_SIGH_INTERNAL(entclass, showpos, sig_base_showpos); \
@@ -99,6 +100,7 @@ SIG_HANDLER (base, setpos);
 SIG_HANDLER (base, setang);
 SIG_HANDLER (base, setname);
 SIG_HANDLER (base, showpos);
+SIG_HANDLER (base, addpos);
 
 /*
  * Events: each entity object (as opposed to class) may specify

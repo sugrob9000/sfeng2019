@@ -35,18 +35,18 @@ void main ()
 	lcoord.z -= DEPTH_BIAS;
 	lcoord.xy = lcoord.xy * 0.5 + 0.5;
 
-	float bright = 0.0;
-	if (lcoord.z <= texture(depth_map, vec3(lcoord.xy, casc)).r)
-		bright = max(0.0, dot(world_norm, light_direction));
-
-	vec3 diffuse = light_rgb * bright;
+	vec3 diffuse = vec3(0.0);
 	vec3 specular = vec3(0.0);
-	if (bright > 0.0) {
+
+	if (lcoord.z <= texture(depth_map, vec3(lcoord.xy, casc)).r) {
+		float bright = max(0.0, dot(world_norm, light_direction));
+		diffuse = light_rgb * bright;
+
 		float exp = texture(gbuffer_specular, texcrd).r;
 		float cos_spec = max(0.0, dot(
-			reflect(-light_direction, world_norm),
-			normalize(eye_pos - world_pos)));
-		specular = bright * light_rgb * pow(cos_spec, exp);
+				reflect(-light_direction, world_norm),
+				normalize(eye_pos - world_pos)));
+		specular = light_rgb * bright * pow(cos_spec, exp);
 	}
 
 	OUT_DIFFUSE = IN_DIFFUSE + diffuse;

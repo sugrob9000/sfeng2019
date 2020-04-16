@@ -251,22 +251,22 @@ static bool append_glsl_source (
 	int linenr = 1;
 	std::string line;
 	for (; std::getline(f, line); linenr++) {
-		if (str_starts_with(line, "#include ")) {
+		if (line.rfind("#include ", 0) == 0) {
 			std::string incl_path = PATH_SHADER + line.substr(
 					9, std::string::npos);
-			src << "#line 0 \"" << incl_path << "\"\n";
+			src << "#line 0\n";
 
 			if (!append_glsl_source(incl_path, src))
 				return false;
 
-			src << "\n#line " << linenr+1 << " \"" << path << '\"';
+			src << "\n#line " << linenr+1;
 		} else {
 			src << line;
 		}
 
-		if (str_starts_with(line, "#version ")) {
+		if (line.rfind("#version ", 0) == 0) {
 			// we can only put #line once we're past #version
-			src << "\n#line " << linenr << " \"" << path << '\"';
+			src << "\n#line " << linenr;
 		}
 
 		src << '\n';

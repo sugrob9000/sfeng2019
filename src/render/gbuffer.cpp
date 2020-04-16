@@ -50,17 +50,22 @@ void gbuffer_pass ()
 	glEnd();
 }
 
-static bool show_gbuffers = false;
-COMMAND_SET_BOOL (show_gbuf, show_gbuffers);
+static int show_gbuffer = -1;
+COMMAND_ROUTINE (show_gbuf)
+{
+	if (ev == RELEASE) {
+		show_gbuffer = -1;
+		return;
+	}
+	if (args.empty())
+		return;
+	show_gbuffer = atoi(args[0].c_str());
+}
 
 void debug_show_gbuffers ()
 {
-	if (show_gbuffers) {
-		debug_render_tex2d(gbuf_fbo.color[GBUF_SLOT_WORLD_POS]->id,
-				0.5, 0.5, 0.5);
-		debug_render_tex2d(gbuf_fbo.color[GBUF_SLOT_WORLD_NORM]->id,
-				0.5, 0.0, 0.5);
-		debug_render_tex2d(gbuf_fbo.color[GBUF_SLOT_SPECULAR]->id,
-				0.5, -0.5, 0.5);
+	if (show_gbuffer >= 0) {
+		debug_render_tex2d(gbuf_fbo.color[show_gbuffer]->id,
+				-1.0, -1.0, 2.0);
 	}
 }

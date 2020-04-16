@@ -89,9 +89,6 @@ void vector_clear_dealloc (std::vector<T>& v)
 inline float floor_step (float a, float st) { return st * floor(a / st); }
 inline float ceil_step (float a, float st) { return st * ceil(a / st); }
 
-
-bool str_starts_with (const std::string& haystack, const std::string& needle);
-
 /*
  * Be able to component-wise "compare" vectors to
  * create maps of them, etc. Not very meaningful otheriwse

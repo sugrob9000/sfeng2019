@@ -12,8 +12,8 @@ struct t_material
 	std::string name;
 	std::vector<GLuint> bitmap_texture_ids;
 
-	std::vector<GLuint> vertex_shaders;
-	std::vector<GLuint> fragment_shaders;
+	/* Vertex shader IDs hashed - needed for idempotency check */
+	uint32_t vert_shaders_hash;
 
 	void load (const std::string& path);
 	void apply () const;

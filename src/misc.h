@@ -84,6 +84,9 @@ void vector_clear_dealloc (std::vector<T>& v)
 	std::vector<T>().swap(v);
 }
 
+/* Hash a vector of integers */
+uint32_t hash_int32_vector (const std::vector<uint32_t>& v);
+
 
 /* Floor/ceil to nearest multiple of */
 inline float floor_step (float a, float st) { return st * floor(a / st); }

@@ -76,8 +76,6 @@ void init_render ()
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,
 	                    SDL_GL_CONTEXT_PROFILE_CORE);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
 
 	sdlctx.window = SDL_CreateWindow("churn-engine",
 			SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,

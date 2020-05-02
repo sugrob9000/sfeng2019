@@ -94,3 +94,11 @@ mat3 rotate_xyz (const vec3& angles)
 	           -s[2], c[2], 0.0,
 	             0.0, 0.0,  1.0);
 }
+
+uint32_t hash_int32_vector (const std::vector<uint32_t>& v)
+{
+	uint32_t r = v.size();
+	for (uint32_t i: v)
+		r ^= i + 0x9e3779b9 + (r << 6) + (r >> 2);
+	return r;
+}

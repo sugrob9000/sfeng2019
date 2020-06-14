@@ -61,7 +61,7 @@ $(BIN)/%.o: $(SRC)/%.cpp
 	@sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
 	     -e '/^$$/ d' -e 's/$$/ :/' < $(BIN)/$*.d >> $(BIN)/$*.P; \
 	rm -f $(BIN)/$*.d
--include $(BIN)/*.P
+-include $(shell find $(BIN) -type f -name "*.P")
 
 $(BIN)/glew.o: include/GL/glew.c
 	@echo Compiling $@

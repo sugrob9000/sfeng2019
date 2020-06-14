@@ -11,7 +11,7 @@ struct t_vertex
 	vec3 norm;
 	vec2 tex;
 };
-bool operator< (const t_vertex& a, const t_vertex& b);
+bool operator< (const t_vertex&, const t_vertex&);
 
 /*
  * An in-memory representation of a model for loading,

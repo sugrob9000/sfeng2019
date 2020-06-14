@@ -272,13 +272,13 @@ COMMAND_ROUTINE (obj2rvd)
 	model.dump_rvd(out);
 }
 
-
 bool operator< (const t_vertex& a, const t_vertex& b)
 {
-	if (a.pos == b.pos) {
-		if (a.norm == b.norm)
-			return a.tex < b.tex;
+	if (a.pos != b.pos)
+		return a.pos < b.pos;
+	if (a.norm != b.norm)
 		return a.norm < b.norm;
-	}
-	return a.pos < b.pos;
+	if (a.tex != b.tex)
+		return a.tex < b.tex;
+	return false;
 }

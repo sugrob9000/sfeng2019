@@ -39,7 +39,9 @@ void t_material::load (const std::string& path)
 		GLuint texid;
 	};
 	std::vector<bitmap_desc> bitmaps;
-	std::vector<GLuint> shaders;
+
+	std::vector<GLuint> all_shaders;
+	std::vector<GLuint> vert_shaders;
 
 	while (true) {
 		f >> key >> value;
@@ -49,28 +51,23 @@ void t_material::load (const std::string& path)
 
 		if (key == "FRAG") {
 			GLuint s = get_frag_shader(value);
-			shaders.push_back(s);
-			fragment_shaders.push_back(s);
-			continue;
+			all_shaders.push_back(s);
 		} else if (key == "VERT") {
 			GLuint s = get_vert_shader(value);
-			shaders.push_back(s);
-			vertex_shaders.push_back(s);
-			continue;
+			all_shaders.push_back(s);
+			vert_shaders.push_back(s);
+		} else {
+			key = "map_" + key;
+			bitmaps.push_back({ key, get_texture(value) });
 		}
-
-		key = "map_" + key;
-		bitmaps.push_back({ key, get_texture(value) });
 	}
 
-	// make sure any two materials with the same set of shaders
-	// will have these vectors compare equal
-	std::sort(fragment_shaders.begin(), fragment_shaders.end());
-	std::sort(vertex_shaders.begin(), vertex_shaders.end());
+	std::sort(vert_shaders.begin(), vert_shaders.end());
+	vert_shaders_hash = hash_int32_vector(vert_shaders);
 
-	shaders.push_back(get_frag_shader("internal/material"));
-	shaders.push_back(get_vert_shader("internal/material"));
-	program = make_glsl_program(shaders);
+	all_shaders.push_back(get_frag_shader("internal/material"));
+	all_shaders.push_back(get_vert_shader("internal/material"));
+	program = make_glsl_program(all_shaders);
 	glUseProgram(program);
 
 	glBindAttribLocation(program, ATTRIB_LOC_TANGENT, "tangent");
@@ -102,7 +99,7 @@ void material_barrier ()
 	latest_material = nullptr;
 }
 
-static bool should_skip_application (const t_material* m)
+static bool can_skip_application (const t_material* m)
 {
 	t_render_stage s = latest_render_stage;
 	if (s != render_ctx.stage || latest_material == nullptr)
@@ -111,10 +108,9 @@ static bool should_skip_application (const t_material* m)
 	if (m == latest_material)
 		return true;
 
-	if (s == RENDER_STAGE_LIGHTING_LSPACE
-	|| s == RENDER_STAGE_WIREFRAME) {
+	if (s == RENDER_STAGE_LIGHTING_LSPACE || s == RENDER_STAGE_WIREFRAME) {
 		// these render stages only care about user vertex shaders
-		if (latest_material->vertex_shaders == m->vertex_shaders)
+		if (latest_material->vert_shaders_hash == m->vert_shaders_hash)
 			return true;
 	}
 
@@ -123,7 +119,7 @@ static bool should_skip_application (const t_material* m)
 
 void t_material::apply () const
 {
-	if (!should_skip_application(this)) {
+	if (!can_skip_application(this)) {
 		glUseProgram(program);
 		for (int i = 0; i < bitmap_texture_ids.size(); i++) {
 			bind_tex2d_to_slot(MAT_TEXTURE_SLOT_OFFSET + i,
@@ -143,7 +139,7 @@ void t_material::apply () const
 
 GLenum get_surface_gl_format (SDL_Surface* s)
 {
-	auto compress = [] (uint32_t i) -> uint8_t {
+	auto compress = [] (uint32_t i) -> uint16_t {
 		// 0x00FF00FF -> 0b0101 etc.
 		i &= 0x08040201;
 		i = i | (i >> 8) | (i >> 16) | (i >> 24);
@@ -232,16 +228,19 @@ GLuint make_glsl_program (const std::vector<GLuint>& shaders)
 }
 
 
-/*
- * Below is a quick and dirty implementation of something akin to #include.
- *   it DOES NOT do real preprocessing, so if a file ends up
- *   including itself, this will just run out of memory.
- */
-
 static bool append_glsl_source (
-		const std::string& path,
-		std::ostringstream& src)
+		const std::string& start_path, const std::string& path,
+		std::ostringstream& src, int depth)
 {
+	static constexpr int maxdepth = 100;
+	if (depth > maxdepth) {
+		warning("Shader %s: depth of #include chain exceeds %i. "
+			"Recursive inclusion does NOT get guarded with "
+			"conditional compilation directives!",
+			start_path.c_str(), maxdepth);
+		return false;
+	}
+
 	std::ifstream f(path);
 	if (!f) {
 		warning("\"%s\": cannot open shader file", path.c_str());
@@ -256,7 +255,8 @@ static bool append_glsl_source (
 					9, std::string::npos);
 			src << "#line 0\n";
 
-			if (!append_glsl_source(incl_path, src))
+			if (!append_glsl_source(start_path, incl_path,
+			                        src, depth + 1))
 				return false;
 
 			src << "\n#line " << linenr+1;
@@ -279,7 +279,7 @@ GLuint compile_glsl (std::string path, GLenum type)
 {
 	std::ostringstream src("");
 
-	if (!append_glsl_source(path, src)) {
+	if (!append_glsl_source(path, path, src, 0)) {
 		warning("Failed to compile shader %s", path.c_str());
 		return 0;
 	}

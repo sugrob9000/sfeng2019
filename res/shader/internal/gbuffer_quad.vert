@@ -1,4 +1,6 @@
-#version 130
+#version 330 core
+#extension GL_ARB_explicit_uniform_location: require
+#extension GL_ARB_explicit_attrib_location: require
 
 /*
  * G-buffer usage: just draw a quad over the whole screen.
@@ -7,8 +9,11 @@
 
 noperspective out vec2 texcrd;
 
+layout (location = 0) in vec2 coord;
+
 void main ()
 {
-	gl_Position = gl_Vertex;
+	gl_Position.xy = coord;
+	gl_Position.zw = vec2(0.5, 1.0);
 	texcrd = gl_Position.st * 0.5 + 0.5;
 }

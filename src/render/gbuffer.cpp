@@ -7,6 +7,8 @@
 #include "input/cmds.h"
 
 t_fbo gbuf_fbo;
+static GLuint gbuf_vao;
+static GLuint gbuf_vbo;
 
 void init_gbuffers ()
 {
@@ -22,6 +24,22 @@ void init_gbuffers ()
 		.assert_complete();
 
 	sspace_add_buffer(gbuf_fbo);
+
+	glGenVertexArrays(1, &gbuf_vao);
+	glBindVertexArray(gbuf_vao);
+
+	glGenBuffers(1, &gbuf_vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, gbuf_vbo);
+
+	vec2 corners[4] = { { -1.0, -1.0 }, { 1.0, -1.0 },
+	                    { 1.0, 1.0 }, { -1.0, 1.0 } };
+	vec2 vbo_contents[6] = { corners[0], corners[1], corners[2],
+	                         corners[0], corners[2], corners[3] };
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vbo_contents[0]) * 6,
+			vbo_contents, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE,
+			sizeof(vbo_contents[0]), (void*) 0);
 }
 
 void fill_gbuffers ()
@@ -42,12 +60,8 @@ void fill_gbuffers ()
 
 void gbuffer_pass ()
 {
-	glBegin(GL_QUADS);
-	glVertex2i(-1, -1);
-	glVertex2i(1, -1);
-	glVertex2i(1, 1);
-	glVertex2i(-1, 1);
-	glEnd();
+	glBindVertexArray(gbuf_vao);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
 static int show_gbuffer = -1;

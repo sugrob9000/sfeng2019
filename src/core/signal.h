@@ -72,7 +72,8 @@ void add_signal (t_signal s);
 
 /* Declare or define a signal handler */
 #define SIG_HANDLER(entclass, name) \
-	void sig_##entclass##_##name (e_##entclass* ent, std::string arg)
+	void sig_##entclass##_##name ([[maybe_unused]] e_##entclass* ent, \
+				      [[maybe_unused]] std::string arg)
 
 /*
  * Register a signal handler, declared with SIG_HANDLER, for

@@ -49,7 +49,7 @@ COMMAND_ROUTINE (signal)
 
 	std::string sigarg;
 	if (args.size() >= 4) {
-		for (int i = 3; i < args.size(); i++) {
+		for (unsigned int i = 3; i < args.size(); i++) {
 			sigarg += args[i];
 			sigarg += " ";
 		}

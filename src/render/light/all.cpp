@@ -9,8 +9,7 @@
 #include "input/cmds.h"
 #include "misc.h"
 
-t_fbo sspace_fbo[2];
-int current_sspace_fbo;
+t_fbo sspace_fbo;
 vec3 light_ambience;
 
 /* TODO: do anything useful in post-processing */
@@ -21,13 +20,11 @@ void init_lighting ()
 	int h = sdlctx.res_y;
 	constexpr GLenum f = GL_R11F_G11F_B10F;
 
-	for (int i: { 0, 1 }) {
-		sspace_fbo[i].make()
-			.attach_color(make_tex2d(w, h, f), LIGHT_SLOT_DIFFUSE)
-			.attach_color(make_tex2d(w, h, f), LIGHT_SLOT_SPECULAR)
-			.assert_complete();
-		sspace_add_buffer(sspace_fbo[i]);
-	}
+	sspace_fbo.make()
+		.attach_color(make_tex2d(w, h, f), LIGHT_SLOT_DIFFUSE)
+		.attach_color(make_tex2d(w, h, f), LIGHT_SLOT_SPECULAR)
+		.assert_complete();
+	sspace_add_buffer(sspace_fbo);
 
 	init_lighting_cone();
 	init_lighting_sun();
@@ -35,11 +32,11 @@ void init_lighting ()
 
 void compute_all_lighting ()
 {
-	current_sspace_fbo = 0;
-	sspace_fbo[0].apply();
+	sspace_fbo.apply();
 
-	glClearColor(light_ambience.x, light_ambience.y,
-			light_ambience.z, 1.0);
+	glClearColor(light_ambience.x,
+	             light_ambience.y,
+	             light_ambience.z, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	// go through all the kinds of lights
@@ -56,9 +53,8 @@ void light_init_material ()
 
 void light_apply_material ()
 {
-	const t_fbo& sspace = sspace_fbo[current_sspace_fbo];
-	bind_tex2d_to_slot(0, sspace.color[LIGHT_SLOT_DIFFUSE]->id);
-	bind_tex2d_to_slot(1, sspace.color[LIGHT_SLOT_SPECULAR]->id);
+	bind_tex2d_to_slot(0, sspace_fbo.color[LIGHT_SLOT_DIFFUSE]->id);
+	bind_tex2d_to_slot(1, sspace_fbo.color[LIGHT_SLOT_SPECULAR]->id);
 }
 
 

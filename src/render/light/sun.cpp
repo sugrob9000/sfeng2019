@@ -40,8 +40,6 @@ void init_lighting_sun ()
 		  get_frag_shader("internal/light/sun") });
 	glUseProgram(program);
 
-	glUniform1i(uniform_loc_light::prev_diffuse_map, 0);
-	glUniform1i(uniform_loc_light::prev_specular_map, 1);
 	glUniform1i(uniform_loc_light_sun::depth_map, 2);
 
 	glUniform1i(uniform_loc_gbuffer::world_pos, 3);
@@ -119,18 +117,11 @@ static void fill_depth_maps (const e_light_sun* l)
 
 static void lighting_pass ()
 {
-	current_sspace_fbo ^= 1;
-	sspace_fbo[current_sspace_fbo].apply();
-
+	sspace_fbo.apply();
 	glUseProgram(program);
-
-	const t_fbo& other_fbo = sspace_fbo[current_sspace_fbo ^ 1];
-	bind_tex2d_to_slot(0, other_fbo.color[LIGHT_SLOT_DIFFUSE]->id);
-	bind_tex2d_to_slot(1, other_fbo.color[LIGHT_SLOT_SPECULAR]->id);
 
 	// color[0] really could have been any other index
 	bind_to_slot(2, GL_TEXTURE_2D_ARRAY, sun_lspace_fbo.color[0]->id);
-
 	bind_tex2d_to_slot(3, gbuf_fbo.color[GBUF_SLOT_WORLD_POS]->id);
 	bind_tex2d_to_slot(4, gbuf_fbo.color[GBUF_SLOT_WORLD_NORM]->id);
 	bind_tex2d_to_slot(5, gbuf_fbo.color[GBUF_SLOT_SPECULAR]->id);
@@ -146,7 +137,13 @@ static void lighting_pass ()
 
 	glUniform3fv(uniform_loc_light::eye_position,
 			1, value_ptr(camera.pos));
-	gbuffer_pass();
+
+	{
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_ONE, GL_ONE);
+		gbuffer_pass();
+		glDisable(GL_BLEND);
+	}
 }
 
 void compute_lighting_sun ()

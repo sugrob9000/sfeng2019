@@ -6,6 +6,8 @@
 #include "misc.h"
 #include "render/ctx.h"
 #include "render/render.h"
+#include <chrono>
+#include <thread>
 
 COMMAND_ROUTINE (at_view)
 {
@@ -20,6 +22,8 @@ COMMAND_ROUTINE (at_view)
 		run_cmd_ext("signal 0 " + s + ' ' + sigang);
 	}
 }
+
+static void wait_fps ();
 
 int main (int argc, const char* const* argv)
 {
@@ -40,9 +44,20 @@ int main (int argc, const char* const* argv)
 		handle_input();
 		update();
 		render_all();
+		wait_fps();
 	}
 
 	SDL_Quit();
 	return exit_code;
 }
 
+static void wait_fps ()
+{
+	constexpr int micros_wait = 1000'000 / 60;
+	namespace chrono = std::chrono;
+	using microseconds = chrono::duration<long, std::micro>;
+	static auto last_frame = chrono::steady_clock::now();
+	auto next_frame = last_frame + microseconds{ micros_wait };
+	last_frame = next_frame;
+	std::this_thread::sleep_until(next_frame);
+}

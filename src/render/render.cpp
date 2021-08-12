@@ -77,7 +77,7 @@ void init_render ()
 	                    SDL_GL_CONTEXT_PROFILE_CORE);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
-	sdlctx.window = SDL_CreateWindow("churn-engine",
+	sdlctx.window = SDL_CreateWindow("engine",
 			SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
 			sdlctx.res_x, sdlctx.res_y,
 			SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN

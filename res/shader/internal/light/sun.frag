@@ -49,8 +49,8 @@ void main ()
 		specular = light_rgb * bright * pow(cos_spec, exp);
 	}
 
-	OUT_DIFFUSE = IN_DIFFUSE + diffuse;
-	OUT_SPECULAR = IN_SPECULAR + specular;
+	OUT_DIFFUSE = diffuse;
+	OUT_SPECULAR = specular;
 }
 
 int get_cascade ()

@@ -20,9 +20,7 @@ void light_init_material ();
 /* Called on each material application - binds the textures */
 void light_apply_material ();
 
-extern t_fbo sspace_fbo[2];
-extern int current_sspace_fbo;
-
+extern t_fbo sspace_fbo;
 extern vec3 light_ambience;
 
 /*
@@ -31,14 +29,6 @@ extern vec3 light_ambience;
  */
 namespace uniform_loc_light
 {
-	/*
-	 * For doing the "ping-pong" accumulation, sampling
-	 * the previous buffer while writing to the new one.
-	 * TODO: image load/store may be more efficient?
-	 */
-	constexpr int prev_diffuse_map = 0;
-	constexpr int prev_specular_map = 1;
-
 	/*
 	 * The sampler for light mapping.
 	 * Each light type implements its own, actually

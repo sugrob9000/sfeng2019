@@ -85,7 +85,7 @@ void t_model_mem::load_obj (const std::string& path)
 		for (int i = 0; i < 3; i++) {
 			t_vertex key = { points[v[i]],
 			                 normals[n[i]],
-					 texcrds[t[i]] };
+			                 texcrds[t[i]] };
 			auto iter = vert_indices.find(key);
 			if (iter == vert_indices.end()) {
 				tri.index[i] = vertices.size();
@@ -157,6 +157,7 @@ void t_model_mem::load_obj (const std::string& path)
 			char buf[line.length()];
 			sscanf(line.c_str(), "%*s %s", buf);
 			current_material = get_material(buf);
+			break;
 		}
 		default: {
 			// something in the format we are unaware of

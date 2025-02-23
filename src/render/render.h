@@ -1,11 +1,7 @@
 #ifndef RENDER_H
 #define RENDER_H
 
-#include "core/core.h"
 #include "inc_gl.h"
-#include "misc.h"
-#include "render/ctx.h"
-
 
 struct t_sdlcontext
 {
@@ -15,7 +11,7 @@ struct t_sdlcontext
 	int res_x;
 	int res_y;
 
-	const char* font_path = "res/FreeMono.ttf";
+	const char* font_path = "resource/FreeMono.ttf";
 	TTF_Font* font;
 	static constexpr int font_h = 16;
 	int font_w;

@@ -4,9 +4,7 @@
 #include "misc.h"
 #include "signal.h"
 #include "core.h"
-#include "render/render.h"
 #include <map>
-#include <queue>
 
 /*
  * Key-value pairs for entities

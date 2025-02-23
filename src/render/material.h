@@ -2,8 +2,8 @@
 #define MATERIAL_H
 
 #include "inc_gl.h"
-#include "render.h"
 #include <vector>
+#include <string>
 
 struct t_material
 {

@@ -1,7 +1,6 @@
 #ifndef BIND_H
 #define BIND_H
 
-#include "misc.h"
 #include "input/input.h"
 
 /*

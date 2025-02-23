@@ -1,9 +1,9 @@
-#include "render/model.h"
-#include "render/render.h"
-#include "render/material.h"
-#include "render/resource.h"
 #include "input/cmds.h"
+#include "render/material.h"
+#include "render/model.h"
+#include "render/resource.h"
 #include <cassert>
+#include <fstream>
 #include <map>
 
 void t_model_mem::gl_send_triangle (int tri_id) const

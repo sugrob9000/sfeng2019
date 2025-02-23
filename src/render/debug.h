@@ -1,6 +1,8 @@
 #ifndef RENDER_DEBUG_H
 #define RENDER_DEBUG_H
 
+#include "inc_gl.h"
+
 void init_render_debug ();
 
 void debug_render_tex2d (GLuint id, float x_left, float y_bottom, float size);

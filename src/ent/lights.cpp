@@ -1,4 +1,5 @@
 #include "ent/lights.h"
+#include "render/ctx.h"
 #include "render/render.h"
 #include "render/light/cone.h"
 #include "render/light/sun.h"

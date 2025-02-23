@@ -1,11 +1,13 @@
 #include "core/core.h"
 #include "input/cmds.h"
+#include "render/ctx.h"
 #include "render/framebuffer.h"
 #include "render/material.h"
 #include "render/resource.h"
 #include "render/vis.h"
 #include <algorithm>
 #include <cstring>
+#include <fstream>
 
 oct_node* root = nullptr;
 t_visible_set all_leaves;

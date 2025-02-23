@@ -1,12 +1,12 @@
 #include "inc_gl.h"
-#include "input/cmds.h"
+#include "render/ctx.h"
+#include "render/light/all.h"
 #include "render/material.h"
 #include "render/render.h"
 #include "render/resource.h"
-#include "render/light/all.h"
-#include "render/gbuffer.h"
-#include <cassert>
 #include <algorithm>
+#include <cassert>
+#include <fstream>
 #include <sstream>
 
 t_material mat_none_instance;

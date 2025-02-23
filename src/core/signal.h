@@ -1,9 +1,9 @@
 #ifndef SIGNAL_H
 #define SIGNAL_H
 
-#include "misc.h"
-#include <queue>
 #include <map>
+#include <queue>
+#include <string>
 
 /*
  * Entities can be sent signals to. Each entity class can implement

@@ -1,7 +1,6 @@
 #ifndef LIGHT_CONE_H
 #define LIGHT_CONE_H
 
-#include "render/render.h"
 #include "ent/lights.h"
 #include <vector>
 

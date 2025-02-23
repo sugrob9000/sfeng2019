@@ -2,7 +2,7 @@
 #define CORE_H
 
 #include "misc.h"
-#include <queue>
+#include <string>
 
 extern bool must_quit;
 extern int exit_code;

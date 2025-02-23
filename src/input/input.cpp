@@ -1,7 +1,11 @@
-#include "input/input.h"
+#include "core/core.h"
 #include "input/bind.h"
 #include "input/cmds.h"
+#include "input/input.h"
+#include "misc.h"
 #include "render/render.h"
+#include <fstream>
+#include <sstream>
 
 t_command_registry cmd_registry;
 f_mousemove_routine mousemove_proc;

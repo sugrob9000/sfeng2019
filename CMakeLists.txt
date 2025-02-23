@@ -47,7 +47,6 @@ target_link_libraries(
 )
 target_include_directories(engine PRIVATE src)
 
-# Warnings
 target_compile_options(
   engine PRIVATE
   -Wall

@@ -1,7 +1,6 @@
 #ifndef LIGHT_SUN_H
 #define LIGHT_SUN_H
 
-#include "render/render.h"
 #include "ent/lights.h"
 #include <vector>
 

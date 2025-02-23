@@ -35,7 +35,7 @@ int main (int argc, const char* const* argv)
 	                  { 0, 0, -64 },
 	                  3500.0f, 1.5f, 60.0f, 1.0);
 
-	run_script("res/cfg/rc");
+	run_script("resource/cfg/rc");
 	run_argv_commands(argc, argv);
 
 	while (!must_quit) {

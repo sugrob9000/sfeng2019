@@ -1,11 +1,11 @@
 #ifndef INPUT_H
 #define INPUT_H
 
-#include "misc.h"
-#include "inc_gl.h"
-#include "core/core.h"
-#include <sstream>
+#include <SDL2/SDL_events.h>
+#include <cstdint>
+#include <string>
 #include <unordered_map>
+#include <vector>
 
 const uint8_t PRESS = 0;
 const uint8_t RELEASE = 1;

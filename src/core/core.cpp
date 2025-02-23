@@ -2,8 +2,11 @@
 #include "core/entity.h"
 #include "input/cmds.h"
 #include "input/input.h"
+#include "render/ctx.h"
 #include "render/vis.h"
 #include <cassert>
+#include <fstream>
+#include <sstream>
 
 bool must_quit;
 int exit_code;
@@ -146,7 +149,7 @@ COMMAND_ROUTINE (loadmap)
 	if (args.empty())
 		return;
 
-	std::string path = "res/maps/" + args[0];
+	std::string path = "resource/maps/" + args[0];
 	load_map(path);
 }
 

@@ -1,13 +1,13 @@
 #include "input/cmds.h"
+#include "render/ctx.h"
+#include "render/debug.h"
+#include "render/framebuffer.h"
+#include "render/gbuffer.h"
+#include "render/light/all.h"
 #include "render/render.h"
 #include "render/resource.h"
 #include "render/sky.h"
 #include "render/vis.h"
-#include "render/framebuffer.h"
-#include "render/gbuffer.h"
-#include "render/debug.h"
-#include "render/light/all.h"
-#include "render/light/sun.h"
 #include <cassert>
 #include <chrono>
 

@@ -5,8 +5,6 @@
 #include "core/entity.h"
 #include "render.h"
 #include "material.h"
-#include "model.h"
-#include <set>
 
 void init_vis ();
 

@@ -1,7 +1,7 @@
 #include "entity.h"
 #include "render/vis.h"
 
-// IWYU pragma: begin_keep
+// IWYU pragma: begin_keep, we include an Xmacro file later that uses these
 #include "ent/lights.h"
 #include "ent/prop.h"
 #include "ent/timer.h"

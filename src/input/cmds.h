@@ -1,7 +1,8 @@
 #ifndef CMDS_H
 #define CMDS_H
 
-#include "input/input.h"
+// We include an Xmacro file later that uses this
+#include "input/input.h" // IWYU pragma: keep
 
 #define COMMAND_ROUTINE(name)                                     \
 	void cmd_##name ([[maybe_unused]] const t_cmd_args& args, \

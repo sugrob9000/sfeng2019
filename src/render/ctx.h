@@ -1,9 +1,7 @@
 #ifndef RENDER_CTX_H
 #define RENDER_CTX_H
 
-#include "inc_gl.h"
 #include "misc.h"
-#include <array>
 
 enum t_render_stage: uint32_t
 {

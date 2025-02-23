@@ -2,7 +2,6 @@
 #define ENT_TIMER_H
 
 #include "core/entity.h"
-#include "core/core.h"
 
 class e_timer: public e_base
 {

@@ -1,4 +1,5 @@
 #include "prop.h"
+#include "render/ctx.h"
 #include "render/resource.h"
 #include "core/signal.h"
 

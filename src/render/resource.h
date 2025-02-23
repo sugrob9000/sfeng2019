@@ -4,16 +4,17 @@
 #include "material.h"
 #include "model.h"
 #include <map>
+#include <string>
 
 typedef std::map<std::string, t_model*> t_cache_mdl;
 typedef std::map<std::string, GLuint> t_cache_tex;
 typedef std::map<std::string, t_material*> t_cache_mat;
 typedef std::map<std::string, GLuint> t_cache_shader;
 
-const char* const PATH_MODEL = "res/models/";
-const char* const PATH_TEXTURE = "res/mat/";
-const char* const PATH_MATERIAL = "res/mat/";
-const char* const PATH_SHADER = "res/shader/";
+const char* const PATH_MODEL = "resource/models/";
+const char* const PATH_TEXTURE = "resource/mat/";
+const char* const PATH_MATERIAL = "resource/mat/";
+const char* const PATH_SHADER = "resource/shader/";
 
 t_model* get_model (std::string name);
 GLuint get_texture (std::string name);

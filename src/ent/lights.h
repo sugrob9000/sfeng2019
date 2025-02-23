@@ -1,6 +1,4 @@
-#ifndef ENT_LIGHTS_H
-#define ENT_LIGHTS_H
-
+#pragma once
 #include "core/entity.h"
 #include "render/render.h"
 #include "render/vis.h"
@@ -51,5 +49,3 @@ class e_light_sun: public e_base
 
 	ENT_MEMBERS (light_sun);
 };
-
-#endif // ENT_LIGHTS_H

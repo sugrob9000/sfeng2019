@@ -1,6 +1,4 @@
-#ifndef MODEL_H
-#define MODEL_H
-
+#pragma once
 #include "material.h"
 #include "core/core.h"
 #include <vector>
@@ -71,5 +69,3 @@ struct t_model
 	void render () const;
 	void load (const t_model_mem& src);
 };
-
-#endif // MODEL_H

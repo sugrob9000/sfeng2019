@@ -1,6 +1,4 @@
-#ifndef GBUFFER_H
-#define GBUFFER_H
-
+#pragma once
 #include "render/framebuffer.h"
 
 /*
@@ -30,5 +28,3 @@ namespace uniform_loc_gbuffer
 	constexpr int screen_depth = 202;
 	constexpr int specular = 203;
 }
-
-#endif // GBUFFER_H

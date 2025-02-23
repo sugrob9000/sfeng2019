@@ -1,6 +1,4 @@
-#ifndef ENT_PROP_H
-#define ENT_PROP_H
-
+#pragma once
 #include "core/entity.h"
 #include "render/model.h"
 #include "render/material.h"
@@ -14,5 +12,3 @@ class e_prop: public e_base
 
 	ENT_MEMBERS (prop)
 };
-
-#endif // ENT_PROP_H

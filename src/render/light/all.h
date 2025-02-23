@@ -1,6 +1,4 @@
-#ifndef ALL_LIGHTING_H
-#define ALL_LIGHTING_H
-
+#pragma once
 #include "render/framebuffer.h"
 #include "misc.h"
 
@@ -51,5 +49,3 @@ namespace uniform_loc_light_material
 /* Framebuffer slots for light MRT */
 constexpr int LIGHT_SLOT_DIFFUSE = 0;
 constexpr int LIGHT_SLOT_SPECULAR = 1;
-
-#endif // ALL_LIGHTING_H

@@ -1,6 +1,4 @@
-#ifndef BIND_H
-#define BIND_H
-
+#pragma once
 #include "input/input.h"
 
 /*
@@ -36,5 +34,3 @@ struct t_keybind_map
 extern t_keybind_map key_binds;
 
 SDL_Scancode scancode_from_name (std::string name);
-
-#endif // BIND_H

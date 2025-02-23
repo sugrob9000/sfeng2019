@@ -1,6 +1,4 @@
-#ifndef INPUT_H
-#define INPUT_H
-
+#pragma once
 #include <SDL2/SDL_events.h>
 #include <cstdint>
 #include <string>
@@ -65,5 +63,3 @@ void console_open ();
 void console_close ();
 void console_render ();
 extern bool console_active;
-
-#endif // INPUT_H

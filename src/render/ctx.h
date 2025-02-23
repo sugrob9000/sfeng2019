@@ -1,6 +1,4 @@
-#ifndef RENDER_CTX_H
-#define RENDER_CTX_H
-
+#pragma once
 #include "misc.h"
 
 enum t_render_stage: uint32_t
@@ -63,5 +61,3 @@ struct t_camera
 
 extern t_camera camera;
 void upd_camera_pos ();
-
-#endif // RENDER_CTX_H

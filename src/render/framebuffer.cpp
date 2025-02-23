@@ -1,7 +1,6 @@
 #include "misc.h"
 #include "render/framebuffer.h"
 #include <cassert>
-#include <map>
 #include <set>
 #include <vector>
 
@@ -246,6 +245,7 @@ t_attachment* make_rbo (int w, int h, GLenum t)
 
 t_attachment* make_rbo_msaa (int w, int h, GLenum t, short samples)
 {
+	(void) samples;
 	auto p = new t_attachment;
 	p->width = w;
 	p->height = h;

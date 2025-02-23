@@ -1,6 +1,4 @@
-#ifndef CORE_H
-#define CORE_H
-
+#pragma once
 #include "misc.h"
 #include <string>
 
@@ -63,5 +61,3 @@ static_assert(offsetof(t_bound_box, start) == 0
            && offsetof(t_bound_box, end) == sizeof(vec3)
            && sizeof(vec3) == 3 * sizeof(float),
 	"Alignment for t_bound_box is broken: data() will not work");
-
-#endif // CORE_H

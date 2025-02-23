@@ -1,6 +1,4 @@
-#ifndef INC_GL_H
-#define INC_GL_H
-
+#pragma once
 #include <GL/glew.h>
 
 #include <SDL2/SDL.h>
@@ -27,6 +25,3 @@ constexpr GLuint ATTRIB_LOC_TANGENT = 1;
 
 /* Vis cuboids */
 constexpr GLuint UNIFORM_LOC_VIS_CUBE = 42;
-
-
-#endif // INC_GL_H

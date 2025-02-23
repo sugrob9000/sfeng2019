@@ -1,6 +1,5 @@
 #include "render/gbuffer.h"
 #include "render/render.h"
-#include "render/material.h"
 #include "render/ctx.h"
 #include "render/vis.h"
 #include "render/debug.h"

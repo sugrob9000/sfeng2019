@@ -1,6 +1,4 @@
-#ifndef MISC_H
-#define MISC_H
-
+#pragma once
 #include <cmath>
 #include <iostream>
 #include <cstdarg>
@@ -137,6 +135,3 @@ template <class T> struct restorer
 	restorer (T& obj): ptr(&obj), original_value(obj) { }
 	~restorer () { *ptr = original_value; }
 };
-
-
-#endif // MISC_H

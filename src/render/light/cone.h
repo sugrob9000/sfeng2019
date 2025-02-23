@@ -1,6 +1,4 @@
-#ifndef LIGHT_CONE_H
-#define LIGHT_CONE_H
-
+#pragma once
 #include "ent/lights.h"
 #include <vector>
 
@@ -22,5 +20,3 @@ namespace uniform_loc_light_cone
 	constexpr int light_view = 12;
 	constexpr int light_bounds = 100;
 }
-
-#endif // LIGHT_CONE_H

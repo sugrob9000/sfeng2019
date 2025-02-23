@@ -1,6 +1,4 @@
-#ifndef FRAMEBUFFER_H
-#define FRAMEBUFFER_H
-
+#pragma once
 #include "inc_gl.h"
 #include <cassert>
 #include <array>
@@ -124,5 +122,3 @@ struct t_fbo
 
 void sspace_add_buffer (t_fbo& fbo);
 void sspace_resize_buffers (int w, int h);
-
-#endif // FRAMEBUFFER_H

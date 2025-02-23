@@ -1,6 +1,4 @@
-#ifndef MATERIAL_H
-#define MATERIAL_H
-
+#pragma once
 #include "inc_gl.h"
 #include <vector>
 #include <string>
@@ -46,5 +44,3 @@ constexpr int MAT_TEXTURE_SLOT_OFFSET = 2;
 
 GLuint make_glsl_program (const std::vector<GLuint>& shaders);
 GLuint compile_glsl (std::string path, GLenum shadertype);
-
-#endif // MATERIAL_H

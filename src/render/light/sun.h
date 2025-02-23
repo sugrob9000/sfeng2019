@@ -1,6 +1,4 @@
-#ifndef LIGHT_SUN_H
-#define LIGHT_SUN_H
-
+#pragma once
 #include "ent/lights.h"
 #include <vector>
 
@@ -18,5 +16,3 @@ namespace uniform_loc_light_sun
 	constexpr int light_dir = 25;
 	constexpr int view_depths = 30;
 }
-
-#endif // LIGHT_SUN_H

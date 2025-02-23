@@ -1,6 +1,4 @@
-#ifndef ENT_TIMER_H
-#define ENT_TIMER_H
-
+#pragma once
 #include "core/entity.h"
 
 class e_timer: public e_base
@@ -12,5 +10,3 @@ class e_timer: public e_base
 
 	ENT_MEMBERS (timer)
 };
-
-#endif // ENT_TIMER_H

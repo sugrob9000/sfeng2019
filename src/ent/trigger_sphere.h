@@ -1,6 +1,4 @@
-#ifndef ENT_TRIGGER_SPHERE_H
-#define ENT_TRIGGER_SPHERE_H
-
+#pragma once
 #include "core/entity.h"
 
 class e_trigger_sphere: public e_base
@@ -14,5 +12,3 @@ class e_trigger_sphere: public e_base
 
 	constexpr static float DEFAULT_RADIUS = 100.0;
 };
-
-#endif // ENT_TRIGGER_SPHERE_H

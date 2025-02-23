@@ -1,6 +1,6 @@
-#include "render/ctx.h"
-#include "render/render.h"
+#include "inc_gl.h"
 #include "input/cmds.h"
+#include "render/ctx.h"
 
 void t_render_ctx::submit_matrices () const
 {

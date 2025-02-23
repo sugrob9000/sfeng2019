@@ -1,5 +1,4 @@
-#ifndef CMDS_H
-#define CMDS_H
+#pragma once
 
 // We include an Xmacro file later that uses this
 #include "input/input.h" // IWYU pragma: keep
@@ -26,5 +25,3 @@
 #undef COMMAND
 
 MOUSEMOVE_ROUTINE (camera);
-
-#endif // CMDS_H

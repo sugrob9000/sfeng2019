@@ -1,7 +1,4 @@
-#ifndef SKY_H
-#define SKY_H
+#pragma once
 
 void init_sky ();
 void render_sky ();
-
-#endif // SKY_H

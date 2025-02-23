@@ -1,6 +1,4 @@
-#ifndef ENTITY_H
-#define ENTITY_H
-
+#pragma once
 #include "misc.h"
 #include "signal.h"
 #include "core.h"
@@ -131,6 +129,3 @@ struct t_entities
 	e_base* find_by_name (std::string name);
 };
 extern t_entities ents;
-
-
-#endif // ENTITY_H

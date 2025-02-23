@@ -1,6 +1,4 @@
-#ifndef RESOURCE_H
-#define RESOURCE_H
-
+#pragma once
 #include "material.h"
 #include "model.h"
 #include <map>
@@ -32,5 +30,3 @@ extern t_cache_mdl cache_mdl;
 extern t_cache_tex cache_tex;
 extern t_cache_mat cache_mat;
 extern t_cache_shader cache_shader;
-
-#endif // RESOURCE_H

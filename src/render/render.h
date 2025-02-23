@@ -1,6 +1,4 @@
-#ifndef RENDER_H
-#define RENDER_H
-
+#pragma once
 #include "inc_gl.h"
 
 struct t_sdlcontext
@@ -39,5 +37,3 @@ inline void bind_tex2d_to_slot (int slot, GLuint tex)
 
 extern GLuint cuboid_dlist_inwards;
 extern GLuint cuboid_dlist_outwards;
-
-#endif // RENDER_H

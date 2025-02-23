@@ -1,6 +1,4 @@
-#ifndef VIS_H
-#define VIS_H
-
+#pragma once
 #include "core/core.h"
 #include "core/entity.h"
 #include "render.h"
@@ -70,5 +68,3 @@ struct t_visible_set
 extern t_visible_set all_leaves;
 
 void vis_requery_entity (e_base* e);
-
-#endif // VIS_H

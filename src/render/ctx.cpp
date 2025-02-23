@@ -66,8 +66,9 @@ void t_camera::get_corner_points (float depth, vec3* dest)
 
 MOUSEMOVE_ROUTINE (camera)
 {
-	camera.ang.x += dy;
-	camera.ang.z += dx;
+	constexpr float sens = 0.1;
+	camera.ang.x += sens * dy;
+	camera.ang.z += sens * dx;
 }
 
 COMMAND_ROUTINE (cam_dump_pos)

@@ -21,7 +21,7 @@
 
 #define COMMAND(name) \
 	COMMAND_ROUTINE (name);
-#include "input/_cmds.inc"
+#include "input/cmds.inc"
 #undef COMMAND
 
 MOUSEMOVE_ROUTINE (camera);

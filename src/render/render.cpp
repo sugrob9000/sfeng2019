@@ -112,6 +112,11 @@ void init_render ()
 	glDebugMessageCallback(callback, nullptr);
 #endif
 
+	printf("OpenGL info:\nVendor: %s\nRenderer: %s\nVersion: %s\n",
+			glGetString(GL_VENDOR),
+			glGetString(GL_RENDERER),
+			glGetString(GL_VERSION));
+
 	extern void init_cuboid ();
 	extern void init_text ();
 

@@ -1,6 +1,4 @@
 #include "core/core.h"
-#include "core/entity.h"
-#include "input/bind.h"
 #include "input/cmds.h"
 #include "input/input.h"
 #include "misc.h"

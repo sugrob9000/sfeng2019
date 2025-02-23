@@ -2,7 +2,6 @@
 #include "core/entity.h"
 #include "input/cmds.h"
 #include "input/input.h"
-#include "render/render.h"
 #include "render/vis.h"
 #include <cassert>
 

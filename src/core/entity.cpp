@@ -1,6 +1,12 @@
 #include "entity.h"
 #include "render/vis.h"
-#include "ent/_headers.inc"
+
+// IWYU pragma: begin_keep
+#include "ent/lights.h"
+#include "ent/prop.h"
+#include "ent/timer.h"
+#include "ent/trigger_sphere.h"
+// IWYU pragma: end_keep
 
 t_ent_registry ent_reg;
 
@@ -48,7 +54,7 @@ void fill_ent_registry ()
 	#define ENTITY(name)                             \
 		ent_reg[#name] = &ent_factory<e_##name>; \
 		fill_io_data<e_##name>();
-	#include "ent/_list.inc"
+	#include "ent/list.inc"
 	#undef ENTITY
 }
 

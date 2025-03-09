@@ -1,5 +1,7 @@
-#include "entity.h"
+#include "base.h"
+#include "core/signal.h"
 #include "render/vis.h"
+#include <sstream>
 
 // IWYU pragma: begin_keep, we include an Xmacro file later that uses these
 #include "ent/lights.h"
@@ -24,7 +26,7 @@ void e_base::on_event(const std::string& event) const {
   auto i = events.find(event);
   if (i == events.end())
     return;
-  for (const t_signal& s: i->second)
+  for (const Signal& s: i->second)
     add_signal(s);
 }
 
@@ -81,4 +83,36 @@ void t_ent_keyvals::add(std::string key, std::string value) {
 
 void t_ent_keyvals::clear() {
   m.clear();
+}
+
+/* ================= Base signals ================= */
+
+template<>
+void signal_handler<e_base, SigTag("setpos")>(e_base& e, std::string arg) {
+  atovec3(arg, e.pos);
+  e.moved();
+}
+
+template<>
+void signal_handler<e_base, SigTag("addpos")>(e_base& e, std::string arg) {
+  e.pos += atovec3(arg);
+  e.moved();
+}
+
+template<>
+void signal_handler<e_base, SigTag("setang")>(e_base& e, std::string arg) {
+  atovec3(arg, e.ang);
+  e.moved();
+}
+
+template<>
+void signal_handler<e_base, SigTag("setname")>(e_base& e, std::string arg) {
+  e.set_name(arg);
+}
+
+template<>
+void signal_handler<e_base, SigTag("showpos")>(e_base& e, std::string) {
+  std::ostringstream os;
+  os << e.name << " - pos " << e.pos << " ang " << e.ang << '\n';
+  DEBUG_MSG(os.str());
 }

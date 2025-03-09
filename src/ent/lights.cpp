@@ -1,27 +1,26 @@
 #include "ent/lights.h"
+#include "core/signal.h"
+#include "misc.h"
 #include "render/ctx.h"
 #include "render/light/cone.h"
 #include "render/light/sun.h"
 #include "render/render.h"
+#include <vector>
 
 std::vector<e_light_cone*> lights;
 
 /* ======================== e_light_cone code ======================== */
 
-SIG_HANDLER(light_cone, setcolor) {
-  atovec3(arg, ent->rgb);
+template<>
+void signal_handler<e_light_cone, SigTag("setcolor")>(e_light_cone& light, std::string arg) {
+  atovec3(arg, light.rgb);
 }
 
-SIG_HANDLER(light_cone, setcone) {
+template<>
+void signal_handler<e_light_cone, SigTag("setcone")>(e_light_cone& light, std::string arg) {
   float cone = atof(arg.c_str());
   if (cone > 0.0 && cone < 180.0)
-    ent->cone_angle = cone;
-}
-
-FILL_IO_DATA(light_cone) {
-  BASIC_SIG_HANDLERS(light_cone);
-  SET_SIG_HANDLER(light_cone, setcolor);
-  SET_SIG_HANDLER(light_cone, setcone);
+    light.cone_angle = cone;
 }
 
 e_light_cone::e_light_cone() {
@@ -29,13 +28,7 @@ e_light_cone::e_light_cone() {
 }
 
 e_light_cone::~e_light_cone() {
-  for (e_light_cone*& p: lights_cone) {
-    if (p == this) {
-      p = lights_cone.back();
-      lights_cone.pop_back();
-      break;
-    }
-  }
+  std::erase(lights_cone, this);
 }
 
 void e_light_cone::moved() {
@@ -69,13 +62,9 @@ void e_light_cone::view() const {
 
 /* ======================== e_light_sun code ======================== */
 
-SIG_HANDLER(light_sun, setcolor) {
-  atovec3(arg, ent->rgb);
-}
-
-FILL_IO_DATA(light_sun) {
-  BASIC_SIG_HANDLERS(light_sun);
-  SET_SIG_HANDLER(light_sun, setcolor);
+template<>
+void signal_handler<e_light_sun, SigTag("setcolor")>(e_light_sun& light, std::string arg) {
+  atovec3(arg, light.rgb);
 }
 
 void e_light_sun::apply_keyvals(const t_ent_keyvals& kv) {
@@ -90,11 +79,5 @@ e_light_sun::e_light_sun() {
 }
 
 e_light_sun::~e_light_sun() {
-  for (e_light_sun*& p: lights_sun) {
-    if (p == this) {
-      p = lights_sun.back();
-      lights_sun.pop_back();
-      break;
-    }
-  }
+  std::erase(lights_sun, this);
 }

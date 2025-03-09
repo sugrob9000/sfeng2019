@@ -1,5 +1,5 @@
 #pragma once
-#include "core/entity.h"
+#include "base.h"
 #include "core/signal.h"
 #include "render/render.h"
 #include "render/vis.h"
@@ -26,6 +26,11 @@ public:
   void view() const;
 };
 
+template<>
+inline void fill_io_data<e_light_cone>() {
+  do_fill_io_data<e_light_cone, SigTag("setcone"), SigTag("setcolor")>();
+}
+
 /*
  * Parallel omnipresent light i.e. a sun
  * World position on this doesn't change anything about its lighting
@@ -48,3 +53,8 @@ public:
   ENT_IMPLEMENT_GET_SIGMAP(e_light_sun);
   void apply_keyvals(const t_ent_keyvals&) override;
 };
+
+template<>
+inline void fill_io_data<e_light_sun>() {
+  do_fill_io_data<e_light_sun, SigTag("setcolor")>();
+}

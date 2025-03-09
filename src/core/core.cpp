@@ -1,5 +1,5 @@
 #include "core/core.h"
-#include "core/entity.h"
+#include "ent/base.h"
 #include "input/cmds.h"
 #include "input/input.h"
 #include "render/ctx.h"
@@ -50,7 +50,7 @@ void update() {
     e->think();
 
   while (!signals.empty()) {
-    const t_signal& s = signals.top();
+    const Signal& s = signals.top();
     if (s.tick_due > tick)
       break;
     s.execute();
@@ -102,7 +102,7 @@ e_base* read_single_entity(std::istream& is) {
       std::istringstream iss(line.c_str() + kstart + 1);
 
       std::string event_name;
-      t_signal s;
+      Signal s;
       iss >> event_name >> s.tick_due >> s.target >> s.signal_name;
       // get the whole rest of the line
       getline(iss, s.argument);

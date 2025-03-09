@@ -1,7 +1,7 @@
 #pragma once
-#include "core.h"
+#include "core/core.h"
+#include "core/signal.h"
 #include "misc.h"
-#include "signal.h"
 #include <map>
 
 /*
@@ -64,7 +64,7 @@ public:
    * to the entity, while in runtime - templates won't help with this
    * The implementation is inserted by the preprocessor
    */
-  virtual const t_sigmap& get_sigmap() const = 0;
+  virtual const Sigmap& get_sigmap() const = 0;
   void on_event(const std::string& event) const;
   void set_name(const std::string& name);
 
@@ -90,7 +90,7 @@ public:
 
 /* Inserted into the entity class definition */
 #define ENT_IMPLEMENT_GET_SIGMAP(NAME) \
-  const t_sigmap& get_sigmap() const override { return sigmap<NAME>; }
+  const Sigmap& get_sigmap() const override { return sigmap<NAME>; }
 
 /*
  * Mapping entity class names (such as prop)

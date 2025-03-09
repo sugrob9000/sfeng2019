@@ -1,16 +1,12 @@
 #include "ent/trigger_sphere.h"
-#include "core/entity.h"
+#include "core/signal.h"
 #include "render/ctx.h"
 
-SIG_HANDLER(trigger_sphere, set_radius) {
+template<>
+void signal_handler<e_trigger_sphere, SigTag("set_radius")>(e_trigger_sphere& sphere, std::string arg) {
   float r = atof(arg.c_str());
   if (r > 0.0)
-    ent->radius = r;
-}
-
-FILL_IO_DATA(trigger_sphere) {
-  BASIC_SIG_HANDLERS(trigger_sphere);
-  SET_SIG_HANDLER(trigger_sphere, set_radius)
+    sphere.radius = r;
 }
 
 void e_trigger_sphere::think() {

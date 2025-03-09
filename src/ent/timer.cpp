@@ -1,22 +1,18 @@
 #include "timer.h"
 
-SIG_HANDLER(timer, start) {
-  ent->running = true;
+template<>
+void signal_handler<e_timer, SigTag("start")>(e_timer& timer, std::string) {
+  timer.running = true;
 }
 
-SIG_HANDLER(timer, stop) {
-  ent->running = false;
+template<>
+void signal_handler<e_timer, SigTag("stop")>(e_timer& timer, std::string) {
+  timer.running = false;
 }
 
-SIG_HANDLER(timer, set) {
-  ent->ticks_left = atoi(arg.c_str());
-}
-
-FILL_IO_DATA(timer) {
-  BASIC_SIG_HANDLERS(timer);
-  SET_SIG_HANDLER(timer, start);
-  SET_SIG_HANDLER(timer, stop);
-  SET_SIG_HANDLER(timer, set);
+template<>
+void signal_handler<e_timer, SigTag("set")>(e_timer& timer, std::string arg) {
+  timer.ticks_left = atoi(arg.c_str());
 }
 
 void e_timer::think() {

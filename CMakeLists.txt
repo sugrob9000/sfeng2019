@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.27)
 project(sfeng2019 LANGUAGES CXX)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 23)
 
 find_package(GLEW REQUIRED)
 find_package(glm REQUIRED)
@@ -11,8 +11,8 @@ find_package(SDL2 REQUIRED)
 add_executable(
   engine
   src/core/core.cpp
-  src/core/entity.cpp
   src/core/signal.cpp
+  src/ent/base.cpp
   src/ent/lights.cpp
   src/ent/prop.cpp
   src/ent/timer.cpp

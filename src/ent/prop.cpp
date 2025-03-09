@@ -3,10 +3,6 @@
 #include "render/ctx.h"
 #include "render/resource.h"
 
-FILL_IO_DATA(prop) {
-  BASIC_SIG_HANDLERS(prop);
-}
-
 void e_prop::apply_keyvals(const t_ent_keyvals& kv) {
   e_base::apply_keyvals(kv);
 

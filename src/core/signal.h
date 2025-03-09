@@ -1,4 +1,5 @@
 #pragma once
+#include <algorithm>
 #include <map>
 #include <queue>
 #include <string>
@@ -20,7 +21,7 @@
  *   not when the signal is sent.
  */
 
-struct t_signal {
+struct Signal {
   std::string target;
   long long tick_due;
   std::string signal_name;
@@ -29,73 +30,67 @@ struct t_signal {
   void execute() const;
 };
 
+
+class e_base;
+typedef void (*SigHandlerFptr)(e_base* ent, std::string arg);
+typedef std::map<std::string, SigHandlerFptr> Sigmap;
+
+template<class Entity>
+Sigmap sigmap;
+
 /*
  * Keep a queue of signals, sorted by when they
  * are due to happen, ascending
  */
-bool operator<(const t_signal& a, const t_signal& b);
-extern std::priority_queue<t_signal> signals;
+bool operator<(const Signal& a, const Signal& b);
+extern std::priority_queue<Signal> signals;
 
 /*
  * The basic routine used to fire a signal
  */
-void add_signal(t_signal s);
+void add_signal(Signal s);
 
-
-/*
- * With these the entity can set up its own signal handlers.
- *
- * Each handler implementation should be declared with SIG_HANDLER.
- *   Note that these don't have to be present in any header.
- *
- * Then there must be a function declared with FILL_IO_DATA,
- *   which should call SET_SIG_HANDLER with entity name
- *   and the handler name. Again, FILL_IO_DATA doesn't have
- *   to be in a header, since it's prototyped as a template,
- *   and the entity implementation is only specializing it.
- */
-
-/* Below are wrappers around this that should actually be used */
 #define _SIGH_INTERNAL(entclass, name, proc) sigmap<e_##entclass>[#name] = (f_sig_handler) proc;
 
-/*
- * Declare or define a routine that is called once for your
- * entity class. It should register the hanglers, i.e. use SET_SIG_HANDLER
- */
-#define FILL_IO_DATA(entclass) \
-  template<> \
-  void fill_io_data<e_##entclass>()
+/* These must be usable at compile time, because they are used as NTTPs */
+struct SigTag {
+  char name[20] = {};
+  constexpr explicit SigTag(std::string_view n) {
+    std::copy(n.begin(), n.end(), name);
+  }
+};
 
-/* Declare or define a signal handler */
-#define SIG_HANDLER(entclass, name) \
-  void sig_##entclass##_##name([[maybe_unused]] e_##entclass* ent, [[maybe_unused]] std::string arg)
+template<typename Entity, SigTag Tag>
+void signal_handler(Entity& ent, std::string argument);
 
-/*
- * Register a signal handler, declared with SIG_HANDLER, for
- * an entity class - presumably used in a FILL_IO_DATA()
- */
-#define SET_SIG_HANDLER(entclass, name) _SIGH_INTERNAL(entclass, name, sig_##entclass##_##name)
+namespace detail {
+  template<typename DestEntity, typename SrcEntity, SigTag Signal>
+  void register_signal_handler() {
+    ::sigmap<DestEntity>[Signal.name] = (SigHandlerFptr) &::signal_handler<SrcEntity, Signal>;
+  }
+}
 
+// Called by everyone's `fill_io_data()` instantiations. DO NOT SPECIALIZE.
+template<typename Entity, SigTag... AddlSignals>
+void do_fill_io_data() {
+  // Register the basic signals
+  detail::register_signal_handler<Entity, e_base, SigTag("setpos")>();
+  detail::register_signal_handler<Entity, e_base, SigTag("addpos")>();
+  detail::register_signal_handler<Entity, e_base, SigTag("setang")>();
+  detail::register_signal_handler<Entity, e_base, SigTag("setname")>();
+  detail::register_signal_handler<Entity, e_base, SigTag("showpos")>();
 
-/* Basic useful signal handlers. You entity should probably have them. */
-#define BASIC_SIG_HANDLERS(entclass) \
-  do { \
-    _SIGH_INTERNAL(entclass, setpos, sig_base_setpos); \
-    _SIGH_INTERNAL(entclass, addpos, sig_base_addpos); \
-    _SIGH_INTERNAL(entclass, setang, sig_base_setang); \
-    _SIGH_INTERNAL(entclass, setname, sig_base_setname); \
-    _SIGH_INTERNAL(entclass, showpos, sig_base_showpos); \
-  } while (0)
+  // Register custom signals
+  (detail::register_signal_handler<Entity, Entity, AddlSignals>(), ...);
+}
 
-class e_base;
-typedef void (*f_sig_handler)(e_base* ent, std::string arg);
-typedef std::map<std::string, f_sig_handler> t_sigmap;
-
-SIG_HANDLER(base, setpos);
-SIG_HANDLER(base, setang);
-SIG_HANDLER(base, setname);
-SIG_HANDLER(base, showpos);
-SIG_HANDLER(base, addpos);
+// An entity may specialize this (IN THE HEADER FILE) to register own signals.
+// In the specialization, it must call `do_fill_io_data` with more SigTag templace arguments.
+template<class Entity>
+void fill_io_data() {
+  // By default, provide no additional signals
+  do_fill_io_data<Entity>();
+}
 
 /*
  * Events: each entity object (as opposed to class) may specify
@@ -104,10 +99,4 @@ SIG_HANDLER(base, addpos);
  * For exmaple, a particular trigger volume may want to tell a
  *   particular door to open when someone steps in it.
  */
-
-typedef std::map<std::string, std::vector<t_signal>> t_eventmap;
-
-template<class entclass>
-void fill_io_data();
-template<class entclass>
-t_sigmap sigmap;
+typedef std::map<std::string, std::vector<Signal>> t_eventmap;

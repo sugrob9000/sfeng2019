@@ -1,5 +1,6 @@
 #pragma once
-#include "core/entity.h"
+#include "base.h"
+#include "core/signal.h"
 
 class e_trigger_sphere: public e_base {
 public:
@@ -12,3 +13,8 @@ public:
   void think() override;
   void apply_keyvals(const t_ent_keyvals&) override;
 };
+
+template<>
+inline void fill_io_data<e_trigger_sphere>() {
+  do_fill_io_data<e_trigger_sphere, SigTag("set_radius")>();
+}

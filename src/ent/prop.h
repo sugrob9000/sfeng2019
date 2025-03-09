@@ -1,6 +1,6 @@
 #pragma once
+#include "base.h"
 #include "core/core.h"
-#include "core/entity.h"
 #include "render/material.h"
 #include "render/model.h"
 

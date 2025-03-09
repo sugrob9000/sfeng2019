@@ -1,5 +1,6 @@
 #pragma once
 #include "core/entity.h"
+#include "core/signal.h"
 #include "render/render.h"
 #include "render/vis.h"
 
@@ -18,8 +19,9 @@ public:
   e_light_cone();
   ~e_light_cone();
 
-  ENT_MEMBERS(light_cone);
-  virtual void moved();
+  void apply_keyvals(const t_ent_keyvals&) override;
+  void moved() override;
+  ENT_IMPLEMENT_GET_SIGMAP(e_light_cone);
 
   void view() const;
 };
@@ -43,5 +45,6 @@ public:
   e_light_sun();
   ~e_light_sun();
 
-  ENT_MEMBERS(light_sun);
+  ENT_IMPLEMENT_GET_SIGMAP(e_light_sun);
+  void apply_keyvals(const t_ent_keyvals&) override;
 };

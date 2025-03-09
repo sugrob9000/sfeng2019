@@ -6,7 +6,9 @@ public:
   float radius;
   bool touching;
 
-  ENT_MEMBERS(trigger_sphere)
-
   constexpr static float DEFAULT_RADIUS = 100.0;
+
+  ENT_IMPLEMENT_GET_SIGMAP(e_trigger_sphere);
+  void think() override;
+  void apply_keyvals(const t_ent_keyvals&) override;
 };

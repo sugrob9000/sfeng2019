@@ -47,21 +47,13 @@ void e_light_cone::moved() {
 }
 
 void e_light_cone::apply_keyvals(const t_ent_keyvals& kv) {
-  apply_basic_keyvals(kv);
+  e_base::apply_keyvals(kv);
 
   KV_TRY_GET(kv["cone"], cone_angle = atof(val.c_str());, cone_angle = 60.0;);
   KV_TRY_GET(kv["rgb"], atovec3(val, rgb);, rgb = vec3(0.5););
 
   KV_TRY_GET(kv["reach"], reach = atof(val.c_str());, reach = 2000.0;);
   KV_TRY_GET(kv["near"], near_plane = atof(val.c_str()), near_plane = 1.0;);
-}
-
-void e_light_cone::think() {}
-
-void e_light_cone::render() const {}
-
-t_bound_box e_light_cone::get_bbox() const {
-  return {};
 }
 
 void e_light_cone::view() const {
@@ -86,16 +78,8 @@ FILL_IO_DATA(light_sun) {
   SET_SIG_HANDLER(light_sun, setcolor);
 }
 
-void e_light_sun::think() {}
-
-void e_light_sun::render() const {}
-
-t_bound_box e_light_sun::get_bbox() const {
-  return {};
-}
-
 void e_light_sun::apply_keyvals(const t_ent_keyvals& kv) {
-  apply_basic_keyvals(kv);
+  e_base::apply_keyvals(kv);
 
   KV_TRY_GET(kv["distance"], distance = atof(val.c_str());, distance = 2000.0;);
   KV_TRY_GET(kv["rgb"], atovec3(val, rgb), rgb = vec3(0.5););

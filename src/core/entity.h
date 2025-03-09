@@ -49,13 +49,16 @@ public:
 
   e_base() {}
 
-  virtual void think() = 0;
+  virtual void think() {}
 
-  virtual void apply_keyvals(const t_ent_keyvals& kv) = 0;
-  /* Read pos, ang, and name. Your entity should probably do this. */
-  void apply_basic_keyvals(const t_ent_keyvals& kv);
+  /*
+   * By default, will read pos, ang, and name.
+   * Every entity should probably still call this.
+   */
+  virtual void apply_keyvals(const t_ent_keyvals& kv);
 
   t_eventmap events;
+
   /*
    * We have to be able to get the sigmap knowing only the pointer
    * to the entity, while in runtime - templates won't help with this
@@ -65,14 +68,14 @@ public:
   void on_event(const std::string& event) const;
   void set_name(const std::string& name);
 
-  virtual void render() const = 0;
+  virtual void render() const {}
 
   /*
    * The entity promises that it is fully inside the box returned
    * Entities that have no physical appearance (ie logical ones)
    *   may express this by returning a box with volume 0
    */
-  virtual t_bound_box get_bbox() const = 0;
+  virtual t_bound_box get_bbox() const { return {}; }
 
   /*
    * Updates the engine's idea of where the entity is, for
@@ -85,19 +88,9 @@ public:
   uint64_t render_last_guard_key;
 };
 
-/*
- * Goes inside the entity class declaration
- */
-#define ENT_MEMBERS(name) \
-public: \
-  void think(); \
-  const t_sigmap& get_sigmap() const { \
-    return sigmap<e_##name>; \
-  } \
-  void render() const; \
-  t_bound_box get_bbox() const; \
-  void apply_keyvals(const t_ent_keyvals& kv);
-
+/* Inserted into the entity class definition */
+#define ENT_IMPLEMENT_GET_SIGMAP(NAME) \
+  const t_sigmap& get_sigmap() const override { return sigmap<NAME>; }
 
 /*
  * Mapping entity class names (such as prop)

@@ -32,14 +32,8 @@ void e_timer::think() {
 }
 
 void e_timer::apply_keyvals(const t_ent_keyvals& kv) {
-  apply_basic_keyvals(kv);
+  e_base::apply_keyvals(kv);
 
   KV_TRY_GET(kv["time"], ticks_left = atoi(val.c_str());, ticks_left = 0;);
   KV_TRY_GET(kv["start-running"], running = (val == "1");, running = false);
-}
-
-void e_timer::render() const {}
-
-t_bound_box e_timer::get_bbox() const {
-  return {};
 }

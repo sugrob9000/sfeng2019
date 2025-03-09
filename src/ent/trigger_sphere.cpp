@@ -1,4 +1,5 @@
 #include "ent/trigger_sphere.h"
+#include "core/entity.h"
 #include "render/ctx.h"
 
 SIG_HANDLER(trigger_sphere, set_radius) {
@@ -33,7 +34,7 @@ void e_trigger_sphere::think() {
 }
 
 void e_trigger_sphere::apply_keyvals(const t_ent_keyvals& kv) {
-  apply_basic_keyvals(kv);
+  e_base::apply_keyvals(kv);
 
   KV_TRY_GET(
     kv["radius"],
@@ -43,10 +44,4 @@ void e_trigger_sphere::apply_keyvals(const t_ent_keyvals& kv) {
     },
     radius = DEFAULT_RADIUS;
   );
-}
-
-void e_trigger_sphere::render() const {}
-
-t_bound_box e_trigger_sphere::get_bbox() const {
-  return {};
 }

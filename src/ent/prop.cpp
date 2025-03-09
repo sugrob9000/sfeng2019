@@ -7,10 +7,8 @@ FILL_IO_DATA(prop) {
   BASIC_SIG_HANDLERS(prop);
 }
 
-void e_prop::think() {}
-
 void e_prop::apply_keyvals(const t_ent_keyvals& kv) {
-  apply_basic_keyvals(kv);
+  e_base::apply_keyvals(kv);
 
   KV_TRY_GET(kv["model"], model = get_model(val);, model = get_model("error"););
   KV_TRY_GET(kv["mat"], material = get_material(val);, material = mat_none;);

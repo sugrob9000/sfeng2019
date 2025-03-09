@@ -32,7 +32,7 @@ void e_base::moved() {
   vis_requery_entity(this);
 }
 
-void e_base::apply_basic_keyvals(const t_ent_keyvals& kv) {
+void e_base::apply_keyvals(const t_ent_keyvals& kv) {
   KV_TRY_GET(kv["pos"], atovec3(val, pos);, pos = vec3(););
   KV_TRY_GET(kv["ang"], atovec3(val, ang);, ang = vec3(););
   KV_TRY_GET(kv["name"], set_name(val), name = "");

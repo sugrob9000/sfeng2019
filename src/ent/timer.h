@@ -6,5 +6,7 @@ public:
   bool running;
   long long ticks_left;
 
-  ENT_MEMBERS(timer)
+  void think() override;
+  void apply_keyvals(const t_ent_keyvals&) override;
+  ENT_IMPLEMENT_GET_SIGMAP(e_timer);
 };

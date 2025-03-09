@@ -9,187 +9,178 @@ static std::string cmd;
 static std::vector<const std::string*> matches;
 static std::string cmd_prefix;
 
-void update_matches ();
-void console_handle_input_ev (const SDL_Event& e)
-{
-	switch (e.type) {
-	case SDL_KEYDOWN:
+void update_matches();
 
-		switch (e.key.keysym.scancode) {
-		case SDL_SCANCODE_BACKSPACE:
+void console_handle_input_ev(const SDL_Event& e) {
+  switch (e.type) {
+  case SDL_KEYDOWN:
 
-			if (cmd.empty())
-				break;
-			if (SDL_GetModState() & KMOD_SHIFT)
-				cmd.clear();
-			else
-				cmd.pop_back();
-			update_matches();
-			break;
+    switch (e.key.keysym.scancode) {
+    case SDL_SCANCODE_BACKSPACE:
 
-		case SDL_SCANCODE_RETURN:
-			run_cmd_ext(cmd);
-			cmd.clear();
-			update_matches();
-			break;
+      if (cmd.empty())
+        break;
+      if (SDL_GetModState() & KMOD_SHIFT)
+        cmd.clear();
+      else
+        cmd.pop_back();
+      update_matches();
+      break;
 
-		case SDL_SCANCODE_TAB:
-			if (!matches.empty()) {
-				cmd = cmd_prefix + *matches[0] + ' ';
-				update_matches();
-			}
-			break;
+    case SDL_SCANCODE_RETURN:
+      run_cmd_ext(cmd);
+      cmd.clear();
+      update_matches();
+      break;
 
-		default:
-			break;
-		}
-		break;
+    case SDL_SCANCODE_TAB:
+      if (!matches.empty()) {
+        cmd = cmd_prefix + *matches[0] + ' ';
+        update_matches();
+      }
+      break;
 
-	case SDL_KEYUP:
+    default:
+      break;
+    }
+    break;
 
-		// handle esc on keyup to avoid sending
-		// the esc keyup event to the main game
-		if (e.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
-			console_close();
-		break;
+  case SDL_KEYUP:
 
-	case SDL_TEXTINPUT:
+    // handle esc on keyup to avoid sending
+    // the esc keyup event to the main game
+    if (e.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
+      console_close();
+    break;
 
-		cmd += e.text.text;
-		update_matches();
-		break;
-	}
+  case SDL_TEXTINPUT:
+
+    cmd += e.text.text;
+    update_matches();
+    break;
+  }
 }
 
-void console_open ()
-{
-	console_active = true;
-	SDL_SetRelativeMouseMode(SDL_FALSE);
-	SDL_StartTextInput();
-	update_matches();
+void console_open() {
+  console_active = true;
+  SDL_SetRelativeMouseMode(SDL_FALSE);
+  SDL_StartTextInput();
+  update_matches();
 }
 
-void console_close ()
-{
-	console_active = false;
-	cmd.clear();
-	SDL_SetRelativeMouseMode(SDL_TRUE);
-	SDL_StopTextInput();
+void console_close() {
+  console_active = false;
+  cmd.clear();
+  SDL_SetRelativeMouseMode(SDL_TRUE);
+  SDL_StopTextInput();
 }
 
-
-bool is_cmd_char (char c)
-{
-	return isalnum(c) || c == '_' || c == '+' || c == '-';
+bool is_cmd_char(char c) {
+  return isalnum(c) || c == '_' || c == '+' || c == '-';
 }
 
+void update_matches() {
+  matches.clear();
 
-void update_matches ()
-{
-	matches.clear();
+  int n = cmd.length();
+  const char* cmd_str = cmd.c_str();
 
-	int n = cmd.length();
-	const char* cmd_str = cmd.c_str();
+  if (cmd_str[0] == '+' || cmd_str[0] == '-') {
+    cmd_prefix = cmd_str[0];
+    cmd_str++;
+    n--;
+  } else {
+    cmd_prefix = "";
+  }
 
-	if (cmd_str[0] == '+' || cmd_str[0] == '-') {
-		cmd_prefix = cmd_str[0];
-		cmd_str++;
-		n--;
-	} else {
-		cmd_prefix = "";
-	}
+  for (char c: cmd) {
+    if (!is_cmd_char(c))
+      return;
+  }
 
-	for (char c: cmd) {
-		if (!is_cmd_char(c))
-			return;
-	}
+  for (const auto& p: cmd_registry.m) {
+    const std::string& s = p.first;
+    if (n > s.length())
+      continue;
+    bool match = true;
+    for (int i = 0; i < n; i++) {
+      if (cmd_str[i] != s[i]) {
+        match = false;
+        break;
+      }
+    }
+    if (match)
+      matches.push_back(&s);
+  }
 
-	for (const auto& p: cmd_registry.m) {
-		const std::string& s = p.first;
-		if (n > s.length())
-			continue;
-		bool match = true;
-		for (int i = 0; i < n; i++) {
-			if (cmd_str[i] != s[i]) {
-				match = false;
-				break;
-			}
-		}
-		if (match)
-			matches.push_back(&s);
-	}
-
-	std::sort(matches.begin(), matches.end(),
-		[] (const std::string* a, const std::string* b) {
-			return *a < *b;
-		});
+  std::sort(matches.begin(), matches.end(), [](const std::string* a, const std::string* b) {
+    return *a < *b;
+  });
 }
 
-void console_render ()
-{
-	static const SDL_Color bg_clr = { 20, 20, 20, 255 };
-	static const SDL_Color bg_match_clr = { 30, 30, 30, 240 };
-	static const SDL_Color cursor_clr = { 220, 220, 40, 255 };
+void console_render() {
+  static const SDL_Color bg_clr = {20, 20, 20, 255};
+  static const SDL_Color bg_match_clr = {30, 30, 30, 240};
+  static const SDL_Color cursor_clr = {220, 220, 40, 255};
 
-	// try to match the actual font size in pixels,
-	// and be 4 away from the top
-	float text_height = sdlctx.font_h * 2.0 / sdlctx.res_y;
-	float text_y = 4.0 * 2.0 / sdlctx.res_y;
-	float height = text_height + 2.0 * text_y;
+  // try to match the actual font size in pixels,
+  // and be 4 away from the top
+  float text_height = sdlctx.font_h * 2.0 / sdlctx.res_y;
+  float text_y = 4.0 * 2.0 / sdlctx.res_y;
+  float height = text_height + 2.0 * text_y;
 
-	float char_width = text_height *
-		((float) sdlctx.font_w / sdlctx.font_h) *
-		((float) sdlctx.res_y / sdlctx.res_x);
-	float text_width = char_width * cmd.length();
-	float text_x = char_width + 0.01;
+  float char_width =
+    text_height * ((float) sdlctx.font_w / sdlctx.font_h) * ((float) sdlctx.res_y / sdlctx.res_x);
+  float text_width = char_width * cmd.length();
+  float text_x = char_width + 0.01;
 
-	glDisable(GL_CULL_FACE);
-	glDisable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
+  glDisable(GL_CULL_FACE);
+  glDisable(GL_DEPTH_TEST);
+  glEnable(GL_BLEND);
 
-	glUseProgram(0);
-	glColor4ubv((GLubyte*) &bg_clr);
-	glRectf(-1.0, 1.0, 1.0, 1.0 - height);
+  glUseProgram(0);
+  glColor4ubv((GLubyte*) &bg_clr);
+  glRectf(-1.0, 1.0, 1.0, 1.0 - height);
 
-	glColor4ubv((GLubyte*) &cursor_clr);
-	glBegin(GL_LINES);
-	glVertex2f(-1.0 + text_x + text_width, 1.0 - text_y);
-	glVertex2f(-1.0 + text_x + text_width,
-	            1.0 - text_y - text_height);
-	glEnd();
+  glColor4ubv((GLubyte*) &cursor_clr);
+  glBegin(GL_LINES);
+  glVertex2f(-1.0 + text_x + text_width, 1.0 - text_y);
+  glVertex2f(-1.0 + text_x + text_width, 1.0 - text_y - text_height);
+  glEnd();
 
-	if (!matches.empty()) {
-		float single_match_h = text_height + 0.015;
-		float matches_h = single_match_h * matches.size();
+  if (!matches.empty()) {
+    float single_match_h = text_height + 0.015;
+    float matches_h = single_match_h * matches.size();
 
-		glColor4ubv((GLubyte*) &bg_match_clr);
-		glRectf(-1.0, 1.0 - height, 1.0, 1.0 - height - matches_h);
+    glColor4ubv((GLubyte*) &bg_match_clr);
+    glRectf(-1.0, 1.0 - height, 1.0, 1.0 - height - matches_h);
 
-		float matches_x = text_x + cmd_prefix.length() * char_width;
+    float matches_x = text_x + cmd_prefix.length() * char_width;
 
-		for (int i = 0; i < matches.size(); i++) {
-			draw_text(matches[i]->c_str(), -1.0 + matches_x,
-					1.0 - height - i * single_match_h,
-					char_width, text_height);
-		}
-	}
+    for (int i = 0; i < matches.size(); i++) {
+      draw_text(
+        matches[i]->c_str(),
+        -1.0 + matches_x,
+        1.0 - height - i * single_match_h,
+        char_width,
+        text_height
+      );
+    }
+  }
 
-	draw_text(">", -1.0, 1.0 - text_y, char_width, text_height);
+  draw_text(">", -1.0, 1.0 - text_y, char_width, text_height);
 
-	if (!cmd.empty()) {
-		draw_text(cmd.c_str(), -1.0 + text_x,
-			1.0 - text_y, char_width, text_height);
-	}
+  if (!cmd.empty()) {
+    draw_text(cmd.c_str(), -1.0 + text_x, 1.0 - text_y, char_width, text_height);
+  }
 }
 
-COMMAND_ROUTINE (console_open)
-{
-	if (ev == PRESS)
-		console_open();
+COMMAND_ROUTINE(console_open) {
+  if (ev == PRESS)
+    console_open();
 }
 
-COMMAND_ROUTINE (console_close)
-{
-	if (ev == PRESS)
-		console_close();
+COMMAND_ROUTINE(console_close) {
+  if (ev == PRESS)
+    console_close();
 }

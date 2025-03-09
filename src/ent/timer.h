@@ -1,12 +1,10 @@
 #pragma once
 #include "core/entity.h"
 
-class e_timer: public e_base
-{
-	public:
+class e_timer: public e_base {
+public:
+  bool running;
+  long long ticks_left;
 
-	bool running;
-	long long ticks_left;
-
-	ENT_MEMBERS (timer)
+  ENT_MEMBERS(timer)
 };

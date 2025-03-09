@@ -1,26 +1,25 @@
 #pragma once
 #include "inc_gl.h"
-#include <vector>
 #include <string>
+#include <vector>
 
-struct t_material
-{
-	GLuint program;
+struct t_material {
+  GLuint program;
 
-	std::string name;
-	std::vector<GLuint> bitmap_texture_ids;
+  std::string name;
+  std::vector<GLuint> bitmap_texture_ids;
 
-	/* Vertex shader IDs hashed - needed for idempotency check */
-	uint32_t vert_shaders_hash;
+  /* Vertex shader IDs hashed - needed for idempotency check */
+  uint32_t vert_shaders_hash;
 
-	void load (const std::string& path);
-	void apply () const;
+  void load(const std::string& path);
+  void apply() const;
 };
 
-void init_materials ();
+void init_materials();
 
-GLuint load_texture (std::string path);
-GLenum get_surface_gl_format (SDL_Surface* s);
+GLuint load_texture(std::string path);
+GLenum get_surface_gl_format(SDL_Surface* s);
 
 /* Draws nothing, for various edge cases */
 extern t_material* mat_none;
@@ -31,7 +30,7 @@ extern t_material* mat_occlude;
  * Discard previous material info to assure that the next
  * material will actually be applied
  */
-void material_barrier ();
+void material_barrier();
 
 /*
  * The first N texture slots are reserved for engine use
@@ -42,5 +41,5 @@ void material_barrier ();
 constexpr int MAT_TEXTURE_SLOT_OFFSET = 2;
 
 
-GLuint make_glsl_program (const std::vector<GLuint>& shaders);
-GLuint compile_glsl (std::string path, GLenum shadertype);
+GLuint make_glsl_program(const std::vector<GLuint>& shaders);
+GLuint compile_glsl(std::string path, GLenum shadertype);

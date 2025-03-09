@@ -11,20 +11,19 @@
 
 extern t_fbo gbuf_fbo;
 
-void init_gbuffers ();
-void fill_gbuffers ();
-void gbuffer_pass ();
+void init_gbuffers();
+void fill_gbuffers();
+void gbuffer_pass();
 
-void debug_show_gbuffers ();
+void debug_show_gbuffers();
 
 constexpr int GBUF_SLOT_WORLD_POS = 0;
 constexpr int GBUF_SLOT_WORLD_NORM = 1;
 constexpr int GBUF_SLOT_SPECULAR = 2;
 
-namespace uniform_loc_gbuffer
-{
-	constexpr int world_pos = 200;
-	constexpr int world_norm = 201;
-	constexpr int screen_depth = 202;
-	constexpr int specular = 203;
-}
+namespace uniform_loc_gbuffer {
+constexpr int world_pos = 200;
+constexpr int world_norm = 201;
+constexpr int screen_depth = 202;
+constexpr int specular = 203;
+}  // namespace uniform_loc_gbuffer

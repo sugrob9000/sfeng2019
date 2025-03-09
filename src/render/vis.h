@@ -1,13 +1,13 @@
 #pragma once
 #include "core/core.h"
 #include "core/entity.h"
-#include "render.h"
 #include "material.h"
+#include "render.h"
 
-void init_vis ();
+void init_vis();
 
-void vis_initialize_world (const std::string& path);
-void vis_destroy_world ();
+void vis_initialize_world(const std::string& path);
+void vis_destroy_world();
 
 /*
  * An octree is used to store the world polygons, then walked to
@@ -23,48 +23,48 @@ void vis_destroy_world ();
  */
 
 struct t_visible_set;
-struct oct_node
-{
-	/*
-	 * Triangles within this node with the same material.
-	 * The vector is empty in non-leaves!
-	 */
-	struct mat_group {
-		t_material* mat;
-		GLuint display_list;
-	};
-	std::vector<mat_group> mat_buckets;
 
-	/*
-	 * Indices into the triangle array of internal world model.
-	 * Empty after tree has been built!
-	 */
-	std::vector<int> bucket;
+struct oct_node {
+  /*
+   * Triangles within this node with the same material.
+   * The vector is empty in non-leaves!
+   */
+  struct mat_group {
+    t_material* mat;
+    GLuint display_list;
+  };
 
-	GLuint query;
+  std::vector<mat_group> mat_buckets;
 
-	oct_node* children;
-	t_bound_box bounds;
+  /*
+   * Indices into the triangle array of internal world model.
+   * Empty after tree has been built!
+   */
+  std::vector<int> bucket;
 
-	void build (t_bound_box bounds, int level);
-	void make_leaf ();
+  GLuint query;
 
-	std::vector<e_base*> entities_inside;
-	void requery_entity (e_base* e, const t_bound_box& b);
+  oct_node* children;
+  t_bound_box bounds;
 
-	oct_node ();
-	~oct_node ();
+  void build(t_bound_box bounds, int level);
+  void make_leaf();
+
+  std::vector<e_base*> entities_inside;
+  void requery_entity(e_base* e, const t_bound_box& b);
+
+  oct_node();
+  ~oct_node();
 };
 
-struct t_visible_set
-{
-	std::vector<const oct_node*> leaves;
+struct t_visible_set {
+  std::vector<const oct_node*> leaves;
 
-	void fill ();
-	void render () const;
-	void render_debug () const;
+  void fill();
+  void render() const;
+  void render_debug() const;
 };
 
 extern t_visible_set all_leaves;
 
-void vis_requery_entity (e_base* e);
+void vis_requery_entity(e_base* e);

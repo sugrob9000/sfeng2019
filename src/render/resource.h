@@ -14,13 +14,13 @@ const char* const PATH_TEXTURE = "resource/mat/";
 const char* const PATH_MATERIAL = "resource/mat/";
 const char* const PATH_SHADER = "resource/shader/";
 
-t_model* get_model (std::string name);
-GLuint get_texture (std::string name);
-t_material* get_material (std::string name);
+t_model* get_model(std::string name);
+GLuint get_texture(std::string name);
+t_material* get_material(std::string name);
 
-GLuint get_frag_shader (const std::string& name);
-GLuint get_vert_shader (const std::string& name);
-GLuint get_shader (const std::string& name, GLenum type);
+GLuint get_frag_shader(const std::string& name);
+GLuint get_vert_shader(const std::string& name);
+GLuint get_shader(const std::string& name, GLenum type);
 
 /*
  * Declare these because some initializers may want to

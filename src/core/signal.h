@@ -20,28 +20,26 @@
  *   not when the signal is sent.
  */
 
-struct t_signal
-{
-	std::string target;
-	long long tick_due;
-	std::string signal_name;
-	std::string argument;
+struct t_signal {
+  std::string target;
+  long long tick_due;
+  std::string signal_name;
+  std::string argument;
 
-	void execute () const;
+  void execute() const;
 };
 
 /*
  * Keep a queue of signals, sorted by when they
  * are due to happen, ascending
  */
-bool operator< (const t_signal& a, const t_signal& b);
+bool operator<(const t_signal& a, const t_signal& b);
 extern std::priority_queue<t_signal> signals;
 
 /*
  * The basic routine used to fire a signal
  */
-void add_signal (t_signal s);
-
+void add_signal(t_signal s);
 
 
 /*
@@ -58,48 +56,46 @@ void add_signal (t_signal s);
  */
 
 /* Below are wrappers around this that should actually be used */
-#define _SIGH_INTERNAL(entclass, name, proc) \
-	sigmap<e_##entclass>[#name] = (f_sig_handler) proc;
+#define _SIGH_INTERNAL(entclass, name, proc) sigmap<e_##entclass>[#name] = (f_sig_handler) proc;
 
 /*
  * Declare or define a routine that is called once for your
  * entity class. It should register the hanglers, i.e. use SET_SIG_HANDLER
  */
 #define FILL_IO_DATA(entclass) \
-	template <> void fill_io_data<e_##entclass> ()
+  template<> \
+  void fill_io_data<e_##entclass>()
 
 /* Declare or define a signal handler */
 #define SIG_HANDLER(entclass, name) \
-	void sig_##entclass##_##name ([[maybe_unused]] e_##entclass* ent, \
-				      [[maybe_unused]] std::string arg)
+  void sig_##entclass##_##name([[maybe_unused]] e_##entclass* ent, [[maybe_unused]] std::string arg)
 
 /*
  * Register a signal handler, declared with SIG_HANDLER, for
  * an entity class - presumably used in a FILL_IO_DATA()
  */
-#define SET_SIG_HANDLER(entclass, name) \
-	_SIGH_INTERNAL(entclass, name, sig_##entclass##_##name)
+#define SET_SIG_HANDLER(entclass, name) _SIGH_INTERNAL(entclass, name, sig_##entclass##_##name)
 
 
 /* Basic useful signal handlers. You entity should probably have them. */
-#define BASIC_SIG_HANDLERS(entclass)                                 \
-	do {                                                         \
-		_SIGH_INTERNAL(entclass, setpos, sig_base_setpos);   \
-		_SIGH_INTERNAL(entclass, addpos, sig_base_addpos);   \
-		_SIGH_INTERNAL(entclass, setang, sig_base_setang);   \
-		_SIGH_INTERNAL(entclass, setname, sig_base_setname); \
-		_SIGH_INTERNAL(entclass, showpos, sig_base_showpos); \
-	} while (0)
+#define BASIC_SIG_HANDLERS(entclass) \
+  do { \
+    _SIGH_INTERNAL(entclass, setpos, sig_base_setpos); \
+    _SIGH_INTERNAL(entclass, addpos, sig_base_addpos); \
+    _SIGH_INTERNAL(entclass, setang, sig_base_setang); \
+    _SIGH_INTERNAL(entclass, setname, sig_base_setname); \
+    _SIGH_INTERNAL(entclass, showpos, sig_base_showpos); \
+  } while (0)
 
 class e_base;
-typedef void (*f_sig_handler) (e_base* ent, std::string arg);
+typedef void (*f_sig_handler)(e_base* ent, std::string arg);
 typedef std::map<std::string, f_sig_handler> t_sigmap;
 
-SIG_HANDLER (base, setpos);
-SIG_HANDLER (base, setang);
-SIG_HANDLER (base, setname);
-SIG_HANDLER (base, showpos);
-SIG_HANDLER (base, addpos);
+SIG_HANDLER(base, setpos);
+SIG_HANDLER(base, setang);
+SIG_HANDLER(base, setname);
+SIG_HANDLER(base, showpos);
+SIG_HANDLER(base, addpos);
 
 /*
  * Events: each entity object (as opposed to class) may specify
@@ -111,5 +107,7 @@ SIG_HANDLER (base, addpos);
 
 typedef std::map<std::string, std::vector<t_signal>> t_eventmap;
 
-template <class entclass> void fill_io_data ();
-template <class entclass> t_sigmap sigmap;
+template<class entclass>
+void fill_io_data();
+template<class entclass>
+t_sigmap sigmap;

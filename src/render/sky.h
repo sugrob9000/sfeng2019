@@ -1,4 +1,4 @@
 #pragma once
 
-void init_sky ();
-void render_sky ();
+void init_sky();
+void render_sky();

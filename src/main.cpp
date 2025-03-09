@@ -8,8 +8,9 @@
 #include <thread>
 
 COMMAND_ROUTINE(at_view) {
-  if (ev != PRESS || args.empty())
+  if (ev != PRESS || args.empty()) {
     return;
+  }
 
   std::string sigpos = "setpos " + vec3toa(camera.pos);
   std::string sigang = "setang " + vec3toa(camera.ang);

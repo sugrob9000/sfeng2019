@@ -24,8 +24,9 @@ void init_materials() {
 void Material::load(const std::string& path) {
   std::ifstream f(path);
 
-  if (!f)
+  if (!f) {
     fatal("Material %s: cannot open file", path.c_str());
+  }
 
   name = path;
 
@@ -45,8 +46,9 @@ void Material::load(const std::string& path) {
   while (true) {
     f >> key >> value;
     f.ignore(-1, '\n');  // skip to next line
-    if (!f)
+    if (!f) {
       break;
+    }
 
     if (key == "FRAG") {
       GLuint s = get_frag_shader(value);
@@ -97,16 +99,19 @@ void material_barrier() {
 
 static bool can_skip_application(const Material* m) {
   RenderStage s = latest_render_stage;
-  if (s != render_ctx.stage || latest_material == nullptr)
+  if (s != render_ctx.stage || latest_material == nullptr) {
     return false;
+  }
 
-  if (m == latest_material)
+  if (m == latest_material) {
     return true;
+  }
 
   if (s == RENDER_STAGE_LIGHTING_LSPACE || s == RENDER_STAGE_WIREFRAME) {
     // these render stages only care about user vertex shaders
-    if (latest_material->vert_shaders_hash == m->vert_shaders_hash)
+    if (latest_material->vert_shaders_hash == m->vert_shaders_hash) {
       return true;
+    }
   }
 
   return false;
@@ -160,8 +165,9 @@ GLenum get_surface_gl_format(SDL_Surface* s) {
 GLuint load_texture(std::string path) {
   SDL_Surface* surf = IMG_Load(path.c_str());
 
-  if (surf == nullptr)
+  if (surf == nullptr) {
     return 0;
+  }
 
   int format = get_surface_gl_format(surf);
   if (format == -1) {
@@ -190,16 +196,18 @@ GLuint load_texture(std::string path) {
 GLuint make_glsl_program(const std::vector<GLuint>& shaders) {
   GLuint r = glCreateProgram();
 
-  for (GLuint s: shaders)
+  for (GLuint s: shaders) {
     glAttachShader(r, s);
+  }
 
   glLinkProgram(r);
 
   int link_success = 0;
   glGetProgramiv(r, GL_LINK_STATUS, &link_success);
 
-  if (link_success)
+  if (link_success) {
     return r;
+  }
 
   int log_length = 0;
   glGetProgramiv(r, GL_INFO_LOG_LENGTH, &log_length);
@@ -242,8 +250,9 @@ static bool append_glsl_source(
       std::string incl_path = PATH_SHADER + line.substr(9, std::string::npos);
       src << "#line 0\n";
 
-      if (!append_glsl_source(start_path, incl_path, src, depth + 1))
+      if (!append_glsl_source(start_path, incl_path, src, depth + 1)) {
         return false;
+      }
 
       src << "\n#line " << linenr + 1;
     } else {
@@ -279,8 +288,9 @@ GLuint compile_glsl(std::string path, GLenum type) {
   int success = 0;
   glGetShaderiv(id, GL_COMPILE_STATUS, &success);
 
-  if (success)
+  if (success) {
     return id;
+  }
 
   int log_length = 0;
   glGetShaderiv(id, GL_INFO_LOG_LENGTH, &log_length);

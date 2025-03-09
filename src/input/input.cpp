@@ -19,8 +19,9 @@ void init_input() {
 }
 
 void run_argv_commands(int argc, const char* const* argv) {
-  while (--argc)
+  while (--argc) {
     cmd_registry.run(parse_command(*++argv), PRESS);
+  }
 }
 
 inline void handle_key(SDL_Scancode scan, uint8_t action) {
@@ -31,8 +32,9 @@ inline void handle_key(SDL_Scancode scan, uint8_t action) {
 void handle_input_ev(const SDL_Event& e) {
   switch (e.type) {
   case SDL_KEYDOWN:
-    if (!e.key.repeat)
+    if (!e.key.repeat) {
       handle_key(e.key.keysym.scancode, PRESS);
+    }
     break;
   case SDL_KEYUP:
     handle_key(e.key.keysym.scancode, RELEASE);
@@ -55,8 +57,9 @@ void handle_input_ev(const SDL_Event& e) {
       scan = scan_mwheel_down;
       y = -y;
     }
-    for (int i = 0; i < y; i++)
+    for (int i = 0; i < y; i++) {
       handle_key(scan, PRESS);
+    }
     break;
   }
   }
@@ -77,10 +80,11 @@ void handle_input() {
       }
       break;
     default:
-      if (console::console_active)
+      if (console::console_active) {
         console::handle_ev(e);
-      else
+      } else {
         handle_input_ev(e);
+      }
       break;
     }
   }
@@ -91,8 +95,9 @@ Command parse_command(const char* cmd) {
   std::istringstream is(cmd);
   is >> ret.name;
 
-  for (std::string arg; is >> arg;)
+  for (std::string arg; is >> arg;) {
     ret.args.push_back(arg);
+  }
 
   return ret;
 }
@@ -103,12 +108,14 @@ void CommandRegistry::register_command(std::string name, CmdRoutineFptr routine)
 
 void CommandRegistry::run(const Command& cmd, uint8_t ev) {
   auto it = m.find(cmd.name);
-  if (it == m.end())
+  if (it == m.end()) {
     return;
+  }
 
   CmdRoutineFptr routine = it->second;
-  if (routine != nullptr)
+  if (routine != nullptr) {
     routine(cmd.args, ev);
+  }
 }
 
 void run_cmd_ext(const std::string& cmd) {
@@ -130,14 +137,17 @@ void run_script(std::string path) {
     return;
   }
   for (std::string line; std::getline(f, line);) {
-    if (!line.empty() && line[0] != '#')
+    if (!line.empty() && line[0] != '#') {
       run_cmd_ext(line);
+    }
   }
 }
 
 COMMAND_ROUTINE(exec) {
-  if (ev != PRESS)
+  if (ev != PRESS) {
     return;
-  for (const std::string& s: args)
+  }
+  for (const std::string& s: args) {
     run_script(s);
+  }
 }

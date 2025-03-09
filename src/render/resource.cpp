@@ -12,8 +12,9 @@ ShaderCache cache_shader;
 Model* get_model(std::string path) {
   Model*& ret = cache_mdl[path];
 
-  if (ret != nullptr)
+  if (ret != nullptr) {
     return ret;
+  }
 
   ret = new Model;
 
@@ -27,13 +28,15 @@ Model* get_model(std::string path) {
 GLuint get_texture(std::string path) {
   GLuint& ret = cache_tex[path];
 
-  if (ret != 0)
+  if (ret != 0) {
     return ret;
+  }
 
   path = PATH_TEXTURE + path;
   ret = load_texture(path);
-  if (!ret)
+  if (!ret) {
     fatal("Cannot load texture %s", path.c_str());
+  }
   return ret;
 }
 
@@ -58,8 +61,9 @@ GLuint get_shader(const std::string& path, GLenum type) {
 
   ret = compile_glsl(PATH_SHADER + path, type);
 
-  if (!ret)
+  if (!ret) {
     fatal("Cannot load shader %s", path.c_str());
+  }
   return ret;
 }
 
@@ -74,8 +78,9 @@ GLuint get_frag_shader(const std::string& name) {
 Material* get_material(std::string path) {
   Material*& ret = cache_mat[path];
 
-  if (ret != nullptr)
+  if (ret != nullptr) {
     return ret;
+  }
 
   path = PATH_MATERIAL + path;
   ret = new Material;

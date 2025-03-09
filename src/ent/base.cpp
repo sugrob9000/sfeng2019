@@ -25,10 +25,12 @@ void BaseEntity::set_name(const std::string& new_name) {
 
 void BaseEntity::on_event(const std::string& event) const {
   auto i = events.find(event);
-  if (i == events.end())
+  if (i == events.end()) {
     return;
-  for (const Signal& s: i->second)
+  }
+  for (const Signal& s: i->second) {
     add_signal(s);
+  }
 }
 
 void BaseEntity::on_moved() {
@@ -74,16 +76,18 @@ WorldEntityList global_entity_list;
 
 BaseEntity* WorldEntityList::spawn(std::string type) {
   SpawnEntityFptr spawner = global_ent_class_registry[type];
-  if (spawner == nullptr)
+  if (spawner == nullptr) {
     return nullptr;
+  }
   vec.push_back(spawner());
   return vec.back().get();
 }
 
 BaseEntity* WorldEntityList::find_by_name(std::string name) {
   auto i = global_entity_list.name_index.find(name);
-  if (i == global_entity_list.name_index.end())
+  if (i == global_entity_list.name_index.end()) {
     return nullptr;
+  }
   return i->second;
 }
 

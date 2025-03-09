@@ -54,4 +54,4 @@ void open_console();
 void close_console();
 void render_console();
 extern bool console_active;
-} // namespace console
+}  // namespace console

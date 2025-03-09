@@ -19,12 +19,14 @@ void Signal::execute() const {
   const Sigmap& sigmap = e->get_sigmap();
   auto i = sigmap.find(signal_name);
 
-  if (i == sigmap.end())
+  if (i == sigmap.end()) {
     return;
+  }
 
   SigHandlerFptr routine = i->second;
-  if (routine != nullptr)
+  if (routine != nullptr) {
     routine(e, argument);
+  }
 }
 
 void add_signal(Signal s) {
@@ -33,11 +35,9 @@ void add_signal(Signal s) {
 }
 
 COMMAND_ROUTINE(signal) {
-  if (ev != PRESS)
+  if (ev != PRESS || args.size() < 3) {
     return;
-
-  if (args.size() < 3)
-    return;
+  }
 
   int delay = atoi(args[0].c_str());
   const std::string& recipient = args[1];

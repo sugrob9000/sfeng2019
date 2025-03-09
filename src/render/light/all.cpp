@@ -49,8 +49,9 @@ void light_apply_material() {
 }
 
 COMMAND_ROUTINE(light_ambience) {
-  if (ev != PRESS)
+  if (ev != PRESS) {
     return;
+  }
   switch (args.size()) {
   case 1:
     light_ambience = vec3(atof(args[0].c_str()));

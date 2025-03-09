@@ -7,8 +7,9 @@ void fatal(const char* format, ...) {
   va_list args;
   va_start(args, format);
   fprintf(stderr, "Fatal: ");
-  if (format != nullptr)
+  if (format != nullptr) {
     vfprintf(stderr, format, args);
+  }
   fprintf(stderr, "\n");
   va_end(args);
 
@@ -21,8 +22,9 @@ void warning(const char* format, ...) {
   va_list args;
   va_start(args, format);
   fprintf(stderr, "Warning: ");
-  if (format != nullptr)
+  if (format != nullptr) {
     vfprintf(stderr, format, args);
+  }
   fprintf(stderr, "\n");
   fflush(stderr);
   va_end(args);
@@ -78,7 +80,8 @@ mat3 rotate_xyz(const vec3& angles) {
 
 uint32_t hash_int32_vector(const std::vector<uint32_t>& v) {
   uint32_t r = v.size();
-  for (uint32_t i: v)
+  for (uint32_t i: v) {
     r ^= i + 0x9e3779b9 + (r << 6) + (r >> 2);
+  }
   return r;
 }

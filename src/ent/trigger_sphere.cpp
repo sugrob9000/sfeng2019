@@ -5,8 +5,9 @@
 template<>
 void signal_handler<TriggerSphereEntity, SigTag("set_radius")>(TriggerSphereEntity& sphere, std::string arg) {
   float r = atof(arg.c_str());
-  if (r > 0.0)
+  if (r > 0.0) {
     sphere.radius = r;
+  }
 }
 
 void TriggerSphereEntity::think() {
@@ -33,7 +34,7 @@ void TriggerSphereEntity::apply_keyvals(const EntKeyvals& kv) {
   BaseEntity::apply_keyvals(kv);
 
   radius = DEFAULT_RADIUS;
-  if (auto *v = kv.get("radius")) {
+  if (auto* v = kv.get("radius")) {
     float r = atof(v->c_str());
     if (r > 0.0) {
       radius = r;

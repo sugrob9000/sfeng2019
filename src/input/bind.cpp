@@ -15,40 +15,43 @@ void KeybindMap::add_bind(SDL_Scancode scan, Command value) {
 const Command& KeybindMap::operator[](SDL_Scancode scan) {
   auto i = m.find(scan);
 
-  if (i == m.end())
+  if (i == m.end()) {
     return empty_cmd;
+  }
 
   return i->second;
 }
 
 SDL_Scancode scancode_from_name(std::string name) {
-  for (char& c: name)
+  for (char& c: name) {
     c = tolower(c);
+  }
 
-  if (name == "lmb")
+  if (name == "lmb") {
     return scan_mouse[SDL_BUTTON_LEFT];
-  else if (name == "mmb")
+  } else if (name == "mmb") {
     return scan_mouse[SDL_BUTTON_MIDDLE];
-  else if (name == "rmb")
+  } else if (name == "rmb") {
     return scan_mouse[SDL_BUTTON_RIGHT];
-  else if (name == "mwheelup")
+  } else if (name == "mwheelup") {
     return scan_mwheel_up;
-  else if (name == "mwheeldown")
+  } else if (name == "mwheeldown") {
     return scan_mwheel_down;
+  }
 
   return SDL_GetScancodeFromName(name.c_str());
 }
 
 COMMAND_ROUTINE(bind) {
-  if (ev != PRESS)
+  if (ev != PRESS || args.size() < 2) {
     return;
-  if (args.size() < 2)
-    return;
+  }
 
   std::string keyname = args[0];
   for (char& c: keyname) {
-    if (c == '_')
+    if (c == '_') {
       c = ' ';
+    }
   }
 
   std::string bind;

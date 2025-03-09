@@ -41,6 +41,7 @@ IndentPPDirectives: AfterHash
 IndentRequiresClause: true
 IndentWidth: 2
 IndentWrappedFunctionNames: false
+InsertBraces: true
 InsertNewlineAtEOF: false
 InsertTrailingCommas: Wrapped
 KeepEmptyLinesAtEOF: false
@@ -70,8 +71,8 @@ SpaceBeforeRangeBasedForLoopColon: false
 SpaceInEmptyParentheses: false
 SpacesBeforeTrailingComments: 2
 SpacesInAngles: false
-SpacesInCStyleCastParentheses: false
 SpacesInContainerLiterals: false
+SpacesInCStyleCastParentheses: false
 SpacesInParentheses: false
 SpacesInSquareBrackets: false
 Standard: Latest

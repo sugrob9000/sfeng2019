@@ -30,8 +30,9 @@ void init_lighting_sun() {
   int s = sun_lspace_resolution;
   sun_lspace_fbo.make().attach_depth(make_rbo(s, s, GL_DEPTH_COMPONENT));
   FramebufferAttachment* dm = make_tex2d_array(s, s, num_cascades, GL_R32F);
-  for (int i = 0; i < num_cascades; i++)
+  for (int i = 0; i < num_cascades; i++) {
     sun_lspace_fbo.attach_color(dm, i, i);
+  }
 
   sun_program =
     make_glsl_program({get_vert_shader("internal/gbuffer_quad"), get_frag_shader("internal/light/sun")});
@@ -65,8 +66,9 @@ static void fill_depth_maps(const SunEntity* l) {
     // all the boundaries *almost* right
     unif_depths[i] = v.z / v.w * 0.5 + 0.5;
 
-    for (int j = 0; j < 4; j++)
+    for (int j = 0; j < 4; j++) {
       planes[4 * i + j] = rot * planes[4 * i + j];
+    }
   }
 
   sun_lspace_fbo.apply();
@@ -80,8 +82,9 @@ static void fill_depth_maps(const SunEntity* l) {
 
   for (unsigned int casc = 0; casc < num_cascades; casc++) {
     Bbox lbound = {vec3(INFINITY), vec3(-INFINITY)};
-    for (int j = 0; j < 8; j++)
+    for (int j = 0; j < 8; j++) {
       lbound.expand(planes[4 * casc + j]);
+    }
 
     // snap the lightspace bounds so they really only change once
     // in a while during movement. this reduces flicker and gives
@@ -156,16 +159,19 @@ void compute_lighting_sun() {
 }  // namespace sun
 
 COMMAND_ROUTINE(light_cascades) {
-  if (ev != PRESS || args.size() != sun::num_cascades - 1)
+  if (ev != PRESS || args.size() != sun::num_cascades - 1) {
     return;
+  }
 
   float new_depths[sun::num_cascades - 1];
   for (int i = 0; i < sun::num_cascades - 1; i++) {
     new_depths[i] = atof(args[i].c_str());
-    if (new_depths[i] < camera.z_near)
+    if (new_depths[i] < camera.z_near) {
       return;
+    }
   }
 
-  for (int i = 0; i < sun::num_cascades - 1; i++)
+  for (int i = 0; i < sun::num_cascades - 1; i++) {
     sun::cascade_depths[i + 1] = new_depths[i];
+  }
 }

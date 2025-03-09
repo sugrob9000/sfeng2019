@@ -9,8 +9,9 @@ Framebuffer& Framebuffer::make() {
   glBindFramebuffer(GL_FRAMEBUFFER, id);
 
   GLenum buffers[num_clr_attachments];
-  for (int i = 0; i < num_clr_attachments; i++)
+  for (int i = 0; i < num_clr_attachments; i++) {
     buffers[i] = GL_COLOR_ATTACHMENT0 + i;
+  }
   glDrawBuffers(num_clr_attachments, buffers);
 
   return *this;
@@ -25,8 +26,9 @@ Framebuffer& Framebuffer::assert_complete() {
     fatal("Framebuffer %i with invalid dimensions %i, %i%s", id, width, height, hint);
   }
 
-  if (status != GL_FRAMEBUFFER_COMPLETE)
+  if (status != GL_FRAMEBUFFER_COMPLETE) {
     fatal("Framebuffer %i incomplete: status %x", id, status);
+  }
 
   return *this;
 }
@@ -244,8 +246,9 @@ void sspace_resize_buffers(int w, int h) {
   std::set<FramebufferAttachment*> updated;
 
   auto upd = [&](Framebuffer::AttachmentRef& a) -> void {
-    if (updated.count(a.ptr))
+    if (updated.count(a.ptr)) {
       return;
+    }
     updated.insert(a.ptr);
 
     switch (a->target) {
@@ -276,8 +279,9 @@ void sspace_resize_buffers(int w, int h) {
 
     for (int i = 0; i < Framebuffer::num_clr_attachments; i++) {
       Framebuffer::AttachmentRef p = fbo->color[i];
-      if (!p.taken())
+      if (!p.taken()) {
         continue;
+      }
 
       upd(p);
       fbo->clear_color(i);
@@ -285,8 +289,9 @@ void sspace_resize_buffers(int w, int h) {
     }
 
     Framebuffer::AttachmentRef p = fbo->depth;
-    if (!p.taken())
+    if (!p.taken()) {
       continue;
+    }
 
     upd(p);
     fbo->clear_depth();

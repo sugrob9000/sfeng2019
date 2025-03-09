@@ -33,7 +33,9 @@ public:
 
 template<>
 inline void fill_io_data<LightConeEntity>() {
-  do_fill_io_data<LightConeEntity, SigTag("setcone"), SigTag("setcolor")>();
+  do_fill_io_data<LightConeEntity,
+    SigTag("setcone"),
+    SigTag("setcolor")>();
 }
 
 // Parallel omnipresent light i.e. a sun

@@ -31,15 +31,17 @@ using glm::vec4;
 
 template<int N, typename S, glm::qualifier Q>
 std::ostream& operator<<(std::ostream& s, const glm::vec<N, S, Q>& v) {
-  for (int i = 0; i < N - 1; i++)
+  for (int i = 0; i < N - 1; i++) {
     s << v[i] << ' ';
+  }
   return s << v[N - 1];
 }
 
 template<int N, typename S, glm::qualifier Q>
 std::istream& operator>>(std::istream& s, glm::vec<N, S, Q>& v) {
-  for (int i = 0; i < N; i++)
+  for (int i = 0; i < N; i++) {
     s >> v[i];
+  }
   return s;
 }
 
@@ -86,22 +88,20 @@ inline float ceil_step(float a, float st) {
 
 // Be able to lexicographically compare vectors to
 // create maps of them, etc. (Not very meaningful otheriwse.)
-template<int N, typename S, glm::qualifier Q>
-bool operator<(const glm::vec<N, S, Q>& a, const glm::vec<N, S, Q>& b) {
-  for (int i = 0; i < N; i++) {
-    if (a[i] != b[i])
-      return a[i] < b[i];
+namespace detail {
+  template<int N, typename S, glm::qualifier Q>
+  auto vec_rank(const glm::vec<N, S, Q>& v) {
+    std::array<S, N> result;
+    for (int i = 0; i < N; ++i) {
+      result[i] = v[i];
+    }
+    return result;
   }
-  return false;
-}
+}  // namespace detail
 
 template<int N, typename S, glm::qualifier Q>
-bool operator==(const glm::vec<N, S, Q>& a, const glm::vec<N, S, Q>& b) {
-  for (int i = 0; i < N; i++) {
-    if (a[i] != b[i])
-      return false;
-  }
-  return true;
+auto operator<=>(const glm::vec<N, S, Q>& lhs, const glm::vec<N, S, Q>& rhs) {
+  return detail::vec_rank(lhs) <=> detail::vec_rank(rhs);
 }
 
 // Restorer: use RAII to restore an object to
@@ -125,4 +125,9 @@ struct Restorer {
   ~Restorer() {
     *ptr = original_value;
   }
+
+  Restorer(const Restorer&) = delete;
+  Restorer(Restorer&&) = delete;
+  Restorer& operator=(const Restorer&) = delete;
+  Restorer& operator=(Restorer&&) = delete;
 };

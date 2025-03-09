@@ -7,9 +7,8 @@ struct Vertex {
   vec3 pos;
   vec3 norm;
   vec2 tex;
+  auto operator<=>(const Vertex&) const = default;
 };
-
-bool operator<(const Vertex&, const Vertex&);
 
 // An in-memory representation of a model for loading,
 // conversion, etc. but not for actual rendering.

@@ -58,8 +58,9 @@ static Bbox octant_bound(Bbox parent, uint8_t octant_id) {
 void oct_node::build(Bbox b, int level) {
   // ensure that bounds include the triangles entirely
   for (int d: bucket) {
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < 3; i++) {
       b.expand(world.get_vertex(d, i).pos);
+    }
   }
   bounds = b;
 
@@ -74,24 +75,27 @@ void oct_node::build(Bbox b, int level) {
 
   for (int d: bucket) {
     vec3 tri_mid(0.0);
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < 3; i++) {
       tri_mid += world.get_vertex(d, i).pos;
+    }
     tri_mid /= 3.0;
     children[which_octant(bb_mid, tri_mid)].bucket.push_back(d);
   }
 
   vector_clear_dealloc(bucket);
 
-  for (int i = 0; i < 8; i++)
+  for (int i = 0; i < 8; i++) {
     children[i].build(octant_bound(bounds, i), level + 1);
+  }
 }
 
 void oct_node::make_leaf() {
   all_leaves.leaves.push_back(this);
 
   std::map<Material*, std::vector<int>> m;
-  for (int d: bucket)
+  for (int d: bucket) {
     m[world.triangles[d].material].push_back(d);
+  }
 
   mat_buckets.reserve(m.size());
 
@@ -99,8 +103,9 @@ void oct_node::make_leaf() {
     unsigned int dlist = glGenLists(1);
     glNewList(dlist, GL_COMPILE);
     glBegin(GL_TRIANGLES);
-    for (int i: tri_ids)
+    for (int i: tri_ids) {
       world.gl_send_triangle(i);
+    }
     glEnd();
     glEndList();
 
@@ -114,8 +119,9 @@ oct_node::oct_node() {
 }
 
 oct_node::~oct_node() {
-  if (children)
+  if (children) {
     delete[] children;
+  }
   glDeleteQueries(1, &query);
 }
 
@@ -169,13 +175,15 @@ void VisibleSet::fill() {
 
     for (oct_node* n: queues[cur_queue]) {
       oct_node* c = n->children;
-      if (!c)
+      if (!c) {
         continue;
+      }
       for (; c < n->children + 8; c++) {
         unsigned int pixels;
         glGetQueryObjectuiv(c->query, GL_QUERY_RESULT, &pixels);
-        if (pixels > 0 || c->bounds.point_in(render_ctx.eye_pos, 1.5))
+        if (pixels > 0 || c->bounds.point_in(render_ctx.eye_pos, 1.5)) {
           queues[cur_queue ^ 1].push_back(c);
+        }
       }
     }
 
@@ -202,7 +210,6 @@ void oct_node::requery_entity(BaseEntity* e, const Bbox& b) {
     break;
   case 0b10:
     // exited
-   //iter = entities_inside.back();
     entities_inside.pop_back();
     break;
   case 0b11:
@@ -211,8 +218,9 @@ void oct_node::requery_entity(BaseEntity* e, const Bbox& b) {
   }
 
   if (children) {
-    for (int i = 0; i < 8; i++)
+    for (int i = 0; i < 8; i++) {
       children[i].requery_entity(e, b);
+    }
   }
 }
 
@@ -246,8 +254,9 @@ void VisibleSet::render() const {
 
 void read_world_vis_data(std::string path) {
   std::ifstream f(path);
-  if (!f)
+  if (!f) {
     warning("Vis data for world unavailable: %s", path.c_str());
+  }
 
   std::string option;
   while (f >> option) {
@@ -268,8 +277,9 @@ void vis_initialize_world(const std::string& path) {
 
   world.load_obj(path + "/geo.obj");
 
-  if (world_bounds_override.volume() > 0.0)
+  if (world_bounds_override.volume() > 0.0) {
     world.bbox = world_bounds_override;
+  }
 
   root = new oct_node;
 

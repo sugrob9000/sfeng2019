@@ -21,12 +21,14 @@ void handle_ev(const SDL_Event& e) {
     switch (e.key.keysym.scancode) {
     case SDL_SCANCODE_BACKSPACE:
 
-      if (cmd.empty())
+      if (cmd.empty()) {
         break;
-      if (SDL_GetModState() & KMOD_SHIFT)
+      }
+      if (SDL_GetModState() & KMOD_SHIFT) {
         cmd.clear();
-      else
+      } else {
         cmd.pop_back();
+      }
       update_matches();
       break;
 
@@ -52,8 +54,9 @@ void handle_ev(const SDL_Event& e) {
 
     // handle esc on keyup to avoid sending
     // the esc keyup event to the main game
-    if (e.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
+    if (e.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
       close_console();
+    }
     break;
 
   case SDL_TEXTINPUT:
@@ -97,14 +100,16 @@ static void update_matches() {
   }
 
   for (char c: cmd) {
-    if (!is_cmd_char(c))
+    if (!is_cmd_char(c)) {
       return;
+    }
   }
 
   for (const auto& p: cmd_registry.m) {
     const std::string& s = p.first;
-    if (n > s.length())
+    if (n > s.length()) {
       continue;
+    }
     bool match = true;
     for (int i = 0; i < n; i++) {
       if (cmd_str[i] != s[i]) {
@@ -112,8 +117,9 @@ static void update_matches() {
         break;
       }
     }
-    if (match)
+    if (match) {
       matches.push_back(&s);
+    }
   }
 
   std::sort(matches.begin(), matches.end(), [](const std::string* a, const std::string* b) {
@@ -181,11 +187,13 @@ void render_console() {
 }  // namespace console
 
 COMMAND_ROUTINE(console_open) {
-  if (ev == PRESS)
+  if (ev == PRESS) {
     console::open_console();
+  }
 }
 
 COMMAND_ROUTINE(console_close) {
-  if (ev == PRESS)
+  if (ev == PRESS) {
     console::close_console();
+  }
 }

@@ -31,8 +31,9 @@ void Model::load(const InMemoryModel& src) {
   glNewList(display_list_id, GL_COMPILE);
   glBegin(GL_TRIANGLES);
   int n = src.triangles.size();
-  for (int i = 0; i < n; i++)
+  for (int i = 0; i < n; i++) {
     src.gl_send_triangle(i);
+  }
   glEnd();
   glEndList();
 
@@ -40,12 +41,14 @@ void Model::load(const InMemoryModel& src) {
 }
 
 void InMemoryModel::calc_bbox() {
-  if (vertices.empty())
+  if (vertices.empty()) {
     return;
+  }
 
   bbox = {vec3(INFINITY), vec3(-INFINITY)};
-  for (const vertex& v: vertices)
+  for (const vertex& v: vertices) {
     bbox.expand(v.v.pos);
+  }
 
   // just in case, extend slightly
   bbox.start -= vec3(0.5);
@@ -54,8 +57,9 @@ void InMemoryModel::calc_bbox() {
 
 void InMemoryModel::load_obj(const std::string& path) {
   std::ifstream f(path);
-  if (!f)
+  if (!f) {
     fatal("Could not open OBJ %s", path.c_str());
+  }
 
   std::vector<vec3> points;
   std::vector<vec3> normals;
@@ -93,11 +97,13 @@ void InMemoryModel::load_obj(const std::string& path) {
 
   for (std::string line; std::getline(f, line);) {
     int comment = line.find('#');
-    if (comment != std::string::npos)
+    if (comment != std::string::npos) {
       line.erase(comment);
+    }
 
-    if (line.size() < 2)
+    if (line.size() < 2) {
       continue;
+    }
 
     switch (pack(line.c_str())) {
     case pack("v "): {
@@ -129,15 +135,9 @@ void InMemoryModel::load_obj(const std::string& path) {
       sscanf(
         line.c_str(),
         "%*s %i/%i/%i %i/%i/%i %i/%i/%i",
-        &v[0],
-        &t[0],
-        &n[0],
-        &v[1],
-        &t[1],
-        &n[1],
-        &v[2],
-        &t[2],
-        &n[2]
+        &v[0], &t[0], &n[0],
+        &v[1], &t[1], &n[1],
+        &v[2], &t[2], &n[2]
       );
       for (int i = 0; i < 3; i++) {
         v[i]--;
@@ -161,16 +161,18 @@ void InMemoryModel::load_obj(const std::string& path) {
     }
   }
 
-  for (vertex& v: vertices)
+  for (vertex& v: vertices) {
     v.tangent = glm::normalize(v.tangent);
+  }
 
   calc_bbox();
 }
 
 void InMemoryModel::load_rvd(const std::string& path) {
   std::ifstream f(path, std::ios::binary);
-  if (!f)
+  if (!f) {
     fatal("Model RVD %s: could not open file", path.c_str());
+  }
 
   uint32_t num_vertices = 0;
   f.read((char*) &num_vertices, sizeof(num_vertices));
@@ -218,8 +220,9 @@ void InMemoryModel::dump_rvd(const std::string& path) const {
   std::map<Material*, std::vector<int>> m;
   for (const triangle& t: triangles) {
     std::vector<int>& v = m[t.material];
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < 3; i++) {
       v.push_back(t.index[i]);
+    }
   }
 
   uint32_t num_buckets = m.size();
@@ -237,10 +240,9 @@ void InMemoryModel::dump_rvd(const std::string& path) const {
 }
 
 COMMAND_ROUTINE(obj2rvd) {
-  if (ev != PRESS)
+  if (ev != PRESS || args.empty()) {
     return;
-  if (args.empty())
-    return;
+  }
 
   const std::string& in = args[0];
   std::string out;
@@ -251,22 +253,13 @@ COMMAND_ROUTINE(obj2rvd) {
     // add .rvd at the end or instead of .obj
     out = in;
     int size = out.size();
-    if (size > 4 && out.compare(size - 4, 4, ".obj") == 0)
+    if (size > 4 && out.compare(size - 4, 4, ".obj") == 0) {
       out.erase(size - 4, std::string::npos);
+    }
     out += ".rvd";
   }
 
   InMemoryModel model;
   model.load_obj(in);
   model.dump_rvd(out);
-}
-
-bool operator<(const Vertex& a, const Vertex& b) {
-  if (a.pos != b.pos)
-    return a.pos < b.pos;
-  if (a.norm != b.norm)
-    return a.norm < b.norm;
-  if (a.tex != b.tex)
-    return a.tex < b.tex;
-  return false;
 }

@@ -139,8 +139,9 @@ void compute_lighting_cone() {
   render_ctx.stage = RENDER_STAGE_LIGHTING_LSPACE;
 
   for (LightConeEntity* l: global_cone_list) {
-    if (fill_depth_map(l))
+    if (fill_depth_map(l)) {
       lighting_pass();
+    }
   }
 }
 

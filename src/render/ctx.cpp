@@ -54,8 +54,9 @@ MOUSEMOVE_ROUTINE(camera) {
 }
 
 COMMAND_ROUTINE(cam_dump_pos) {
-  if (ev != PRESS)
+  if (ev != PRESS) {
     return;
+  }
   std::cout << "pos " << camera.pos << "\nang " << camera.ang << std::endl;
 }
 
@@ -73,15 +74,19 @@ COMMAND_SET_BOOL(cam_decelerate, slowdown);
 
 void upd_camera_pos() {
   float speed = 4.0;
-  if (speedup)
+  if (speedup) {
     speed *= 2.5;
-  if (slowdown)
+  }
+  if (slowdown) {
     speed *= 0.4;
+  }
 
-  if (camera.ang.x < -90.0)
+  if (camera.ang.x < -90.0) {
     camera.ang.x = -90.0;
-  if (camera.ang.x > 90.0)
+  }
+  if (camera.ang.x > 90.0) {
     camera.ang.x = 90.0;
+  }
 
   using glm::radians;
   float sz = sinf(radians(camera.ang.z));
@@ -90,22 +95,28 @@ void upd_camera_pos() {
 
   vec3 delta(0.0);
 
-  if (move_flags[move_f])
+  if (move_flags[move_f]) {
     delta += vec3(sz, cz, -sx);
-  if (move_flags[move_b])
+  }
+  if (move_flags[move_b]) {
     delta -= vec3(sz, cz, -sx);
-  if (move_flags[move_l])
+  }
+  if (move_flags[move_l]) {
     delta -= vec3(cz, -sz, 0.0);
-  if (move_flags[move_r])
+  }
+  if (move_flags[move_r]) {
     delta += vec3(cz, -sz, 0.0);
+  }
 
-  if (glm::length(delta) > 0.0f)
+  if (glm::length(delta) > 0.0f) {
     camera.pos += glm::normalize(delta) * speed;
+  }
 }
 
 COMMAND_ROUTINE(cam_move) {
-  if (args.empty() || args[0].empty())
+  if (args.empty() || args[0].empty()) {
     return;
+  }
 
   bool f = (ev == PRESS);
 

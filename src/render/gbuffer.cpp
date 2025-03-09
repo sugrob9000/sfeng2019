@@ -62,8 +62,9 @@ COMMAND_ROUTINE(show_gbuf) {
     show_gbuffer = -1;
     return;
   }
-  if (args.empty())
+  if (args.empty()) {
     return;
+  }
   show_gbuffer = atoi(args[0].c_str());
 }
 

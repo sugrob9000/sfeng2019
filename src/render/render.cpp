@@ -42,11 +42,13 @@ void render_all() {
 
   debug_show_gbuffers();
 
-  if (console::console_active)
+  if (console::console_active) {
     console::render_console();
+  }
 
-  if (int err = glGetError(); err != 0)
+  if (int err = glGetError(); err != 0) {
     warning("OpenGL error 0x%x (%i)", err, err);
+  }
 
   last_frame_time = cr::duration<float>(sc::now() - frame_start).count();
   SDL_GL_SwapWindow(sdl_ctx.window);
@@ -59,8 +61,9 @@ void init_render() {
     sdl_ctx.res_y = 480;
   }
 
-  if (SDL_Init(SDL_INIT_VIDEO) < 0)
+  if (SDL_Init(SDL_INIT_VIDEO) < 0) {
     fatal("SDL_Init failed: %s", SDL_GetError());
+  }
 
   int img_flags = IMG_INIT_JPG | IMG_INIT_PNG | IMG_INIT_TIF;
   int img_success = IMG_Init(img_flags);
@@ -81,16 +84,19 @@ void init_render() {
     sdl_ctx.res_y,
     SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE
   );
-  if (sdl_ctx.window == nullptr)
+  if (sdl_ctx.window == nullptr) {
     fatal("SDL window creation failed: %s", SDL_GetError());
+  }
 
   sdl_ctx.glcont = SDL_GL_CreateContext(sdl_ctx.window);
-  if (sdl_ctx.glcont == nullptr)
+  if (sdl_ctx.glcont == nullptr) {
     fatal("SDL glcont creation failed: %s", SDL_GetError());
+  }
 
   glewExperimental = true;
-  if (glewInit() != GLEW_OK)
+  if (glewInit() != GLEW_OK) {
     fatal("GLEW init failed");
+  }
 
   sdl_ctx.renderer =
     SDL_CreateRenderer(sdl_ctx.window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
@@ -147,10 +153,9 @@ void resize_window(int w, int h) {
 }
 
 COMMAND_ROUTINE(windowsize) {
-  if (ev != PRESS)
+  if (ev != PRESS || args.size() != 2) {
     return;
-  if (args.size() != 2)
-    return;
+  }
 
   using std::atoi;
   resize_window(atoi(args[0].c_str()), atoi(args[1].c_str()));
@@ -202,11 +207,13 @@ unsigned int text_program;
 unsigned int text_prg_glyph_loc;
 
 void init_text() {
-  if (TTF_Init() < 0)
+  if (TTF_Init() < 0) {
     fatal("TTF init failed");
+  }
   sdl_ctx.font = TTF_OpenFont(sdl_ctx.font_path, sdl_ctx.font_h);
-  if (sdl_ctx.font == nullptr)
+  if (sdl_ctx.font == nullptr) {
     fatal("Failed to find font %s", sdl_ctx.font_path);
+  }
   if (!TTF_FontFaceIsFixedWidth(sdl_ctx.font)) {
     warning("Font %s is not monospace. Text will break", sdl_ctx.font_path);
   }
@@ -218,8 +225,9 @@ void init_text() {
   char all_chars[257];
   all_chars[0] = '~';
   all_chars[256] = 0;
-  for (int i = 1; i < 256; i++)
+  for (int i = 1; i < 256; i++) {
     all_chars[i] = i;
+  }
 
   SDL_Surface* surf = TTF_RenderText_Blended(sdl_ctx.font, all_chars, text_color);
 

@@ -27,7 +27,7 @@ int main(int argc, const char* const* argv) {
   init_core();
   init_render();
 
-  console_close();
+  console::close_console();
 
   camera = Camera({726.066, -74.7267, 214.754}, {0, 0, -64}, 3500.0f, 1.5f, 60.0f, 1.0);
 

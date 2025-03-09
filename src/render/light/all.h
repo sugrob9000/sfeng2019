@@ -35,5 +35,5 @@ constexpr int lightmap_specular = 2;
 }  // namespace uniform_loc_light_material
 
 // Framebuffer slots for light MRT
-constexpr int LIGHT_SLOT_DIFFUSE = 0;
-constexpr int LIGHT_SLOT_SPECULAR = 1;
+constexpr int light_slot_diffuse = 0;
+constexpr int light_slot_specular = 1;

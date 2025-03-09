@@ -2,10 +2,11 @@
 #include "ent/lights.h"
 #include <vector>
 
+namespace cone {
 void init_lighting_cone();
 void compute_lighting_cone();
-
-extern std::vector<LightConeEntity*> lights_cone;
+extern std::vector<LightConeEntity*> global_cone_list;
+}  // namespace cone
 
 // GLSL uniform locations for calculating light
 // when rendering actual geometry from a light's perspective

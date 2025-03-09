@@ -1,5 +1,6 @@
 #include "render/render.h"
 #include "input/cmds.h"
+#include "input/input.h"
 #include "render/ctx.h"
 #include "render/debug.h"
 #include "render/framebuffer.h"
@@ -41,8 +42,8 @@ void render_all() {
 
   debug_show_gbuffers();
 
-  if (console_active)
-    console_render();
+  if (console::console_active)
+    console::render_console();
 
   if (int err = glGetError(); err != 0)
     warning("OpenGL error 0x%x (%i)", err, err);

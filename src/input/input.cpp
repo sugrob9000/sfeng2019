@@ -78,8 +78,8 @@ void handle_input() {
       }
       break;
     default:
-      if (console_active)
-        console_handle_input_ev(e);
+      if (console::console_active)
+        console::handle_ev(e);
       else
         handle_input_ev(e);
       break;

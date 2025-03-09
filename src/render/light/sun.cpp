@@ -14,27 +14,28 @@
 // has been trial-and-error'ed until it looked right.
 // There are probably several mistakes that cancel each other out
 
-std::vector<SunEntity*> lights_sun;
+namespace sun {
 
-constexpr int sun_num_cascades = 3;
-std::array<float, sun_num_cascades + 1> cascade_depths;
+std::vector<SunEntity*> global_sun_list;
 
-static GLuint program;
+constexpr int num_cascades = 3;
+static std::array<float, num_cascades + 1> cascade_depths;
+
+static GLuint sun_program;
 
 constexpr int sun_lspace_resolution = 2048;
-
-Framebuffer sun_lspace_fbo;
+static Framebuffer sun_lspace_fbo;
 
 void init_lighting_sun() {
   int s = sun_lspace_resolution;
   sun_lspace_fbo.make().attach_depth(make_rbo(s, s, GL_DEPTH_COMPONENT));
-  FramebufferAttachment* dm = make_tex2d_array(s, s, sun_num_cascades, GL_R32F);
-  for (int i = 0; i < sun_num_cascades; i++)
+  FramebufferAttachment* dm = make_tex2d_array(s, s, num_cascades, GL_R32F);
+  for (int i = 0; i < num_cascades; i++)
     sun_lspace_fbo.attach_color(dm, i, i);
 
-  program =
+  sun_program =
     make_glsl_program({get_vert_shader("internal/gbuffer_quad"), get_frag_shader("internal/light/sun")});
-  glUseProgram(program);
+  glUseProgram(sun_program);
 
   glUniform1i(uniform_loc_light_sun::depth_map, 2);
 
@@ -45,15 +46,15 @@ void init_lighting_sun() {
 }
 
 static vec3 unif_rgb;
-static mat4 unif_view[sun_num_cascades];
+static mat4 unif_view[num_cascades];
 static vec3 unif_direction;
-static float unif_depths[sun_num_cascades + 1];
+static float unif_depths[num_cascades + 1];
 
 static void fill_depth_maps(const SunEntity* l) {
   mat3 rot = rotate_xyz(glm::radians(l->ang - vec3(90.0, 0.0, 0.0)));
-  vec3 planes[4 * (sun_num_cascades + 1)];
+  vec3 planes[4 * (num_cascades + 1)];
 
-  for (int i = 0; i < sun_num_cascades + 1; i++) {
+  for (int i = 0; i < num_cascades + 1; i++) {
     camera.get_corner_points(cascade_depths[i], planes + 4 * i);
 
     // get the depth value while we're at it
@@ -77,7 +78,7 @@ static void fill_depth_maps(const SunEntity* l) {
   render_ctx.view = rot;
   render_ctx.model = mat4(1.0);
 
-  for (unsigned int casc = 0; casc < sun_num_cascades; casc++) {
+  for (unsigned int casc = 0; casc < num_cascades; casc++) {
     Bbox lbound = {vec3(INFINITY), vec3(-INFINITY)};
     for (int j = 0; j < 8; j++)
       lbound.expand(planes[4 * casc + j]);
@@ -114,7 +115,7 @@ static void fill_depth_maps(const SunEntity* l) {
 
 static void lighting_pass() {
   sspace_fbo.apply();
-  glUseProgram(program);
+  glUseProgram(sun_program);
 
   // color[0] really could have been any other index
   bind_to_slot(2, GL_TEXTURE_2D_ARRAY, sun_lspace_fbo.color[0]->id);
@@ -126,9 +127,9 @@ static void lighting_pass() {
   using glm::value_ptr;
   using namespace uniform_loc_light_sun;
   glUniform3fv(light_rgb, 1, value_ptr(unif_rgb));
-  glUniformMatrix4fv(light_view, sun_num_cascades, false, value_ptr(unif_view[0]));
+  glUniformMatrix4fv(light_view, num_cascades, false, value_ptr(unif_view[0]));
   glUniform3fv(light_dir, 1, value_ptr(unif_direction));
-  glUniform1fv(view_depths, sun_num_cascades + 1, unif_depths);
+  glUniform1fv(view_depths, num_cascades + 1, unif_depths);
 
   glUniform3fv(uniform_loc_light::eye_position, 1, value_ptr(camera.pos));
 
@@ -142,27 +143,29 @@ static void lighting_pass() {
 
 void compute_lighting_sun() {
   cascade_depths[0] = camera.z_near;
-  cascade_depths[sun_num_cascades] = camera.z_far;
+  cascade_depths[num_cascades] = camera.z_far;
 
   render_ctx.stage = RENDER_STAGE_LIGHTING_LSPACE;
 
-  for (SunEntity* l: lights_sun) {
+  for (SunEntity* l: global_sun_list) {
     fill_depth_maps(l);
     lighting_pass();
   }
 }
 
+}  // namespace sun
+
 COMMAND_ROUTINE(light_cascades) {
-  if (ev != PRESS || args.size() != sun_num_cascades - 1)
+  if (ev != PRESS || args.size() != sun::num_cascades - 1)
     return;
 
-  float new_depths[sun_num_cascades - 1];
-  for (int i = 0; i < sun_num_cascades - 1; i++) {
+  float new_depths[sun::num_cascades - 1];
+  for (int i = 0; i < sun::num_cascades - 1; i++) {
     new_depths[i] = atof(args[i].c_str());
     if (new_depths[i] < camera.z_near)
       return;
   }
 
-  for (int i = 0; i < sun_num_cascades - 1; i++)
-    cascade_depths[i + 1] = new_depths[i];
+  for (int i = 0; i < sun::num_cascades - 1; i++)
+    sun::cascade_depths[i + 1] = new_depths[i];
 }

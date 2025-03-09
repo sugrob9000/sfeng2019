@@ -7,7 +7,9 @@
 #include "render/material.h"
 #include "render/resource.h"
 
-std::vector<LightConeEntity*> lights_cone;
+namespace cone {
+
+std::vector<LightConeEntity*> global_cone_list;
 
 // Sending lighting info to shader
 static vec3 unif_pos;
@@ -136,8 +138,10 @@ static void lighting_pass() {
 void compute_lighting_cone() {
   render_ctx.stage = RENDER_STAGE_LIGHTING_LSPACE;
 
-  for (LightConeEntity* l: lights_cone) {
+  for (LightConeEntity* l: global_cone_list) {
     if (fill_depth_map(l))
       lighting_pass();
   }
 }
+
+}  // namespace cone

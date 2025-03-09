@@ -2,10 +2,11 @@
 #include "ent/lights.h"
 #include <vector>
 
+namespace sun {
 void init_lighting_sun();
 void compute_lighting_sun();
-
-extern std::vector<SunEntity*> lights_sun;
+extern std::vector<SunEntity*> global_sun_list;
+} //  namespace sun
 
 namespace uniform_loc_light_sun {
 constexpr int depth_map = 2;

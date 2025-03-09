@@ -57,3 +57,5 @@ target_compile_options(
   -Wno-cast-function-type
   -Wshadow
 )
+
+set_target_properties(engine PROPERTIES UNITY_BUILD ON)

@@ -2,11 +2,9 @@
 #include "input/cmds.h"
 #include "misc.h"
 #include "render/framebuffer.h"
-#include "render/gbuffer.h"
 #include "render/light/cone.h"
 #include "render/light/sun.h"
 #include "render/render.h"
-#include "render/resource.h"
 
 Framebuffer sspace_fbo;
 vec3 light_ambience;
@@ -19,13 +17,13 @@ void init_lighting() {
   constexpr GLenum f = GL_R11F_G11F_B10F;
 
   sspace_fbo.make()
-    .attach_color(make_tex2d(w, h, f), LIGHT_SLOT_DIFFUSE)
-    .attach_color(make_tex2d(w, h, f), LIGHT_SLOT_SPECULAR)
+    .attach_color(make_tex2d(w, h, f), light_slot_diffuse)
+    .attach_color(make_tex2d(w, h, f), light_slot_specular)
     .assert_complete();
   sspace_add_buffer(sspace_fbo);
 
-  init_lighting_cone();
-  init_lighting_sun();
+  cone::init_lighting_cone();
+  sun::init_lighting_sun();
 }
 
 void compute_all_lighting() {
@@ -35,8 +33,8 @@ void compute_all_lighting() {
   glClear(GL_COLOR_BUFFER_BIT);
 
   // go through all the kinds of lights
-  compute_lighting_cone();
-  compute_lighting_sun();
+  cone::compute_lighting_cone();
+  sun::compute_lighting_sun();
 }
 
 void light_init_material() {
@@ -46,8 +44,8 @@ void light_init_material() {
 }
 
 void light_apply_material() {
-  bind_tex2d_to_slot(0, sspace_fbo.color[LIGHT_SLOT_DIFFUSE]->id);
-  bind_tex2d_to_slot(1, sspace_fbo.color[LIGHT_SLOT_SPECULAR]->id);
+  bind_tex2d_to_slot(0, sspace_fbo.color[light_slot_diffuse]->id);
+  bind_tex2d_to_slot(1, sspace_fbo.color[light_slot_specular]->id);
 }
 
 COMMAND_ROUTINE(light_ambience) {

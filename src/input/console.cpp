@@ -2,6 +2,8 @@
 #include "render/render.h"
 #include <algorithm>
 
+namespace console {
+
 bool console_active;
 
 static int cursor;
@@ -9,9 +11,10 @@ static std::string cmd;
 static std::vector<const std::string*> matches;
 static std::string cmd_prefix;
 
-void update_matches();
 
-void console_handle_input_ev(const SDL_Event& e) {
+static void update_matches();
+
+void handle_ev(const SDL_Event& e) {
   switch (e.type) {
   case SDL_KEYDOWN:
 
@@ -50,7 +53,7 @@ void console_handle_input_ev(const SDL_Event& e) {
     // handle esc on keyup to avoid sending
     // the esc keyup event to the main game
     if (e.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
-      console_close();
+      close_console();
     break;
 
   case SDL_TEXTINPUT:
@@ -61,14 +64,14 @@ void console_handle_input_ev(const SDL_Event& e) {
   }
 }
 
-void console_open() {
+void open_console() {
   console_active = true;
   SDL_SetRelativeMouseMode(SDL_FALSE);
   SDL_StartTextInput();
   update_matches();
 }
 
-void console_close() {
+void close_console() {
   console_active = false;
   cmd.clear();
   SDL_SetRelativeMouseMode(SDL_TRUE);
@@ -79,7 +82,7 @@ bool is_cmd_char(char c) {
   return isalnum(c) || c == '_' || c == '+' || c == '-';
 }
 
-void update_matches() {
+static void update_matches() {
   matches.clear();
 
   int n = cmd.length();
@@ -118,7 +121,7 @@ void update_matches() {
   });
 }
 
-void console_render() {
+void render_console() {
   static const SDL_Color bg_clr = {20, 20, 20, 255};
   static const SDL_Color bg_match_clr = {30, 30, 30, 240};
   static const SDL_Color cursor_clr = {220, 220, 40, 255};
@@ -175,12 +178,14 @@ void console_render() {
   }
 }
 
+}  // namespace console
+
 COMMAND_ROUTINE(console_open) {
   if (ev == PRESS)
-    console_open();
+    console::open_console();
 }
 
 COMMAND_ROUTINE(console_close) {
   if (ev == PRESS)
-    console_close();
+    console::close_console();
 }

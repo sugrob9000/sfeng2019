@@ -44,13 +44,14 @@ void run_script(std::string path);
 
 Command parse_command(const char* cmd);
 
-
+namespace console {
 // A console window for entering commands
 // Enter - execute
 // Esc - get out
 // Shift-backspace - erase current command
-void console_handle_input_ev(const SDL_Event& e);
-void console_open();
-void console_close();
-void console_render();
+void handle_ev(const SDL_Event& e);
+void open_console();
+void close_console();
+void render_console();
 extern bool console_active;
+} // namespace console

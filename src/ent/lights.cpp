@@ -24,11 +24,11 @@ void signal_handler<LightConeEntity, SigTag("setcone")>(LightConeEntity& light, 
 }
 
 LightConeEntity::LightConeEntity() {
-  lights_cone.push_back(this);
+  cone::global_cone_list.push_back(this);
 }
 
 LightConeEntity::~LightConeEntity() {
-  std::erase(lights_cone, this);
+  std::erase(cone::global_cone_list, this);
 }
 
 void LightConeEntity::moved() {
@@ -75,9 +75,9 @@ void SunEntity::apply_keyvals(const EntKeyvals& kv) {
 }
 
 SunEntity::SunEntity() {
-  lights_sun.push_back(this);
+  sun::global_sun_list.push_back(this);
 }
 
 SunEntity::~SunEntity() {
-  std::erase(lights_sun, this);
+  std::erase(sun::global_sun_list, this);
 }

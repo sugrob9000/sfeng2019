@@ -51,7 +51,7 @@ static vec3 unif_direction;
 static float unif_depths[num_cascades + 1];
 
 static void fill_depth_maps(const SunEntity* l) {
-  mat3 rot = rotate_xyz(glm::radians(l->ang - vec3(90.0, 0.0, 0.0)));
+  mat3 rot = rotate_xyz(glm::radians(l->get_ang() - vec3(90.0, 0.0, 0.0)));
   vec3 planes[4 * (num_cascades + 1)];
 
   for (int i = 0; i < num_cascades + 1; i++) {

@@ -50,7 +50,7 @@ static bool fill_depth_map(const LightConeEntity* l) {
   mat4& proj = render_ctx.proj;
   mat4& view = render_ctx.view;
 
-  vec4 camspace = proj * view * vec4(l->pos, 1.0);
+  vec4 camspace = proj * view * vec4(l->get_pos(), 1.0);
   Bbox lbounds;
   if (view_bounds.point_in(camspace / camspace.w)) {
     // cannot cull XY when light is visible on screen
@@ -82,8 +82,8 @@ static bool fill_depth_map(const LightConeEntity* l) {
   lbounds.start.z = 0.0;
 
   unif_view = proj * view;
-  unif_pos = l->pos;
-  unif_rgb = l->rgb;
+  unif_pos = l->get_pos();
+  unif_rgb = l->get_rgb();
   unif_bounds[0] = lbounds.start;
   unif_bounds[1] = lbounds.end;
 
@@ -103,7 +103,7 @@ static bool fill_depth_map(const LightConeEntity* l) {
   glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
   material_barrier();
-  l->vis.render();
+  l->render_vis();
 
   return true;
 }

@@ -12,7 +12,7 @@ void signal_handler<TriggerSphereEntity, SigTag("set_radius")>(TriggerSphereEnti
 void TriggerSphereEntity::think() {
   uint8_t touched_before = touching;
 
-  vec3 delta = pos - camera.pos;
+  vec3 delta = get_pos() - camera.pos;
   float dist2 = delta.x * delta.x + delta.y * delta.y + delta.z * delta.z;
   touching = (dist2 <= radius * radius);
 

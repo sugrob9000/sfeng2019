@@ -100,14 +100,12 @@ BaseEntity* read_single_entity(std::istream& is) {
     if (line[kstart] == '!') {
       // line describes an event
       std::istringstream iss(line.c_str() + kstart + 1);
-
       std::string event_name;
-      Signal s;
-      iss >> event_name >> s.tick_due >> s.target >> s.signal_name;
+      Signal signal;
+      iss >> event_name >> signal.tick_due >> signal.target >> signal.signal_name;
       // get the whole rest of the line
-      getline(iss, s.argument);
-      ent->events[event_name].push_back(s);
-
+      getline(iss, signal.argument);
+      ent->register_event(event_name, std::move(signal));
     } else {
       // line describes a key-value pair
       kv.add(line.substr(kstart, kend - kstart), line.substr(kend + 1));
@@ -119,7 +117,7 @@ BaseEntity* read_single_entity(std::istream& is) {
       break;
   }
   ent->apply_keyvals(kv);
-  ent->moved();
+  ent->on_moved();
 
   return ent;
 }

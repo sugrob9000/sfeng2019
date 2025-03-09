@@ -11,11 +11,10 @@ CommandRegistry cmd_registry;
 MousemoveFptr mousemove_proc;
 
 void init_input() {
-// register all commands
-#define COMMAND(name) cmd_registry.register_command(#name, &cmd_##name);
-#include "input/cmds.inc"
-#undef COMMAND
-
+  // register all commands
+  #define COMMAND(name) cmd_registry.register_command(#name, &cmd_##name);
+  #include "input/cmds.inc"
+  #undef COMMAND
   mousemove_proc = &mouse_camera;
 }
 

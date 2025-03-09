@@ -13,14 +13,15 @@ std::vector<LightConeEntity*> lights;
 
 template<>
 void signal_handler<LightConeEntity, SigTag("setcolor")>(LightConeEntity& light, std::string arg) {
-  atovec3(arg, light.rgb);
+  light.set_rgb(stovec3(arg));
 }
 
 template<>
 void signal_handler<LightConeEntity, SigTag("setcone")>(LightConeEntity& light, std::string arg) {
   float cone = atof(arg.c_str());
-  if (cone > 0.0 && cone < 180.0)
-    light.cone_angle = cone;
+  if (cone > 0.0 && cone < 180.0) {
+    light.set_cone_angle(cone);
+  }
 }
 
 LightConeEntity::LightConeEntity() {
@@ -31,8 +32,8 @@ LightConeEntity::~LightConeEntity() {
   std::erase(cone::global_cone_list, this);
 }
 
-void LightConeEntity::moved() {
-  BaseEntity::moved();
+void LightConeEntity::on_moved() {
+  BaseEntity::on_moved();
 
   // update visible set
   view();
@@ -51,11 +52,11 @@ void LightConeEntity::view() const {
   using namespace glm;
 
   render_ctx.proj = perspective(radians(2.0f * cone_angle), 1.0f, near_plane, reach);
-  render_ctx.view = rotate_xyz(radians(ang - vec3(90.0, 0.0, 0.0)));
-  render_ctx.view = translate(render_ctx.view, -pos);
+  render_ctx.view = rotate_xyz(radians(get_ang() - vec3(90.0, 0.0, 0.0)));
+  render_ctx.view = translate(render_ctx.view, -get_pos());
   render_ctx.model = mat4(1.0);
 
-  render_ctx.eye_pos = pos;
+  render_ctx.eye_pos = get_pos();
 }
 
 // ======================== e_light_sun code ========================

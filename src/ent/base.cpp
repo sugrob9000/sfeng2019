@@ -31,8 +31,29 @@ void BaseEntity::on_event(const std::string& event) const {
     add_signal(s);
 }
 
-void BaseEntity::moved() {
+void BaseEntity::on_moved() {
   vis_requery_entity(this);
+}
+
+void BaseEntity::move_to(vec3 newpos) {
+  pos = newpos;
+  on_moved();
+}
+
+void BaseEntity::rotate_to(vec3 newang) {
+  ang = newang;
+  on_moved();
+}
+
+void BaseEntity::render(uint64_t sentinel) const {
+  if (last_render_sentinel != sentinel) {
+    last_render_sentinel = sentinel;
+    do_render();
+  }
+}
+
+void BaseEntity::register_event(std::string event_name, Signal signal) {
+  events[event_name].push_back(std::move(signal));
 }
 
 void BaseEntity::apply_keyvals(const EntKeyvals& kv) {
@@ -42,11 +63,11 @@ void BaseEntity::apply_keyvals(const EntKeyvals& kv) {
 }
 
 void fill_ent_class_registry() {
-#define ENTITY(NAME, CLASS) \
-  global_ent_class_registry[NAME] = &(ent_factory<CLASS>); \
-  fill_io_data<CLASS>();
-#include "ent/list.inc"
-#undef ENTITY
+  #define ENTITY(NAME, CLASS) \
+    global_ent_class_registry[NAME] = &(ent_factory<CLASS>); \
+    fill_io_data<CLASS>();
+  #include "ent/list.inc"
+  #undef ENTITY
 }
 
 WorldEntityList global_entity_list;
@@ -93,20 +114,17 @@ std::string EntKeyvals::get_with_default(std::string key, std::string def) const
 
 template<>
 void signal_handler<BaseEntity, SigTag("setpos")>(BaseEntity& e, std::string arg) {
-  atovec3(arg, e.pos);
-  e.moved();
+  e.move_to(atovec3(arg));
 }
 
 template<>
 void signal_handler<BaseEntity, SigTag("addpos")>(BaseEntity& e, std::string arg) {
-  e.pos += atovec3(arg);
-  e.moved();
+  e.move_by(atovec3(arg));
 }
 
 template<>
 void signal_handler<BaseEntity, SigTag("setang")>(BaseEntity& e, std::string arg) {
-  atovec3(arg, e.ang);
-  e.moved();
+  e.rotate_to(atovec3(arg));
 }
 
 template<>
@@ -117,6 +135,6 @@ void signal_handler<BaseEntity, SigTag("setname")>(BaseEntity& e, std::string ar
 template<>
 void signal_handler<BaseEntity, SigTag("showpos")>(BaseEntity& e, std::string) {
   std::ostringstream os;
-  os << e.name << " - pos " << e.pos << " ang " << e.ang << '\n';
+  os << e.get_name() << " - pos " << e.get_pos() << " ang " << e.get_ang() << '\n';
   DEBUG_MSG(os.str());
 }

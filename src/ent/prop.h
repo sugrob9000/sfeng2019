@@ -5,14 +5,13 @@
 #include "render/model.h"
 
 class PropEntity: public BaseEntity {
-public:
   Model* model;
   Material* material;
 
+public:
   ~PropEntity() override = default;
-
   void apply_keyvals(const EntKeyvals&) override;
-  void render() const override;
+  void do_render() const override;
   Bbox get_bbox() const override;
   ENT_IMPLEMENT_GET_SIGMAP(PropEntity);
 };

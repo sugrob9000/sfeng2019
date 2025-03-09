@@ -29,41 +29,62 @@ struct EntKeyvals {
 // The base entity class
 class BaseEntity {
 public:
-  vec3 pos{};
-  vec3 ang{};
-  std::string name;
-
+  BaseEntity() = default;
   virtual ~BaseEntity() = default;
-
   virtual void think() {}
-  // By default, will read pos, ang, and name.
-  // Every entity should probably still call this.
-  virtual void apply_keyvals(const EntKeyvals& kv);
-
-  EventMap events;
 
   // We have to be able to get the sigmap knowing only the pointer
   // to the entity, while in runtime - templates won't help with this
   // The implementation is inserted by the preprocessor
   virtual const Sigmap& get_sigmap() const = 0;
 
-  void on_event(const std::string& event) const;
-  void set_name(const std::string& name);
-
-  virtual void render() const {}
+  // Must be called with appropriate global rendering context setup
+  // (RenderContext, stage, OpenGL state... messy)
+  // Sentinel is basically the ID of the batch in which it is being rendered.
+  // Calling render() again with the same sentinel as last time has no effect.
+  void render(uint64_t sentinel) const;
 
   // The entity promises that it is fully inside the box returned
-  // Entities that have no physical appearance (ie logical ones)
-  //   may express this by returning a box with volume 0
+  // Entities that have no physical appearance (i.e. logic-only entities)
+  // may return a box with volume 0
   virtual Bbox get_bbox() const { return {}; }
+
+  // By default, will read pos, ang, and name.
+  // Every entity should probably still call this.
+  virtual void apply_keyvals(const EntKeyvals& kv);
+
+  vec3 get_pos() const { return pos; }
+  vec3 get_ang() const { return ang; }
+
+  const std::string& get_name() { return name; }
+  void set_name(const std::string& name);
+
+  void move_to(vec3);
+  void move_by(vec3 offset) { move_to(pos + offset); }
+
+  void rotate_to(vec3);
+  void rotate_by(vec3 offset) { rotate_to(ang + offset); }
+
+  void on_event(const std::string& event) const;
 
   // Updates the engine's idea of where the entity is, for
   // purposes such as vis. Call this on an entity whenever its
   // output of get_bbox() changes
-  virtual void moved();
+  virtual void on_moved();
+
+  void register_event(std::string name, Signal);
+
+protected:
+  virtual void do_render() const {}
+
+private:
+  EventMap events;
+  vec3 pos{};
+  vec3 ang{};
+  std::string name;
 
   // Used in vis to avoid redundant rendering
-  uint64_t render_last_guard_key;
+  mutable uint64_t last_render_sentinel;
 };
 
 // Inserted into the entity class definition

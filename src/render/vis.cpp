@@ -228,16 +228,13 @@ void VisibleSet::render() const {
   // So, define a guard key that is unique for each invocation
   //   and use it to determine if we have already
   //   seen any particular entity in this invocation
-  static uint64_t guard_key = 0;
-  guard_key++;
+  static uint64_t sentinel = 0;
+  sentinel++;
 
   for (const oct_node* l: leaves) {
     // draw entities
     for (BaseEntity* e: l->entities_inside) {
-      if (e->render_last_guard_key == guard_key)
-        continue;
-      e->render_last_guard_key = guard_key;
-      e->render();
+      e->render(sentinel);
     }
     // draw world
     for (const auto& gr: l->mat_buckets) {

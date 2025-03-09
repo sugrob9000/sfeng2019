@@ -33,7 +33,7 @@ class BaseEntity;
 using SigHandlerFptr = void (*)(BaseEntity* ent, std::string arg);
 using Sigmap = std::map<std::string, SigHandlerFptr>;
 
-template<class Entity>
+template<typename Entity>
 Sigmap sigmap;
 
 // Keep a queue of signals, sorted by when they
@@ -78,7 +78,7 @@ void do_fill_io_data() {
 
 // An entity may specialize this (IN THE HEADER FILE) to register own signals.
 // In the specialization, it must call `do_fill_io_data` with more SigTag templace arguments.
-template<class Entity>
+template<typename Entity>
 void fill_io_data() {
   // By default, provide no additional signals
   do_fill_io_data<Entity>();

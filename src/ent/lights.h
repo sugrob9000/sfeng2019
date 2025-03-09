@@ -6,7 +6,6 @@
 
 // Directional cone light
 class LightConeEntity: public BaseEntity {
-public:
   float cone_angle;
   float near_plane;
   float reach;
@@ -14,14 +13,22 @@ public:
 
   VisibleSet vis;
 
+public:
   LightConeEntity();
   ~LightConeEntity() override;
-
   void apply_keyvals(const EntKeyvals&) override;
-  void moved() override;
+  void on_moved() override;
   ENT_IMPLEMENT_GET_SIGMAP(LightConeEntity);
-
   void view() const;
+
+  float get_cone_angle() const  {return cone_angle; }
+  void set_cone_angle(float f) { cone_angle = f; }
+
+  vec3 get_rgb() const { return rgb; }
+  void set_rgb(vec3 v) { rgb = v; }
+
+  // Like render(), requires proper render context setup
+  void render_vis() const { vis.render(); }
 };
 
 template<>

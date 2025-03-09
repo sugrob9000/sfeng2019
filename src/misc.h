@@ -19,13 +19,6 @@ void warning(const char* format, ...);
     std::cerr << "d: " << (msg) << std::endl; \
   } while (false)
 
-// Smallest power of 2 >= x
-#define CEIL_PO2(x) (1 << (8 * sizeof((x)) - __builtin_clz((x) - 1)))
-
-// Whether x is a power of 2
-#define IS_PO2(x) (((x) & ((x) - 1)) == 0)
-
-
 // GLM library bindings
 #include <glm/ext.hpp>
 #include <glm/glm.hpp>
@@ -36,14 +29,14 @@ using glm::vec2;
 using glm::vec3;
 using glm::vec4;
 
-template<int N, class S, glm::qualifier Q>
+template<int N, typename S, glm::qualifier Q>
 std::ostream& operator<<(std::ostream& s, const glm::vec<N, S, Q>& v) {
   for (int i = 0; i < N - 1; i++)
     s << v[i] << ' ';
   return s << v[N - 1];
 }
 
-template<int N, class S, glm::qualifier Q>
+template<int N, typename S, glm::qualifier Q>
 std::istream& operator>>(std::istream& s, glm::vec<N, S, Q>& v) {
   for (int i = 0; i < N; i++)
     s >> v[i];
@@ -74,7 +67,7 @@ inline mat4 rotate_xyz_4x4(const vec3& a) {
 }
 
 // Clear a std::vector with guaranteed deallocation of data
-template<class T>
+template<typename T>
 void vector_clear_dealloc(std::vector<T>& v) {
   std::vector<T>().swap(v);
 }
@@ -93,7 +86,7 @@ inline float ceil_step(float a, float st) {
 
 // Be able to lexicographically compare vectors to
 // create maps of them, etc. (Not very meaningful otheriwse.)
-template<int N, class S, glm::qualifier Q>
+template<int N, typename S, glm::qualifier Q>
 bool operator<(const glm::vec<N, S, Q>& a, const glm::vec<N, S, Q>& b) {
   for (int i = 0; i < N; i++) {
     if (a[i] != b[i])
@@ -102,7 +95,7 @@ bool operator<(const glm::vec<N, S, Q>& a, const glm::vec<N, S, Q>& b) {
   return false;
 }
 
-template<int N, class S, glm::qualifier Q>
+template<int N, typename S, glm::qualifier Q>
 bool operator==(const glm::vec<N, S, Q>& a, const glm::vec<N, S, Q>& b) {
   for (int i = 0; i < N; i++) {
     if (a[i] != b[i])
@@ -122,7 +115,7 @@ bool operator==(const glm::vec<N, S, Q>& a, const glm::vec<N, S, Q>& b) {
 // }
 // // camera1 is applied now
 
-template<class T>
+template<typename T>
 struct Restorer {
   T* ptr;
   T original_value;

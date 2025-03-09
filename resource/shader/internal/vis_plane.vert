@@ -9,5 +9,5 @@ layout (location = 116) uniform mat4 view;
 
 void main ()
 {
-	gl_Position = proj * view * gl_Vertex;
+  gl_Position = proj * view * gl_Vertex;
 }

@@ -4,9 +4,7 @@
 #include "render/render.h"
 #include "render/vis.h"
 
-/*
- * Directional cone light
- */
+// Directional cone light
 class LightConeEntity: public BaseEntity {
 public:
   float cone_angle;
@@ -31,20 +29,15 @@ inline void fill_io_data<LightConeEntity>() {
   do_fill_io_data<LightConeEntity, SigTag("setcone"), SigTag("setcolor")>();
 }
 
-/*
- * Parallel omnipresent light i.e. a sun
- * World position on this doesn't change anything about its lighting
- */
+// Parallel omnipresent light i.e. a sun
+// World position on this doesn't change anything about its lighting
 class SunEntity: public BaseEntity {
 public:
   vec3 rgb;
-
-  /*
-   * Consider the sun to be this far from the eye, in the (opposite)
-   *   direction of the rays. If there's something in the map farther
-   *   than this, it will not cast shadows
-   * Smaller values mean better depth buffer precision, though
-   */
+  // Consider the sun to be this far from the eye, in the (opposite)
+  //   direction of the rays. If there's something in the map farther
+  //   than this, it will not cast shadows
+  // Smaller values mean better depth buffer precision, though
   float distance;
 
   SunEntity();

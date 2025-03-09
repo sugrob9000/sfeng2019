@@ -9,7 +9,7 @@
 
 std::vector<LightConeEntity*> lights;
 
-/* ======================== e_light_cone code ======================== */
+// ======================== e_light_cone code ========================
 
 template<>
 void signal_handler<LightConeEntity, SigTag("setcolor")>(LightConeEntity& light, std::string arg) {
@@ -60,7 +60,7 @@ void LightConeEntity::view() const {
   render_ctx.eye_pos = pos;
 }
 
-/* ======================== e_light_sun code ======================== */
+// ======================== e_light_sun code ========================
 
 template<>
 void signal_handler<SunEntity, SigTag("setcolor")>(SunEntity& light, std::string arg) {

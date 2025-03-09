@@ -20,7 +20,7 @@ static GLuint occ_planes_dlist;
 static GLuint occ_cube_prog;
 
 
-/* Disabling vis */
+// Disabling vis
 bool pass_all_nodes = false;
 COMMAND_SET_BOOL(vis_disable, pass_all_nodes);
 
@@ -39,17 +39,13 @@ void init_vis() {
 static Bbox world_bounds_override;
 static InMemoryModel world;
 
-/*
- * The ID of the octant in which point is
- * if the midpoint of the bbox is origin
- */
+// The ID of the octant in which point is
+// if the midpoint of the bbox is origin
 static uint8_t which_octant(vec3 origin, vec3 point) {
   return (point.x > origin.x) + ((point.y > origin.y) << 1) + ((point.z > origin.z) << 2);
 }
 
-/*
- * The bbox of an octant with given ID, given the parent
- */
+// The bbox of an octant with given ID, given the parent
 static Bbox octant_bound(Bbox parent, uint8_t octant_id) {
   vec3 mid = (parent.start + parent.end) * 0.5f;
   Bbox r = parent;
@@ -206,7 +202,7 @@ void oct_node::requery_entity(BaseEntity* e, const Bbox& b) {
     break;
   case 0b10:
     // exited
-    *iter = entities_inside.back();
+   //iter = entities_inside.back();
     entities_inside.pop_back();
     break;
   case 0b11:
@@ -225,15 +221,13 @@ void vis_requery_entity(BaseEntity* e) {
 }
 
 void VisibleSet::render() const {
-  /*
-   * When we walk the entities in the leaves like this, there
-   *   is redundancy (multiple leaves that we see will touch
-   *   the same entity), so we need to ensure each entity is
-   *   drawn once.
-   * So, define a guard key that is unique for each invocation
-   *   and use it to determine if we have already
-   *   seen any particular entity in this invocation
-   */
+  // When we walk the entities in the leaves like this, there
+  //   is redundancy (multiple leaves that we see will touch
+  //   the same entity), so we need to ensure each entity is
+  //   drawn once.
+  // So, define a guard key that is unique for each invocation
+  //   and use it to determine if we have already
+  //   seen any particular entity in this invocation
   static uint64_t guard_key = 0;
   guard_key++;
 

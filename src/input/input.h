@@ -13,13 +13,11 @@ typedef std::vector<std::string> CmdArgs;
 typedef void (*CmdRoutineFptr)(const CmdArgs&, uint8_t);
 typedef void (*MousemoveFptr)(int dx, int dy, int abx, int aby);
 
-/*
- * Instances of this class are *not* supposed to be created
- * a lot during runtime. The key binding maps holds instances of them,
- * which are created once during engine start.
- * They are also created when parsing a console command, which is
- * not often either.
- */
+// Instances of this class are *not* supposed to be created
+// a lot during runtime. The key binding maps holds instances of them,
+// which are created once during engine start.
+// They are also created when parsing a console command, which is
+// not often either.
 struct Command {
   std::string name;
   CmdArgs args;
@@ -39,22 +37,18 @@ void init_input();
 void run_argv_commands(int argc, const char* const* argv);
 void handle_input();
 
-/*
- * Supports prepending + or - for PRESS and RELEASE, respectively
- * (+ is unnecessary, since PRESS is the default anyway)
- */
+// Supports prepending + or - for PRESS and RELEASE, respectively
+// (+ is unnecessary, since PRESS is the default anyway)
 void run_cmd_ext(const std::string& cmd);
 void run_script(std::string path);
 
 Command parse_command(const char* cmd);
 
 
-/*
- * A console window for entering commands
- * Enter - execute
- * Esc - get out
- * Shift-backspace - erase current command
- */
+// A console window for entering commands
+// Enter - execute
+// Esc - get out
+// Shift-backspace - erase current command
 void console_handle_input_ev(const SDL_Event& e);
 void console_open();
 void console_close();

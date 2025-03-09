@@ -87,7 +87,7 @@ void Material::load(const std::string& path) {
   light_init_material();
 }
 
-/* Material application is idempotent, so we can avoid redundancy */
+// Material application is idempotent, so we can avoid redundancy
 static const Material* latest_material = nullptr;
 static RenderStage latest_render_stage;
 

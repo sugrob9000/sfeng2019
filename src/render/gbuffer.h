@@ -1,13 +1,11 @@
 #pragma once
 #include "render/framebuffer.h"
 
-/*
- * G-buffer layout:
- *  depth             depth in screenspace
- *  color 0    RGB    position in worldspace
- *  color 1    RGB    normals in worldspace
- *  color 2    R      specular exponent
- */
+// G-buffer layout:
+//  depth             depth in screenspace
+//  color 0    RGB    position in worldspace
+//  color 1    RGB    normals in worldspace
+//  color 2    R      specular exponent
 
 extern Framebuffer gbuf_fbo;
 

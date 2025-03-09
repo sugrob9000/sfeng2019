@@ -1,11 +1,9 @@
 #pragma once
 #include "input/input.h"
 
-/*
- * Use obscure but valid scancodes for mouse.
- * Starts with an invalid scancode because mouse buttons
- * start from 1
- */
+// Use obscure but valid scancodes for mouse.
+// Starts with an invalid scancode because mouse buttons
+// start from 1
 const SDL_Scancode scan_mouse[6] = {
   SDL_SCANCODE_UNKNOWN,
   SDL_SCANCODE_F20,
@@ -17,12 +15,10 @@ const SDL_Scancode scan_mouse[6] = {
 const SDL_Scancode scan_mwheel_up = SDL_SCANCODE_F23;
 const SDL_Scancode scan_mwheel_down = SDL_SCANCODE_F24;
 
-/*
- * A wrapper around a standard map that prevents it from
- * allocating a node when accessing a key that
- * does not exist, by instead returning a reference
- * to a static default-initialized empty command.
- */
+// A wrapper around a standard map that prevents it from
+// allocating a node when accessing a key that
+// does not exist, by instead returning a reference
+// to a static default-initialized empty command.
 struct KeybindMap {
   static Command empty_cmd;
   std::unordered_map<SDL_Scancode, Command> m;

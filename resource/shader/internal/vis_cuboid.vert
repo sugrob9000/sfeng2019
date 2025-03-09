@@ -11,9 +11,9 @@ layout (location = 42) uniform vec3 cuboid[2];
 
 void main ()
 {
-	vec3 center = (cuboid[0] + cuboid[1]) * 0.5;
-	vec3 scale = (cuboid[1] - cuboid[0]) * 0.5;
+  vec3 center = (cuboid[0] + cuboid[1]) * 0.5;
+  vec3 scale = (cuboid[1] - cuboid[0]) * 0.5;
 
-	vec3 vert = gl_Vertex.xyz * scale + center;
-	gl_Position = proj * view * vec4(vert, 1.0);
+  vec3 vert = gl_Vertex.xyz * scale + center;
+  gl_Position = proj * view * vec4(vert, 1.0);
 }

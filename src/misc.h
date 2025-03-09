@@ -19,16 +19,14 @@ void warning(const char* format, ...);
     std::cerr << "d: " << (msg) << std::endl; \
   } while (false)
 
-/* Smallest power of 2 >= x */
+// Smallest power of 2 >= x
 #define CEIL_PO2(x) (1 << (8 * sizeof((x)) - __builtin_clz((x) - 1)))
 
-/* Whether x is a power of 2 */
+// Whether x is a power of 2
 #define IS_PO2(x) (((x) & ((x) - 1)) == 0)
 
 
-/*
- * GLM library bindings
- */
+// GLM library bindings
 #include <glm/ext.hpp>
 #include <glm/glm.hpp>
 
@@ -59,28 +57,28 @@ void atovec3(const std::string& s, vec3& v);
 
 std::string vec3toa(const vec3& v);
 
-/* Component-wise min & max */
+// Component-wise min & max
 vec3 min_components(const vec3& a, const vec3& b);
 vec3 max_components(const vec3& a, const vec3& b);
 
 
-/* Rotation matrix for Euler angles - just x, then y, then z */
+// Rotation matrix for Euler angles - just x, then y, then z
 mat3 rotate_xyz(const vec3& angles);
 
 inline mat4 rotate_xyz_4x4(const vec3& a) {
   return mat4(rotate_xyz(a));
 }
 
-/* Clear a std::vector with guaranteed deallocation of data */
+// Clear a std::vector with guaranteed deallocation of data
 template<class T>
 void vector_clear_dealloc(std::vector<T>& v) {
   std::vector<T>().swap(v);
 }
 
-/* Hash a vector of integers */
+// Hash a vector of integers
 uint32_t hash_int32_vector(const std::vector<uint32_t>& v);
 
-/* Floor/ceil to nearest multiple of */
+// Floor/ceil to nearest multiple of
 inline float floor_step(float a, float st) {
   return st * floor(a / st);
 }
@@ -89,10 +87,8 @@ inline float ceil_step(float a, float st) {
   return st * ceil(a / st);
 }
 
-/*
- * Be able to component-wise "compare" vectors to
- * create maps of them, etc. Not very meaningful otheriwse
- */
+// Be able to lexicographically compare vectors to
+// create maps of them, etc. (Not very meaningful otheriwse.)
 template<int N, class S, glm::qualifier Q>
 bool operator<(const glm::vec<N, S, Q>& a, const glm::vec<N, S, Q>& b) {
   for (int i = 0; i < N; i++) {
@@ -111,27 +107,25 @@ bool operator==(const glm::vec<N, S, Q>& a, const glm::vec<N, S, Q>& b) {
   return true;
 }
 
-/*
- * Restorer: use RAII to restore an object to
- * its original state after scope ends, for example:
- *
- * camera1.apply();
- * {
- *   restorer rest(render_ctx);
- *   camera2.apply();
- *   // do rendering from the viewpoint of camera1
- * }
- * // camera1 is applied now
- */
+// Restorer: use RAII to restore an object to
+// its original state after scope ends, for example:
+//
+// camera1.apply();
+// {
+//   restorer rest(render_ctx);
+//   camera2.apply();
+//   // do rendering from the viewpoint of camera1
+// }
+// // camera1 is applied now
 
 template<class T>
-struct restorer {
+struct Restorer {
   T* ptr;
   T original_value;
 
-  restorer(T& obj) : ptr(&obj), original_value(obj) {}
+  Restorer(T& obj) : ptr(&obj), original_value(obj) {}
 
-  ~restorer() {
+  ~Restorer() {
     *ptr = original_value;
   }
 };

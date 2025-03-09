@@ -5,11 +5,9 @@ TextureCache cache_tex;
 MaterialCache cache_mat;
 ShaderCache cache_shader;
 
-/*
- * The get_*() functions have to return something
- * (or crash), so it is okay for them to use
- * std::map::operator[]
- */
+// The get_*() functions have to return something
+// (or crash), so it is okay for them to use
+// std::map::operator[]
 
 Model* get_model(std::string path) {
   Model*& ret = cache_mdl[path];

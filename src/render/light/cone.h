@@ -7,10 +7,8 @@ void compute_lighting_cone();
 
 extern std::vector<LightConeEntity*> lights_cone;
 
-/*
- * GLSL uniform locations for calculating light
- * when rendering actual geometry from a light's perspective
- */
+// GLSL uniform locations for calculating light
+// when rendering actual geometry from a light's perspective
 namespace uniform_loc_light_cone {
 constexpr int depth_map = 2;
 

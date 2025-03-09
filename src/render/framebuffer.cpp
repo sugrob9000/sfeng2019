@@ -120,9 +120,7 @@ Framebuffer& Framebuffer::set_mrt_slots(const std::vector<GLenum>& slots) {
   return *this;
 }
 
-/*
- * ================= Making different attachments =================
- */
+// ================= Making different attachments =================
 
 inline FramebufferAttachment* attachment_finalize(FramebufferAttachment* a) {
   GLenum t;
@@ -234,7 +232,7 @@ FramebufferAttachment* make_rbo_msaa(int w, int h, GLenum t, short samples) {
   return attachment_finalize(p);
 }
 
-/* ========================================================= */
+// =========================================================
 
 static std::vector<Framebuffer*> ssbuffers;
 

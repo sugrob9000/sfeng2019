@@ -9,7 +9,7 @@
 
 std::vector<LightConeEntity*> lights_cone;
 
-/* Sending lighting info to shader */
+// Sending lighting info to shader
 static vec3 unif_pos;
 static vec3 unif_rgb;
 static mat4 unif_view;
@@ -40,7 +40,7 @@ void init_lighting_cone() {
   glUniform1i(screen_depth, 6);
 }
 
-/* Returns: whether this light is potentially visible */
+// Returns: whether this light is potentially visible
 static bool fill_depth_map(const LightConeEntity* l) {
   static constexpr Bbox view_bounds = {{-1.0, -1.0, 0.0}, {1.0, 1.0, 1.0}};
 
@@ -57,7 +57,7 @@ static bool fill_depth_map(const LightConeEntity* l) {
     lbounds = {vec3(INFINITY), vec3(-INFINITY)};
   }
 
-  restorer rest(render_ctx);
+  Restorer rest(render_ctx);
   l->view();
 
   vec3 planes[8];

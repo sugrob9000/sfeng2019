@@ -66,7 +66,7 @@ BaseEntity* WorldEntityList::find_by_name(std::string name) {
   return i->second;
 }
 
-/* ================= Key-value maps ================= */
+// ================= Key-value maps =================
 
 const std::string EntKeyvals::none = "";
 
@@ -85,7 +85,7 @@ void EntKeyvals::clear() {
   m.clear();
 }
 
-/* ================= Base signals ================= */
+// ================= Base signals =================
 
 template<>
 void signal_handler<BaseEntity, SigTag("setpos")>(BaseEntity& e, std::string arg) {

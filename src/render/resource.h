@@ -22,10 +22,8 @@ GLuint get_frag_shader(const std::string& name);
 GLuint get_vert_shader(const std::string& name);
 GLuint get_shader(const std::string& name, GLenum type);
 
-/*
- * Declare these because some initializers may want to
- * put special things into cache to avoid edge cases
- */
+// Declare these because some initializers may want to
+// put special things into cache to avoid edge cases
 extern ModelCache cache_mdl;
 extern TextureCache cache_tex;
 extern MaterialCache cache_mat;

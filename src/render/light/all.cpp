@@ -11,7 +11,7 @@
 Framebuffer sspace_fbo;
 vec3 light_ambience;
 
-/* TODO: do anything useful in post-processing */
+// TODO: do anything useful in post-processing
 
 void init_lighting() {
   int w = sdl_ctx.res_x;

@@ -6,5 +6,5 @@ varying vec2 tex_crd;
 
 void main ()
 {
-	gl_FragColor = texture2DRect(glyphs, tex_crd);
+  gl_FragColor = texture2DRect(glyphs, tex_crd);
 }

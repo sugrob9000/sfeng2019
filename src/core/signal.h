@@ -4,22 +4,20 @@
 #include <queue>
 #include <string>
 
-/*
- * Entities can be sent signals to. Each entity class can implement
- *   handlers for its own signals, and set them up at engine startup.
- * For example, a door class may have a handler for
- *   "open" and "close" signals.
- *
- * A signal knows:
- *   - its target entity, by name
- *   - the tick on which it is due to happen
- *   - what signal for the target to execute and with which argument
- * Note that it does not know the class of which its target is,
- *   so invalid signals should be tolerated.
- *
- * Name resolution happens *when the delay is up*,
- *   not when the signal is sent.
- */
+// Entities can be sent signals to. Each entity class can implement
+//   handlers for its own signals, and set them up at engine startup.
+// For example, a door class may have a handler for
+//   "open" and "close" signals.
+//
+// A signal knows:
+//   - its target entity, by name
+//   - the tick on which it is due to happen
+//   - what signal for the target to execute and with which argument
+// Note that it does not know the class of which its target is,
+//   so invalid signals should be tolerated.
+//
+// Name resolution happens *when the delay is up*,
+//   not when the signal is sent.
 
 struct Signal {
   std::string target;
@@ -38,19 +36,15 @@ typedef std::map<std::string, SigHandlerFptr> Sigmap;
 template<class Entity>
 Sigmap sigmap;
 
-/*
- * Keep a queue of signals, sorted by when they
- * are due to happen, ascending
- */
+// Keep a queue of signals, sorted by when they
+// are due to happen, ascending
 bool operator<(const Signal& a, const Signal& b);
 extern std::priority_queue<Signal> signals;
 
-/*
- * The basic routine used to fire a signal
- */
+// The basic routine used to fire a signal
 void add_signal(Signal s);
 
-/* These must be usable at compile time, because they are used as NTTPs */
+// These must be usable at compile time, because they are used as NTTPs
 struct SigTag {
   char name[20] = {};
   constexpr explicit SigTag(std::string_view n) {
@@ -90,11 +84,9 @@ void fill_io_data() {
   do_fill_io_data<Entity>();
 }
 
-/*
- * Events: each entity object (as opposed to class) may specify
- *   on which events it wants to fire certain signals
- *   (maybe, several on one event).
- * For exmaple, a particular trigger volume may want to tell a
- *   particular door to open when someone steps in it.
- */
+// Events: each entity object (as opposed to class) may specify
+//   on which events it wants to fire certain signals
+//   (maybe, several on one event).
+// For exmaple, a particular trigger volume may want to tell a
+//   particular door to open when someone steps in it.
 typedef std::map<std::string, std::vector<Signal>> EventMap;

@@ -10,11 +10,9 @@
 #include <array>
 #include <vector>
 
-/*
- * Quite a bit of the math, matrix work especially,
- * has been trial-and-error'ed until it looked right.
- * There are probably several mistakes that cancel each other out
- */
+// Quite a bit of the math, matrix work especially,
+// has been trial-and-error'ed until it looked right.
+// There are probably several mistakes that cancel each other out
 
 std::vector<SunEntity*> lights_sun;
 
@@ -75,7 +73,7 @@ static void fill_depth_maps(const SunEntity* l) {
 
   material_barrier();
 
-  restorer rest(render_ctx);
+  Restorer rest(render_ctx);
   render_ctx.view = rot;
   render_ctx.model = mat4(1.0);
 

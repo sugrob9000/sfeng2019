@@ -11,10 +11,8 @@ struct Vertex {
 
 bool operator<(const Vertex&, const Vertex&);
 
-/*
- * An in-memory representation of a model for loading,
- * conversion, etc. but not for actual rendering.
- */
+// An in-memory representation of a model for loading,
+// conversion, etc. but not for actual rendering.
 struct InMemoryModel {
   struct vertex {
     Vertex v;
@@ -41,26 +39,22 @@ struct InMemoryModel {
 
   void load_obj(const std::string& path);
 
-  /*
-   * RVD (raw vertex data) - a binary file format
-   * that should be faster to load than OBJ.
-   * Format:
-   *   number of vertices
-   *   each vertex, as raw float data
-   *   number of material buckets
-   *   each material bucket, as:
-   *     length of name
-   *     name, NOT null terminated
-   *     number of vertices (should divide by 3)
-   *     triangles, as triplets of indices into vertices
-   */
+  // RVD (raw vertex data) - a binary file format
+  // that should be faster to load than OBJ.
+  // Format:
+  //   number of vertices
+  //   each vertex, as raw float data
+  //   number of material buckets
+  //   each material bucket, as:
+  //     length of name
+  //     name, NOT null terminated
+  //     number of vertices (should divide by 3)
+  //     triangles, as triplets of indices into vertices
   void load_rvd(const std::string& path);
   void dump_rvd(const std::string& path) const;
 };
 
-/*
- * The representation of a model which is efficient to render
- */
+// The representation of a model which is efficient to render
 struct Model {
   GLuint display_list_id;
 

@@ -3,13 +3,13 @@
 #extension GL_ARB_explicit_attrib_location: require
 
 
-/* The user shader which links against the lib should implement these */
+// The user shader which links against the lib should implement these
 vec4 vertex_pos ();
 vec3 vertex_norm ();
 vec2 vertex_texcoord ();
 
 
-/* ========================================== */
+// ==========================================
 
 #define RENDER_STAGE_G_BUFFERS 0
 #define RENDER_STAGE_LIGHTING_LSPACE 1
@@ -31,19 +31,19 @@ out mat3 TBN;
 
 void main ()
 {
-	vec4 pos = vertex_pos();
-	vec4 normal = vec4(vertex_norm(), 0.0);
-	tex_crd = vertex_texcoord();
+  vec4 pos = vertex_pos();
+  vec4 normal = vec4(vertex_norm(), 0.0);
+  tex_crd = vertex_texcoord();
 
-	gl_Position = proj * view * model * pos;
-	screen_crd = gl_Position;
+  gl_Position = proj * view * model * pos;
+  screen_crd = gl_Position;
 
-	world_normal = (model * normal).xyz;
-	world_pos = (model * pos).xyz;
+  world_normal = (model * normal).xyz;
+  world_pos = (model * pos).xyz;
 
-	if (stage == RENDER_STAGE_G_BUFFERS) {
-		vec3 w_tangent = (model * vec4(tangent, 0.0)).xyz;
-		vec3 w_bitangent = cross(world_normal, w_tangent);
-		TBN = mat3(w_tangent, w_bitangent, world_normal);
-	}
+  if (stage == RENDER_STAGE_G_BUFFERS) {
+    vec3 w_tangent = (model * vec4(tangent, 0.0)).xyz;
+    vec3 w_bitangent = cross(world_normal, w_tangent);
+    TBN = mat3(w_tangent, w_bitangent, world_normal);
+  }
 }

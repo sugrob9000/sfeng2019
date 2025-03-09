@@ -9,37 +9,30 @@ void init_vis();
 void vis_initialize_world(const std::string& path);
 void vis_destroy_world();
 
-/*
- * An octree is used to store the world polygons, then walked to
- *   determine the currently visible set.
- *
- * The map can specify the leaf capacity, which will get a leaf
- *   split when exceeded, and maximum leaf depth, beyond which
- *   no leaf will ever be split.
- *
- * The map specifies certain "occlusion planes", which are polygons
- *   that are rendered every frame into a depth buffer and against
- *   which the nodes of the octree are tested.
- */
+// An octree is used to store the world polygons, then walked to
+//   determine the currently visible set.
+//
+// The map can specify the leaf capacity, which will get a leaf
+//   split when exceeded, and maximum leaf depth, beyond which
+//   no leaf will ever be split.
+//
+// The map specifies certain "occlusion planes", which are polygons
+//   that are rendered every frame into a depth buffer and against
+//   which the nodes of the octree are tested.
 
 struct VisibleSet;
 
 struct oct_node {
-  /*
-   * Triangles within this node with the same material.
-   * The vector is empty in non-leaves!
-   */
+  // Triangles within this node with the same material.
+  // The vector is empty in non-leaves!
   struct mat_group {
     Material* mat;
     GLuint display_list;
   };
 
   std::vector<mat_group> mat_buckets;
-
-  /*
-   * Indices into the triangle array of internal world model.
-   * Empty after tree has been built!
-   */
+  // Indices into the triangle array of internal world model.
+  // Empty after tree has been built!
   std::vector<int> bucket;
 
   GLuint query;

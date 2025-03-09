@@ -9,7 +9,7 @@ struct Material {
   std::string name;
   std::vector<GLuint> bitmap_texture_ids;
 
-  /* Vertex shader IDs hashed - needed for idempotency check */
+  // Vertex shader IDs hashed - needed for idempotency check
   uint32_t vert_shaders_hash;
 
   void load(const std::string& path);
@@ -21,23 +21,19 @@ void init_materials();
 GLuint load_texture(std::string path);
 GLenum get_surface_gl_format(SDL_Surface* s);
 
-/* Draws nothing, for various edge cases */
+// Draws nothing, for various edge cases
 extern Material* mat_none;
-/* Not an actual material, used in vis for occlusion planes */
+// Not an actual material, used in vis for occlusion planes
 extern Material* mat_occlude;
 
-/*
- * Discard previous material info to assure that the next
- * material will actually be applied
- */
+// Discard previous material info to assure that the next
+// material will actually be applied
 void material_barrier();
 
-/*
- * The first N texture slots are reserved for engine use
- * (lighting buffers etc.); after Nth, the slots are used for user bitmaps
- *
- * 0 and 1 are screenspace light maps, diffuse and specular, respectively
- */
+// The first N texture slots are reserved for engine use
+// (lighting buffers etc.); after Nth, the slots are used for user bitmaps
+//
+// 0 and 1 are screenspace light maps, diffuse and specular, respectively
 constexpr int MAT_TEXTURE_SLOT_OFFSET = 2;
 
 

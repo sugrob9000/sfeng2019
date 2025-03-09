@@ -20,10 +20,10 @@ struct RenderContext {
 
   vec3 eye_pos;
 
-  /* Set the matrices as their corresponding uniforms */
+  // Set the matrices as their corresponding uniforms
   void submit_matrices() const;
 
-  /* Same, but without the model matrix */
+  // Same, but without the model matrix
   void submit_viewproj() const;
 };
 
@@ -52,12 +52,9 @@ struct Camera {
 
   mat4 get_view();
   mat4 get_proj();
-
-  /*
-   * The four points in worldspace that correspond to this
-   *   camera's screen corners at a given depth
-   * dest is a C-style destination argument: caller must allocate
-   */
+  // The four points in worldspace that correspond to this
+  //   camera's screen corners at a given depth
+  // dest is a C-style destination argument: caller must allocate
   void get_corner_points(float depth, vec3* dest);
 };
 

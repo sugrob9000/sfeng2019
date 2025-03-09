@@ -3,10 +3,7 @@
 #extension GL_ARB_explicit_attrib_location: require
 #extension GL_ARB_draw_buffers: require
 
-/*
- * The screenspace pass for directional sunlight
- * (parallel light rays everywhere)
- */
+// The screenspace pass for directional sunlight (parallel light rays everywhere)
 
 #include internal/light/_sspace_pass.inc
 #include internal/_gbuffer.inc
@@ -25,41 +22,41 @@ const float DEPTH_BIAS = 3e-3;
 int get_cascade ();
 void main ()
 {
-	vec3 world_pos = texture(gbuffer_world_pos, texcrd).rgb;
-	vec3 world_norm = texture(gbuffer_world_norm, texcrd).rgb;
+  vec3 world_pos = texture(gbuffer_world_pos, texcrd).rgb;
+  vec3 world_norm = texture(gbuffer_world_norm, texcrd).rgb;
 
-	int casc = get_cascade();
+  int casc = get_cascade();
 
-	vec4 lspace = light_view[casc] * vec4(world_pos, 1.0);
-	vec3 lcoord = lspace.xyz;
-	lcoord.z -= DEPTH_BIAS;
-	lcoord.xy = lcoord.xy * 0.5 + 0.5;
+  vec4 lspace = light_view[casc] * vec4(world_pos, 1.0);
+  vec3 lcoord = lspace.xyz;
+  lcoord.z -= DEPTH_BIAS;
+  lcoord.xy = lcoord.xy * 0.5 + 0.5;
 
-	vec3 diffuse = vec3(0.0);
-	vec3 specular = vec3(0.0);
+  vec3 diffuse = vec3(0.0);
+  vec3 specular = vec3(0.0);
 
-	if (lcoord.z <= texture(depth_map, vec3(lcoord.xy, casc)).r) {
-		float bright = max(0.0, dot(world_norm, light_direction));
-		diffuse = light_rgb * bright;
+  if (lcoord.z <= texture(depth_map, vec3(lcoord.xy, casc)).r) {
+    float bright = max(0.0, dot(world_norm, light_direction));
+    diffuse = light_rgb * bright;
 
-		float exp = texture(gbuffer_specular, texcrd).r;
-		float cos_spec = max(0.0, dot(
-				reflect(-light_direction, world_norm),
-				normalize(eye_pos - world_pos)));
-		specular = light_rgb * bright * pow(cos_spec, exp);
-	}
+    float exp = texture(gbuffer_specular, texcrd).r;
+    float cos_spec = max(0.0, dot(
+        reflect(-light_direction, world_norm),
+        normalize(eye_pos - world_pos)));
+    specular = light_rgb * bright * pow(cos_spec, exp);
+  }
 
-	OUT_DIFFUSE = diffuse;
-	OUT_SPECULAR = specular;
+  OUT_DIFFUSE = diffuse;
+  OUT_SPECULAR = specular;
 }
 
 int get_cascade ()
 {
-	float d = texture(gbuffer_screen_depth, texcrd).r;
-	int i = 0;
-	for (; i < sun_num_cascades; i++) {
-		if (depths[i] > d)
-			break;
-	}
-	return i-1;
+  float d = texture(gbuffer_screen_depth, texcrd).r;
+  int i = 0;
+  for (; i < sun_num_cascades; i++) {
+    if (depths[i] > d)
+      break;
+  }
+  return i-1;
 }

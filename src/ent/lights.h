@@ -7,35 +7,35 @@
 /*
  * Directional cone light
  */
-class e_light_cone: public e_base {
+class LightConeEntity: public BaseEntity {
 public:
   float cone_angle;
   float near_plane;
   float reach;
   vec3 rgb;
 
-  t_visible_set vis;
+  VisibleSet vis;
 
-  e_light_cone();
-  ~e_light_cone();
+  LightConeEntity();
+  ~LightConeEntity();
 
-  void apply_keyvals(const t_ent_keyvals&) override;
+  void apply_keyvals(const EntKeyvals&) override;
   void moved() override;
-  ENT_IMPLEMENT_GET_SIGMAP(e_light_cone);
+  ENT_IMPLEMENT_GET_SIGMAP(LightConeEntity);
 
   void view() const;
 };
 
 template<>
-inline void fill_io_data<e_light_cone>() {
-  do_fill_io_data<e_light_cone, SigTag("setcone"), SigTag("setcolor")>();
+inline void fill_io_data<LightConeEntity>() {
+  do_fill_io_data<LightConeEntity, SigTag("setcone"), SigTag("setcolor")>();
 }
 
 /*
  * Parallel omnipresent light i.e. a sun
  * World position on this doesn't change anything about its lighting
  */
-class e_light_sun: public e_base {
+class SunEntity: public BaseEntity {
 public:
   vec3 rgb;
 
@@ -47,14 +47,14 @@ public:
    */
   float distance;
 
-  e_light_sun();
-  ~e_light_sun();
+  SunEntity();
+  ~SunEntity();
 
-  ENT_IMPLEMENT_GET_SIGMAP(e_light_sun);
-  void apply_keyvals(const t_ent_keyvals&) override;
+  ENT_IMPLEMENT_GET_SIGMAP(SunEntity);
+  void apply_keyvals(const EntKeyvals&) override;
 };
 
 template<>
-inline void fill_io_data<e_light_sun>() {
-  do_fill_io_data<e_light_sun, SigTag("setcolor")>();
+inline void fill_io_data<SunEntity>() {
+  do_fill_io_data<SunEntity, SigTag("setcolor")>();
 }

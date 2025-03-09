@@ -4,13 +4,13 @@
 #include "render/material.h"
 #include "render/model.h"
 
-class e_prop: public e_base {
+class PropEntity: public BaseEntity {
 public:
-  t_model* model;
-  t_material* material;
+  Model* model;
+  Material* material;
 
-  void apply_keyvals(const t_ent_keyvals&) override;
+  void apply_keyvals(const EntKeyvals&) override;
   void render() const override;
-  t_bound_box get_bbox() const override;
-  ENT_IMPLEMENT_GET_SIGMAP(e_prop);
+  Bbox get_bbox() const override;
+  ENT_IMPLEMENT_GET_SIGMAP(PropEntity);
 };

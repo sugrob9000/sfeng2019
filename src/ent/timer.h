@@ -2,19 +2,19 @@
 #include "base.h"
 #include "core/signal.h"
 
-class e_timer: public e_base {
+class TimerEntity: public BaseEntity {
 public:
   bool running;
   long long ticks_left;
 
   void think() override;
-  void apply_keyvals(const t_ent_keyvals&) override;
-  ENT_IMPLEMENT_GET_SIGMAP(e_timer);
+  void apply_keyvals(const EntKeyvals&) override;
+  ENT_IMPLEMENT_GET_SIGMAP(TimerEntity);
 };
 
 template<>
-inline void fill_io_data<e_timer>() {
-  do_fill_io_data<e_timer,
+inline void fill_io_data<TimerEntity>() {
+  do_fill_io_data<TimerEntity,
     SigTag("start"),
     SigTag("stop"),
     SigTag("set")>();

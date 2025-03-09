@@ -29,7 +29,7 @@ int main(int argc, const char* const* argv) {
 
   console_close();
 
-  camera = t_camera({726.066, -74.7267, 214.754}, {0, 0, -64}, 3500.0f, 1.5f, 60.0f, 1.0);
+  camera = Camera({726.066, -74.7267, 214.754}, {0, 0, -64}, 3500.0f, 1.5f, 60.0f, 1.0);
 
   run_script("resource/cfg/rc");
   run_argv_commands(argc, argv);

@@ -1,18 +1,18 @@
 #include "input/bind.h"
 #include "input/cmds.h"
 
-t_command t_keybind_map::empty_cmd;
-t_keybind_map key_binds;
+Command KeybindMap::empty_cmd;
+KeybindMap key_binds;
 
-void t_keybind_map::clear() {
+void KeybindMap::clear() {
   m.clear();
 }
 
-void t_keybind_map::add_bind(SDL_Scancode scan, t_command value) {
+void KeybindMap::add_bind(SDL_Scancode scan, Command value) {
   m[scan] = value;
 }
 
-const t_command& t_keybind_map::operator[](SDL_Scancode scan) {
+const Command& KeybindMap::operator[](SDL_Scancode scan) {
   auto i = m.find(scan);
 
   if (i == m.end())

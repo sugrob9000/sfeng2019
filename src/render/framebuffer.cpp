@@ -4,7 +4,7 @@
 #include <set>
 #include <vector>
 
-t_fbo& t_fbo::make() {
+Framebuffer& Framebuffer::make() {
   glGenFramebuffers(1, &id);
   glBindFramebuffer(GL_FRAMEBUFFER, id);
 
@@ -16,7 +16,7 @@ t_fbo& t_fbo::make() {
   return *this;
 }
 
-t_fbo& t_fbo::assert_complete() {
+Framebuffer& Framebuffer::assert_complete() {
   glBindFramebuffer(GL_FRAMEBUFFER, id);
   GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 
@@ -31,7 +31,7 @@ t_fbo& t_fbo::assert_complete() {
   return *this;
 }
 
-static void attach_low(t_fbo& fbo, t_fbo::t_attachment_ptr att, GLenum slot, int slice) {
+static void attach_low(Framebuffer& fbo, Framebuffer::AttachmentRef att, GLenum slot, int slice) {
   if (fbo.width == 0 && fbo.height == 0) {
     fbo.width = att->width;
     fbo.height = att->height;
@@ -72,7 +72,7 @@ static void attach_low(t_fbo& fbo, t_fbo::t_attachment_ptr att, GLenum slot, int
   }
 }
 
-t_fbo& t_fbo::attach_color(t_attachment* att, int idx, short slice) {
+Framebuffer& Framebuffer::attach_color(FramebufferAttachment* att, int idx, short slice) {
   assert(idx >= 0 && idx < num_clr_attachments);
 
   if (color[idx].taken()) {
@@ -90,7 +90,7 @@ t_fbo& t_fbo::attach_color(t_attachment* att, int idx, short slice) {
   return *this;
 }
 
-t_fbo& t_fbo::attach_depth(t_attachment* att, short slice) {
+Framebuffer& Framebuffer::attach_depth(FramebufferAttachment* att, short slice) {
   if (depth.taken()) {
     warning(
       "Replacing existing depth attachment on FBO %i"
@@ -105,16 +105,16 @@ t_fbo& t_fbo::attach_depth(t_attachment* att, short slice) {
   return *this;
 }
 
-void t_fbo::clear_color(int idx) {
+void Framebuffer::clear_color(int idx) {
   assert(idx >= 0 && idx < num_clr_attachments);
   color[idx] = {nullptr, 0};
 }
 
-void t_fbo::clear_depth() {
+void Framebuffer::clear_depth() {
   depth = {nullptr, 0};
 }
 
-t_fbo& t_fbo::set_mrt_slots(const std::vector<GLenum>& slots) {
+Framebuffer& Framebuffer::set_mrt_slots(const std::vector<GLenum>& slots) {
   bind();
   glDrawBuffers(slots.size(), slots.data());
   return *this;
@@ -124,7 +124,7 @@ t_fbo& t_fbo::set_mrt_slots(const std::vector<GLenum>& slots) {
  * ================= Making different attachments =================
  */
 
-inline t_attachment* attachment_finalize(t_attachment* a) {
+inline FramebufferAttachment* attachment_finalize(FramebufferAttachment* a) {
   GLenum t;
   switch (a->target) {
   case tex2d:
@@ -175,8 +175,8 @@ inline t_attachment* attachment_finalize(t_attachment* a) {
   return a;
 }
 
-t_attachment* make_tex2d(int w, int h, GLenum t) {
-  auto p = new t_attachment;
+FramebufferAttachment* make_tex2d(int w, int h, GLenum t) {
+  auto p = new FramebufferAttachment;
   p->width = w;
   p->height = h;
   p->storage_type = t;
@@ -184,8 +184,8 @@ t_attachment* make_tex2d(int w, int h, GLenum t) {
   return attachment_finalize(p);
 }
 
-t_attachment* make_tex2d_msaa(int w, int h, GLenum t, short samples) {
-  auto p = new t_attachment;
+FramebufferAttachment* make_tex2d_msaa(int w, int h, GLenum t, short samples) {
+  auto p = new FramebufferAttachment;
   p->width = w;
   p->height = h;
   p->storage_type = t;
@@ -194,8 +194,8 @@ t_attachment* make_tex2d_msaa(int w, int h, GLenum t, short samples) {
   return attachment_finalize(p);
 }
 
-t_attachment* make_tex2d_array(int w, int h, int d, GLenum t) {
-  auto p = new t_attachment;
+FramebufferAttachment* make_tex2d_array(int w, int h, int d, GLenum t) {
+  auto p = new FramebufferAttachment;
   p->width = w;
   p->height = h;
   p->depth = d;
@@ -204,8 +204,8 @@ t_attachment* make_tex2d_array(int w, int h, int d, GLenum t) {
   return attachment_finalize(p);
 }
 
-t_attachment* make_tex2d_array_msaa(int w, int h, int d, GLenum t, short samples) {
-  auto p = new t_attachment;
+FramebufferAttachment* make_tex2d_array_msaa(int w, int h, int d, GLenum t, short samples) {
+  auto p = new FramebufferAttachment;
   p->width = w;
   p->height = h;
   p->depth = d;
@@ -215,8 +215,8 @@ t_attachment* make_tex2d_array_msaa(int w, int h, int d, GLenum t, short samples
   return attachment_finalize(p);
 }
 
-t_attachment* make_rbo(int w, int h, GLenum t) {
-  auto p = new t_attachment;
+FramebufferAttachment* make_rbo(int w, int h, GLenum t) {
+  auto p = new FramebufferAttachment;
   p->width = w;
   p->height = h;
   p->storage_type = t;
@@ -224,9 +224,9 @@ t_attachment* make_rbo(int w, int h, GLenum t) {
   return attachment_finalize(p);
 }
 
-t_attachment* make_rbo_msaa(int w, int h, GLenum t, short samples) {
+FramebufferAttachment* make_rbo_msaa(int w, int h, GLenum t, short samples) {
   (void) samples;
-  auto p = new t_attachment;
+  auto p = new FramebufferAttachment;
   p->width = w;
   p->height = h;
   p->storage_type = t;
@@ -236,16 +236,16 @@ t_attachment* make_rbo_msaa(int w, int h, GLenum t, short samples) {
 
 /* ========================================================= */
 
-static std::vector<t_fbo*> ssbuffers;
+static std::vector<Framebuffer*> ssbuffers;
 
-void sspace_add_buffer(t_fbo& fbo) {
+void sspace_add_buffer(Framebuffer& fbo) {
   ssbuffers.push_back(&fbo);
 }
 
 void sspace_resize_buffers(int w, int h) {
-  std::set<t_attachment*> updated;
+  std::set<FramebufferAttachment*> updated;
 
-  auto upd = [&](t_fbo::t_attachment_ptr& a) -> void {
+  auto upd = [&](Framebuffer::AttachmentRef& a) -> void {
     if (updated.count(a.ptr))
       return;
     updated.insert(a.ptr);
@@ -272,12 +272,12 @@ void sspace_resize_buffers(int w, int h) {
     attachment_finalize(a.ptr);
   };
 
-  for (t_fbo* fbo: ssbuffers) {
+  for (Framebuffer* fbo: ssbuffers) {
     fbo->width = w;
     fbo->height = h;
 
-    for (int i = 0; i < t_fbo::num_clr_attachments; i++) {
-      t_fbo::t_attachment_ptr p = fbo->color[i];
+    for (int i = 0; i < Framebuffer::num_clr_attachments; i++) {
+      Framebuffer::AttachmentRef p = fbo->color[i];
       if (!p.taken())
         continue;
 
@@ -286,7 +286,7 @@ void sspace_resize_buffers(int w, int h) {
       fbo->attach_color(p.ptr, i, p.slice_used);
     }
 
-    t_fbo::t_attachment_ptr p = fbo->depth;
+    Framebuffer::AttachmentRef p = fbo->depth;
     if (!p.taken())
       continue;
 

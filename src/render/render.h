@@ -1,7 +1,7 @@
 #pragma once
 #include "inc_gl.h"
 
-struct t_sdlcontext {
+struct SdlContext {
   SDL_Window* window;
   SDL_GLContext glcont;
   SDL_Renderer* renderer;
@@ -14,11 +14,11 @@ struct t_sdlcontext {
   int font_w;
 };
 
-extern t_sdlcontext sdlctx;
+extern SdlContext sdl_ctx;
 
 
-struct t_visible_set;
-extern t_visible_set visible_set;
+struct VisibleSet;
+extern VisibleSet visible_set;
 
 void init_render();
 void render_all();

@@ -125,12 +125,12 @@ void console_render() {
 
   // try to match the actual font size in pixels,
   // and be 4 away from the top
-  float text_height = sdlctx.font_h * 2.0 / sdlctx.res_y;
-  float text_y = 4.0 * 2.0 / sdlctx.res_y;
+  float text_height = sdl_ctx.font_h * 2.0 / sdl_ctx.res_y;
+  float text_y = 4.0 * 2.0 / sdl_ctx.res_y;
   float height = text_height + 2.0 * text_y;
 
   float char_width =
-    text_height * ((float) sdlctx.font_w / sdlctx.font_h) * ((float) sdlctx.res_y / sdlctx.res_x);
+    text_height * ((float) sdl_ctx.font_w / sdl_ctx.font_h) * ((float) sdl_ctx.res_y / sdl_ctx.res_x);
   float text_width = char_width * cmd.length();
   float text_x = char_width + 0.01;
 

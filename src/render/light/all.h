@@ -18,7 +18,7 @@ void light_init_material();
 /* Called on each material application - binds the textures */
 void light_apply_material();
 
-extern t_fbo sspace_fbo;
+extern Framebuffer sspace_fbo;
 extern vec3 light_ambience;
 
 /*

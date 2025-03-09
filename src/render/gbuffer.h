@@ -9,7 +9,7 @@
  *  color 2    R      specular exponent
  */
 
-extern t_fbo gbuf_fbo;
+extern Framebuffer gbuf_fbo;
 
 void init_gbuffers();
 void fill_gbuffers();

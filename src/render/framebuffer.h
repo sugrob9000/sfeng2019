@@ -8,7 +8,7 @@
  * Helper / abstraction for OpenGL framebuffers and their attachments.
  * Example of usage:
  *
- *   t_fbo fbo;
+ *   Framebuffer fbo;
  *   fbo.make()
  *      .attach_color(make_tex2d(1024, 1024, GL_RGB), 0)
  *      .attach_color(make_tex2d(1024, 1024, GL_RGBA), 1)
@@ -40,7 +40,7 @@ enum att_target_enum : uint8_t {
 /*
  * A particular attachment
  */
-struct t_attachment {
+struct FramebufferAttachment {
   GLuint id = -1;
   GLenum storage_type; /* GL_RGBA32F etc. */
 
@@ -56,31 +56,31 @@ struct t_attachment {
  * Make a correct attachment out of the given struct,
  * which is allocated and populated by caller; fills in ID
  */
-t_attachment* attachment_finalize(t_attachment*);
+FramebufferAttachment* attachment_finalize(FramebufferAttachment*);
 
 /*
  * Allocate and make an attachment. Different attachments require different
  * parameters with which to be made - the number of samples, dimensions, etc.
  */
-t_attachment* make_tex2d(int w, int h, GLenum internal_type);
-t_attachment* make_tex2d_msaa(int w, int h, GLenum internal_type, short samples);
-t_attachment* make_tex2d_array(int w, int h, int d, GLenum internal_type);
-t_attachment* make_tex2d_array_msaa(int w, int h, int d, GLenum internal_type, short samples);
-t_attachment* make_rbo(int w, int h, GLenum internal_type);
-t_attachment* make_rbo_msaa(int w, int h, GLenum internal_type, short samples);
+FramebufferAttachment* make_tex2d(int w, int h, GLenum internal_type);
+FramebufferAttachment* make_tex2d_msaa(int w, int h, GLenum internal_type, short samples);
+FramebufferAttachment* make_tex2d_array(int w, int h, int d, GLenum internal_type);
+FramebufferAttachment* make_tex2d_array_msaa(int w, int h, int d, GLenum internal_type, short samples);
+FramebufferAttachment* make_rbo(int w, int h, GLenum internal_type);
+FramebufferAttachment* make_rbo_msaa(int w, int h, GLenum internal_type, short samples);
 
 /*
  * In all functions, slice only matters when the target is 3D
  */
-struct t_fbo {
+struct Framebuffer {
   GLuint id;
   int width = 0;
   int height = 0;
 
   constexpr static int num_clr_attachments = 8;
 
-  struct t_attachment_ptr {
-    t_attachment* ptr = nullptr;
+  struct AttachmentRef {
+    FramebufferAttachment* ptr = nullptr;
 
     /* Which slice of a 3D texture this FBO uses */
     short slice_used = 0;
@@ -89,33 +89,33 @@ struct t_fbo {
       return ptr != nullptr;
     }
 
-    t_attachment& operator*() {
+    FramebufferAttachment& operator*() {
       return *ptr;
     }
 
-    t_attachment* operator->() {
+    FramebufferAttachment* operator->() {
       return ptr;
     }
 
-    const t_attachment& operator*() const {
+    const FramebufferAttachment& operator*() const {
       return *ptr;
     }
 
-    const t_attachment* operator->() const {
+    const FramebufferAttachment* operator->() const {
       return ptr;
     }
   };
 
-  std::array<t_attachment_ptr, num_clr_attachments> color;
-  t_attachment_ptr depth;
+  std::array<AttachmentRef, num_clr_attachments> color;
+  AttachmentRef depth;
 
-  t_fbo& make();
-  t_fbo& assert_complete();
+  Framebuffer& make();
+  Framebuffer& assert_complete();
 
-  t_fbo& attach_color(t_attachment* att, int idx = 0, short slice = 0);
-  t_fbo& attach_depth(t_attachment* att, short slice = 0);
+  Framebuffer& attach_color(FramebufferAttachment* att, int idx = 0, short slice = 0);
+  Framebuffer& attach_depth(FramebufferAttachment* att, short slice = 0);
 
-  t_fbo& set_mrt_slots(const std::vector<GLenum>& slots);
+  Framebuffer& set_mrt_slots(const std::vector<GLenum>& slots);
 
   void clear_color(int idx = 0);
   void clear_depth();
@@ -135,5 +135,5 @@ struct t_fbo {
  * their resolution updated accordingly, somewhat automatically
  */
 
-void sspace_add_buffer(t_fbo& fbo);
+void sspace_add_buffer(Framebuffer& fbo);
 void sspace_resize_buffers(int w, int h);

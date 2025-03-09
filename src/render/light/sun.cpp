@@ -16,7 +16,7 @@
  * There are probably several mistakes that cancel each other out
  */
 
-std::vector<e_light_sun*> lights_sun;
+std::vector<SunEntity*> lights_sun;
 
 constexpr int sun_num_cascades = 3;
 std::array<float, sun_num_cascades + 1> cascade_depths;
@@ -25,12 +25,12 @@ static GLuint program;
 
 constexpr int sun_lspace_resolution = 2048;
 
-t_fbo sun_lspace_fbo;
+Framebuffer sun_lspace_fbo;
 
 void init_lighting_sun() {
   int s = sun_lspace_resolution;
   sun_lspace_fbo.make().attach_depth(make_rbo(s, s, GL_DEPTH_COMPONENT));
-  t_attachment* dm = make_tex2d_array(s, s, sun_num_cascades, GL_R32F);
+  FramebufferAttachment* dm = make_tex2d_array(s, s, sun_num_cascades, GL_R32F);
   for (int i = 0; i < sun_num_cascades; i++)
     sun_lspace_fbo.attach_color(dm, i, i);
 
@@ -51,7 +51,7 @@ static mat4 unif_view[sun_num_cascades];
 static vec3 unif_direction;
 static float unif_depths[sun_num_cascades + 1];
 
-static void fill_depth_maps(const e_light_sun* l) {
+static void fill_depth_maps(const SunEntity* l) {
   mat3 rot = rotate_xyz(glm::radians(l->ang - vec3(90.0, 0.0, 0.0)));
   vec3 planes[4 * (sun_num_cascades + 1)];
 
@@ -80,7 +80,7 @@ static void fill_depth_maps(const e_light_sun* l) {
   render_ctx.model = mat4(1.0);
 
   for (unsigned int casc = 0; casc < sun_num_cascades; casc++) {
-    t_bound_box lbound = {vec3(INFINITY), vec3(-INFINITY)};
+    Bbox lbound = {vec3(INFINITY), vec3(-INFINITY)};
     for (int j = 0; j < 8; j++)
       lbound.expand(planes[4 * casc + j]);
 
@@ -148,7 +148,7 @@ void compute_lighting_sun() {
 
   render_ctx.stage = RENDER_STAGE_LIGHTING_LSPACE;
 
-  for (e_light_sun* l: lights_sun) {
+  for (SunEntity* l: lights_sun) {
     fill_depth_maps(l);
     lighting_pass();
   }

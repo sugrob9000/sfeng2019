@@ -4,7 +4,7 @@
 #include "input/input.h"  // IWYU pragma: keep
 
 #define COMMAND_ROUTINE(name) \
-  void cmd_##name([[maybe_unused]] const t_cmd_args& args, [[maybe_unused]] uint8_t ev)
+  void cmd_##name([[maybe_unused]] const CmdArgs& args, [[maybe_unused]] uint8_t ev)
 
 #define MOUSEMOVE_ROUTINE(name) \
   void mouse_##name( \

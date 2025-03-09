@@ -22,7 +22,7 @@ void vis_destroy_world();
  *   which the nodes of the octree are tested.
  */
 
-struct t_visible_set;
+struct VisibleSet;
 
 struct oct_node {
   /*
@@ -30,7 +30,7 @@ struct oct_node {
    * The vector is empty in non-leaves!
    */
   struct mat_group {
-    t_material* mat;
+    Material* mat;
     GLuint display_list;
   };
 
@@ -45,19 +45,19 @@ struct oct_node {
   GLuint query;
 
   oct_node* children;
-  t_bound_box bounds;
+  Bbox bounds;
 
-  void build(t_bound_box bounds, int level);
+  void build(Bbox bounds, int level);
   void make_leaf();
 
-  std::vector<e_base*> entities_inside;
-  void requery_entity(e_base* e, const t_bound_box& b);
+  std::vector<BaseEntity*> entities_inside;
+  void requery_entity(BaseEntity* e, const Bbox& b);
 
   oct_node();
   ~oct_node();
 };
 
-struct t_visible_set {
+struct VisibleSet {
   std::vector<const oct_node*> leaves;
 
   void fill();
@@ -65,6 +65,6 @@ struct t_visible_set {
   void render_debug() const;
 };
 
-extern t_visible_set all_leaves;
+extern VisibleSet all_leaves;
 
-void vis_requery_entity(e_base* e);
+void vis_requery_entity(BaseEntity* e);

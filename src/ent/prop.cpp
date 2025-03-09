@@ -3,14 +3,14 @@
 #include "render/ctx.h"
 #include "render/resource.h"
 
-void e_prop::apply_keyvals(const t_ent_keyvals& kv) {
-  e_base::apply_keyvals(kv);
+void PropEntity::apply_keyvals(const EntKeyvals& kv) {
+  BaseEntity::apply_keyvals(kv);
 
   KV_TRY_GET(kv["model"], model = get_model(val);, model = get_model("error"););
   KV_TRY_GET(kv["mat"], material = get_material(val);, material = mat_none;);
 }
 
-void e_prop::render() const {
+void PropEntity::render() const {
   mat4 restore = render_ctx.model;
   render_ctx.model = glm::translate(render_ctx.model, pos);
   render_ctx.model *= rotate_xyz_4x4(glm::radians(ang));
@@ -21,9 +21,9 @@ void e_prop::render() const {
   render_ctx.model = restore;
 }
 
-t_bound_box e_prop::get_bbox() const {
+Bbox PropEntity::get_bbox() const {
   // TODO: does not account for rotation
-  t_bound_box r = model->bbox;
+  Bbox r = model->bbox;
   r.start += pos;
   r.end += pos;
   return r;

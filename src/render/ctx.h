@@ -1,7 +1,7 @@
 #pragma once
 #include "misc.h"
 
-enum t_render_stage : uint32_t {
+enum RenderStage : uint32_t {
   RENDER_STAGE_G_BUFFERS = 0,
   RENDER_STAGE_LIGHTING_LSPACE = 1,
   RENDER_STAGE_SHADE_FINAL = 2,
@@ -11,8 +11,8 @@ enum t_render_stage : uint32_t {
   NUM_RENDER_STAGES
 };
 
-struct t_render_ctx {
-  t_render_stage stage;
+struct RenderContext {
+  RenderStage stage;
 
   mat4 proj;
   mat4 view;
@@ -27,9 +27,9 @@ struct t_render_ctx {
   void submit_viewproj() const;
 };
 
-extern t_render_ctx render_ctx;
+extern RenderContext render_ctx;
 
-struct t_camera {
+struct Camera {
   vec3 pos;
   vec3 ang;
 
@@ -38,9 +38,9 @@ struct t_camera {
   float fov;
   float aspect;
 
-  t_camera() {}
+  Camera() {}
 
-  t_camera(vec3 p, vec3 a, float zf, float zn, float fv, float asp) :
+  Camera(vec3 p, vec3 a, float zf, float zn, float fv, float asp) :
     pos(p),
     ang(a),
     z_far(zf),
@@ -61,5 +61,5 @@ struct t_camera {
   void get_corner_points(float depth, vec3* dest);
 };
 
-extern t_camera camera;
+extern Camera camera;
 void upd_camera_pos();

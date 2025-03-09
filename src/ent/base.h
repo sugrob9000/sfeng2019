@@ -8,7 +8,7 @@
  * Key-value pairs for entities
  */
 
-struct t_ent_keyvals {
+struct EntKeyvals {
   std::map<std::string, std::string> m;
   static const std::string none;
 
@@ -18,12 +18,12 @@ struct t_ent_keyvals {
 };
 
 /*
- * Try to get a value from a t_ent_keyvals,
+ * Try to get a value from an EntKeyvals,
  * run code in the parameter if_there if it's there, or
  * run code in the parameter if_not_there if it's not
  * Example:
  *
- * const t_ent_keyvals& kv = ...;
+ * const EntKeyvals& kv = ...;
  * KV_TRY_GET(kv["pos"],
  *    atovec3(val, pos); ,
  *    pos = vec3(0.0, 0.0, 0.0); );
@@ -41,13 +41,11 @@ struct t_ent_keyvals {
 /*
  * The base entity class
  */
-class e_base {
+class BaseEntity {
 public:
   vec3 pos;
   vec3 ang;
   std::string name;
-
-  e_base() {}
 
   virtual void think() {}
 
@@ -55,9 +53,9 @@ public:
    * By default, will read pos, ang, and name.
    * Every entity should probably still call this.
    */
-  virtual void apply_keyvals(const t_ent_keyvals& kv);
+  virtual void apply_keyvals(const EntKeyvals& kv);
 
-  t_eventmap events;
+  EventMap events;
 
   /*
    * We have to be able to get the sigmap knowing only the pointer
@@ -75,7 +73,7 @@ public:
    * Entities that have no physical appearance (ie logical ones)
    *   may express this by returning a box with volume 0
    */
-  virtual t_bound_box get_bbox() const { return {}; }
+  virtual Bbox get_bbox() const { return {}; }
 
   /*
    * Updates the engine's idea of where the entity is, for
@@ -96,24 +94,24 @@ public:
  * Mapping entity class names (such as prop)
  * to C++ classes
  */
-typedef e_base* (*f_ent_spawner)();
-typedef std::map<std::string, f_ent_spawner> t_ent_registry;
-extern t_ent_registry ent_reg;
+typedef BaseEntity* (*EntSpawnerFptr)();
+typedef std::map<std::string, EntSpawnerFptr> EntRegistry;
+extern EntRegistry ent_reg;
 void fill_ent_registry();
 
 template<class e_derived>
-e_base* ent_factory() {
+BaseEntity* ent_factory() {
   return new e_derived;
 }
 
 /*
  * A world's currently existing entities
  */
-struct t_entities {
-  std::vector<e_base*> vec;
-  std::map<std::string, e_base*> name_index;
-  e_base* spawn(std::string type);
-  e_base* find_by_name(std::string name);
+struct WorldEntityList {
+  std::vector<BaseEntity*> vec;
+  std::map<std::string, BaseEntity*> name_index;
+  BaseEntity* spawn(std::string type);
+  BaseEntity* find_by_name(std::string name);
 };
 
-extern t_entities ents;
+extern WorldEntityList ents;

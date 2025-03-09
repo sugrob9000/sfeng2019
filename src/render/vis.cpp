@@ -10,10 +10,10 @@
 #include <fstream>
 
 oct_node* root = nullptr;
-t_visible_set all_leaves;
+VisibleSet all_leaves;
 
 constexpr int occ_fbo_size = 256;
-t_fbo occ_fbo;
+Framebuffer occ_fbo;
 
 static GLuint occ_planes_prog;
 static GLuint occ_planes_dlist;
@@ -36,8 +36,8 @@ void init_vis() {
   occ_fbo.make().attach_depth(make_rbo(occ_fbo_size, occ_fbo_size, GL_DEPTH_COMPONENT)).assert_complete();
 }
 
-static t_bound_box world_bounds_override;
-static t_model_mem world;
+static Bbox world_bounds_override;
+static InMemoryModel world;
 
 /*
  * The ID of the octant in which point is
@@ -50,16 +50,16 @@ static uint8_t which_octant(vec3 origin, vec3 point) {
 /*
  * The bbox of an octant with given ID, given the parent
  */
-static t_bound_box octant_bound(t_bound_box parent, uint8_t octant_id) {
+static Bbox octant_bound(Bbox parent, uint8_t octant_id) {
   vec3 mid = (parent.start + parent.end) * 0.5f;
-  t_bound_box r = parent;
+  Bbox r = parent;
   (octant_id & 1 ? r.start : r.end).x = mid.x;
   (octant_id & 2 ? r.start : r.end).y = mid.y;
   (octant_id & 4 ? r.start : r.end).z = mid.z;
   return r;
 }
 
-void oct_node::build(t_bound_box b, int level) {
+void oct_node::build(Bbox b, int level) {
   // ensure that bounds include the triangles entirely
   for (int d: bucket) {
     for (int i = 0; i < 3; i++)
@@ -93,7 +93,7 @@ void oct_node::build(t_bound_box b, int level) {
 void oct_node::make_leaf() {
   all_leaves.leaves.push_back(this);
 
-  std::map<t_material*, std::vector<int>> m;
+  std::map<Material*, std::vector<int>> m;
   for (int d: bucket)
     m[world.triangles[d].material].push_back(d);
 
@@ -123,7 +123,7 @@ oct_node::~oct_node() {
   glDeleteQueries(1, &query);
 }
 
-void t_visible_set::fill() {
+void VisibleSet::fill() {
   if (pass_all_nodes) {
     leaves = all_leaves.leaves;
     return;
@@ -190,7 +190,7 @@ void t_visible_set::fill() {
   glEnable(GL_CULL_FACE);
 }
 
-void oct_node::requery_entity(e_base* e, const t_bound_box& b) {
+void oct_node::requery_entity(BaseEntity* e, const Bbox& b) {
   auto iter = std::find(entities_inside.begin(), entities_inside.end(), e);
 
   uint8_t before = (iter != entities_inside.end());
@@ -220,11 +220,11 @@ void oct_node::requery_entity(e_base* e, const t_bound_box& b) {
   }
 }
 
-void vis_requery_entity(e_base* e) {
+void vis_requery_entity(BaseEntity* e) {
   root->requery_entity(e, e->get_bbox());
 }
 
-void t_visible_set::render() const {
+void VisibleSet::render() const {
   /*
    * When we walk the entities in the leaves like this, there
    *   is redundancy (multiple leaves that we see will touch
@@ -239,7 +239,7 @@ void t_visible_set::render() const {
 
   for (const oct_node* l: leaves) {
     // draw entities
-    for (e_base* e: l->entities_inside) {
+    for (BaseEntity* e: l->entities_inside) {
       if (e->render_last_guard_key == guard_key)
         continue;
       e->render_last_guard_key = guard_key;
@@ -315,7 +315,7 @@ void vis_destroy_world() {
 static bool debug_draw_wireframe = false;
 COMMAND_SET_BOOL(vis_wireframe, debug_draw_wireframe);
 
-void t_visible_set::render_debug() const {
+void VisibleSet::render_debug() const {
   if (debug_draw_wireframe) {
     glDisable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);

@@ -6,7 +6,7 @@
 #include <fstream>
 #include <map>
 
-void t_model_mem::gl_send_triangle(int tri_id) const {
+void InMemoryModel::gl_send_triangle(int tri_id) const {
   for (int i = 0; i < 3; i++) {
     int idx = triangles[tri_id].index[i];
 
@@ -22,11 +22,11 @@ void t_model_mem::gl_send_triangle(int tri_id) const {
   }
 }
 
-void t_model::render() const {
+void Model::render() const {
   glCallList(display_list_id);
 }
 
-void t_model::load(const t_model_mem& src) {
+void Model::load(const InMemoryModel& src) {
   display_list_id = glGenLists(1);
   glNewList(display_list_id, GL_COMPILE);
   glBegin(GL_TRIANGLES);
@@ -39,7 +39,7 @@ void t_model::load(const t_model_mem& src) {
   bbox = src.bbox;
 }
 
-void t_model_mem::calc_bbox() {
+void InMemoryModel::calc_bbox() {
   if (vertices.empty())
     return;
 
@@ -52,7 +52,7 @@ void t_model_mem::calc_bbox() {
   bbox.end += vec3(0.5);
 }
 
-void t_model_mem::load_obj(const std::string& path) {
+void InMemoryModel::load_obj(const std::string& path) {
   std::ifstream f(path);
   if (!f)
     fatal("Could not open OBJ %s", path.c_str());
@@ -61,9 +61,9 @@ void t_model_mem::load_obj(const std::string& path) {
   std::vector<vec3> normals;
   std::vector<vec2> texcrds;
 
-  std::map<t_vertex, int> vert_indices;
+  std::map<Vertex, int> vert_indices;
 
-  t_material* current_material = mat_none;
+  Material* current_material = mat_none;
 
   auto add_face = [&](int* v, int* n, int* t) -> void {
     vec3 d_pos1 = points[v[1]] - points[v[0]];
@@ -75,7 +75,7 @@ void t_model_mem::load_obj(const std::string& path) {
 
     triangle tri = {{}, current_material};
     for (int i = 0; i < 3; i++) {
-      t_vertex key = {points[v[i]], normals[n[i]], texcrds[t[i]]};
+      Vertex key = {points[v[i]], normals[n[i]], texcrds[t[i]]};
       auto iter = vert_indices.find(key);
       if (iter == vert_indices.end()) {
         tri.index[i] = vertices.size();
@@ -167,7 +167,7 @@ void t_model_mem::load_obj(const std::string& path) {
   calc_bbox();
 }
 
-void t_model_mem::load_rvd(const std::string& path) {
+void InMemoryModel::load_rvd(const std::string& path) {
   std::ifstream f(path, std::ios::binary);
   if (!f)
     fatal("Model RVD %s: could not open file", path.c_str());
@@ -188,7 +188,7 @@ void t_model_mem::load_rvd(const std::string& path) {
     std::string mat_name(name_len, '\0');
     f.read(mat_name.data(), name_len);
 
-    t_material* mat = get_material(mat_name);
+    Material* mat = get_material(mat_name);
 
     uint32_t num_verts = 0;
     f.read((char*) &num_verts, sizeof(num_verts));
@@ -205,7 +205,7 @@ void t_model_mem::load_rvd(const std::string& path) {
   calc_bbox();
 }
 
-void t_model_mem::dump_rvd(const std::string& path) const {
+void InMemoryModel::dump_rvd(const std::string& path) const {
   std::ofstream f(path, std::ios::binary);
   if (!f) {
     fatal("Model RVD dump: could not open file %s for writing", path.c_str());
@@ -215,7 +215,7 @@ void t_model_mem::dump_rvd(const std::string& path) const {
   f.write((const char*) &num_vertices, sizeof(num_vertices));
   f.write((const char*) vertices.data(), sizeof(vertex) * num_vertices);
 
-  std::map<t_material*, std::vector<int>> m;
+  std::map<Material*, std::vector<int>> m;
   for (const triangle& t: triangles) {
     std::vector<int>& v = m[t.material];
     for (int i = 0; i < 3; i++)
@@ -256,12 +256,12 @@ COMMAND_ROUTINE(obj2rvd) {
     out += ".rvd";
   }
 
-  t_model_mem model;
+  InMemoryModel model;
   model.load_obj(in);
   model.dump_rvd(out);
 }
 
-bool operator<(const t_vertex& a, const t_vertex& b) {
+bool operator<(const Vertex& a, const Vertex& b) {
   if (a.pos != b.pos)
     return a.pos < b.pos;
   if (a.norm != b.norm)

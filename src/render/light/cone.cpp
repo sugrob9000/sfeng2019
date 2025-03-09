@@ -7,7 +7,7 @@
 #include "render/material.h"
 #include "render/resource.h"
 
-std::vector<e_light_cone*> lights_cone;
+std::vector<LightConeEntity*> lights_cone;
 
 /* Sending lighting info to shader */
 static vec3 unif_pos;
@@ -16,7 +16,7 @@ static mat4 unif_view;
 static vec2 unif_bounds[2];
 
 constexpr int cone_lspace_resolution = 1024;
-static t_fbo lspace_fbo;
+static Framebuffer lspace_fbo;
 
 static GLuint program;
 
@@ -41,15 +41,15 @@ void init_lighting_cone() {
 }
 
 /* Returns: whether this light is potentially visible */
-static bool fill_depth_map(const e_light_cone* l) {
-  static constexpr t_bound_box view_bounds = {{-1.0, -1.0, 0.0}, {1.0, 1.0, 1.0}};
+static bool fill_depth_map(const LightConeEntity* l) {
+  static constexpr Bbox view_bounds = {{-1.0, -1.0, 0.0}, {1.0, 1.0, 1.0}};
 
   // aliases
   mat4& proj = render_ctx.proj;
   mat4& view = render_ctx.view;
 
   vec4 camspace = proj * view * vec4(l->pos, 1.0);
-  t_bound_box lbounds;
+  Bbox lbounds;
   if (view_bounds.point_in(camspace / camspace.w)) {
     // cannot cull XY when light is visible on screen
     lbounds = {{-1.0, -1.0, 0.0}, {1.0, 1.0, 0.0}};
@@ -136,7 +136,7 @@ static void lighting_pass() {
 void compute_lighting_cone() {
   render_ctx.stage = RENDER_STAGE_LIGHTING_LSPACE;
 
-  for (e_light_cone* l: lights_cone) {
+  for (LightConeEntity* l: lights_cone) {
     if (fill_depth_map(l))
       lighting_pass();
   }

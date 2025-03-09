@@ -7,8 +7,8 @@
 #include <fstream>
 #include <sstream>
 
-t_command_registry cmd_registry;
-f_mousemove_routine mousemove_proc;
+CommandRegistry cmd_registry;
+MousemoveFptr mousemove_proc;
 
 void init_input() {
 // register all commands
@@ -25,7 +25,7 @@ void run_argv_commands(int argc, const char* const* argv) {
 }
 
 inline void handle_key(SDL_Scancode scan, uint8_t action) {
-  const t_command& cmd = key_binds[scan];
+  const Command& cmd = key_binds[scan];
   cmd_registry.run(cmd, action);
 }
 
@@ -87,8 +87,8 @@ void handle_input() {
   }
 }
 
-t_command parse_command(const char* cmd) {
-  t_command ret;
+Command parse_command(const char* cmd) {
+  Command ret;
   std::istringstream is(cmd);
   is >> ret.name;
 
@@ -98,16 +98,16 @@ t_command parse_command(const char* cmd) {
   return ret;
 }
 
-void t_command_registry::register_command(std::string name, f_cmd_routine routine) {
+void CommandRegistry::register_command(std::string name, CmdRoutineFptr routine) {
   m[name] = routine;
 }
 
-void t_command_registry::run(const t_command& cmd, uint8_t ev) {
+void CommandRegistry::run(const Command& cmd, uint8_t ev) {
   auto it = m.find(cmd.name);
   if (it == m.end())
     return;
 
-  f_cmd_routine routine = it->second;
+  CmdRoutineFptr routine = it->second;
   if (routine != nullptr)
     routine(cmd.args, ev);
 }

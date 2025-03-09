@@ -3,37 +3,37 @@
 #include "material.h"
 #include <vector>
 
-struct t_vertex {
+struct Vertex {
   vec3 pos;
   vec3 norm;
   vec2 tex;
 };
 
-bool operator<(const t_vertex&, const t_vertex&);
+bool operator<(const Vertex&, const Vertex&);
 
 /*
  * An in-memory representation of a model for loading,
  * conversion, etc. but not for actual rendering.
  */
-struct t_model_mem {
+struct InMemoryModel {
   struct vertex {
-    t_vertex v;
+    Vertex v;
     vec3 tangent;
   };
 
   struct triangle {
     int index[3];
-    t_material* material;
+    Material* material;
   };
 
   std::vector<vertex> vertices;
   std::vector<triangle> triangles;
 
-  t_bound_box bbox;
+  Bbox bbox;
 
   void calc_bbox();
 
-  const t_vertex& get_vertex(int tri, int vert) const {
+  const Vertex& get_vertex(int tri, int vert) const {
     return vertices[triangles[tri].index[vert]].v;
   }
 
@@ -61,11 +61,11 @@ struct t_model_mem {
 /*
  * The representation of a model which is efficient to render
  */
-struct t_model {
+struct Model {
   GLuint display_list_id;
 
-  t_bound_box bbox;
+  Bbox bbox;
 
   void render() const;
-  void load(const t_model_mem& src);
+  void load(const InMemoryModel& src);
 };

@@ -2,20 +2,20 @@
 #include "inc_gl.h"
 #include "input/cmds.h"
 
-void t_render_ctx::submit_matrices() const {
+void RenderContext::submit_matrices() const {
   auto f = [](GLuint loc, const mat4& m) -> void { glUniformMatrix4fv(loc, 1, false, glm::value_ptr(m)); };
   f(UNIFORM_LOC_PROJ, proj);
   f(UNIFORM_LOC_VIEW, view);
   f(UNIFORM_LOC_MODEL, model);
 }
 
-void t_render_ctx::submit_viewproj() const {
+void RenderContext::submit_viewproj() const {
   auto f = [](GLuint loc, const mat4& m) -> void { glUniformMatrix4fv(loc, 1, false, glm::value_ptr(m)); };
   f(UNIFORM_LOC_PROJ, proj);
   f(UNIFORM_LOC_VIEW, view);
 }
 
-void t_camera::apply() {
+void Camera::apply() {
   using namespace glm;
 
   render_ctx.proj = get_proj();
@@ -25,19 +25,19 @@ void t_camera::apply() {
   render_ctx.eye_pos = pos;
 }
 
-mat4 t_camera::get_proj() {
+mat4 Camera::get_proj() {
   using namespace glm;
   return perspective(radians(fov), aspect, z_near, z_far);
 }
 
-mat4 t_camera::get_view() {
+mat4 Camera::get_view() {
   using namespace glm;
   mat4 r = rotate_xyz(radians(ang - vec3(90.0, 0.0, 0.0)));
   r = translate(r, -pos);
   return r;
 }
 
-void t_camera::get_corner_points(float depth, vec3* dest) {
+void Camera::get_corner_points(float depth, vec3* dest) {
   int dir[4][2] = {{1, 1}, {1, -1}, {-1, -1}, {-1, 1}};
   mat4 inv_view = glm::inverse(get_view());
   float factor = depth * tan(glm::radians(fov) * 0.5);
@@ -64,7 +64,7 @@ static constexpr short move_b = 1;
 static constexpr short move_l = 2;
 static constexpr short move_r = 3;
 static bool move_flags[4];
-t_camera camera;
+Camera camera;
 
 static bool speedup;
 static bool slowdown;

@@ -11,9 +11,9 @@
 #include <cassert>
 #include <chrono>
 
-t_sdlcontext sdlctx;
-t_render_ctx render_ctx;
-t_visible_set visible_set;
+SdlContext sdl_ctx;
+RenderContext render_ctx;
+VisibleSet visible_set;
 
 void render_all() {
   namespace cr = std::chrono;
@@ -29,7 +29,7 @@ void render_all() {
   compute_all_lighting();
 
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
-  glViewport(0, 0, sdlctx.res_x, sdlctx.res_y);
+  glViewport(0, 0, sdl_ctx.res_x, sdl_ctx.res_y);
   glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
   render_ctx.stage = RENDER_STAGE_SHADE_FINAL;
@@ -48,14 +48,14 @@ void render_all() {
     warning("OpenGL error 0x%x (%i)", err, err);
 
   last_frame_time = cr::duration<float>(sc::now() - frame_start).count();
-  SDL_GL_SwapWindow(sdlctx.window);
+  SDL_GL_SwapWindow(sdl_ctx.window);
 }
 
 void init_render() {
-  if (sdlctx.res_x == 0 || sdlctx.res_y == 0) {
+  if (sdl_ctx.res_x == 0 || sdl_ctx.res_y == 0) {
     // use a sane default
-    sdlctx.res_x = 640;
-    sdlctx.res_y = 480;
+    sdl_ctx.res_x = 640;
+    sdl_ctx.res_y = 480;
   }
 
   if (SDL_Init(SDL_INIT_VIDEO) < 0)
@@ -72,27 +72,27 @@ void init_render() {
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
   SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
-  sdlctx.window = SDL_CreateWindow(
+  sdl_ctx.window = SDL_CreateWindow(
     "engine",
     SDL_WINDOWPOS_UNDEFINED,
     SDL_WINDOWPOS_UNDEFINED,
-    sdlctx.res_x,
-    sdlctx.res_y,
+    sdl_ctx.res_x,
+    sdl_ctx.res_y,
     SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE
   );
-  if (sdlctx.window == nullptr)
+  if (sdl_ctx.window == nullptr)
     fatal("SDL window creation failed: %s", SDL_GetError());
 
-  sdlctx.glcont = SDL_GL_CreateContext(sdlctx.window);
-  if (sdlctx.glcont == nullptr)
+  sdl_ctx.glcont = SDL_GL_CreateContext(sdl_ctx.window);
+  if (sdl_ctx.glcont == nullptr)
     fatal("SDL glcont creation failed: %s", SDL_GetError());
 
   glewExperimental = true;
   if (glewInit() != GLEW_OK)
     fatal("GLEW init failed");
 
-  sdlctx.renderer =
-    SDL_CreateRenderer(sdlctx.window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+  sdl_ctx.renderer =
+    SDL_CreateRenderer(sdl_ctx.window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
   if (SDL_GL_SetSwapInterval(-1) == -1) {
     warning("Failed to set adaptive vsync, setting regular");
@@ -136,13 +136,13 @@ void resize_window(int w, int h) {
     return;
   }
 
-  sdlctx.res_x = w;
-  sdlctx.res_y = h;
+  sdl_ctx.res_x = w;
+  sdl_ctx.res_y = h;
   camera.aspect = (float) w / h;
 
   sspace_resize_buffers(w, h);
 
-  SDL_SetWindowSize(sdlctx.window, w, h);
+  SDL_SetWindowSize(sdl_ctx.window, w, h);
 }
 
 COMMAND_ROUTINE(windowsize) {
@@ -203,13 +203,13 @@ unsigned int text_prg_glyph_loc;
 void init_text() {
   if (TTF_Init() < 0)
     fatal("TTF init failed");
-  sdlctx.font = TTF_OpenFont(sdlctx.font_path, sdlctx.font_h);
-  if (sdlctx.font == nullptr)
-    fatal("Failed to find font %s", sdlctx.font_path);
-  if (!TTF_FontFaceIsFixedWidth(sdlctx.font)) {
-    warning("Font %s is not monospace. Text will break", sdlctx.font_path);
+  sdl_ctx.font = TTF_OpenFont(sdl_ctx.font_path, sdl_ctx.font_h);
+  if (sdl_ctx.font == nullptr)
+    fatal("Failed to find font %s", sdl_ctx.font_path);
+  if (!TTF_FontFaceIsFixedWidth(sdl_ctx.font)) {
+    warning("Font %s is not monospace. Text will break", sdl_ctx.font_path);
   }
-  TTF_GlyphMetrics(sdlctx.font, '~', nullptr, nullptr, nullptr, nullptr, &sdlctx.font_w);
+  TTF_GlyphMetrics(sdl_ctx.font, '~', nullptr, nullptr, nullptr, nullptr, &sdl_ctx.font_w);
 
   text_program = make_glsl_program({get_vert_shader("internal/text"), get_frag_shader("internal/text")});
   text_prg_glyph_loc = glGetUniformLocation(text_program, "glyphs");
@@ -220,7 +220,7 @@ void init_text() {
   for (int i = 1; i < 256; i++)
     all_chars[i] = i;
 
-  SDL_Surface* surf = TTF_RenderText_Blended(sdlctx.font, all_chars, text_color);
+  SDL_Surface* surf = TTF_RenderText_Blended(sdl_ctx.font, all_chars, text_color);
 
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -255,8 +255,8 @@ void draw_text(const char* str, float x, float y, float charw, float charh) {
   glUniform1i(text_prg_glyph_loc, 0);
 
   glBegin(GL_QUADS);
-  int w = sdlctx.font_w;
-  int h = sdlctx.font_h;
+  int w = sdl_ctx.font_w;
+  int h = sdl_ctx.font_h;
 
   for (int i = 0; str[i] != 0; i++) {
     const char c = str[i];

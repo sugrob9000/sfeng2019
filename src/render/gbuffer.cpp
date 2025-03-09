@@ -5,13 +5,13 @@
 #include "render/render.h"
 #include "render/vis.h"
 
-t_fbo gbuf_fbo;
+Framebuffer gbuf_fbo;
 static GLuint gbuf_vao;
 static GLuint gbuf_vbo;
 
 void init_gbuffers() {
-  int w = sdlctx.res_x;
-  int h = sdlctx.res_y;
+  int w = sdl_ctx.res_x;
+  int h = sdl_ctx.res_y;
 
   gbuf_fbo.make()
     .attach_color(make_tex2d(w, h, GL_RGB32F), GBUF_SLOT_WORLD_POS)

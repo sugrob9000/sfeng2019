@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-struct t_material {
+struct Material {
   GLuint program;
 
   std::string name;
@@ -22,9 +22,9 @@ GLuint load_texture(std::string path);
 GLenum get_surface_gl_format(SDL_Surface* s);
 
 /* Draws nothing, for various edge cases */
-extern t_material* mat_none;
+extern Material* mat_none;
 /* Not an actual material, used in vis for occlusion planes */
-extern t_material* mat_occlude;
+extern Material* mat_occlude;
 
 /*
  * Discard previous material info to assure that the next

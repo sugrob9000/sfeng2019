@@ -8,10 +8,10 @@
 const uint8_t PRESS = 0;
 const uint8_t RELEASE = 1;
 
-typedef std::vector<std::string> t_cmd_args;
+typedef std::vector<std::string> CmdArgs;
 
-typedef void (*f_cmd_routine)(const t_cmd_args&, uint8_t);
-typedef void (*f_mousemove_routine)(int dx, int dy, int abx, int aby);
+typedef void (*CmdRoutineFptr)(const CmdArgs&, uint8_t);
+typedef void (*MousemoveFptr)(int dx, int dy, int abx, int aby);
 
 /*
  * Instances of this class are *not* supposed to be created
@@ -20,20 +20,20 @@ typedef void (*f_mousemove_routine)(int dx, int dy, int abx, int aby);
  * They are also created when parsing a console command, which is
  * not often either.
  */
-struct t_command {
+struct Command {
   std::string name;
-  t_cmd_args args;
+  CmdArgs args;
 };
 
-struct t_command_registry {
-  std::unordered_map<std::string, f_cmd_routine> m;
+struct CommandRegistry {
+  std::unordered_map<std::string, CmdRoutineFptr> m;
 
-  void register_command(std::string name, f_cmd_routine routine);
-  void run(const t_command& cmd, uint8_t ev);
+  void register_command(std::string name, CmdRoutineFptr routine);
+  void run(const Command& cmd, uint8_t ev);
 };
 
-extern t_command_registry cmd_registry;
-extern f_mousemove_routine mousemove_proc;
+extern CommandRegistry cmd_registry;
+extern MousemoveFptr mousemove_proc;
 
 void init_input();
 void run_argv_commands(int argc, const char* const* argv);
@@ -46,7 +46,7 @@ void handle_input();
 void run_cmd_ext(const std::string& cmd);
 void run_script(std::string path);
 
-t_command parse_command(const char* cmd);
+Command parse_command(const char* cmd);
 
 
 /*

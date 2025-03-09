@@ -8,14 +8,14 @@
 #include "render/render.h"
 #include "render/resource.h"
 
-t_fbo sspace_fbo;
+Framebuffer sspace_fbo;
 vec3 light_ambience;
 
 /* TODO: do anything useful in post-processing */
 
 void init_lighting() {
-  int w = sdlctx.res_x;
-  int h = sdlctx.res_y;
+  int w = sdl_ctx.res_x;
+  int h = sdl_ctx.res_y;
   constexpr GLenum f = GL_R11F_G11F_B10F;
 
   sspace_fbo.make()

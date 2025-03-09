@@ -32,18 +32,18 @@ void init_core();
 /*
  * Axially-aligned bounding box
  */
-struct t_bound_box {
+struct Bbox {
   vec3 start;
   vec3 end;
 
   void expand(const vec3& pt);
-  void expand(const t_bound_box& other);
+  void expand(const Bbox& other);
 
   bool point_in(const vec3& pt) const;
   bool point_in(const vec3& pt, float tolerance) const;
   float volume() const;
 
-  bool intersects(const t_bound_box& b) const;
+  bool intersects(const Bbox& b) const;
 
   /*
    * In a case with no intersection, the _guarded version
@@ -51,8 +51,8 @@ struct t_bound_box {
    * The regular version might end up with a box which has
    * exactly two negative sides, giving volume > 0
    */
-  void intersect(const t_bound_box& b);
-  void intersect_guarded(const t_bound_box& b);
+  void intersect(const Bbox& b);
+  void intersect_guarded(const Bbox& b);
 
   inline const float* data() const {
     return glm::value_ptr(start);
@@ -60,7 +60,7 @@ struct t_bound_box {
 };
 
 static_assert(
-  offsetof(t_bound_box, start) == 0 && offsetof(t_bound_box, end) == sizeof(vec3)
+  offsetof(Bbox, start) == 0 && offsetof(Bbox, end) == sizeof(vec3)
     && sizeof(vec3) == 3 * sizeof(float),
-  "Alignment for t_bound_box is broken: data() will not work"
+  "Alignment for Bbox is broken: data() will not work"
 );

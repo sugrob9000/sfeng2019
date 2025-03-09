@@ -1,9 +1,9 @@
 #include "resource.h"
 
-t_cache_mdl cache_mdl;
-t_cache_tex cache_tex;
-t_cache_mat cache_mat;
-t_cache_shader cache_shader;
+ModelCache cache_mdl;
+TextureCache cache_tex;
+MaterialCache cache_mat;
+ShaderCache cache_shader;
 
 /*
  * The get_*() functions have to return something
@@ -11,16 +11,16 @@ t_cache_shader cache_shader;
  * std::map::operator[]
  */
 
-t_model* get_model(std::string path) {
-  t_model*& ret = cache_mdl[path];
+Model* get_model(std::string path) {
+  Model*& ret = cache_mdl[path];
 
   if (ret != nullptr)
     return ret;
 
-  ret = new t_model;
+  ret = new Model;
 
   path = PATH_MODEL + path + ".rvd";
-  t_model_mem verts;
+  InMemoryModel verts;
   verts.load_rvd(path);
   ret->load(verts);
   return ret;
@@ -73,14 +73,14 @@ GLuint get_frag_shader(const std::string& name) {
   return get_shader(name + ".frag", GL_FRAGMENT_SHADER);
 }
 
-t_material* get_material(std::string path) {
-  t_material*& ret = cache_mat[path];
+Material* get_material(std::string path) {
+  Material*& ret = cache_mat[path];
 
   if (ret != nullptr)
     return ret;
 
   path = PATH_MATERIAL + path;
-  ret = new t_material;
+  ret = new Material;
   ret->load(path);
   return ret;
 }

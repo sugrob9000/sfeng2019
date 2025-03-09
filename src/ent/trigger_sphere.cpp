@@ -3,13 +3,13 @@
 #include "render/ctx.h"
 
 template<>
-void signal_handler<e_trigger_sphere, SigTag("set_radius")>(e_trigger_sphere& sphere, std::string arg) {
+void signal_handler<TriggerSphereEntity, SigTag("set_radius")>(TriggerSphereEntity& sphere, std::string arg) {
   float r = atof(arg.c_str());
   if (r > 0.0)
     sphere.radius = r;
 }
 
-void e_trigger_sphere::think() {
+void TriggerSphereEntity::think() {
   uint8_t touched_before = touching;
 
   vec3 delta = pos - camera.pos;
@@ -29,8 +29,8 @@ void e_trigger_sphere::think() {
   }
 }
 
-void e_trigger_sphere::apply_keyvals(const t_ent_keyvals& kv) {
-  e_base::apply_keyvals(kv);
+void TriggerSphereEntity::apply_keyvals(const EntKeyvals& kv) {
+  BaseEntity::apply_keyvals(kv);
 
   KV_TRY_GET(
     kv["radius"],

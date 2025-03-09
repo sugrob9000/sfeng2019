@@ -2,19 +2,19 @@
 #include "base.h"
 #include "core/signal.h"
 
-class e_trigger_sphere: public e_base {
+class TriggerSphereEntity: public BaseEntity {
 public:
   float radius;
   bool touching;
 
   constexpr static float DEFAULT_RADIUS = 100.0;
 
-  ENT_IMPLEMENT_GET_SIGMAP(e_trigger_sphere);
+  ENT_IMPLEMENT_GET_SIGMAP(TriggerSphereEntity);
   void think() override;
-  void apply_keyvals(const t_ent_keyvals&) override;
+  void apply_keyvals(const EntKeyvals&) override;
 };
 
 template<>
-inline void fill_io_data<e_trigger_sphere>() {
-  do_fill_io_data<e_trigger_sphere, SigTag("set_radius")>();
+inline void fill_io_data<TriggerSphereEntity>() {
+  do_fill_io_data<TriggerSphereEntity, SigTag("set_radius")>();
 }

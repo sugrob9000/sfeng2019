@@ -10,11 +10,11 @@
 #include "ent/trigger_sphere.h"
 // IWYU pragma: end_keep
 
-t_ent_registry ent_reg;
+EntRegistry ent_reg;
 
-void e_base::set_name(const std::string& new_name) {
+void BaseEntity::set_name(const std::string& new_name) {
   name = new_name;
-  e_base* another = ents.find_by_name(new_name);
+  BaseEntity* another = ents.find_by_name(new_name);
   if (another != nullptr) {
     warning("Entity at %p stole name %s from entity at %p", this, name.c_str(), another);
     another->set_name("");
@@ -22,7 +22,7 @@ void e_base::set_name(const std::string& new_name) {
   ents.name_index[name] = this;
 }
 
-void e_base::on_event(const std::string& event) const {
+void BaseEntity::on_event(const std::string& event) const {
   auto i = events.find(event);
   if (i == events.end())
     return;
@@ -30,36 +30,36 @@ void e_base::on_event(const std::string& event) const {
     add_signal(s);
 }
 
-void e_base::moved() {
+void BaseEntity::moved() {
   vis_requery_entity(this);
 }
 
-void e_base::apply_keyvals(const t_ent_keyvals& kv) {
+void BaseEntity::apply_keyvals(const EntKeyvals& kv) {
   KV_TRY_GET(kv["pos"], atovec3(val, pos);, pos = vec3(););
   KV_TRY_GET(kv["ang"], atovec3(val, ang);, ang = vec3(););
   KV_TRY_GET(kv["name"], set_name(val), name = "");
 }
 
 void fill_ent_registry() {
-#define ENTITY(name) \
-  ent_reg[#name] = &ent_factory<e_##name>; \
-  fill_io_data<e_##name>();
+#define ENTITY(NAME, CLASS) \
+  ent_reg[NAME] = &ent_factory<CLASS>; \
+  fill_io_data<CLASS>();
 #include "ent/list.inc"
 #undef ENTITY
 }
 
-t_entities ents;
+WorldEntityList ents;
 
-e_base* t_entities::spawn(std::string type) {
-  f_ent_spawner spawner = ent_reg[type];
+BaseEntity* WorldEntityList::spawn(std::string type) {
+  EntSpawnerFptr spawner = ent_reg[type];
   if (spawner == nullptr)
     return nullptr;
-  e_base* ent = spawner();
+  BaseEntity* ent = spawner();
   vec.push_back(ent);
   return ent;
 }
 
-e_base* t_entities::find_by_name(std::string name) {
+BaseEntity* WorldEntityList::find_by_name(std::string name) {
   auto i = ents.name_index.find(name);
   if (i == ents.name_index.end())
     return nullptr;
@@ -68,50 +68,50 @@ e_base* t_entities::find_by_name(std::string name) {
 
 /* ================= Key-value maps ================= */
 
-const std::string t_ent_keyvals::none = "";
+const std::string EntKeyvals::none = "";
 
-const std::string& t_ent_keyvals::operator[](std::string s) const {
+const std::string& EntKeyvals::operator[](std::string s) const {
   auto i = m.find(s);
   if (i == m.end())
     return none;
   return i->second;
 }
 
-void t_ent_keyvals::add(std::string key, std::string value) {
+void EntKeyvals::add(std::string key, std::string value) {
   m[key] = value;
 }
 
-void t_ent_keyvals::clear() {
+void EntKeyvals::clear() {
   m.clear();
 }
 
 /* ================= Base signals ================= */
 
 template<>
-void signal_handler<e_base, SigTag("setpos")>(e_base& e, std::string arg) {
+void signal_handler<BaseEntity, SigTag("setpos")>(BaseEntity& e, std::string arg) {
   atovec3(arg, e.pos);
   e.moved();
 }
 
 template<>
-void signal_handler<e_base, SigTag("addpos")>(e_base& e, std::string arg) {
+void signal_handler<BaseEntity, SigTag("addpos")>(BaseEntity& e, std::string arg) {
   e.pos += atovec3(arg);
   e.moved();
 }
 
 template<>
-void signal_handler<e_base, SigTag("setang")>(e_base& e, std::string arg) {
+void signal_handler<BaseEntity, SigTag("setang")>(BaseEntity& e, std::string arg) {
   atovec3(arg, e.ang);
   e.moved();
 }
 
 template<>
-void signal_handler<e_base, SigTag("setname")>(e_base& e, std::string arg) {
+void signal_handler<BaseEntity, SigTag("setname")>(BaseEntity& e, std::string arg) {
   e.set_name(arg);
 }
 
 template<>
-void signal_handler<e_base, SigTag("showpos")>(e_base& e, std::string) {
+void signal_handler<BaseEntity, SigTag("showpos")>(BaseEntity& e, std::string) {
   std::ostringstream os;
   os << e.name << " - pos " << e.pos << " ang " << e.ang << '\n';
   DEBUG_MSG(os.str());

@@ -31,8 +31,8 @@ struct Signal {
 };
 
 
-class e_base;
-typedef void (*SigHandlerFptr)(e_base* ent, std::string arg);
+class BaseEntity;
+typedef void (*SigHandlerFptr)(BaseEntity* ent, std::string arg);
 typedef std::map<std::string, SigHandlerFptr> Sigmap;
 
 template<class Entity>
@@ -49,8 +49,6 @@ extern std::priority_queue<Signal> signals;
  * The basic routine used to fire a signal
  */
 void add_signal(Signal s);
-
-#define _SIGH_INTERNAL(entclass, name, proc) sigmap<e_##entclass>[#name] = (f_sig_handler) proc;
 
 /* These must be usable at compile time, because they are used as NTTPs */
 struct SigTag {
@@ -74,11 +72,11 @@ namespace detail {
 template<typename Entity, SigTag... AddlSignals>
 void do_fill_io_data() {
   // Register the basic signals
-  detail::register_signal_handler<Entity, e_base, SigTag("setpos")>();
-  detail::register_signal_handler<Entity, e_base, SigTag("addpos")>();
-  detail::register_signal_handler<Entity, e_base, SigTag("setang")>();
-  detail::register_signal_handler<Entity, e_base, SigTag("setname")>();
-  detail::register_signal_handler<Entity, e_base, SigTag("showpos")>();
+  detail::register_signal_handler<Entity, BaseEntity, SigTag("setpos")>();
+  detail::register_signal_handler<Entity, BaseEntity, SigTag("addpos")>();
+  detail::register_signal_handler<Entity, BaseEntity, SigTag("setang")>();
+  detail::register_signal_handler<Entity, BaseEntity, SigTag("setname")>();
+  detail::register_signal_handler<Entity, BaseEntity, SigTag("showpos")>();
 
   // Register custom signals
   (detail::register_signal_handler<Entity, Entity, AddlSignals>(), ...);
@@ -99,4 +97,4 @@ void fill_io_data() {
  * For exmaple, a particular trigger volume may want to tell a
  *   particular door to open when someone steps in it.
  */
-typedef std::map<std::string, std::vector<Signal>> t_eventmap;
+typedef std::map<std::string, std::vector<Signal>> EventMap;

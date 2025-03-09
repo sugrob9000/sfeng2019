@@ -9,11 +9,11 @@
 #include <fstream>
 #include <sstream>
 
-t_material mat_none_instance;
-t_material* mat_none = &mat_none_instance;
+Material mat_none_instance;
+Material* mat_none = &mat_none_instance;
 
-t_material mat_occlude_instance;
-t_material* mat_occlude = &mat_occlude_instance;
+Material mat_occlude_instance;
+Material* mat_occlude = &mat_occlude_instance;
 
 void init_materials() {
   cache_mat[""] = mat_none;
@@ -21,7 +21,7 @@ void init_materials() {
   cache_mat["OCCLUDE"] = mat_occlude;
 }
 
-void t_material::load(const std::string& path) {
+void Material::load(const std::string& path) {
   std::ifstream f(path);
 
   if (!f)
@@ -88,15 +88,15 @@ void t_material::load(const std::string& path) {
 }
 
 /* Material application is idempotent, so we can avoid redundancy */
-static const t_material* latest_material = nullptr;
-static t_render_stage latest_render_stage;
+static const Material* latest_material = nullptr;
+static RenderStage latest_render_stage;
 
 void material_barrier() {
   latest_material = nullptr;
 }
 
-static bool can_skip_application(const t_material* m) {
-  t_render_stage s = latest_render_stage;
+static bool can_skip_application(const Material* m) {
+  RenderStage s = latest_render_stage;
   if (s != render_ctx.stage || latest_material == nullptr)
     return false;
 
@@ -112,7 +112,7 @@ static bool can_skip_application(const t_material* m) {
   return false;
 }
 
-void t_material::apply() const {
+void Material::apply() const {
   if (!can_skip_application(this)) {
     glUseProgram(program);
     for (int i = 0; i < bitmap_texture_ids.size(); i++) {

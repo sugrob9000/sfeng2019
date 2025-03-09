@@ -10,7 +10,7 @@ bool operator<(const Signal& a, const Signal& b) {
 }
 
 void Signal::execute() const {
-  e_base* e = ents.find_by_name(target);
+  BaseEntity* e = ents.find_by_name(target);
   if (e == nullptr) {
     warning("tried to send signal to nonexistent entity %s", target.c_str());
     return;

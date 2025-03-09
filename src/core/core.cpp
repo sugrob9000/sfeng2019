@@ -46,7 +46,7 @@ COMMAND_ROUTINE(echo) {
 void update() {
   tick++;
 
-  for (e_base* e: ents.vec)
+  for (BaseEntity* e: ents.vec)
     e->think();
 
   while (!signals.empty()) {
@@ -60,7 +60,7 @@ void update() {
   upd_camera_pos();
 }
 
-e_base* read_single_entity(std::istream& is) {
+BaseEntity* read_single_entity(std::istream& is) {
   std::string line;
   std::getline(is, line);
 
@@ -70,11 +70,11 @@ e_base* read_single_entity(std::istream& is) {
   while (isspace(line.back()))
     line.pop_back();
 
-  e_base* ent = ents.spawn(line);
+  BaseEntity* ent = ents.spawn(line);
   if (ent == nullptr)
     fatal("Unable to spawn entity \"%s\"", line.c_str());
 
-  t_ent_keyvals kv;
+  EntKeyvals kv;
   int kstart, kend;
 
   while (std::getline(is, line)) {
@@ -145,41 +145,41 @@ COMMAND_ROUTINE(loadmap) {
   load_map(path);
 }
 
-float t_bound_box::volume() const {
+float Bbox::volume() const {
   return (end.x - start.x) * (end.y - start.y) * (end.z - start.z);
 }
 
-void t_bound_box::expand(const vec3& pt) {
+void Bbox::expand(const vec3& pt) {
   start = min_components(start, pt);
   end = max_components(end, pt);
 }
 
-void t_bound_box::expand(const t_bound_box& other) {
+void Bbox::expand(const Bbox& other) {
   start = min_components(start, other.start);
   end = max_components(end, other.end);
 }
 
-bool t_bound_box::point_in(const vec3& pt) const {
+bool Bbox::point_in(const vec3& pt) const {
   return (pt.x >= start.x) && (pt.y >= start.y) && (pt.z >= start.z) && (pt.x <= end.x) && (pt.y <= end.y)
     && (pt.z <= end.z);
 }
 
-bool t_bound_box::point_in(const vec3& pt, float tolerance) const {
+bool Bbox::point_in(const vec3& pt, float tolerance) const {
   return (pt.x >= start.x - tolerance) && (pt.y >= start.y - tolerance) && (pt.z >= start.z - tolerance)
     && (pt.x <= end.x + tolerance) && (pt.y <= end.y + tolerance) && (pt.z <= end.z + tolerance);
 }
 
-bool t_bound_box::intersects(const t_bound_box& b) const {
-  t_bound_box tmp = {max_components(start, b.start), min_components(end, b.end)};
+bool Bbox::intersects(const Bbox& b) const {
+  Bbox tmp = {max_components(start, b.start), min_components(end, b.end)};
   return tmp.end.x >= tmp.start.x && tmp.end.y >= tmp.start.y && tmp.end.z >= tmp.start.z;
 }
 
-void t_bound_box::intersect(const t_bound_box& b) {
+void Bbox::intersect(const Bbox& b) {
   start = max_components(start, b.start);
   end = min_components(end, b.end);
 }
 
-void t_bound_box::intersect_guarded(const t_bound_box& b) {
+void Bbox::intersect_guarded(const Bbox& b) {
   start = max_components(start, b.start);
   end = min_components(end, b.end);
   for (int i = 0; i < 3; i++)

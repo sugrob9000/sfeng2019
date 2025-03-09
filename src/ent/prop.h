@@ -9,6 +9,8 @@ public:
   Model* model;
   Material* material;
 
+  ~PropEntity() override = default;
+
   void apply_keyvals(const EntKeyvals&) override;
   void render() const override;
   Bbox get_bbox() const override;

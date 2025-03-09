@@ -17,7 +17,7 @@ void init_core() {
   exit_code = 0;
   tick = 0;
 
-  fill_ent_registry();
+  fill_ent_class_registry();
 }
 
 COMMAND_ROUTINE(nop) {
@@ -46,7 +46,7 @@ COMMAND_ROUTINE(echo) {
 void update() {
   tick++;
 
-  for (BaseEntity* e: ents.vec)
+  for (const auto& e: global_entity_list.vec)
     e->think();
 
   while (!signals.empty()) {
@@ -70,7 +70,7 @@ BaseEntity* read_single_entity(std::istream& is) {
   while (isspace(line.back()))
     line.pop_back();
 
-  BaseEntity* ent = ents.spawn(line);
+  BaseEntity* ent = global_entity_list.spawn(line);
   if (ent == nullptr)
     fatal("Unable to spawn entity \"%s\"", line.c_str());
 

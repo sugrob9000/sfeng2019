@@ -55,6 +55,10 @@ void atovec3(const char* s, vec3& v);
 vec3 atovec3(const std::string& s);
 void atovec3(const std::string& s, vec3& v);
 
+inline vec3 stovec3(const std::string& s) { return atovec3(s); }
+inline float stof(const std::string& s) { return atof(s.c_str()); }
+inline int stoi(const std::string& s) { return atoi(s.c_str()); }
+
 std::string vec3toa(const vec3& v);
 
 // Component-wise min & max

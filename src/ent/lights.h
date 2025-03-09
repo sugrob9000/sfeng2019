@@ -15,7 +15,7 @@ public:
   VisibleSet vis;
 
   LightConeEntity();
-  ~LightConeEntity();
+  ~LightConeEntity() override;
 
   void apply_keyvals(const EntKeyvals&) override;
   void moved() override;
@@ -41,7 +41,7 @@ public:
   float distance;
 
   SunEntity();
-  ~SunEntity();
+  ~SunEntity() override;
 
   ENT_IMPLEMENT_GET_SIGMAP(SunEntity);
   void apply_keyvals(const EntKeyvals&) override;

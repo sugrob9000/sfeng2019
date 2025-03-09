@@ -1,5 +1,6 @@
 #include "base.h"
 #include "core/signal.h"
+#include "misc.h"
 #include "render/vis.h"
 #include <sstream>
 
@@ -10,16 +11,16 @@
 #include "ent/trigger_sphere.h"
 // IWYU pragma: end_keep
 
-EntRegistry ent_reg;
+EntClassRegistry global_ent_class_registry;
 
 void BaseEntity::set_name(const std::string& new_name) {
   name = new_name;
-  BaseEntity* another = ents.find_by_name(new_name);
-  if (another != nullptr) {
-    warning("Entity at %p stole name %s from entity at %p", this, name.c_str(), another);
-    another->set_name("");
+  BaseEntity* other = global_entity_list.find_by_name(new_name);
+  if (other != nullptr) {
+    warning("Entity at %p stole name %s from entity at %p", this, name.c_str(), other);
+    other->set_name("");
   }
-  ents.name_index[name] = this;
+  global_entity_list.name_index[name] = this;
 }
 
 void BaseEntity::on_event(const std::string& event) const {
@@ -35,47 +36,37 @@ void BaseEntity::moved() {
 }
 
 void BaseEntity::apply_keyvals(const EntKeyvals& kv) {
-  KV_TRY_GET(kv["pos"], atovec3(val, pos);, pos = vec3(););
-  KV_TRY_GET(kv["ang"], atovec3(val, ang);, ang = vec3(););
-  KV_TRY_GET(kv["name"], set_name(val), name = "");
+  pos = kv.transform_with_default("pos", stovec3, vec3());
+  ang = kv.transform_with_default("ang", stovec3, vec3());
+  set_name(kv.get_with_default("name", ""));
 }
 
-void fill_ent_registry() {
+void fill_ent_class_registry() {
 #define ENTITY(NAME, CLASS) \
-  ent_reg[NAME] = &ent_factory<CLASS>; \
+  global_ent_class_registry[NAME] = &(ent_factory<CLASS>); \
   fill_io_data<CLASS>();
 #include "ent/list.inc"
 #undef ENTITY
 }
 
-WorldEntityList ents;
+WorldEntityList global_entity_list;
 
 BaseEntity* WorldEntityList::spawn(std::string type) {
-  EntSpawnerFptr spawner = ent_reg[type];
+  SpawnEntityFptr spawner = global_ent_class_registry[type];
   if (spawner == nullptr)
     return nullptr;
-  BaseEntity* ent = spawner();
-  vec.push_back(ent);
-  return ent;
+  vec.push_back(spawner());
+  return vec.back().get();
 }
 
 BaseEntity* WorldEntityList::find_by_name(std::string name) {
-  auto i = ents.name_index.find(name);
-  if (i == ents.name_index.end())
+  auto i = global_entity_list.name_index.find(name);
+  if (i == global_entity_list.name_index.end())
     return nullptr;
   return i->second;
 }
 
 // ================= Key-value maps =================
-
-const std::string EntKeyvals::none = "";
-
-const std::string& EntKeyvals::operator[](std::string s) const {
-  auto i = m.find(s);
-  if (i == m.end())
-    return none;
-  return i->second;
-}
 
 void EntKeyvals::add(std::string key, std::string value) {
   m[key] = value;
@@ -83,6 +74,19 @@ void EntKeyvals::add(std::string key, std::string value) {
 
 void EntKeyvals::clear() {
   m.clear();
+}
+
+const std::string* EntKeyvals::get(std::string key) const {
+  auto it = m.find(key);
+  if (it == m.end()) {
+    return nullptr;
+  }
+  return &it->second;
+}
+
+std::string EntKeyvals::get_with_default(std::string key, std::string def) const {
+  auto* found = get(key);
+  return found ? *found : def;
 }
 
 // ================= Base signals =================

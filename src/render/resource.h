@@ -4,15 +4,15 @@
 #include <map>
 #include <string>
 
-typedef std::map<std::string, Model*> ModelCache;
-typedef std::map<std::string, GLuint> TextureCache;
-typedef std::map<std::string, Material*> MaterialCache;
-typedef std::map<std::string, GLuint> ShaderCache;
+using ModelCache = std::map<std::string, Model*>;
+using TextureCache = std::map<std::string, GLuint>;
+using MaterialCache = std::map<std::string, Material*>;
+using ShaderCache = std::map<std::string, GLuint>;
 
-const char* const PATH_MODEL = "resource/models/";
-const char* const PATH_TEXTURE = "resource/mat/";
-const char* const PATH_MATERIAL = "resource/mat/";
-const char* const PATH_SHADER = "resource/shader/";
+inline const char PATH_MODEL[] = "resource/models/";
+inline const char PATH_TEXTURE[] = "resource/mat/";
+inline const char PATH_MATERIAL[] = "resource/mat/";
+inline const char PATH_SHADER[] = "resource/shader/";
 
 Model* get_model(std::string name);
 GLuint get_texture(std::string name);

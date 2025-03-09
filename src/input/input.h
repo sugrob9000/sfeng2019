@@ -8,10 +8,10 @@
 const uint8_t PRESS = 0;
 const uint8_t RELEASE = 1;
 
-typedef std::vector<std::string> CmdArgs;
+using CmdArgs = std::vector<std::string>;
 
-typedef void (*CmdRoutineFptr)(const CmdArgs&, uint8_t);
-typedef void (*MousemoveFptr)(int dx, int dy, int abx, int aby);
+using CmdRoutineFptr = void (*)(const CmdArgs&, uint8_t);
+using MousemoveFptr = void (*)(int dx, int dy, int abx, int aby);
 
 // Instances of this class are *not* supposed to be created
 // a lot during runtime. The key binding maps holds instances of them,

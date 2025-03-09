@@ -29,7 +29,10 @@ void TimerEntity::think() {
 
 void TimerEntity::apply_keyvals(const EntKeyvals& kv) {
   BaseEntity::apply_keyvals(kv);
-
-  KV_TRY_GET(kv["time"], ticks_left = atoi(val.c_str());, ticks_left = 0;);
-  KV_TRY_GET(kv["start-running"], running = (val == "1");, running = false);
+  ticks_left = kv.transform_with_default("time", stoi, 0);
+  if (auto* val = kv.get("start-running")) {
+    running = (*val == "1");
+  } else {
+    running = false;
+  }
 }

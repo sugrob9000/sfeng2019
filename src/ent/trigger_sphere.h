@@ -7,6 +7,8 @@ public:
   float radius;
   bool touching;
 
+  ~TriggerSphereEntity() override = default;
+
   constexpr static float DEFAULT_RADIUS = 100.0;
 
   ENT_IMPLEMENT_GET_SIGMAP(TriggerSphereEntity);

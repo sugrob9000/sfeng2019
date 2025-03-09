@@ -30,8 +30,8 @@ struct Signal {
 
 
 class BaseEntity;
-typedef void (*SigHandlerFptr)(BaseEntity* ent, std::string arg);
-typedef std::map<std::string, SigHandlerFptr> Sigmap;
+using SigHandlerFptr = void (*)(BaseEntity* ent, std::string arg);
+using Sigmap = std::map<std::string, SigHandlerFptr>;
 
 template<class Entity>
 Sigmap sigmap;
@@ -89,4 +89,4 @@ void fill_io_data() {
 //   (maybe, several on one event).
 // For exmaple, a particular trigger volume may want to tell a
 //   particular door to open when someone steps in it.
-typedef std::map<std::string, std::vector<Signal>> EventMap;
+using EventMap = std::map<std::string, std::vector<Signal>>;

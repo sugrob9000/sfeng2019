@@ -32,12 +32,11 @@ void TriggerSphereEntity::think() {
 void TriggerSphereEntity::apply_keyvals(const EntKeyvals& kv) {
   BaseEntity::apply_keyvals(kv);
 
-  KV_TRY_GET(
-    kv["radius"],
-    {
-      float r = atof(val.c_str());
-      radius = (r > 0.0) ? r : DEFAULT_RADIUS;
-    },
-    radius = DEFAULT_RADIUS;
-  );
+  radius = DEFAULT_RADIUS;
+  if (auto *v = kv.get("radius")) {
+    float r = atof(v->c_str());
+    if (r > 0.0) {
+      radius = r;
+    }
+  }
 }

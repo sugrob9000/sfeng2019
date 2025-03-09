@@ -7,6 +7,8 @@ public:
   bool running;
   long long ticks_left;
 
+  ~TimerEntity() override = default;
+
   void think() override;
   void apply_keyvals(const EntKeyvals&) override;
   ENT_IMPLEMENT_GET_SIGMAP(TimerEntity);

@@ -3,43 +3,37 @@
 #include "core/signal.h"
 #include "misc.h"
 #include <map>
+#include <memory>
 
 // Key-value pairs for entities
 
 struct EntKeyvals {
   std::map<std::string, std::string> m;
-  static const std::string none;
 
-  const std::string& operator[](std::string s) const;
   void add(std::string key, std::string value);
   void clear();
-};
+  const std::string* get(std::string) const;
+  std::string get_with_default(std::string key, std::string d) const;
 
-// Try to get a value from an EntKeyvals,
-// run code in the parameter if_there if it's there, or
-// run code in the parameter if_not_there if it's not
-// Example:
-//
-// const EntKeyvals& kv = ...;
-// KV_TRY_GET(kv["pos"],
-//    atovec3(val, pos); ,
-//    pos = vec3(0.0, 0.0, 0.0); );
-#define KV_TRY_GET(kvv, if_there, if_not_there) \
-  do { \
-    const std::string& val = kvv; \
-    if (val.empty()) { \
-      if_not_there; \
-    } else { \
-      if_there; \
-    } \
-  } while (false)
+  // no monadic interface? :(
+  template<typename T>
+  T transform_with_default(std::string key, auto f, T def) const {
+    if (auto* value = get(std::move(key))) {
+      return f(*value);
+    } else {
+      return def;
+    }
+  }
+};
 
 // The base entity class
 class BaseEntity {
 public:
-  vec3 pos;
-  vec3 ang;
+  vec3 pos{};
+  vec3 ang{};
   std::string name;
+
+  virtual ~BaseEntity() = default;
 
   virtual void think() {}
   // By default, will read pos, ang, and name.
@@ -78,22 +72,21 @@ public:
 
 // Mapping entity class names (such as prop)
 // to C++ classes
-typedef BaseEntity* (*EntSpawnerFptr)();
-typedef std::map<std::string, EntSpawnerFptr> EntRegistry;
-extern EntRegistry ent_reg;
-void fill_ent_registry();
+using SpawnEntityFptr = std::unique_ptr<BaseEntity> (*)();
+using EntClassRegistry = std::map<std::string, SpawnEntityFptr>;
+extern EntClassRegistry global_ent_class_registry;
+void fill_ent_class_registry();
 
-template<class e_derived>
-BaseEntity* ent_factory() {
-  return new e_derived;
+template<class Derived>
+std::unique_ptr<BaseEntity> ent_factory() {
+  return std::make_unique<Derived>();
 }
 
 // A world's currently existing entities
 struct WorldEntityList {
-  std::vector<BaseEntity*> vec;
+  std::vector<std::unique_ptr<BaseEntity>> vec;
   std::map<std::string, BaseEntity*> name_index;
   BaseEntity* spawn(std::string type);
   BaseEntity* find_by_name(std::string name);
 };
-
-extern WorldEntityList ents;
+extern WorldEntityList global_entity_list;

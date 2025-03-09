@@ -1,13 +1,13 @@
 #include "prop.h"
 #include "core/signal.h"
 #include "render/ctx.h"
+#include "render/material.h"
 #include "render/resource.h"
 
 void PropEntity::apply_keyvals(const EntKeyvals& kv) {
   BaseEntity::apply_keyvals(kv);
-
-  KV_TRY_GET(kv["model"], model = get_model(val);, model = get_model("error"););
-  KV_TRY_GET(kv["mat"], material = get_material(val);, material = mat_none;);
+  model = get_model(kv.get_with_default("model", "error"));
+  material = kv.transform_with_default("mat", get_material, mat_none);
 }
 
 void PropEntity::render() const {

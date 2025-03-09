@@ -41,12 +41,10 @@ void LightConeEntity::moved() {
 
 void LightConeEntity::apply_keyvals(const EntKeyvals& kv) {
   BaseEntity::apply_keyvals(kv);
-
-  KV_TRY_GET(kv["cone"], cone_angle = atof(val.c_str());, cone_angle = 60.0;);
-  KV_TRY_GET(kv["rgb"], atovec3(val, rgb);, rgb = vec3(0.5););
-
-  KV_TRY_GET(kv["reach"], reach = atof(val.c_str());, reach = 2000.0;);
-  KV_TRY_GET(kv["near"], near_plane = atof(val.c_str()), near_plane = 1.0;);
+  cone_angle = kv.transform_with_default("cone", stof, 60.0f);
+  rgb = kv.transform_with_default("rgb", stovec3, vec3(0.5f));
+  reach = kv.transform_with_default("reach", stof, 2000.0f);
+  near_plane = kv.transform_with_default("near", stof, 1.0f);
 }
 
 void LightConeEntity::view() const {
@@ -69,9 +67,8 @@ void signal_handler<SunEntity, SigTag("setcolor")>(SunEntity& light, std::string
 
 void SunEntity::apply_keyvals(const EntKeyvals& kv) {
   BaseEntity::apply_keyvals(kv);
-
-  KV_TRY_GET(kv["distance"], distance = atof(val.c_str());, distance = 2000.0;);
-  KV_TRY_GET(kv["rgb"], atovec3(val, rgb), rgb = vec3(0.5););
+  distance = kv.transform_with_default("distance", stof, 2000.0f);
+  rgb = kv.transform_with_default("rgb", stovec3, vec3(0.5f));
 }
 
 SunEntity::SunEntity() {
